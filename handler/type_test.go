@@ -22,13 +22,13 @@ var _ = Describe("type Type", func() {
 		})
 	})
 
-	Describe("func OneOf", func() {
+	Describe("func Is", func() {
 		It("returns true when the type is in the given set", func() {
-			Expect(AggregateType.OneOf(AggregateType, ProcessType)).To(BeTrue())
+			Expect(AggregateType.Is(AggregateType, ProcessType)).To(BeTrue())
 		})
 
 		It("returns false when the type is not in the given set", func() {
-			Expect(IntegrationType.OneOf(AggregateType, ProcessType)).To(BeFalse())
+			Expect(IntegrationType.Is(AggregateType, ProcessType)).To(BeFalse())
 		})
 	})
 

@@ -14,6 +14,13 @@ const (
 	TimeoutRole Role = "timeout"
 )
 
+// Roles is a slice of the valid message roles.
+var Roles = []Role{
+	CommandRole,
+	EventRole,
+	TimeoutRole,
+}
+
 // MustValidate panics if r is not a valid message role.
 func (r Role) MustValidate() {
 	switch r {

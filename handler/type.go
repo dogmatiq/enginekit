@@ -17,6 +17,14 @@ const (
 	ProjectionType Type = "projection"
 )
 
+// Types is a slice of the valid handler types.
+var Types = []Type{
+	AggregateType,
+	ProcessType,
+	IntegrationType,
+	ProjectionType,
+}
+
 // MustValidate panics if r is not a valid message role.
 func (t Type) MustValidate() {
 	switch t {

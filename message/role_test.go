@@ -54,4 +54,12 @@ var _ = Describe("type Role", func() {
 			}).To(Panic())
 		})
 	})
+
+	Describe("func String", func() {
+		It("returns the role value as a string", func() {
+			Expect(CommandRole.String()).To(Equal("command"))
+			Expect(EventRole.String()).To(Equal("event"))
+			Expect(TimeoutRole.String()).To(Equal("timeout"))
+		})
+	})
 })

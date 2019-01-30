@@ -137,6 +137,15 @@ var _ = Describe("type Type", func() {
 		})
 	})
 
+	Describe("func String", func() {
+		It("returns the type value as a string", func() {
+			Expect(AggregateType.String()).To(Equal("aggregate"))
+			Expect(ProcessType.String()).To(Equal("process"))
+			Expect(IntegrationType.String()).To(Equal("integration"))
+			Expect(ProjectionType.String()).To(Equal("projection"))
+		})
+	})
+
 	Describe("func ConsumersOf", func() {
 		It("returns the expected values", func() {
 			Expect(ConsumersOf(message.CommandRole)).To(ConsistOf(

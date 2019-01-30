@@ -60,3 +60,7 @@ func (r Role) MustNotBe(roles ...Role) {
 		panic("unexpected role: " + r)
 	}
 }
+
+func (r Role) String() string {
+	return string(r)
+}

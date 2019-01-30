@@ -116,6 +116,10 @@ func (t Type) Produces() []message.Role {
 	}
 }
 
+func (t Type) String() string {
+	return string(t)
+}
+
 // ConsumersOf returns the handler types that can consume messages with the
 // given role.
 func ConsumersOf(r message.Role) []Type {

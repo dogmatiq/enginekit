@@ -29,30 +29,31 @@ func (t Type) MustValidate() {
 	}
 }
 
-// MustBe panics if t is not one of the given types.
-func (t Type) MustBe(types ...Type) {
+// OneOf returns true if t is one of the given types.
+func (t Type) OneOf(types ...Type) bool {
 	t.MustValidate()
 
 	for _, x := range types {
 		x.MustValidate()
 
 		if t == x {
-			return
+			return true
 		}
 	}
 
-	panic("unexpected type: " + t)
+	return false
+}
+
+// MustBe panics if t is not one of the given types.
+func (t Type) MustBe(types ...Type) {
+	if !t.OneOf(types...) {
+		panic("unexpected type: " + t)
+	}
 }
 
 // MustNotBe panics if t is one of the given types.
 func (t Type) MustNotBe(types ...Type) {
-	t.MustValidate()
-
-	for _, x := range types {
-		x.MustValidate()
-
-		if t == x {
-			panic("unexpected type: " + t)
-		}
+	if t.OneOf(types...) {
+		panic("unexpected type: " + t)
 	}
 }

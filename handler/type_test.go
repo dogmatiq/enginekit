@@ -22,6 +22,16 @@ var _ = Describe("type Type", func() {
 		})
 	})
 
+	Describe("func OneOf", func() {
+		It("returns true when the type is in the given set", func() {
+			Expect(AggregateType.OneOf(AggregateType, ProcessType)).To(BeTrue())
+		})
+
+		It("returns false when the type is not in the given set", func() {
+			Expect(IntegrationType.OneOf(AggregateType, ProcessType)).To(BeFalse())
+		})
+	})
+
 	Describe("func MustBe", func() {
 		It("does not panic when the type is in the given set", func() {
 			AggregateType.MustBe(AggregateType, ProcessType)

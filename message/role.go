@@ -25,30 +25,31 @@ func (r Role) MustValidate() {
 	}
 }
 
-// MustBe panics if r is not one of the given roles.
-func (r Role) MustBe(roles ...Role) {
+// OneOf returns true if r is one of the given roles.
+func (r Role) OneOf(roles ...Role) bool {
 	r.MustValidate()
 
 	for _, x := range roles {
 		x.MustValidate()
 
 		if r == x {
-			return
+			return true
 		}
 	}
 
-	panic("unexpected role: " + r)
+	return false
+}
+
+// MustBe panics if r is not one of the given roles.
+func (r Role) MustBe(roles ...Role) {
+	if !r.OneOf(roles...) {
+		panic("unexpected role: " + r)
+	}
 }
 
 // MustNotBe panics if r is one of the given roles.
 func (r Role) MustNotBe(roles ...Role) {
-	r.MustValidate()
-
-	for _, x := range roles {
-		x.MustValidate()
-
-		if r == x {
-			panic("unexpected role: " + r)
-		}
+	if r.OneOf(roles...) {
+		panic("unexpected role: " + r)
 	}
 }

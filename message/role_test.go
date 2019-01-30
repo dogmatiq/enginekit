@@ -21,6 +21,16 @@ var _ = Describe("type Role", func() {
 		})
 	})
 
+	Describe("func OneOf", func() {
+		It("returns true when the role is in the given set", func() {
+			Expect(CommandRole.OneOf(CommandRole, EventRole)).To(BeTrue())
+		})
+
+		It("returns false when the role is not in the given set", func() {
+			Expect(TimeoutRole.OneOf(CommandRole, EventRole)).To(BeFalse())
+		})
+	})
+
 	Describe("func MustBe", func() {
 		It("does not panic when the role is in the given set", func() {
 			CommandRole.MustBe(CommandRole, EventRole)

@@ -68,9 +68,9 @@ const (
 	// SystemIcon is an icon shown when a log message relates to the internals of
 	// the engine. It is a sprocket, representing the inner workings of the
 	// machine.
-	SystemIcon = "⚙" // (sprocket) to represent internals
+	SystemIcon = "⚙"
 
 	// SeparatorIcon is an icon used to separate strings of unrelated text inside a
 	// log message. It is a large bullet, intended to have a large visual impact.
-	SeparatorIcon = "●" // a bold bullet used to separate arbitrary text fields
+	SeparatorIcon = "●"
 )

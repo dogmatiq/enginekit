@@ -116,6 +116,22 @@ func (t Type) Produces() []message.Role {
 	}
 }
 
+// ShortString returns a short (3-character) representation of the handler type.
+func (t Type) ShortString() string {
+	t.MustValidate()
+
+	switch t {
+	case AggregateType:
+		return "agg"
+	case ProcessType:
+		return "prc"
+	case IntegrationType:
+		return "int"
+	default: // ProjectionType
+		return "prj"
+	}
+}
+
 func (t Type) String() string {
 	return string(t)
 }

@@ -137,6 +137,15 @@ var _ = Describe("type Type", func() {
 		})
 	})
 
+	Describe("func ShortString", func() {
+		It("returns the type value as a short string", func() {
+			Expect(AggregateType.ShortString()).To(Equal("agg"))
+			Expect(ProcessType.ShortString()).To(Equal("prc"))
+			Expect(IntegrationType.ShortString()).To(Equal("int"))
+			Expect(ProjectionType.ShortString()).To(Equal("prj"))
+		})
+	})
+
 	Describe("func String", func() {
 		It("returns the type value as a string", func() {
 			Expect(AggregateType.String()).To(Equal("aggregate"))

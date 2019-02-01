@@ -61,6 +61,21 @@ func (r Role) MustNotBe(roles ...Role) {
 	}
 }
 
+// Marker returns a character that identifies the message role when displaying
+// message types.
+func (r Role) Marker() string {
+	r.MustValidate()
+
+	switch r {
+	case CommandRole:
+		return "?"
+	case EventRole:
+		return "!"
+	default:
+		return "@"
+	}
+}
+
 func (r Role) String() string {
 	return string(r)
 }

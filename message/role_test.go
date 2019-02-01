@@ -55,6 +55,14 @@ var _ = Describe("type Role", func() {
 		})
 	})
 
+	Describe("func Marker", func() {
+		It("returns the correct marker character", func() {
+			Expect(CommandRole.Marker()).To(Equal("?"))
+			Expect(EventRole.Marker()).To(Equal("!"))
+			Expect(TimeoutRole.Marker()).To(Equal("@"))
+		})
+	})
+
 	Describe("func String", func() {
 		It("returns the role value as a string", func() {
 			Expect(CommandRole.String()).To(Equal("command"))

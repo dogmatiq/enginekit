@@ -16,7 +16,7 @@ var _ = Describe("type Role", func() {
 
 		It("panics when the role is not valid", func() {
 			Expect(func() {
-				Role(-1).MustValidate()
+				Role("<invalid>").MustValidate()
 			}).To(Panic())
 		})
 	})

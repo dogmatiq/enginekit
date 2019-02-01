@@ -18,7 +18,7 @@ var _ = Describe("type Type", func() {
 
 		It("panics when the type is not valid", func() {
 			Expect(func() {
-				Type(-1).MustValidate()
+				Type("<invalid>").MustValidate()
 			}).To(Panic())
 		})
 	})

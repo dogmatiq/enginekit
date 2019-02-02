@@ -14,6 +14,9 @@ import (
 // ID is truncated. If negative, the head of the ID is truncated. If tr is zero
 // no truncation is performed
 //
+// icon is the "status" icon to show, it is overridden with the error icon if
+// err is non-nil.
+//
 // text is a set of human-readable messages.
 //
 // The output does not include a trailing newline.
@@ -21,7 +24,7 @@ func WriteMessage(
 	w io.Writer,
 	md message.MetaData,
 	tr int,
-	isRetry bool,
+	icon string,
 	err error,
 	text []string,
 ) (int, error) {
@@ -36,10 +39,8 @@ func WriteMessage(
 	if err != nil {
 		icons = append(icons, ErrorIcon)
 		before = append(before, err.Error())
-	} else if isRetry {
-		icons = append(icons, RetryIcon)
 	} else {
-		icons = append(icons, "")
+		icons = append(icons, icon)
 	}
 
 	return Write(
@@ -57,13 +58,16 @@ func WriteMessage(
 // ID is truncated. If negative, the head of the ID is truncated. If tr is zero
 // no truncation is performed
 //
+// icon is the "status" icon to show, it is overridden with the error icon if
+// err is non-nil.
+//
 // text is a set of human-readable messages.
 //
 // The output does not include a trailing newline.
 func FormatMessage(
 	md message.MetaData,
 	tr int,
-	isRetry bool,
+	icon string,
 	err error,
 	text []string,
 ) string {
@@ -73,7 +77,7 @@ func FormatMessage(
 		&w,
 		md,
 		tr,
-		isRetry,
+		icon,
 		err,
 		text,
 	))

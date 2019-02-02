@@ -28,28 +28,12 @@ var _ = Describe("func FormatMessage", func() {
 				FormatMessage(
 					md,
 					8,
-					false,
+					SystemIcon,
 					nil,
 					[]string{"<foo>", "<bar>"},
 				),
 			).To(Equal(
-				"= <grandch  ∵  <child>  ⋲ <parent>  ▼    fixtures.MessageA? ● <foo> ● <bar>",
-			))
-		})
-	})
-
-	When("the message is being retried", func() {
-		It("returns the expected output", func() {
-			Expect(
-				FormatMessage(
-					md,
-					8,
-					true,
-					nil,
-					[]string{"<foo>", "<bar>"},
-				),
-			).To(Equal(
-				"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ↻  fixtures.MessageA? ● <foo> ● <bar>",
+				"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ⚙  fixtures.MessageA? ● <foo> ● <bar>",
 			))
 		})
 	})
@@ -60,7 +44,7 @@ var _ = Describe("func FormatMessage", func() {
 				FormatMessage(
 					md,
 					8,
-					true, // setting isRetry to true should still render the error icon, not the retry icon
+					SystemIcon,
 					errors.New("<error>"),
 					[]string{"<foo>", "<bar>"},
 				),

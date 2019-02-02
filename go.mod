@@ -2,6 +2,7 @@ module github.com/dogmatiq/enginekit
 
 require (
 	github.com/dogmatiq/dogma v0.0.0-20190125031156-7aa035456afb
+	github.com/dogmatiq/iago v0.3.0
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/onsi/ginkgo v1.7.0
 	github.com/onsi/gomega v1.4.3

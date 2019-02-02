@@ -1,5 +1,10 @@
 package logging
 
+import (
+	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/message"
+)
+
 const (
 	// MessageIDIcon is the icon shown directly before a message ID.
 	// It is an "equals sign", indicating that this message "has exactly" the
@@ -74,3 +79,38 @@ const (
 	// log message. It is a large bullet, intended to have a large visual impact.
 	SeparatorIcon = "●"
 )
+
+// DirectionIcon returns the icon to use for the given message direction.
+func DirectionIcon(d message.Direction, isError bool) string {
+	d.MustValidate()
+
+	if d == message.InboundDirection {
+		if isError {
+			return InboundErrorIcon
+		}
+
+		return InboundIcon
+	}
+
+	if isError {
+		return OutboundErrorIcon
+	}
+
+	return OutboundIcon
+}
+
+// HandlerTypeIcon returns the icon to use for the given handler type.
+func HandlerTypeIcon(t handler.Type) string {
+	t.MustValidate()
+
+	switch t {
+	case handler.AggregateType:
+		return AggregateIcon
+	case handler.ProcessType:
+		return ProcessIcon
+	case handler.IntegrationType:
+		return IntegrationIcon
+	default: // handler.ProjectionType:
+		return ProjectionIcon
+	}
+}

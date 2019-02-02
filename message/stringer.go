@@ -22,7 +22,7 @@ type Stringer interface {
 // implements fmt.Stringer, it returns m.String().
 //
 // Finally, if m does not implement either of these interfaces, it returns
-// the standard Go "%#v" representation of the message.
+// the standard Go "%v" representation of the message.
 func ToString(m dogma.Message) string {
 	if s, ok := m.(Stringer); ok {
 		return s.MessageString()
@@ -32,5 +32,5 @@ func ToString(m dogma.Message) string {
 		return s.String()
 	}
 
-	return fmt.Sprintf("%#v", m)
+	return fmt.Sprintf("%v", m)
 }

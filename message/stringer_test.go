@@ -47,7 +47,7 @@ var _ = Describe("func ToString", func() {
 		Expect(
 			ToString(nonStringerMessage{100}),
 		).To(Equal(
-			"message_test.nonStringerMessage{Value:100}",
+			"{100}",
 		))
 	})
 })

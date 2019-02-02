@@ -20,7 +20,8 @@ var _ = Describe("func Format", func() {
 				c,
 				8,
 				[]string{InboundIcon, RetryIcon},
-				[]string{"<foo>", "<bar>"},
+				"<foo>",
+				"<bar>",
 			),
 		).To(Equal(
 			"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ↻  <foo> ● <bar>",
@@ -33,7 +34,8 @@ var _ = Describe("func Format", func() {
 				c,
 				8,
 				[]string{InboundIcon, ""},
-				[]string{"<foo>", "<bar>"},
+				"<foo>",
+				"<bar>",
 			),
 		).To(Equal(
 			"= <grandch  ∵  <child>  ⋲ <parent>  ▼    <foo> ● <bar>",
@@ -46,7 +48,9 @@ var _ = Describe("func Format", func() {
 				c,
 				8,
 				[]string{InboundIcon, RetryIcon},
-				[]string{"<foo>", "", "<bar>"},
+				"<foo>",
+				"",
+				"<bar>",
 			),
 		).To(Equal(
 			"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ↻  <foo> ● <bar>",
@@ -59,7 +63,9 @@ var _ = Describe("func Format", func() {
 				c,
 				8,
 				[]string{InboundIcon, RetryIcon},
-				[]string{"", "<foo>", "<bar>"},
+				"",
+				"<foo>",
+				"<bar>",
 			),
 		).To(Equal(
 			"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ↻  <foo> ● <bar>",

@@ -31,7 +31,8 @@ var _ = Describe("func FormatMessage", func() {
 					8,
 					SystemIcon,
 					nil,
-					[]string{"<foo>", "<bar>"},
+					"<foo>",
+					"<bar>",
 				),
 			).To(Equal(
 				"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ⚙  fixtures.MessageA? ● {A1} ● <foo> ● <bar>",
@@ -48,7 +49,8 @@ var _ = Describe("func FormatMessage", func() {
 					8,
 					SystemIcon,
 					errors.New("<error>"),
-					[]string{"<foo>", "<bar>"},
+					"<foo>",
+					"<bar>",
 				),
 			).To(Equal(
 				"= <grandch  ∵  <child>  ⋲ <parent>  ▽ ✖  fixtures.MessageA? ● <error> ● {A1} ● <foo> ● <bar>",

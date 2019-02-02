@@ -23,7 +23,7 @@ func Write(
 	c message.Correlation,
 	tr int,
 	icons []string,
-	text []string,
+	text ...string,
 ) (n int, err error) {
 	defer iago.Recover(&err)
 
@@ -82,7 +82,7 @@ func Format(
 	c message.Correlation,
 	tr int,
 	icons []string,
-	text []string,
+	text ...string,
 ) string {
 	var w strings.Builder
 
@@ -91,7 +91,7 @@ func Format(
 		c,
 		tr,
 		icons,
-		text,
+		text...,
 	))
 
 	return w.String()

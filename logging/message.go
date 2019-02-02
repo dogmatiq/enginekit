@@ -29,7 +29,7 @@ func WriteMessage(
 	tr int,
 	icon string,
 	err error,
-	text []string,
+	text ...string,
 ) (int, error) {
 	icons := []string{
 		DirectionIcon(md.Direction, err != nil),
@@ -53,7 +53,7 @@ func WriteMessage(
 		md.Correlation,
 		tr,
 		icons,
-		append(before, text...),
+		append(before, text...)...,
 	)
 }
 
@@ -75,7 +75,7 @@ func FormatMessage(
 	tr int,
 	icon string,
 	err error,
-	text []string,
+	text ...string,
 ) string {
 	var w strings.Builder
 
@@ -86,7 +86,7 @@ func FormatMessage(
 		tr,
 		icon,
 		err,
-		text,
+		text...,
 	))
 
 	return w.String()

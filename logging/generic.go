@@ -86,15 +86,13 @@ func Format(
 ) string {
 	var w strings.Builder
 
-	if _, err := Write(
+	iago.Must(Write(
 		&w,
 		c,
 		tr,
 		icons,
 		text,
-	); err != nil {
-		panic(err)
-	}
+	))
 
 	return w.String()
 }

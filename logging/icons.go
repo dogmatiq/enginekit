@@ -58,7 +58,7 @@ const (
 	// ProcessIcon is the icon shown when a log message relates to a process
 	// message handler. It is three horizontal lines, representing the step in a
 	// process.
-	ProcessIcon = "☰"
+	ProcessIcon = "≡"
 
 	// IntegrationIcon is the icon shown when a log message relates to an
 	// integration message handler. It is the relational algebra "join" symbol,

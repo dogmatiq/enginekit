@@ -4,6 +4,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/dogmatiq/dogma"
+
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/iago"
 )
@@ -23,6 +25,7 @@ import (
 func WriteMessage(
 	w io.Writer,
 	md message.MetaData,
+	m dogma.Message,
 	tr int,
 	icon string,
 	err error,
@@ -42,6 +45,8 @@ func WriteMessage(
 	} else {
 		icons = append(icons, icon)
 	}
+
+	before = append(before, message.ToString(m))
 
 	return Write(
 		w,
@@ -66,6 +71,7 @@ func WriteMessage(
 // The output does not include a trailing newline.
 func FormatMessage(
 	md message.MetaData,
+	m dogma.Message,
 	tr int,
 	icon string,
 	err error,
@@ -76,6 +82,7 @@ func FormatMessage(
 	iago.Must(WriteMessage(
 		&w,
 		md,
+		m,
 		tr,
 		icon,
 		err,

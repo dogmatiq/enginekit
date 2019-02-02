@@ -27,13 +27,14 @@ var _ = Describe("func FormatMessage", func() {
 			Expect(
 				FormatMessage(
 					md,
+					fixtures.MessageA1,
 					8,
 					SystemIcon,
 					nil,
 					[]string{"<foo>", "<bar>"},
 				),
 			).To(Equal(
-				"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ⚙  fixtures.MessageA? ● <foo> ● <bar>",
+				"= <grandch  ∵  <child>  ⋲ <parent>  ▼ ⚙  fixtures.MessageA? ● {A1} ● <foo> ● <bar>",
 			))
 		})
 	})
@@ -43,13 +44,14 @@ var _ = Describe("func FormatMessage", func() {
 			Expect(
 				FormatMessage(
 					md,
+					fixtures.MessageA1,
 					8,
 					SystemIcon,
 					errors.New("<error>"),
 					[]string{"<foo>", "<bar>"},
 				),
 			).To(Equal(
-				"= <grandch  ∵  <child>  ⋲ <parent>  ▽ ✖  fixtures.MessageA? ● <error> ● <foo> ● <bar>",
+				"= <grandch  ∵  <child>  ⋲ <parent>  ▽ ✖  fixtures.MessageA? ● <error> ● {A1} ● <foo> ● <bar>",
 			))
 		})
 	})

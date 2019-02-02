@@ -16,25 +16,31 @@ var _ = Describe("func FormatCorrelation", func() {
 
 	It("returns the expected output", func() {
 		Expect(
-			FormatCorrelation(c, 0),
+			FormatCorrelation(c, nil),
 		).To(Equal(
 			"= <grandchild>  ∵ <child>  ⋲ <parent>",
 		))
 	})
 
-	It("truncates message IDs (tail)", func() {
+	It("returns the expected output for an empty correlation", func() {
 		Expect(
-			FormatCorrelation(c, 8),
+			FormatCorrelation(message.Correlation{}, nil),
 		).To(Equal(
-			"= <grandch  ∵  <child>  ⋲ <parent>",
+			"= -  ∵ -  ⋲ -",
 		))
 	})
 
-	It("truncates message IDs (head)", func() {
+	It("uses the format function", func() {
 		Expect(
-			FormatCorrelation(c, -8),
+			FormatCorrelation(c, func(id string) string {
+				if len(id) > 8 {
+					return id[:8]
+				}
+
+				return id
+			}),
 		).To(Equal(
-			"= ndchild>  ∵  <child>  ⋲ <parent>",
+			"= <grandch  ∵ <child>  ⋲ <parent>",
 		))
 	})
 })

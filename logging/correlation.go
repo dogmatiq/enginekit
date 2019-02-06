@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/dogmatiq/enginekit/message"
-	"github.com/dogmatiq/iago"
+	"github.com/dogmatiq/iago/must"
 )
 
 // FormatCorrelation returns a formatted representation of message correlation
@@ -42,17 +42,17 @@ func writeCorrelation(
 		}
 	}
 
-	iago.MustWriteString(w, MessageIDIcon)
-	iago.MustWriteByte(w, ' ')
-	iago.MustWriteString(w, f(c.MessageID))
-	iago.MustWriteString(w, "  ")
+	must.WriteString(w, MessageIDIcon)
+	must.WriteByte(w, ' ')
+	must.WriteString(w, f(c.MessageID))
+	must.WriteString(w, "  ")
 
-	iago.MustWriteString(w, CausationIDIcon)
-	iago.MustWriteByte(w, ' ')
-	iago.MustWriteString(w, f(c.CausationID))
-	iago.MustWriteString(w, "  ")
+	must.WriteString(w, CausationIDIcon)
+	must.WriteByte(w, ' ')
+	must.WriteString(w, f(c.CausationID))
+	must.WriteString(w, "  ")
 
-	iago.MustWriteString(w, CorrelationIDIcon)
-	iago.MustWriteByte(w, ' ')
-	iago.MustWriteString(w, f(c.CorrelationID))
+	must.WriteString(w, CorrelationIDIcon)
+	must.WriteByte(w, ' ')
+	must.WriteString(w, f(c.CorrelationID))
 }

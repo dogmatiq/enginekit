@@ -39,15 +39,6 @@ var _ = Describe("type ProjectionConfig", func() {
 				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
-			It("the accepted message types are in the set", func() {
-				Expect(cfg.MessageTypes().AcceptedEventTypes).To(Equal(
-					message.NewTypeSet(
-						fixtures.MessageAType,
-						fixtures.MessageBType,
-					),
-				))
-			})
-
 			Describe("func Name()", func() {
 				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
@@ -59,6 +50,20 @@ var _ = Describe("type ProjectionConfig", func() {
 					Expect(cfg.HandlerType()).To(Equal(handlerkit.ProjectionType))
 				})
 			})
+
+			Describe("func MessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.MessageTypes()).To(Equal(
+						MessageTypes{
+							AcceptedEventTypes: message.NewTypeSet(
+								fixtures.MessageAType,
+								fixtures.MessageBType,
+							),
+						},
+					))
+				})
+			})
+
 		})
 
 		When("the handler does not configure anything", func() {

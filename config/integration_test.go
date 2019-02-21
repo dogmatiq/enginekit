@@ -23,7 +23,6 @@ var _ = Describe("type IntegrationConfig", func() {
 					c.AcceptsCommandType(fixtures.MessageA{})
 					c.AcceptsCommandType(fixtures.MessageB{})
 					c.RecordsEventType(fixtures.MessageE{})
-					c.RecordsEventType(fixtures.MessageF{})
 				},
 			}
 		})
@@ -41,15 +40,6 @@ var _ = Describe("type IntegrationConfig", func() {
 				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
-			It("the accepted message types are in the set", func() {
-				Expect(cfg.MessageTypes().AcceptedCommandTypes).To(Equal(
-					message.NewTypeSet(
-						fixtures.MessageAType,
-						fixtures.MessageBType,
-					),
-				))
-			})
-
 			Describe("func Name()", func() {
 				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
@@ -59,6 +49,22 @@ var _ = Describe("type IntegrationConfig", func() {
 			Describe("func HandlerType()", func() {
 				It("returns handler.IntegrationType", func() {
 					Expect(cfg.HandlerType()).To(Equal(handlerkit.IntegrationType))
+				})
+			})
+
+			Describe("func MessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.MessageTypes()).To(Equal(
+						MessageTypes{
+							AcceptedCommandTypes: message.NewTypeSet(
+								fixtures.MessageAType,
+								fixtures.MessageBType,
+							),
+							RecordedEventTypes: message.NewTypeSet(
+								fixtures.MessageEType,
+							),
+						},
+					))
 				})
 			})
 		})

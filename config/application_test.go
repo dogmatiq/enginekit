@@ -26,6 +26,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Name("<aggregate>")
 					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
 				},
 			}
 
@@ -206,6 +207,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				aggregate.ConfigureFunc = func(c dogma.AggregateConfigurer) {
 					c.Name("<process>") // conflict!
 					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
 				}
 
 				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {

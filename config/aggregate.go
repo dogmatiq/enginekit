@@ -55,12 +55,12 @@ func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, erro
 		)
 	}
 
-	// if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
-	// 	return nil, errorf(
-	// 		"%T.Configure() did not call AggregateConfigurer.RecordsEventType()",
-	// 		h,
-	// 	)
-	// }
+	if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
+		return nil, errorf(
+			"%T.Configure() did not call AggregateConfigurer.RecordsEventType()",
+			h,
+		)
+	}
 
 	return cfg, nil
 }

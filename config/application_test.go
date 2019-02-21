@@ -35,6 +35,7 @@ var _ = Describe("type ApplicationConfig", func() {
 					c.Name("<process>")
 					c.AcceptsEventType(fixtures.MessageB{})
 					c.AcceptsEventType(fixtures.MessageE{}) // shared with <projection>
+					c.ExecutesCommandType(fixtures.MessageC{})
 				},
 			}
 
@@ -229,6 +230,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<aggregate>") // conflict!
 					c.AcceptsEventType(fixtures.MessageB{})
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -291,6 +293,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<process>")
 					c.AcceptsEventType(fixtures.MessageA{}) // conflict with <aggregate>
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 
 				_, err := NewApplicationConfig(app)

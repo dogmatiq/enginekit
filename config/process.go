@@ -55,12 +55,12 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 		)
 	}
 
-	// if len(c.cfg.messageTypes.ExecutedCommandTypes) == 0 {
-	// 	return nil, errorf(
-	// 		"%T.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
-	// 		h,
-	// 	)
-	// }
+	if len(c.cfg.messageTypes.ExecutedCommandTypes) == 0 {
+		return nil, errorf(
+			"%T.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
+			h,
+		)
+	}
 
 	return cfg, nil
 }

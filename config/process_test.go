@@ -22,6 +22,7 @@ var _ = Describe("type ProcessConfig", func() {
 					c.Name("<name>")
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.AcceptsEventType(fixtures.MessageB{})
+					c.ExecutesCommandType(fixtures.MessageC{})
 				},
 			}
 		})
@@ -76,6 +77,7 @@ var _ = Describe("type ProcessConfig", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.AcceptsEventType(fixtures.MessageA{})
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 			})
 
@@ -96,6 +98,7 @@ var _ = Describe("type ProcessConfig", func() {
 					c.Name("<name>")
 					c.Name("<other>")
 					c.AcceptsEventType(fixtures.MessageA{})
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 			})
 
@@ -115,6 +118,7 @@ var _ = Describe("type ProcessConfig", func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("\t \n")
 					c.AcceptsEventType(fixtures.MessageA{})
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 			})
 
@@ -129,10 +133,11 @@ var _ = Describe("type ProcessConfig", func() {
 			})
 		})
 
-		When("the handler does not configure any routes", func() {
+		When("the handler does not configure any accepted event types", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 			})
 
@@ -147,12 +152,13 @@ var _ = Describe("type ProcessConfig", func() {
 			})
 		})
 
-		When("the handler does configures multiple routes for the same message type", func() {
+		When("the handler configures the same accepted event type multiple times", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.AcceptsEventType(fixtures.MessageA{})
+					c.ExecutesCommandType(fixtures.MessageC{})
 				}
 			})
 
@@ -162,6 +168,46 @@ var _ = Describe("type ProcessConfig", func() {
 				Expect(err).To(Equal(
 					Error(
 						"*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.AcceptsEventType(fixtures.MessageA)",
+					),
+				))
+			})
+		})
+
+		When("the handler does not configure any executed command types", func() {
+			BeforeEach(func() {
+				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+					c.Name("<name>")
+					c.AcceptsEventType(fixtures.MessageA{})
+				}
+			})
+
+			It("returns a descriptive error", func() {
+				_, err := NewProcessConfig(handler)
+
+				Expect(err).To(Equal(
+					Error(
+						"*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
+					),
+				))
+			})
+		})
+
+		When("the handler configures the same executed command type multiple times", func() {
+			BeforeEach(func() {
+				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+					c.Name("<name>")
+					c.AcceptsEventType(fixtures.MessageA{})
+					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ExecutesCommandType(fixtures.MessageC{})
+				}
+			})
+
+			It("returns a descriptive error", func() {
+				_, err := NewProcessConfig(handler)
+
+				Expect(err).To(Equal(
+					Error(
+						"*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ExecutesCommandType(fixtures.MessageC)",
 					),
 				))
 			})

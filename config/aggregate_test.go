@@ -134,7 +134,7 @@ var _ = Describe("type AggregateConfig", func() {
 			})
 		})
 
-		When("the handler does not configure any accepted commands", func() {
+		When("the handler does not configure any accepted command types", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")

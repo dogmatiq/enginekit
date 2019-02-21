@@ -18,16 +18,17 @@ type IntegrationConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	// MessageTypes is the set of command message types that are routed to this
-	// handler, as specified by its Configure() method.
-	MessageTypes message.TypeSet
+	messageTypes MessageTypes
 }
 
 // NewIntegrationConfig returns an IntegrationConfig for the given handler.
 func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig, error) {
 	cfg := &IntegrationConfig{
-		Handler:      h,
-		MessageTypes: message.TypeSet{},
+		Handler: h,
+		messageTypes: MessageTypes{
+			AcceptedCommandTypes: message.TypeSet{},
+			RecordedEventTypes:   message.TypeSet{},
+		},
 	}
 
 	c := &integrationConfigurer{
@@ -47,12 +48,19 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 		)
 	}
 
-	if len(c.cfg.MessageTypes) == 0 {
+	if len(c.cfg.messageTypes.AcceptedCommandTypes) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call IntegrationConfigurer.RouteCommandType()",
+			"%T.Configure() did not call IntegrationConfigurer.AcceptsCommandType()",
 			h,
 		)
 	}
+
+	// if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
+	// 	return nil, errorf(
+	// 		"%T.Configure() did not call IntegrationConfigurer.RecordsEventType()",
+	// 		h,
+	// 	)
+	// }
 
 	return cfg, nil
 }
@@ -72,14 +80,9 @@ func (c *IntegrationConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// CommandTypes returns the types of command messages that are routed to the handler.
-func (c *IntegrationConfig) CommandTypes() message.TypeSet {
-	return c.MessageTypes
-}
-
-// EventTypes returns the types of event messages that are routed to the handler.
-func (c *IntegrationConfig) EventTypes() message.TypeSet {
-	return nil
+// MessageTypes returns the message types used by the handler.
+func (c *IntegrationConfig) MessageTypes() MessageTypes {
+	return c.messageTypes
 }
 
 // Accept calls v.VisitIntegrationConfig(ctx, c).
@@ -113,16 +116,22 @@ func (c *integrationConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *integrationConfigurer) RouteCommandType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.MessageTypes[t]; ok {
+func (c *integrationConfigurer) AcceptsCommandType(m dogma.Message) {
+	if !c.cfg.messageTypes.AcceptedCommandTypes.AddM(m) {
 		panicf(
-			`%T.Configure() has already called IntegrationConfigurer.RouteCommandType(%T)`,
+			`%T.Configure() has already called IntegrationConfigurer.AcceptsCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+}
 
-	c.cfg.MessageTypes[t] = struct{}{}
+func (c *integrationConfigurer) RecordsEventType(m dogma.Message) {
+	if !c.cfg.messageTypes.RecordedEventTypes.AddM(m) {
+		panicf(
+			`%T.Configure() has already called IntegrationConfigurer.RecordsEventType(%T)`,
+			c.cfg.Handler,
+			m,
+		)
+	}
 }

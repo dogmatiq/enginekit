@@ -20,8 +20,8 @@ var _ = Describe("type IntegrationConfig", func() {
 			handler = &fixtures.IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.RouteCommandType(fixtures.MessageA{})
-					c.RouteCommandType(fixtures.MessageB{})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageB{})
 				},
 			}
 		})
@@ -39,8 +39,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
-			It("the message types are in the set", func() {
-				Expect(cfg.MessageTypes).To(Equal(
+			It("the accepted message types are in the set", func() {
+				Expect(cfg.MessageTypes().AcceptedCommandTypes).To(Equal(
 					message.NewTypeSet(
 						fixtures.MessageAType,
 						fixtures.MessageBType,
@@ -75,7 +75,7 @@ var _ = Describe("type IntegrationConfig", func() {
 		When("the handler does not configure a name", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
-					c.RouteCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
 				}
 			})
 
@@ -95,7 +95,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.RouteCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
 				}
 			})
 
@@ -114,7 +114,7 @@ var _ = Describe("type IntegrationConfig", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("\t \n")
-					c.RouteCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
 				}
 			})
 
@@ -141,7 +141,7 @@ var _ = Describe("type IntegrationConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						"*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.RouteCommandType()",
+						"*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.AcceptsCommandType()",
 					),
 				))
 			})
@@ -151,8 +151,8 @@ var _ = Describe("type IntegrationConfig", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.RouteCommandType(fixtures.MessageA{})
-					c.RouteCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
 				}
 			})
 
@@ -161,7 +161,7 @@ var _ = Describe("type IntegrationConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						"*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.RouteCommandType(fixtures.MessageA)",
+						"*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.AcceptsCommandType(fixtures.MessageA)",
 					),
 				))
 			})

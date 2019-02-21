@@ -18,16 +18,17 @@ type ProcessConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	// MessageTypes is the set of event message types that are routed to this
-	// handler, as specified by its Configure() method.
-	MessageTypes message.TypeSet
+	messageTypes MessageTypes
 }
 
 // NewProcessConfig returns an ProcessConfig for the given handler.
 func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 	cfg := &ProcessConfig{
-		Handler:      h,
-		MessageTypes: message.TypeSet{},
+		Handler: h,
+		messageTypes: MessageTypes{
+			AcceptedEventTypes:   message.TypeSet{},
+			ExecutedCommandTypes: message.TypeSet{},
+		},
 	}
 
 	c := &processConfigurer{
@@ -47,12 +48,19 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 		)
 	}
 
-	if len(c.cfg.MessageTypes) == 0 {
+	if len(c.cfg.messageTypes.AcceptedEventTypes) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call ProcessConfigurer.RouteEventType()",
+			"%T.Configure() did not call ProcessConfigurer.AcceptsEventType()",
 			h,
 		)
 	}
+
+	// if len(c.cfg.messageTypes.ExecutedCommandTypes) == 0 {
+	// 	return nil, errorf(
+	// 		"%T.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
+	// 		h,
+	// 	)
+	// }
 
 	return cfg, nil
 }
@@ -72,14 +80,9 @@ func (c *ProcessConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// CommandTypes returns the types of command messages that are routed to the handler.
-func (c *ProcessConfig) CommandTypes() message.TypeSet {
-	return nil
-}
-
-// EventTypes returns the types of event messages that are routed to the handler.
-func (c *ProcessConfig) EventTypes() message.TypeSet {
-	return c.MessageTypes
+// MessageTypes returns the message types used by the handler.
+func (c *ProcessConfig) MessageTypes() MessageTypes {
+	return c.messageTypes
 }
 
 // Accept calls v.VisitProcessConfig(ctx, c).
@@ -113,16 +116,22 @@ func (c *processConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *processConfigurer) RouteEventType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.MessageTypes[t]; ok {
+func (c *processConfigurer) AcceptsEventType(m dogma.Message) {
+	if !c.cfg.messageTypes.AcceptedEventTypes.AddM(m) {
 		panicf(
-			`%T.Configure() has already called ProcessConfigurer.RouteEventType(%T)`,
+			`%T.Configure() has already called ProcessConfigurer.AcceptsEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+}
 
-	c.cfg.MessageTypes[t] = struct{}{}
+func (c *processConfigurer) ExecutesCommandType(m dogma.Message) {
+	if !c.cfg.messageTypes.ExecutedCommandTypes.AddM(m) {
+		panicf(
+			`%T.Configure() has already called ProcessConfigurer.ExecutesCommandType(%T)`,
+			c.cfg.Handler,
+			m,
+		)
+	}
 }

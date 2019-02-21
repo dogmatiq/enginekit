@@ -18,16 +18,17 @@ type AggregateConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	// MessageTypes is the set of command message types that are routed to this
-	// handler, as specified by its Configure() method.
-	MessageTypes message.TypeSet
+	messageTypes MessageTypes
 }
 
 // NewAggregateConfig returns an AggregateConfig for the given handler.
 func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, error) {
 	cfg := &AggregateConfig{
-		Handler:      h,
-		MessageTypes: message.TypeSet{},
+		Handler: h,
+		messageTypes: MessageTypes{
+			AcceptedCommandTypes: message.TypeSet{},
+			RecordedEventTypes:   message.TypeSet{},
+		},
 	}
 
 	c := &aggregateConfigurer{
@@ -47,12 +48,19 @@ func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, erro
 		)
 	}
 
-	if len(c.cfg.MessageTypes) == 0 {
+	if len(c.cfg.messageTypes.AcceptedCommandTypes) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call AggregateConfigurer.RouteCommandType()",
+			"%T.Configure() did not call AggregateConfigurer.AcceptsCommandType()",
 			h,
 		)
 	}
+
+	// if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
+	// 	return nil, errorf(
+	// 		"%T.Configure() did not call AggregateConfigurer.RecordsEventType()",
+	// 		h,
+	// 	)
+	// }
 
 	return cfg, nil
 }
@@ -72,14 +80,9 @@ func (c *AggregateConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// CommandTypes returns the types of command messages that are routed to the handler.
-func (c *AggregateConfig) CommandTypes() message.TypeSet {
-	return c.MessageTypes
-}
-
-// EventTypes returns the types of event messages that are routed to the handler.
-func (c *AggregateConfig) EventTypes() message.TypeSet {
-	return nil
+// MessageTypes returns the message types used by the handler.
+func (c *AggregateConfig) MessageTypes() MessageTypes {
+	return c.messageTypes
 }
 
 // Accept calls v.VisitAggregateConfig(ctx, c).
@@ -113,16 +116,22 @@ func (c *aggregateConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *aggregateConfigurer) RouteCommandType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.MessageTypes[t]; ok {
+func (c *aggregateConfigurer) AcceptsCommandType(m dogma.Message) {
+	if !c.cfg.messageTypes.AcceptedCommandTypes.AddM(m) {
 		panicf(
-			`%T.Configure() has already called AggregateConfigurer.RouteCommandType(%T)`,
+			`%T.Configure() has already called AggregateConfigurer.AcceptsCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+}
 
-	c.cfg.MessageTypes[t] = struct{}{}
+func (c *aggregateConfigurer) RecordsEventType(m dogma.Message) {
+	if !c.cfg.messageTypes.RecordedEventTypes.AddM(m) {
+		panicf(
+			`%T.Configure() has already called AggregateConfigurer.RecordsEventType(%T)`,
+			c.cfg.Handler,
+			m,
+		)
+	}
 }

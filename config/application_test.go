@@ -25,30 +25,30 @@ var _ = Describe("type ApplicationConfig", func() {
 			aggregate = &fixtures.AggregateMessageHandler{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Name("<aggregate>")
-					c.RouteCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
 				},
 			}
 
 			process = &fixtures.ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Name("<process>")
-					c.RouteEventType(fixtures.MessageB{})
-					c.RouteEventType(fixtures.MessageE{}) // shared with <projection>
+					c.AcceptsEventType(fixtures.MessageB{})
+					c.AcceptsEventType(fixtures.MessageE{}) // shared with <projection>
 				},
 			}
 
 			integration = &fixtures.IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
-					c.RouteCommandType(fixtures.MessageC{})
+					c.AcceptsCommandType(fixtures.MessageC{})
 				},
 			}
 
 			projection = &fixtures.ProjectionMessageHandler{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Name("<projection>")
-					c.RouteEventType(fixtures.MessageD{})
-					c.RouteEventType(fixtures.MessageE{}) // shared with <process>
+					c.AcceptsEventType(fixtures.MessageD{})
+					c.AcceptsEventType(fixtures.MessageE{}) // shared with <process>
 				},
 			}
 
@@ -205,7 +205,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when an aggregate name is in conflict", func() {
 				aggregate.ConfigureFunc = func(c dogma.AggregateConfigurer) {
 					c.Name("<process>") // conflict!
-					c.RouteCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
 				}
 
 				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {
@@ -226,7 +226,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a process name is in conflict", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<aggregate>") // conflict!
-					c.RouteEventType(fixtures.MessageB{})
+					c.AcceptsEventType(fixtures.MessageB{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -241,7 +241,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when an integration name is in conflict", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<process>") // conflict!
-					c.RouteCommandType(fixtures.MessageC{})
+					c.AcceptsCommandType(fixtures.MessageC{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -256,7 +256,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a projection name is in conflict", func() {
 				projection.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
 					c.Name("<integration>") // conflict!
-					c.RouteEventType(fixtures.MessageD{})
+					c.AcceptsEventType(fixtures.MessageD{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -273,7 +273,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a route is in conflict because two handlers intend to receive the same command", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
-					c.RouteCommandType(fixtures.MessageA{}) // conflict with <aggregate>
+					c.AcceptsCommandType(fixtures.MessageA{}) // conflict with <aggregate>
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -288,7 +288,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a process route is in conflict because a command is reclassified as an event", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<process>")
-					c.RouteEventType(fixtures.MessageA{}) // conflict with <aggregate>
+					c.AcceptsEventType(fixtures.MessageA{}) // conflict with <aggregate>
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -303,7 +303,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a process route is in conflict because an event with a single handler is reclassified as a command", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
-					c.RouteCommandType(fixtures.MessageB{}) // conflict with <process>
+					c.AcceptsCommandType(fixtures.MessageB{}) // conflict with <process>
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -318,7 +318,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a process route is in conflict because an event with multiple handlers is reclassified as a command", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
-					c.RouteCommandType(fixtures.MessageE{}) // conflict with <process> and <projection>
+					c.AcceptsCommandType(fixtures.MessageE{}) // conflict with <process> and <projection>
 				}
 
 				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {

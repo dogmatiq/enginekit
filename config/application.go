@@ -84,7 +84,9 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 		)
 	}
 
-	for t := range cfg.CommandTypes() {
+	types := cfg.MessageTypes()
+
+	for t := range types.AcceptedCommandTypes {
 		if x, ok := c.CommandRoutes[t]; ok {
 			panicf(
 				"can not route commands of type %s to %#v because they are already routed to %#v",
@@ -114,7 +116,7 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 		}
 	}
 
-	for t := range cfg.EventTypes() {
+	for t := range types.AcceptedEventTypes {
 		if x, ok := c.CommandRoutes[t]; ok {
 			panicf(
 				"can not route messages of type %s to %#v as events because they are already routed to %#v as commands",
@@ -127,12 +129,12 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 
 	c.Handlers[n] = cfg
 
-	for t := range cfg.CommandTypes() {
+	for t := range types.AcceptedCommandTypes {
 		c.Routes[t] = append(c.Routes[t], cfg.Name())
 		c.CommandRoutes[t] = cfg.Name()
 	}
 
-	for t := range cfg.EventTypes() {
+	for t := range types.AcceptedEventTypes {
 		c.Routes[t] = append(c.Routes[t], cfg.Name())
 		c.EventRoutes[t] = append(c.EventRoutes[t], cfg.Name())
 	}

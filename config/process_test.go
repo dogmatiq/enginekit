@@ -20,8 +20,8 @@ var _ = Describe("type ProcessConfig", func() {
 			handler = &fixtures.ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.RouteEventType(fixtures.MessageA{})
-					c.RouteEventType(fixtures.MessageB{})
+					c.AcceptsEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageB{})
 				},
 			}
 		})
@@ -39,8 +39,8 @@ var _ = Describe("type ProcessConfig", func() {
 				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
-			It("the message types are in the set", func() {
-				Expect(cfg.MessageTypes).To(Equal(
+			It("the accepted message types are in the set", func() {
+				Expect(cfg.MessageTypes().AcceptedEventTypes).To(Equal(
 					message.NewTypeSet(
 						fixtures.MessageAType,
 						fixtures.MessageBType,
@@ -75,7 +75,7 @@ var _ = Describe("type ProcessConfig", func() {
 		When("the handler does not configure a name", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
-					c.RouteEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageA{})
 				}
 			})
 
@@ -95,7 +95,7 @@ var _ = Describe("type ProcessConfig", func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.RouteEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageA{})
 				}
 			})
 
@@ -114,7 +114,7 @@ var _ = Describe("type ProcessConfig", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("\t \n")
-					c.RouteEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageA{})
 				}
 			})
 
@@ -141,7 +141,7 @@ var _ = Describe("type ProcessConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						"*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.RouteEventType()",
+						"*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.AcceptsEventType()",
 					),
 				))
 			})
@@ -151,8 +151,8 @@ var _ = Describe("type ProcessConfig", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.RouteEventType(fixtures.MessageA{})
-					c.RouteEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageA{})
 				}
 			})
 
@@ -161,7 +161,7 @@ var _ = Describe("type ProcessConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						"*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.RouteEventType(fixtures.MessageA)",
+						"*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.AcceptsEventType(fixtures.MessageA)",
 					),
 				))
 			})

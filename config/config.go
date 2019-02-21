@@ -29,9 +29,15 @@ type HandlerConfig interface {
 	// HandlerReflectType returns the reflect.Type of the handler.
 	HandlerReflectType() reflect.Type
 
-	// CommandTypes returns the types of command messages that are routed to the handler.
-	CommandTypes() message.TypeSet
+	// MessageTypes returns the message types used by the handler.
+	MessageTypes() MessageTypes
+}
 
-	// EventTypes returns the types of event messages that are routed to the handler.
-	EventTypes() message.TypeSet
+// MessageTypes contains sets that indicate what types of messages are accepted
+// and produced by a handler.
+type MessageTypes struct {
+	AcceptedCommandTypes message.TypeSet
+	AcceptedEventTypes   message.TypeSet
+	ExecutedCommandTypes message.TypeSet
+	RecordedEventTypes   message.TypeSet
 }

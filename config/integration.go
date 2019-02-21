@@ -55,12 +55,12 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 		)
 	}
 
-	// if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
-	// 	return nil, errorf(
-	// 		"%T.Configure() did not call IntegrationConfigurer.RecordsEventType()",
-	// 		h,
-	// 	)
-	// }
+	if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
+		return nil, errorf(
+			"%T.Configure() did not call IntegrationConfigurer.RecordsEventType()",
+			h,
+		)
+	}
 
 	return cfg, nil
 }

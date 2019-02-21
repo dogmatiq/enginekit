@@ -43,6 +43,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
 					c.AcceptsCommandType(fixtures.MessageC{})
+					c.RecordsEventType(fixtures.MessageF{})
 				},
 			}
 
@@ -246,6 +247,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<process>") // conflict!
 					c.AcceptsCommandType(fixtures.MessageC{})
+					c.RecordsEventType(fixtures.MessageF{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -278,6 +280,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
 					c.AcceptsCommandType(fixtures.MessageA{}) // conflict with <aggregate>
+					c.RecordsEventType(fixtures.MessageF{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -309,6 +312,7 @@ var _ = Describe("type ApplicationConfig", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
 					c.AcceptsCommandType(fixtures.MessageB{}) // conflict with <process>
+					c.RecordsEventType(fixtures.MessageF{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -320,10 +324,11 @@ var _ = Describe("type ApplicationConfig", func() {
 				))
 			})
 
-			It("returns an error when a process route is in conflict because an event with multiple handlers is reclassified as a command", func() {
+			It("returns an error when an integration route is in conflict because an event with multiple handlers is reclassified as a command", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<integration>")
 					c.AcceptsCommandType(fixtures.MessageE{}) // conflict with <process> and <projection>
+					c.RecordsEventType(fixtures.MessageF{})
 				}
 
 				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {

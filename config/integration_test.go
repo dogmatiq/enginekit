@@ -22,6 +22,8 @@ var _ = Describe("type IntegrationConfig", func() {
 					c.Name("<name>")
 					c.AcceptsCommandType(fixtures.MessageA{})
 					c.AcceptsCommandType(fixtures.MessageB{})
+					c.RecordsEventType(fixtures.MessageE{})
+					c.RecordsEventType(fixtures.MessageF{})
 				},
 			}
 		})
@@ -76,6 +78,7 @@ var _ = Describe("type IntegrationConfig", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
 				}
 			})
 
@@ -96,6 +99,7 @@ var _ = Describe("type IntegrationConfig", func() {
 					c.Name("<name>")
 					c.Name("<other>")
 					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
 				}
 			})
 
@@ -115,6 +119,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("\t \n")
 					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
 				}
 			})
 
@@ -129,10 +134,11 @@ var _ = Describe("type IntegrationConfig", func() {
 			})
 		})
 
-		When("the handler does not configure any routes", func() {
+		When("the handler does not configure any accepted command types", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
+					c.RecordsEventType(fixtures.MessageE{})
 				}
 			})
 
@@ -147,12 +153,13 @@ var _ = Describe("type IntegrationConfig", func() {
 			})
 		})
 
-		When("the handler does configures multiple routes for the same message type", func() {
+		When("the handler configures the same accepted command type multiple times", func() {
 			BeforeEach(func() {
 				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
 					c.AcceptsCommandType(fixtures.MessageA{})
 					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
 				}
 			})
 

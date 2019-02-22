@@ -7,6 +7,7 @@ import (
 	handlerkit "github.com/dogmatiq/enginekit/handler"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
@@ -20,8 +21,8 @@ var _ = Describe("type ProjectionConfig", func() {
 			handler = &fixtures.ProjectionMessageHandler{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
-					c.RouteEventType(fixtures.MessageA{})
-					c.RouteEventType(fixtures.MessageB{})
+					c.AcceptsEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageB{})
 				},
 			}
 		})
@@ -39,15 +40,6 @@ var _ = Describe("type ProjectionConfig", func() {
 				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
-			It("the message types are in the set", func() {
-				Expect(cfg.MessageTypes).To(Equal(
-					message.NewTypeSet(
-						fixtures.MessageAType,
-						fixtures.MessageBType,
-					),
-				))
-			})
-
 			Describe("func Name()", func() {
 				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
@@ -59,112 +51,85 @@ var _ = Describe("type ProjectionConfig", func() {
 					Expect(cfg.HandlerType()).To(Equal(handlerkit.ProjectionType))
 				})
 			})
-		})
 
-		When("the handler does not configure anything", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = nil
+			Describe("func ConsumedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.EventRole,
+							fixtures.MessageBType: message.EventRole,
+						},
+					))
+				})
 			})
 
-			It("returns an error", func() {
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns an empty map", func() {
+					Expect(cfg.ProducedMessageTypes()).To(BeEmpty())
+				})
+			})
+		})
+
+		DescribeTable(
+			"when the configuration is invalid",
+			func(
+				msg string,
+				fn func(dogma.ProjectionConfigurer),
+			) {
+				handler.ConfigureFunc = fn
+
 				_, err := NewProjectionConfig(handler)
 				Expect(err).Should(HaveOccurred())
-			})
-		})
 
-		When("the handler does not configure a name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
-					c.RouteEventType(fixtures.MessageA{})
+				if msg != "" {
+					Expect(err).To(MatchError(msg))
 				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProjectionConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.Name()",
-					),
-				))
-			})
-		})
-
-		When("the handler configures multiple names", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
+			},
+			Entry(
+				"when the handler does not configure anything",
+				"", // any error
+				nil,
+			),
+			Entry(
+				"when the handler does not configure a name",
+				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.Name()`,
+				func(c dogma.ProjectionConfigurer) {
+					c.AcceptsEventType(fixtures.MessageA{})
+				},
+			),
+			Entry(
+				"when the handler configures multiple names",
+				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.Name("<name>")`,
+				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.RouteEventType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProjectionConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.Name("<name>")`,
-					),
-				))
-			})
-		})
-
-		When("the handler configures an invalid name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
+					c.AcceptsEventType(fixtures.MessageA{})
+				},
+			),
+			Entry(
+				"when the handler configures an invalid name",
+				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Name("\t \n") with an invalid name`,
+				func(c dogma.ProjectionConfigurer) {
 					c.Name("\t \n")
-					c.RouteEventType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProjectionConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Name("\t \n") with an invalid name`,
-					),
-				))
-			})
-		})
-
-		When("the handler does not configure any routes", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
+					c.AcceptsEventType(fixtures.MessageA{})
+				},
+			),
+			Entry(
+				"when the handler does not configure any accepted event types",
+				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.AcceptsEventType()`,
+				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProjectionConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.RouteEventType()",
-					),
-				))
-			})
-		})
-
-		When("the handler does configures multiple routes for the same message type", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler configures the same accepted event type multiple times",
+				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.AcceptsEventType(fixtures.MessageA)`,
+				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
-					c.RouteEventType(fixtures.MessageA{})
-					c.RouteEventType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProjectionConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.RouteEventType(fixtures.MessageA)",
-					),
-				))
-			})
-		})
+					c.AcceptsEventType(fixtures.MessageA{})
+					c.AcceptsEventType(fixtures.MessageA{})
+				},
+			),
+		)
 	})
 })

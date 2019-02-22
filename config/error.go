@@ -1,6 +1,9 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // catch calls fn(), and recovers from any panic where the value is a
 // ConfigurationError by returning that error.
@@ -28,9 +31,10 @@ func panicf(f string, v ...interface{}) {
 
 // errorf returns a new configuration error.
 func errorf(f string, v ...interface{}) Error {
-	return Error(
-		fmt.Sprintf(f, v...),
-	)
+	m := fmt.Sprintf(f, v...)
+	m = strings.Replace(m, "an command", "a command", -1)
+	m = strings.Replace(m, "a event", "an event", -1)
+	return Error(m)
 }
 
 // Error is an error representing a fault in an application's

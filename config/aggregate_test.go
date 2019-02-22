@@ -7,6 +7,7 @@ import (
 	handlerkit "github.com/dogmatiq/enginekit/handler"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
@@ -20,8 +21,9 @@ var _ = Describe("type AggregateConfig", func() {
 			handler = &fixtures.AggregateMessageHandler{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.RouteCommandType(fixtures.MessageA{})
-					c.RouteCommandType(fixtures.MessageB{})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageB{})
+					c.RecordsEventType(fixtures.MessageE{})
 				},
 			}
 		})
@@ -35,19 +37,6 @@ var _ = Describe("type AggregateConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("the handler name is set", func() {
-				Expect(cfg.HandlerName).To(Equal("<name>"))
-			})
-
-			It("the message types are in the set", func() {
-				Expect(cfg.MessageTypes).To(Equal(
-					message.NewTypeSet(
-						fixtures.MessageAType,
-						fixtures.MessageBType,
-					),
-				))
-			})
-
 			Describe("func Name()", func() {
 				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
@@ -59,112 +48,112 @@ var _ = Describe("type AggregateConfig", func() {
 					Expect(cfg.HandlerType()).To(Equal(handlerkit.AggregateType))
 				})
 			})
-		})
 
-		When("the handler does not configure anything", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = nil
+			Describe("func ConsumedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.CommandRole,
+							fixtures.MessageBType: message.CommandRole,
+						},
+					))
+				})
 			})
 
-			It("returns an error", func() {
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ProducedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageEType: message.EventRole,
+						},
+					))
+				})
+			})
+		})
+
+		DescribeTable(
+			"when the configuration is invalid",
+			func(
+				msg string,
+				fn func(dogma.AggregateConfigurer),
+			) {
+				handler.ConfigureFunc = fn
+
 				_, err := NewAggregateConfig(handler)
 				Expect(err).Should(HaveOccurred())
-			})
-		})
 
-		When("the handler does not configure a name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.AggregateConfigurer) {
-					c.RouteCommandType(fixtures.MessageA{})
+				if msg != "" {
+					Expect(err).To(MatchError(msg))
 				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewAggregateConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.Name()",
-					),
-				))
-			})
-		})
-
-		When("the handler configures multiple names", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.AggregateConfigurer) {
+			},
+			Entry(
+				"when the handler does not configure anything",
+				"", // any error
+				nil,
+			),
+			Entry(
+				"when the handler does not configure a name",
+				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.Name()`,
+				func(c dogma.AggregateConfigurer) {
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures multiple names",
+				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.Name("<name>")`,
+				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.RouteCommandType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewAggregateConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.Name("<name>")`,
-					),
-				))
-			})
-		})
-
-		When("the handler configures an invalid name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.AggregateConfigurer) {
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures an invalid name",
+				`*fixtures.AggregateMessageHandler.Configure() called AggregateConfigurer.Name("\t \n") with an invalid name`,
+				func(c dogma.AggregateConfigurer) {
 					c.Name("\t \n")
-					c.RouteCommandType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewAggregateConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.AggregateMessageHandler.Configure() called AggregateConfigurer.Name("\t \n") with an invalid name`,
-					),
-				))
-			})
-		})
-
-		When("the handler does not configure any routes", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.AggregateConfigurer) {
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler does not configure any accepted command types",
+				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.AcceptsCommandType()`,
+				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewAggregateConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.RouteCommandType()",
-					),
-				))
-			})
-		})
-
-		When("the handler does configures multiple routes for the same message type", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.AggregateConfigurer) {
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures the same accepted command type multiple times",
+				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.AcceptsCommandType(fixtures.MessageA)`,
+				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.RouteCommandType(fixtures.MessageA{})
-					c.RouteCommandType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewAggregateConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.RouteCommandType(fixtures.MessageA)",
-					),
-				))
-			})
-		})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler does not configure any recorded events",
+				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.RecordsEventType()`,
+				func(c dogma.AggregateConfigurer) {
+					c.Name("<name>")
+					c.AcceptsCommandType(fixtures.MessageA{})
+				},
+			),
+			Entry(
+				"when the handler configures the same recorded event type multiple times",
+				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.RecordsEventType(fixtures.MessageE)`,
+				func(c dogma.AggregateConfigurer) {
+					c.Name("<name>")
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+		)
 	})
 })

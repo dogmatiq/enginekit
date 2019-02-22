@@ -7,6 +7,7 @@ import (
 	handlerkit "github.com/dogmatiq/enginekit/handler"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
@@ -20,8 +21,9 @@ var _ = Describe("type IntegrationConfig", func() {
 			handler = &fixtures.IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.RouteCommandType(fixtures.MessageA{})
-					c.RouteCommandType(fixtures.MessageB{})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageB{})
+					c.RecordsEventType(fixtures.MessageE{})
 				},
 			}
 		})
@@ -35,19 +37,6 @@ var _ = Describe("type IntegrationConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("the handler name is set", func() {
-				Expect(cfg.HandlerName).To(Equal("<name>"))
-			})
-
-			It("the message types are in the set", func() {
-				Expect(cfg.MessageTypes).To(Equal(
-					message.NewTypeSet(
-						fixtures.MessageAType,
-						fixtures.MessageBType,
-					),
-				))
-			})
-
 			Describe("func Name()", func() {
 				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
@@ -59,112 +48,118 @@ var _ = Describe("type IntegrationConfig", func() {
 					Expect(cfg.HandlerType()).To(Equal(handlerkit.IntegrationType))
 				})
 			})
-		})
 
-		When("the handler does not configure anything", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = nil
+			Describe("func ConsumedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.CommandRole,
+							fixtures.MessageBType: message.CommandRole,
+						},
+					))
+				})
 			})
 
-			It("returns an error", func() {
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ProducedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageEType: message.EventRole,
+						},
+					))
+				})
+			})
+
+			When("the handler does not configure any recorded events", func() {
+				BeforeEach(func() {
+					handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+						c.Name("<name>")
+						c.AcceptsCommandType(fixtures.MessageA{})
+					}
+				})
+
+				It("does not return an error", func() {
+					_, err := NewIntegrationConfig(handler)
+					Expect(err).ShouldNot(HaveOccurred())
+				})
+			})
+		})
+
+		DescribeTable(
+			"when the configuration is invalid",
+			func(
+				msg string,
+				fn func(dogma.IntegrationConfigurer),
+			) {
+				handler.ConfigureFunc = fn
+
 				_, err := NewIntegrationConfig(handler)
 				Expect(err).Should(HaveOccurred())
-			})
-		})
 
-		When("the handler does not configure a name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
-					c.RouteCommandType(fixtures.MessageA{})
+				if msg != "" {
+					Expect(err).To(MatchError(msg))
 				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewIntegrationConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.Name()",
-					),
-				))
-			})
-		})
-
-		When("the handler configures multiple names", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+			},
+			Entry(
+				"when the handler does not configure anything",
+				"", // any error
+				nil,
+			),
+			Entry(
+				"when the handler does not configure a name",
+				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.Name()`,
+				func(c dogma.IntegrationConfigurer) {
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures multiple names",
+				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.Name("<name>")`,
+				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.RouteCommandType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewIntegrationConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.Name("<name>")`,
-					),
-				))
-			})
-		})
-
-		When("the handler configures an invalid name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures an invalid name",
+				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Name("\t \n") with an invalid name`,
+				func(c dogma.IntegrationConfigurer) {
 					c.Name("\t \n")
-					c.RouteCommandType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewIntegrationConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Name("\t \n") with an invalid name`,
-					),
-				))
-			})
-		})
-
-		When("the handler does not configure any routes", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler does not configure any accepted command types",
+				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.AcceptsCommandType()`,
+				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewIntegrationConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.RouteCommandType()",
-					),
-				))
-			})
-		})
-
-		When("the handler does configures multiple routes for the same message type", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures the same accepted command type multiple times",
+				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.AcceptsCommandType(fixtures.MessageA)`,
+				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.RouteCommandType(fixtures.MessageA{})
-					c.RouteCommandType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewIntegrationConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.RouteCommandType(fixtures.MessageA)",
-					),
-				))
-			})
-		})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures the same recorded event type multiple times",
+				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.RecordsEventType(fixtures.MessageE)`,
+				func(c dogma.IntegrationConfigurer) {
+					c.Name("<name>")
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+					c.RecordsEventType(fixtures.MessageE{})
+				},
+			),
+		)
 	})
 })

@@ -18,16 +18,14 @@ type ProjectionConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	// MessageTypes is the set of event message types that are routed to this
-	// handler, as specified by its Configure() method.
-	MessageTypes message.TypeSet
+	consumed map[message.Type]message.Role
 }
 
 // NewProjectionConfig returns an ProjectionConfig for the given handler.
 func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, error) {
 	cfg := &ProjectionConfig{
-		Handler:      h,
-		MessageTypes: message.TypeSet{},
+		Handler:  h,
+		consumed: map[message.Type]message.Role{},
 	}
 
 	c := &projectionConfigurer{
@@ -47,9 +45,9 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 		)
 	}
 
-	if len(c.cfg.MessageTypes) == 0 {
+	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call ProjectionConfigurer.RouteEventType()",
+			"%T.Configure() did not call ProjectionConfigurer.AcceptsEventType()",
 			h,
 		)
 	}
@@ -72,14 +70,14 @@ func (c *ProjectionConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// CommandTypes returns the types of command messages that are routed to the handler.
-func (c *ProjectionConfig) CommandTypes() message.TypeSet {
-	return nil
+// ConsumedMessageTypes returns the message types consumed by the handler.
+func (c *ProjectionConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+	return c.consumed
 }
 
-// EventTypes returns the types of event messages that are routed to the handler.
-func (c *ProjectionConfig) EventTypes() message.TypeSet {
-	return c.MessageTypes
+// ProducedMessageTypes returns the message types produced by the handler.
+func (c *ProjectionConfig) ProducedMessageTypes() map[message.Type]message.Role {
+	return nil
 }
 
 // Accept calls v.VisitProjectionConfig(ctx, c).
@@ -113,16 +111,16 @@ func (c *projectionConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *projectionConfigurer) RouteEventType(m dogma.Message) {
+func (c *projectionConfigurer) AcceptsEventType(m dogma.Message) {
 	t := message.TypeOf(m)
 
-	if _, ok := c.cfg.MessageTypes[t]; ok {
+	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
-			`%T.Configure() has already called ProjectionConfigurer.RouteEventType(%T)`,
+			`%T.Configure() has already called ProjectionConfigurer.AcceptsEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
 
-	c.cfg.MessageTypes[t] = struct{}{}
+	c.cfg.consumed[t] = message.EventRole
 }

@@ -19,27 +19,27 @@ type ApplicationConfig struct {
 	// Handlers is a map of handler name to their respective configuration.
 	Handlers map[string]HandlerConfig
 
-	// Routes is map of message type to the names of the handlers that receive
-	// messages of that type.
-	Routes map[message.Type][]string
+	// Roles is a map of message type to the role it performs within the
+	// application. The map does not include timeout message types.
+	Roles map[message.Type]message.Role
 
-	// CommandRoutes is map of command message type to the names of the handler
-	// that receives that command type.
-	CommandRoutes map[message.Type]string
+	// Consumers is a map of message type to the names of the handlers that
+	// consume messages of that type.
+	Consumers map[message.Type][]string
 
-	// EventRoutes is map of event message type to the names of the handlers that
-	// receive events of that type.
-	EventRoutes map[message.Type][]string
+	// Producers is a map of message type to the name of the handlers that
+	// produce messages of that type.
+	Producers map[message.Type][]string
 }
 
 // NewApplicationConfig returns a new application config for the given application.
 func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 	cfg := &ApplicationConfig{
-		Application:   app,
-		Handlers:      map[string]HandlerConfig{},
-		Routes:        map[message.Type][]string{},
-		CommandRoutes: map[message.Type]string{},
-		EventRoutes:   map[message.Type][]string{},
+		Application: app,
+		Handlers:    map[string]HandlerConfig{},
+		Roles:       map[message.Type]message.Role{},
+		Consumers:   map[message.Type][]string{},
+		Producers:   map[message.Type][]string{},
 	}
 
 	c := &applicationConfigurer{
@@ -84,58 +84,77 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 		)
 	}
 
-	for t := range cfg.CommandTypes() {
-		if x, ok := c.CommandRoutes[t]; ok {
-			panicf(
-				"can not route commands of type %s to %#v because they are already routed to %#v",
-				t,
-				cfg.Name(),
-				x,
-			)
-		}
+	for t, r := range cfg.ConsumedMessageTypes() {
+		c.checkMessageType(cfg, t, r)
 
-		if x, ok := c.EventRoutes[t]; ok {
-			if len(x) == 1 {
+		if r == message.CommandRole {
+			if x, ok := c.Consumers[t]; ok {
 				panicf(
-					"can not route messages of type %s to %#v as commands because they are already routed to %#v as events",
-					t,
+					"the %#v handler can not consume %s commands because they are already consumed by %#v",
 					cfg.Name(),
+					t,
 					x[0],
 				)
 			}
-
-			panicf(
-				"can not route messages of type %s to %#v as commands because they are already routed to %#v and %d other handler(s) as events",
-				t,
-				cfg.Name(),
-				x[0],
-				len(x)-1,
-			)
 		}
 	}
 
-	for t := range cfg.EventTypes() {
-		if x, ok := c.CommandRoutes[t]; ok {
-			panicf(
-				"can not route messages of type %s to %#v as events because they are already routed to %#v as commands",
-				t,
-				cfg.Name(),
-				x,
-			)
+	for t, r := range cfg.ProducedMessageTypes() {
+		c.checkMessageType(cfg, t, r)
+
+		if r == message.EventRole {
+			if x, ok := c.Producers[t]; ok {
+				panicf(
+					"the %#v handler can not produce %s events because they are already produced by %#v",
+					cfg.Name(),
+					t,
+					x[0],
+				)
+			}
 		}
 	}
 
 	c.Handlers[n] = cfg
 
-	for t := range cfg.CommandTypes() {
-		c.Routes[t] = append(c.Routes[t], cfg.Name())
-		c.CommandRoutes[t] = cfg.Name()
+	for t, r := range cfg.ConsumedMessageTypes() {
+		c.Roles[t] = r
+		c.Consumers[t] = append(c.Consumers[t], cfg.Name())
 	}
 
-	for t := range cfg.EventTypes() {
-		c.Routes[t] = append(c.Routes[t], cfg.Name())
-		c.EventRoutes[t] = append(c.EventRoutes[t], cfg.Name())
+	for t, r := range cfg.ProducedMessageTypes() {
+		c.Roles[t] = r
+		c.Producers[t] = append(c.Producers[t], cfg.Name())
 	}
+}
+
+// checkMessageType panics if the message type has already been registered with
+// a different role.
+func (c *ApplicationConfig) checkMessageType(
+	cfg HandlerConfig,
+	t message.Type,
+	r message.Role,
+) {
+	x, ok := c.Roles[t]
+	if !ok || x == r {
+		return
+	}
+
+	var h string
+
+	if n, ok := c.Consumers[t]; ok {
+		h = n[0]
+	} else if n, ok := c.Producers[t]; ok {
+		h = n[0]
+	}
+
+	panicf(
+		"the %#v handler configures %s as a %s but %#v configures it as a %s",
+		cfg.Name(),
+		t,
+		r,
+		h,
+		x,
+	)
 }
 
 // applicationConfigurer is an implementation of dogma.ApplicationConfigurer

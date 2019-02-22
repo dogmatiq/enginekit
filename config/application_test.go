@@ -75,12 +75,25 @@ var _ = Describe("type ApplicationConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("the app name is set", func() {
+			It("sets the app name", func() {
 				Expect(cfg.ApplicationName).To(Equal("<app>"))
 			})
 
-			It("the routes are present", func() {
-				Expect(cfg.Routes).To(Equal(
+			It("sets the roles map", func() {
+				Expect(cfg.Roles).To(Equal(
+					map[message.Type]message.Role{
+						fixtures.MessageAType: message.CommandRole,
+						fixtures.MessageBType: message.EventRole,
+						fixtures.MessageCType: message.CommandRole,
+						fixtures.MessageDType: message.EventRole,
+						fixtures.MessageEType: message.EventRole,
+						fixtures.MessageFType: message.EventRole,
+					},
+				))
+			})
+
+			It("sets the consumers map", func() {
+				Expect(cfg.Consumers).To(Equal(
 					map[message.Type][]string{
 						fixtures.MessageAType: {"<aggregate>"},
 						fixtures.MessageBType: {"<process>"},
@@ -91,21 +104,12 @@ var _ = Describe("type ApplicationConfig", func() {
 				))
 			})
 
-			It("the command routes are present", func() {
-				Expect(cfg.CommandRoutes).To(Equal(
-					map[message.Type]string{
-						fixtures.MessageAType: "<aggregate>",
-						fixtures.MessageCType: "<integration>",
-					},
-				))
-			})
-
-			It("the event routes are present", func() {
-				Expect(cfg.EventRoutes).To(Equal(
+			It("sets the producers map", func() {
+				Expect(cfg.Producers).To(Equal(
 					map[message.Type][]string{
-						fixtures.MessageBType: {"<process>"},
-						fixtures.MessageDType: {"<projection>"},
-						fixtures.MessageEType: {"<process>", "<projection>"},
+						fixtures.MessageCType: {"<process>"},
+						fixtures.MessageEType: {"<aggregate>"},
+						fixtures.MessageFType: {"<integration>"},
 					},
 				))
 			})
@@ -275,24 +279,40 @@ var _ = Describe("type ApplicationConfig", func() {
 			})
 		})
 
-		When("the app contains conflicting routes", func() {
-			It("returns an error when a route is in conflict because two handlers intend to receive the same command", func() {
-				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
-					c.Name("<integration>")
-					c.AcceptsCommandType(fixtures.MessageA{}) // conflict with <aggregate>
-					c.RecordsEventType(fixtures.MessageF{})
-				}
+		It("returns an error when the app contains multiple consumers of the same command", func() {
+			integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+				c.Name("<integration>")
+				c.AcceptsCommandType(fixtures.MessageA{}) // conflict with <aggregate>
+				c.RecordsEventType(fixtures.MessageF{})
+			}
 
-				_, err := NewApplicationConfig(app)
+			_, err := NewApplicationConfig(app)
 
-				Expect(err).To(Equal(
-					Error(
-						`can not route commands of type fixtures.MessageA to "<integration>" because they are already routed to "<aggregate>"`,
-					),
-				))
-			})
+			Expect(err).To(Equal(
+				Error(
+					`the "<integration>" handler can not consume fixtures.MessageA commands because they are already consumed by "<aggregate>"`,
+				),
+			))
+		})
 
-			It("returns an error when a process route is in conflict because a command is reclassified as an event", func() {
+		It("returns an error when the app contains multiple producers of the same event", func() {
+			integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+				c.Name("<integration>")
+				c.AcceptsCommandType(fixtures.MessageC{})
+				c.RecordsEventType(fixtures.MessageE{}) // conflict with <aggregate>
+			}
+
+			_, err := NewApplicationConfig(app)
+
+			Expect(err).To(Equal(
+				Error(
+					`the "<integration>" handler can not produce fixtures.MessageE events because they are already produced by "<aggregate>"`,
+				),
+			))
+		})
+
+		When("multiple handlers use a single message type in differing roles", func() {
+			It("returns an error when a conflict occurs with a consumed message", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Name("<process>")
 					c.AcceptsEventType(fixtures.MessageA{}) // conflict with <aggregate>
@@ -303,46 +323,23 @@ var _ = Describe("type ApplicationConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						`can not route messages of type fixtures.MessageA to "<process>" as events because they are already routed to "<aggregate>" as commands`,
+						`the "<process>" handler configures fixtures.MessageA as an event but "<aggregate>" configures it as a command`,
 					),
 				))
 			})
 
-			It("returns an error when a process route is in conflict because an event with a single handler is reclassified as a command", func() {
-				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
-					c.Name("<integration>")
-					c.AcceptsCommandType(fixtures.MessageB{}) // conflict with <process>
-					c.RecordsEventType(fixtures.MessageF{})
+			It("returns an error when a conflict occurs with a produced message", func() {
+				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+					c.Name("<process>")
+					c.AcceptsEventType(fixtures.MessageB{})
+					c.ExecutesCommandType(fixtures.MessageE{}) // conflict with <aggregate>
 				}
 
 				_, err := NewApplicationConfig(app)
 
 				Expect(err).To(Equal(
 					Error(
-						`can not route messages of type fixtures.MessageB to "<integration>" as commands because they are already routed to "<process>" as events`,
-					),
-				))
-			})
-
-			It("returns an error when an integration route is in conflict because an event with multiple handlers is reclassified as a command", func() {
-				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
-					c.Name("<integration>")
-					c.AcceptsCommandType(fixtures.MessageE{}) // conflict with <process> and <projection>
-					c.RecordsEventType(fixtures.MessageF{})
-				}
-
-				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {
-					c.Name("<app>")
-					c.RegisterProcess(process)
-					c.RegisterProjection(projection)
-					c.RegisterIntegration(integration) // register the conflicting integration last
-				}
-
-				_, err := NewApplicationConfig(app)
-
-				Expect(err).To(Equal(
-					Error(
-						`can not route messages of type fixtures.MessageE to "<integration>" as commands because they are already routed to "<process>" and 1 other handler(s) as events`,
+						`the "<process>" handler configures fixtures.MessageE as a command but "<aggregate>" configures it as an event`,
 					),
 				))
 			})

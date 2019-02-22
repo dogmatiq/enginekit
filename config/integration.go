@@ -18,17 +18,16 @@ type IntegrationConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	messageTypes MessageTypes
+	consumed map[message.Type]message.Role
+	produced map[message.Type]message.Role
 }
 
 // NewIntegrationConfig returns an IntegrationConfig for the given handler.
 func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig, error) {
 	cfg := &IntegrationConfig{
-		Handler: h,
-		messageTypes: MessageTypes{
-			AcceptedCommandTypes: message.TypeSet{},
-			RecordedEventTypes:   message.TypeSet{},
-		},
+		Handler:  h,
+		consumed: map[message.Type]message.Role{},
+		produced: map[message.Type]message.Role{},
 	}
 
 	c := &integrationConfigurer{
@@ -48,16 +47,9 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 		)
 	}
 
-	if len(c.cfg.messageTypes.AcceptedCommandTypes) == 0 {
+	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call IntegrationConfigurer.AcceptsCommandType()",
-			h,
-		)
-	}
-
-	if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
-		return nil, errorf(
-			"%T.Configure() did not call IntegrationConfigurer.RecordsEventType()",
 			h,
 		)
 	}
@@ -80,9 +72,14 @@ func (c *IntegrationConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// MessageTypes returns the message types used by the handler.
-func (c *IntegrationConfig) MessageTypes() MessageTypes {
-	return c.messageTypes
+// ConsumedMessageTypes returns the message types consumed by the handler.
+func (c *IntegrationConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+	return c.consumed
+}
+
+// ProducedMessageTypes returns the message types produced by the handler.
+func (c *IntegrationConfig) ProducedMessageTypes() map[message.Type]message.Role {
+	return c.produced
 }
 
 // Accept calls v.VisitIntegrationConfig(ctx, c).
@@ -117,21 +114,29 @@ func (c *integrationConfigurer) Name(n string) {
 }
 
 func (c *integrationConfigurer) AcceptsCommandType(m dogma.Message) {
-	if !c.cfg.messageTypes.AcceptedCommandTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
 			`%T.Configure() has already called IntegrationConfigurer.AcceptsCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.consumed[t] = message.CommandRole
 }
 
 func (c *integrationConfigurer) RecordsEventType(m dogma.Message) {
-	if !c.cfg.messageTypes.RecordedEventTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.produced[t]; ok {
 		panicf(
 			`%T.Configure() has already called IntegrationConfigurer.RecordsEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.produced[t] = message.EventRole
 }

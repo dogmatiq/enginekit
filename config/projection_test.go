@@ -51,19 +51,22 @@ var _ = Describe("type ProjectionConfig", func() {
 				})
 			})
 
-			Describe("func MessageTypes()", func() {
+			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
-					Expect(cfg.MessageTypes()).To(Equal(
-						MessageTypes{
-							AcceptedEventTypes: message.NewTypeSet(
-								fixtures.MessageAType,
-								fixtures.MessageBType,
-							),
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.EventRole,
+							fixtures.MessageBType: message.EventRole,
 						},
 					))
 				})
 			})
 
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns an empty map", func() {
+					Expect(cfg.ProducedMessageTypes()).To(BeEmpty())
+				})
+			})
 		})
 
 		When("the handler does not configure anything", func() {

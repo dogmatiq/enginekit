@@ -52,17 +52,22 @@ var _ = Describe("type ProcessConfig", func() {
 				})
 			})
 
-			Describe("func MessageTypes()", func() {
+			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
-					Expect(cfg.MessageTypes()).To(Equal(
-						MessageTypes{
-							AcceptedEventTypes: message.NewTypeSet(
-								fixtures.MessageAType,
-								fixtures.MessageBType,
-							),
-							ExecutedCommandTypes: message.NewTypeSet(
-								fixtures.MessageCType,
-							),
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.EventRole,
+							fixtures.MessageBType: message.EventRole,
+						},
+					))
+				})
+			})
+
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ProducedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageCType: message.CommandRole,
 						},
 					))
 				})

@@ -18,16 +18,14 @@ type ProjectionConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	messageTypes MessageTypes
+	consumed map[message.Type]message.Role
 }
 
 // NewProjectionConfig returns an ProjectionConfig for the given handler.
 func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, error) {
 	cfg := &ProjectionConfig{
-		Handler: h,
-		messageTypes: MessageTypes{
-			AcceptedEventTypes: message.TypeSet{},
-		},
+		Handler:  h,
+		consumed: map[message.Type]message.Role{},
 	}
 
 	c := &projectionConfigurer{
@@ -47,7 +45,7 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 		)
 	}
 
-	if len(c.cfg.messageTypes.AcceptedEventTypes) == 0 {
+	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call ProjectionConfigurer.AcceptsEventType()",
 			h,
@@ -72,9 +70,14 @@ func (c *ProjectionConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// MessageTypes returns the message types used by the handler.
-func (c *ProjectionConfig) MessageTypes() MessageTypes {
-	return c.messageTypes
+// ConsumedMessageTypes returns the message types consumed by the handler.
+func (c *ProjectionConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+	return c.consumed
+}
+
+// ProducedMessageTypes returns the message types produced by the handler.
+func (c *ProjectionConfig) ProducedMessageTypes() map[message.Type]message.Role {
+	return nil
 }
 
 // Accept calls v.VisitProjectionConfig(ctx, c).
@@ -109,11 +112,15 @@ func (c *projectionConfigurer) Name(n string) {
 }
 
 func (c *projectionConfigurer) AcceptsEventType(m dogma.Message) {
-	if !c.cfg.messageTypes.AcceptedEventTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
 			`%T.Configure() has already called ProjectionConfigurer.AcceptsEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.consumed[t] = message.EventRole
 }

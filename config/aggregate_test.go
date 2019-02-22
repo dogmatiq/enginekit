@@ -52,17 +52,22 @@ var _ = Describe("type AggregateConfig", func() {
 				})
 			})
 
-			Describe("func MessageTypes()", func() {
+			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
-					Expect(cfg.MessageTypes()).To(Equal(
-						MessageTypes{
-							AcceptedCommandTypes: message.NewTypeSet(
-								fixtures.MessageAType,
-								fixtures.MessageBType,
-							),
-							RecordedEventTypes: message.NewTypeSet(
-								fixtures.MessageEType,
-							),
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.CommandRole,
+							fixtures.MessageBType: message.CommandRole,
+						},
+					))
+				})
+			})
+
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ProducedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageEType: message.EventRole,
 						},
 					))
 				})

@@ -18,17 +18,16 @@ type AggregateConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	messageTypes MessageTypes
+	consumed map[message.Type]message.Role
+	produced map[message.Type]message.Role
 }
 
 // NewAggregateConfig returns an AggregateConfig for the given handler.
 func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, error) {
 	cfg := &AggregateConfig{
-		Handler: h,
-		messageTypes: MessageTypes{
-			AcceptedCommandTypes: message.TypeSet{},
-			RecordedEventTypes:   message.TypeSet{},
-		},
+		Handler:  h,
+		consumed: map[message.Type]message.Role{},
+		produced: map[message.Type]message.Role{},
 	}
 
 	c := &aggregateConfigurer{
@@ -48,14 +47,14 @@ func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, erro
 		)
 	}
 
-	if len(c.cfg.messageTypes.AcceptedCommandTypes) == 0 {
+	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call AggregateConfigurer.AcceptsCommandType()",
 			h,
 		)
 	}
 
-	if len(c.cfg.messageTypes.RecordedEventTypes) == 0 {
+	if len(c.cfg.produced) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call AggregateConfigurer.RecordsEventType()",
 			h,
@@ -80,9 +79,14 @@ func (c *AggregateConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// MessageTypes returns the message types used by the handler.
-func (c *AggregateConfig) MessageTypes() MessageTypes {
-	return c.messageTypes
+// ConsumedMessageTypes returns the message types consumed by the handler.
+func (c *AggregateConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+	return c.consumed
+}
+
+// ProducedMessageTypes returns the message types produced by the handler.
+func (c *AggregateConfig) ProducedMessageTypes() map[message.Type]message.Role {
+	return c.produced
 }
 
 // Accept calls v.VisitAggregateConfig(ctx, c).
@@ -117,21 +121,29 @@ func (c *aggregateConfigurer) Name(n string) {
 }
 
 func (c *aggregateConfigurer) AcceptsCommandType(m dogma.Message) {
-	if !c.cfg.messageTypes.AcceptedCommandTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.AcceptsCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.consumed[t] = message.CommandRole
 }
 
 func (c *aggregateConfigurer) RecordsEventType(m dogma.Message) {
-	if !c.cfg.messageTypes.RecordedEventTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.produced[t]; ok {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.RecordsEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.produced[t] = message.EventRole
 }

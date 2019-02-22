@@ -52,17 +52,22 @@ var _ = Describe("type IntegrationConfig", func() {
 				})
 			})
 
-			Describe("func MessageTypes()", func() {
+			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
-					Expect(cfg.MessageTypes()).To(Equal(
-						MessageTypes{
-							AcceptedCommandTypes: message.NewTypeSet(
-								fixtures.MessageAType,
-								fixtures.MessageBType,
-							),
-							RecordedEventTypes: message.NewTypeSet(
-								fixtures.MessageEType,
-							),
+					Expect(cfg.ConsumedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageAType: message.CommandRole,
+							fixtures.MessageBType: message.CommandRole,
+						},
+					))
+				})
+			})
+
+			Describe("func ProducedMessageTypes()", func() {
+				It("returns the expected message types", func() {
+					Expect(cfg.ProducedMessageTypes()).To(Equal(
+						map[message.Type]message.Role{
+							fixtures.MessageEType: message.EventRole,
 						},
 					))
 				})
@@ -175,6 +180,41 @@ var _ = Describe("type IntegrationConfig", func() {
 				Expect(err).To(Equal(
 					Error(
 						"*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.AcceptsCommandType(fixtures.MessageA)",
+					),
+				))
+			})
+		})
+
+		When("the handler does not configure any recorded events", func() {
+			BeforeEach(func() {
+				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+					c.Name("<name>")
+					c.AcceptsCommandType(fixtures.MessageA{})
+				}
+			})
+
+			It("does not return an error", func() {
+				_, err := NewIntegrationConfig(handler)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+		})
+
+		When("the handler configures the same recorded event type multiple times", func() {
+			BeforeEach(func() {
+				handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
+					c.Name("<name>")
+					c.AcceptsCommandType(fixtures.MessageA{})
+					c.RecordsEventType(fixtures.MessageE{})
+					c.RecordsEventType(fixtures.MessageE{})
+				}
+			})
+
+			It("returns a descriptive error", func() {
+				_, err := NewIntegrationConfig(handler)
+
+				Expect(err).To(Equal(
+					Error(
+						"*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.RecordsEventType(fixtures.MessageE)",
 					),
 				))
 			})

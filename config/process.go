@@ -18,17 +18,16 @@ type ProcessConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	messageTypes MessageTypes
+	consumed map[message.Type]message.Role
+	produced map[message.Type]message.Role
 }
 
 // NewProcessConfig returns an ProcessConfig for the given handler.
 func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 	cfg := &ProcessConfig{
-		Handler: h,
-		messageTypes: MessageTypes{
-			AcceptedEventTypes:   message.TypeSet{},
-			ExecutedCommandTypes: message.TypeSet{},
-		},
+		Handler:  h,
+		consumed: map[message.Type]message.Role{},
+		produced: map[message.Type]message.Role{},
 	}
 
 	c := &processConfigurer{
@@ -48,14 +47,14 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 		)
 	}
 
-	if len(c.cfg.messageTypes.AcceptedEventTypes) == 0 {
+	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call ProcessConfigurer.AcceptsEventType()",
 			h,
 		)
 	}
 
-	if len(c.cfg.messageTypes.ExecutedCommandTypes) == 0 {
+	if len(c.cfg.produced) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
 			h,
@@ -80,9 +79,14 @@ func (c *ProcessConfig) HandlerReflectType() reflect.Type {
 	return reflect.TypeOf(c.Handler)
 }
 
-// MessageTypes returns the message types used by the handler.
-func (c *ProcessConfig) MessageTypes() MessageTypes {
-	return c.messageTypes
+// ConsumedMessageTypes returns the message types consumed by the handler.
+func (c *ProcessConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+	return c.consumed
+}
+
+// ProducedMessageTypes returns the message types produced by the handler.
+func (c *ProcessConfig) ProducedMessageTypes() map[message.Type]message.Role {
+	return c.produced
 }
 
 // Accept calls v.VisitProcessConfig(ctx, c).
@@ -117,21 +121,29 @@ func (c *processConfigurer) Name(n string) {
 }
 
 func (c *processConfigurer) AcceptsEventType(m dogma.Message) {
-	if !c.cfg.messageTypes.AcceptedEventTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
 			`%T.Configure() has already called ProcessConfigurer.AcceptsEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.consumed[t] = message.EventRole
 }
 
 func (c *processConfigurer) ExecutesCommandType(m dogma.Message) {
-	if !c.cfg.messageTypes.ExecutedCommandTypes.AddM(m) {
+	t := message.TypeOf(m)
+
+	if _, ok := c.cfg.produced[t]; ok {
 		panicf(
 			`%T.Configure() has already called ProcessConfigurer.ExecutesCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
+
+	c.cfg.produced[t] = message.CommandRole
 }

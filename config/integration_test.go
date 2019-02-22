@@ -133,7 +133,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accept command types",
+				"when the handler does not configure any accepted command types",
 				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.AcceptsCommandType()`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
@@ -141,7 +141,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accept command types",
+				"when the handler configures the same accepted command type multiple times",
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.AcceptsCommandType(fixtures.MessageA)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")

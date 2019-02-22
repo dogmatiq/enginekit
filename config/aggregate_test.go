@@ -119,7 +119,7 @@ var _ = Describe("type AggregateConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accept command types",
+				"when the handler does not configure any accepted command types",
 				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.AcceptsCommandType()`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
@@ -127,7 +127,7 @@ var _ = Describe("type AggregateConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accept command types",
+				"when the handler configures the same accepted command type multiple times",
 				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.AcceptsCommandType(fixtures.MessageA)`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")

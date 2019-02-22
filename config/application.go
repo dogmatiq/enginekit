@@ -23,7 +23,7 @@ type ApplicationConfig struct {
 	// application. The map does not include timeout message types.
 	Roles map[message.Type]message.Role
 
-	// Consumers is map of message type to the names of the handlers that
+	// Consumers is a map of message type to the names of the handlers that
 	// consume messages of that type.
 	Consumers map[message.Type][]string
 

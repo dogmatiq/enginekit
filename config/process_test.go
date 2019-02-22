@@ -7,6 +7,7 @@ import (
 	handlerkit "github.com/dogmatiq/enginekit/handler"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
@@ -74,155 +75,89 @@ var _ = Describe("type ProcessConfig", func() {
 			})
 		})
 
-		When("the handler does not configure anything", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = nil
-			})
+		DescribeTable(
+			"when the configuration is invalid",
+			func(
+				msg string,
+				fn func(dogma.ProcessConfigurer),
+			) {
+				handler.ConfigureFunc = fn
 
-			It("returns an error", func() {
 				_, err := NewProcessConfig(handler)
 				Expect(err).Should(HaveOccurred())
-			})
-		})
 
-		When("the handler does not configure a name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				if msg != "" {
+					Expect(err).To(MatchError(msg))
+				}
+			},
+			Entry(
+				"when the handler does not configure anything",
+				"", // any error
+				nil,
+			),
+			Entry(
+				"when the handler does not configure a name",
+				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.Name()`,
+				func(c dogma.ProcessConfigurer) {
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.ExecutesCommandType(fixtures.MessageC{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.Name()",
-					),
-				))
-			})
-		})
-
-		When("the handler configures multiple names", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler configures multiple names",
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.Name("<name>")`,
+				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.ExecutesCommandType(fixtures.MessageC{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.Name("<name>")`,
-					),
-				))
-			})
-		})
-
-		When("the handler configures an invalid name", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler configures an invalid name",
+				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Name("\t \n") with an invalid name`,
+				func(c dogma.ProcessConfigurer) {
 					c.Name("\t \n")
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.ExecutesCommandType(fixtures.MessageC{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Name("\t \n") with an invalid name`,
-					),
-				))
-			})
-		})
-
-		When("the handler does not configure any accepted event types", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler does not configure any accepted event types",
+				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.AcceptsEventType()`,
+				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.ExecutesCommandType(fixtures.MessageC{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.AcceptsEventType()",
-					),
-				))
-			})
-		})
-
-		When("the handler configures the same accepted event type multiple times", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler configures the same accepted event type multiple times",
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.AcceptsEventType(fixtures.MessageA)`,
+				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.ExecutesCommandType(fixtures.MessageC{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.AcceptsEventType(fixtures.MessageA)",
-					),
-				))
-			})
-		})
-
-		When("the handler does not configure any executed command types", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler does not configure any executed commands",
+				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ExecutesCommandType()`,
+				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.AcceptsEventType(fixtures.MessageA{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
-					),
-				))
-			})
-		})
-
-		When("the handler configures the same executed command type multiple times", func() {
-			BeforeEach(func() {
-				handler.ConfigureFunc = func(c dogma.ProcessConfigurer) {
+				},
+			),
+			Entry(
+				"when the handler configures the same executed command type multiple times",
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ExecutesCommandType(fixtures.MessageC)`,
+				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.AcceptsEventType(fixtures.MessageA{})
 					c.ExecutesCommandType(fixtures.MessageC{})
 					c.ExecutesCommandType(fixtures.MessageC{})
-				}
-			})
-
-			It("returns a descriptive error", func() {
-				_, err := NewProcessConfig(handler)
-
-				Expect(err).To(Equal(
-					Error(
-						"*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ExecutesCommandType(fixtures.MessageC)",
-					),
-				))
-			})
-		})
+				},
+			),
+		)
 	})
 })

@@ -49,7 +49,7 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 
 	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call IntegrationConfigurer.AcceptsCommandType()",
+			"%T.Configure() did not call IntegrationConfigurer.ConsumesCommandType()",
 			h,
 		)
 	}
@@ -113,12 +113,12 @@ func (c *integrationConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *integrationConfigurer) AcceptsCommandType(m dogma.Message) {
+func (c *integrationConfigurer) ConsumesCommandType(m dogma.Message) {
 	t := message.TypeOf(m)
 
 	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
-			`%T.Configure() has already called IntegrationConfigurer.AcceptsCommandType(%T)`,
+			`%T.Configure() has already called IntegrationConfigurer.ConsumesCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
@@ -127,12 +127,12 @@ func (c *integrationConfigurer) AcceptsCommandType(m dogma.Message) {
 	c.cfg.consumed[t] = message.CommandRole
 }
 
-func (c *integrationConfigurer) RecordsEventType(m dogma.Message) {
+func (c *integrationConfigurer) ProducesEventType(m dogma.Message) {
 	t := message.TypeOf(m)
 
 	if _, ok := c.cfg.produced[t]; ok {
 		panicf(
-			`%T.Configure() has already called IntegrationConfigurer.RecordsEventType(%T)`,
+			`%T.Configure() has already called IntegrationConfigurer.ProducesEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)

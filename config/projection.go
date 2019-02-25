@@ -47,7 +47,7 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 
 	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call ProjectionConfigurer.AcceptsEventType()",
+			"%T.Configure() did not call ProjectionConfigurer.ConsumesEventType()",
 			h,
 		)
 	}
@@ -111,12 +111,12 @@ func (c *projectionConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *projectionConfigurer) AcceptsEventType(m dogma.Message) {
+func (c *projectionConfigurer) ConsumesEventType(m dogma.Message) {
 	t := message.TypeOf(m)
 
 	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
-			`%T.Configure() has already called ProjectionConfigurer.AcceptsEventType(%T)`,
+			`%T.Configure() has already called ProjectionConfigurer.ConsumesEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)

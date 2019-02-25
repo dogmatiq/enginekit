@@ -21,9 +21,9 @@ var _ = Describe("type ProcessConfig", func() {
 			handler = &fixtures.ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.AcceptsEventType(fixtures.MessageB{})
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageB{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			}
 		})
@@ -99,8 +99,8 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler does not configure a name",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.Name()`,
 				func(c dogma.ProcessConfigurer) {
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
 			Entry(
@@ -109,8 +109,8 @@ var _ = Describe("type ProcessConfig", func() {
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
 			Entry(
@@ -118,44 +118,44 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Name("\t \n") with an invalid name`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("\t \n")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
 			Entry(
 				"when the handler does not configure any accepted event types",
-				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.AcceptsEventType()`,
+				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ConsumesEventType()`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
 			Entry(
 				"when the handler configures the same accepted event type multiple times",
-				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.AcceptsEventType(fixtures.MessageA)`,
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
 			Entry(
 				"when the handler does not configure any executed commands",
-				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ExecutesCommandType()`,
+				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ProducesCommandType()`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.AcceptsEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 			Entry(
 				"when the handler configures the same executed command type multiple times",
-				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ExecutesCommandType(fixtures.MessageC)`,
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ProducesCommandType(fixtures.MessageC)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.ExecutesCommandType(fixtures.MessageC{})
-					c.ExecutesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ProducesCommandType(fixtures.MessageC{})
+					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
 		)

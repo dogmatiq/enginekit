@@ -21,9 +21,9 @@ var _ = Describe("type IntegrationConfig", func() {
 			handler = &fixtures.IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.AcceptsCommandType(fixtures.MessageB{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ConsumesCommandType(fixtures.MessageB{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			}
 		})
@@ -74,7 +74,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				BeforeEach(func() {
 					handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 						c.Name("<name>")
-						c.AcceptsCommandType(fixtures.MessageA{})
+						c.ConsumesCommandType(fixtures.MessageA{})
 					}
 				})
 
@@ -109,8 +109,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				"when the handler does not configure a name",
 				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.Name()`,
 				func(c dogma.IntegrationConfigurer) {
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
@@ -119,8 +119,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
@@ -128,36 +128,36 @@ var _ = Describe("type IntegrationConfig", func() {
 				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Name("\t \n") with an invalid name`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("\t \n")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler does not configure any accepted command types",
-				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.AcceptsCommandType()`,
+				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.ConsumesCommandType()`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler configures the same accepted command type multiple times",
-				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.AcceptsCommandType(fixtures.MessageA)`,
+				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler configures the same recorded event type multiple times",
-				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.RecordsEventType(fixtures.MessageE)`,
+				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 		)

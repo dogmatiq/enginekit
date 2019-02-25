@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"reflect"
-	"strings"
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/handler"
@@ -109,7 +108,7 @@ func (c *processConfigurer) Name(n string) {
 		)
 	}
 
-	if strings.TrimSpace(n) == "" {
+	if !IsValidName(n) {
 		panicf(
 			`%T.Configure() called ProcessConfigurer.Name(%#v) with an invalid name`,
 			c.cfg.Handler,

@@ -49,14 +49,14 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 
 	if len(c.cfg.consumed) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call ProcessConfigurer.AcceptsEventType()",
+			"%T.Configure() did not call ProcessConfigurer.ConsumesEventType()",
 			h,
 		)
 	}
 
 	if len(c.cfg.produced) == 0 {
 		return nil, errorf(
-			"%T.Configure() did not call ProcessConfigurer.ExecutesCommandType()",
+			"%T.Configure() did not call ProcessConfigurer.ProducesCommandType()",
 			h,
 		)
 	}
@@ -120,12 +120,12 @@ func (c *processConfigurer) Name(n string) {
 	c.cfg.HandlerName = n
 }
 
-func (c *processConfigurer) AcceptsEventType(m dogma.Message) {
+func (c *processConfigurer) ConsumesEventType(m dogma.Message) {
 	t := message.TypeOf(m)
 
 	if _, ok := c.cfg.consumed[t]; ok {
 		panicf(
-			`%T.Configure() has already called ProcessConfigurer.AcceptsEventType(%T)`,
+			`%T.Configure() has already called ProcessConfigurer.ConsumesEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
@@ -134,12 +134,12 @@ func (c *processConfigurer) AcceptsEventType(m dogma.Message) {
 	c.cfg.consumed[t] = message.EventRole
 }
 
-func (c *processConfigurer) ExecutesCommandType(m dogma.Message) {
+func (c *processConfigurer) ProducesCommandType(m dogma.Message) {
 	t := message.TypeOf(m)
 
 	if _, ok := c.cfg.produced[t]; ok {
 		panicf(
-			`%T.Configure() has already called ProcessConfigurer.ExecutesCommandType(%T)`,
+			`%T.Configure() has already called ProcessConfigurer.ProducesCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)

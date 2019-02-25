@@ -21,8 +21,8 @@ var _ = Describe("type ProjectionConfig", func() {
 			handler = &fixtures.ProjectionMessageHandler{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.AcceptsEventType(fixtures.MessageB{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageB{})
 				},
 			}
 		})
@@ -94,7 +94,7 @@ var _ = Describe("type ProjectionConfig", func() {
 				"when the handler does not configure a name",
 				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.Name()`,
 				func(c dogma.ProjectionConfigurer) {
-					c.AcceptsEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 			Entry(
@@ -103,7 +103,7 @@ var _ = Describe("type ProjectionConfig", func() {
 				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.AcceptsEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 			Entry(
@@ -111,23 +111,23 @@ var _ = Describe("type ProjectionConfig", func() {
 				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Name("\t \n") with an invalid name`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Name("\t \n")
-					c.AcceptsEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 			Entry(
 				"when the handler does not configure any accepted event types",
-				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.AcceptsEventType()`,
+				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.ConsumesEventType()`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
 				},
 			),
 			Entry(
 				"when the handler configures the same accepted event type multiple times",
-				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.AcceptsEventType(fixtures.MessageA)`,
+				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
-					c.AcceptsEventType(fixtures.MessageA{})
-					c.AcceptsEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 		)

@@ -21,9 +21,9 @@ var _ = Describe("type AggregateConfig", func() {
 			handler = &fixtures.AggregateMessageHandler{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.AcceptsCommandType(fixtures.MessageB{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ConsumesCommandType(fixtures.MessageB{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			}
 		})
@@ -95,8 +95,8 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler does not configure a name",
 				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.Name()`,
 				func(c dogma.AggregateConfigurer) {
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
@@ -105,8 +105,8 @@ var _ = Describe("type AggregateConfig", func() {
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
 					c.Name("<other>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
@@ -114,44 +114,44 @@ var _ = Describe("type AggregateConfig", func() {
 				`*fixtures.AggregateMessageHandler.Configure() called AggregateConfigurer.Name("\t \n") with an invalid name`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("\t \n")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler does not configure any accepted command types",
-				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.AcceptsCommandType()`,
+				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.ConsumesCommandType()`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler configures the same accepted command type multiple times",
-				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.AcceptsCommandType(fixtures.MessageA)`,
+				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler does not configure any recorded events",
-				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.RecordsEventType()`,
+				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.ProducesEventType()`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
+					c.ConsumesCommandType(fixtures.MessageA{})
 				},
 			),
 			Entry(
 				"when the handler configures the same recorded event type multiple times",
-				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.RecordsEventType(fixtures.MessageE)`,
+				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
-					c.AcceptsCommandType(fixtures.MessageA{})
-					c.RecordsEventType(fixtures.MessageE{})
-					c.RecordsEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
+					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 		)

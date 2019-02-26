@@ -25,7 +25,8 @@ var _ = Describe("func IsValidName", func() {
 			Expect(IsValidName(n)).To(BeFalse())
 		},
 		Entry("empty", ""),
-		Entry("non-printable ascii character", "\n"),
+		Entry("non-printable ascii character (newline)", "\n"),
+		Entry("non-printable ascii character (space)", " "),
 		Entry("non-printable unicode character", "\u200B"),
 	)
 })

@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"strings"
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/message"
@@ -172,7 +171,7 @@ func (c *applicationConfigurer) Name(n string) {
 		)
 	}
 
-	if strings.TrimSpace(n) == "" {
+	if !IsValidName(n) {
 		panicf(
 			`%T.Configure() called ApplicationConfigurer.Name(%#v) with an invalid name`,
 			c.cfg.Application,

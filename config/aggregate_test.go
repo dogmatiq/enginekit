@@ -52,7 +52,7 @@ var _ = Describe("type AggregateConfig", func() {
 			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
-						map[message.Type]message.Role{
+						message.RoleMap{
 							fixtures.MessageAType: message.CommandRole,
 							fixtures.MessageBType: message.CommandRole,
 						},
@@ -63,7 +63,7 @@ var _ = Describe("type AggregateConfig", func() {
 			Describe("func ProducedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
-						map[message.Type]message.Role{
+						message.RoleMap{
 							fixtures.MessageEType: message.EventRole,
 						},
 					))

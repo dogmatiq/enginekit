@@ -17,16 +17,16 @@ type ProcessConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	consumed map[message.Type]message.Role
-	produced map[message.Type]message.Role
+	consumed message.RoleMap
+	produced message.RoleMap
 }
 
 // NewProcessConfig returns an ProcessConfig for the given handler.
 func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 	cfg := &ProcessConfig{
 		Handler:  h,
-		consumed: map[message.Type]message.Role{},
-		produced: map[message.Type]message.Role{},
+		consumed: message.RoleMap{},
+		produced: message.RoleMap{},
 	}
 
 	c := &processConfigurer{
@@ -79,12 +79,12 @@ func (c *ProcessConfig) HandlerReflectType() reflect.Type {
 }
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
-func (c *ProcessConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+func (c *ProcessConfig) ConsumedMessageTypes() message.RoleMap {
 	return c.consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
-func (c *ProcessConfig) ProducedMessageTypes() map[message.Type]message.Role {
+func (c *ProcessConfig) ProducedMessageTypes() message.RoleMap {
 	return c.produced
 }
 
@@ -120,29 +120,21 @@ func (c *processConfigurer) Name(n string) {
 }
 
 func (c *processConfigurer) ConsumesEventType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.consumed[t]; ok {
+	if !c.cfg.consumed.AddM(m, message.EventRole) {
 		panicf(
 			`%T.Configure() has already called ProcessConfigurer.ConsumesEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
-
-	c.cfg.consumed[t] = message.EventRole
 }
 
 func (c *processConfigurer) ProducesCommandType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.produced[t]; ok {
+	if !c.cfg.produced.AddM(m, message.CommandRole) {
 		panicf(
 			`%T.Configure() has already called ProcessConfigurer.ProducesCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
-
-	c.cfg.produced[t] = message.CommandRole
 }

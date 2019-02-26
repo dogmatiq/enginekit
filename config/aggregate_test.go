@@ -119,7 +119,7 @@ var _ = Describe("type AggregateConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accepted command types",
+				"when the handler does not configure any consumed command types",
 				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.ConsumesCommandType()`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
@@ -127,7 +127,7 @@ var _ = Describe("type AggregateConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler configures the same accepted command type multiple times",
+				"when the handler configures the same consumed command type multiple times",
 				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
@@ -137,7 +137,7 @@ var _ = Describe("type AggregateConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any recorded events",
+				"when the handler does not configure any produced events",
 				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.ProducesEventType()`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")
@@ -145,7 +145,7 @@ var _ = Describe("type AggregateConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler configures the same recorded event type multiple times",
+				"when the handler configures the same produced event type multiple times",
 				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.AggregateConfigurer) {
 					c.Name("<name>")

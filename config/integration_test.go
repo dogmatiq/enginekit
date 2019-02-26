@@ -70,7 +70,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				})
 			})
 
-			When("the handler does not configure any recorded events", func() {
+			When("the handler does not configure any produced events", func() {
 				BeforeEach(func() {
 					handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 						c.Name("<name>")
@@ -133,7 +133,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accepted command types",
+				"when the handler does not configure any consumed command types",
 				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.ConsumesCommandType()`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
@@ -141,7 +141,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler configures the same accepted command type multiple times",
+				"when the handler configures the same consumed command type multiple times",
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")
@@ -151,7 +151,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler configures the same recorded event type multiple times",
+				"when the handler configures the same produced event type multiple times",
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Name("<name>")

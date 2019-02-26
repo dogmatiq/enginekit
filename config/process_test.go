@@ -123,7 +123,7 @@ var _ = Describe("type ProcessConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accepted event types",
+				"when the handler does not configure any consumed event types",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ConsumesEventType()`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
@@ -131,7 +131,7 @@ var _ = Describe("type ProcessConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler configures the same accepted event type multiple times",
+				"when the handler configures the same consumed event type multiple times",
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
@@ -141,7 +141,7 @@ var _ = Describe("type ProcessConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any executed commands",
+				"when the handler does not configure any produced commands",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ProducesCommandType()`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")
@@ -149,7 +149,7 @@ var _ = Describe("type ProcessConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler configures the same executed command type multiple times",
+				"when the handler configures the same produced command type multiple times",
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ProducesCommandType(fixtures.MessageC)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Name("<name>")

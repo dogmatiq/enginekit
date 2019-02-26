@@ -115,14 +115,14 @@ var _ = Describe("type ProjectionConfig", func() {
 				},
 			),
 			Entry(
-				"when the handler does not configure any accepted event types",
+				"when the handler does not configure any consumed event types",
 				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.ConsumesEventType()`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")
 				},
 			),
 			Entry(
-				"when the handler configures the same accepted event type multiple times",
+				"when the handler configures the same consumed event type multiple times",
 				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Name("<name>")

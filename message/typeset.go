@@ -5,6 +5,7 @@ import (
 )
 
 // TypeSet is a collection of distinct message types.
+// It implements the TypeContainer interface.
 type TypeSet map[Type]struct{}
 
 // NewTypeSet returns a TypeSet containing the given types.

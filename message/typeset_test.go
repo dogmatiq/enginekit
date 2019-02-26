@@ -7,6 +7,8 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+var _ TypeContainer = TypeSet{}
+
 var _ = Describe("type TypeSet", func() {
 	Describe("func NewTypeSet", func() {
 		It("returns a set containing the given types", func() {

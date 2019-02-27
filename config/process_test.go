@@ -56,7 +56,7 @@ var _ = Describe("type ProcessConfig", func() {
 			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
-						map[message.Type]message.Role{
+						message.RoleMap{
 							fixtures.MessageAType: message.EventRole,
 							fixtures.MessageBType: message.EventRole,
 						},
@@ -67,7 +67,7 @@ var _ = Describe("type ProcessConfig", func() {
 			Describe("func ProducedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
-						map[message.Type]message.Role{
+						message.RoleMap{
 							fixtures.MessageCType: message.CommandRole,
 						},
 					))

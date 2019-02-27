@@ -30,8 +30,8 @@ type HandlerConfig interface {
 	HandlerReflectType() reflect.Type
 
 	// ConsumedMessageTypes returns the message types consumed by the handler.
-	ConsumedMessageTypes() map[message.Type]message.Role
+	ConsumedMessageTypes() message.RoleMap
 
 	// ProducedMessageTypes returns the message types produced by the handler.
-	ProducedMessageTypes() map[message.Type]message.Role
+	ProducedMessageTypes() message.RoleMap
 }

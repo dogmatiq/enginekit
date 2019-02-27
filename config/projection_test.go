@@ -55,7 +55,7 @@ var _ = Describe("type ProjectionConfig", func() {
 			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
-						map[message.Type]message.Role{
+						message.RoleMap{
 							fixtures.MessageAType: message.EventRole,
 							fixtures.MessageBType: message.EventRole,
 						},

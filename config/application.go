@@ -20,7 +20,7 @@ type ApplicationConfig struct {
 
 	// Roles is a map of message type to the role it performs within the
 	// application. The map does not include timeout message types.
-	Roles map[message.Type]message.Role
+	Roles message.RoleMap
 
 	// Consumers is a map of message type to the names of the handlers that
 	// consume messages of that type.
@@ -36,7 +36,7 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 	cfg := &ApplicationConfig{
 		Application: app,
 		Handlers:    map[string]HandlerConfig{},
-		Roles:       map[message.Type]message.Role{},
+		Roles:       message.RoleMap{},
 		Consumers:   map[message.Type][]string{},
 		Producers:   map[message.Type][]string{},
 	}
@@ -116,12 +116,12 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 	c.Handlers[n] = cfg
 
 	for t, r := range cfg.ConsumedMessageTypes() {
-		c.Roles[t] = r
+		c.Roles.Add(t, r)
 		c.Consumers[t] = append(c.Consumers[t], cfg.Name())
 	}
 
 	for t, r := range cfg.ProducedMessageTypes() {
-		c.Roles[t] = r
+		c.Roles.Add(t, r)
 		c.Producers[t] = append(c.Producers[t], cfg.Name())
 	}
 }

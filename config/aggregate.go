@@ -17,16 +17,16 @@ type AggregateConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
-	consumed map[message.Type]message.Role
-	produced map[message.Type]message.Role
+	consumed message.RoleMap
+	produced message.RoleMap
 }
 
 // NewAggregateConfig returns an AggregateConfig for the given handler.
 func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, error) {
 	cfg := &AggregateConfig{
 		Handler:  h,
-		consumed: map[message.Type]message.Role{},
-		produced: map[message.Type]message.Role{},
+		consumed: message.RoleMap{},
+		produced: message.RoleMap{},
 	}
 
 	c := &aggregateConfigurer{
@@ -79,12 +79,12 @@ func (c *AggregateConfig) HandlerReflectType() reflect.Type {
 }
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
-func (c *AggregateConfig) ConsumedMessageTypes() map[message.Type]message.Role {
+func (c *AggregateConfig) ConsumedMessageTypes() message.RoleMap {
 	return c.consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
-func (c *AggregateConfig) ProducedMessageTypes() map[message.Type]message.Role {
+func (c *AggregateConfig) ProducedMessageTypes() message.RoleMap {
 	return c.produced
 }
 
@@ -120,29 +120,21 @@ func (c *aggregateConfigurer) Name(n string) {
 }
 
 func (c *aggregateConfigurer) ConsumesCommandType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.consumed[t]; ok {
+	if !c.cfg.consumed.AddM(m, message.CommandRole) {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.ConsumesCommandType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
-
-	c.cfg.consumed[t] = message.CommandRole
 }
 
 func (c *aggregateConfigurer) ProducesEventType(m dogma.Message) {
-	t := message.TypeOf(m)
-
-	if _, ok := c.cfg.produced[t]; ok {
+	if !c.cfg.produced.AddM(m, message.EventRole) {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.ProducesEventType(%T)`,
 			c.cfg.Handler,
 			m,
 		)
 	}
-
-	c.cfg.produced[t] = message.EventRole
 }

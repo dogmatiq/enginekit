@@ -81,7 +81,7 @@ var _ = Describe("type ApplicationConfig", func() {
 
 			It("sets the roles map", func() {
 				Expect(cfg.Roles).To(Equal(
-					map[message.Type]message.Role{
+					message.RoleMap{
 						fixtures.MessageAType: message.CommandRole,
 						fixtures.MessageBType: message.EventRole,
 						fixtures.MessageCType: message.CommandRole,

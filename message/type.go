@@ -7,6 +7,15 @@ import (
 	"github.com/dogmatiq/dogma"
 )
 
+// TypeContainer is an interface for containers of message types.
+type TypeContainer interface {
+	// Has returns true if t is in the container.
+	Has(t Type) bool
+
+	// HasM returns true if TypeOf(m) is in the container.
+	HasM(m dogma.Message) bool
+}
+
 // Type is a value that identifies the type of a message.
 type Type interface {
 	// ReflectType returns the reflect.Type for this message type.

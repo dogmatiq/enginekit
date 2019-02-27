@@ -5,7 +5,7 @@ import (
 )
 
 // RoleMap is a map of message type to role.
-// It implements the TypeContainer interfacer.
+// It implements the TypeContainer interface.
 type RoleMap map[Type]Role
 
 // Has returns true if rm contains t.

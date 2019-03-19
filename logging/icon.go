@@ -91,7 +91,7 @@ const (
 	SeparatorIcon Icon = "●"
 )
 
-// Icon athe type for strings that contain icons.
+// Icon is a unicode symbol used as an icon in log messages.
 type Icon string
 
 func (i Icon) String() string {

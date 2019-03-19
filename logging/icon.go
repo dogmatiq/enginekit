@@ -110,7 +110,7 @@ func (i Icon) WriteTo(w io.Writer) (int64, error) {
 	return int64(n), err
 }
 
-// WithLabel returns a log component that renders the icon with a label.
+// WithLabel return an IconWithLabel containing this icon and the given label.
 func (i Icon) WithLabel(f string, v ...interface{}) IconWithLabel {
 	return IconWithLabel{
 		i,

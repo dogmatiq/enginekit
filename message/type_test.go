@@ -38,11 +38,19 @@ var _ = Describe("type Type", func() {
 	})
 
 	Describe("func String", func() {
-		It("returns the package-qualified type name and the pointer address", func() {
+		It("returns the package-qualified type name", func() {
 			t := TypeOf(fixtures.MessageA1)
 
 			Expect(t.String()).To(Equal(
 				"fixtures.MessageA",
+			))
+		})
+
+		It("returns the package-qualified type name for pointer types", func() {
+			t := TypeOf(&fixtures.MessageA1)
+
+			Expect(t.String()).To(Equal(
+				"*fixtures.MessageA",
 			))
 		})
 

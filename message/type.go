@@ -53,12 +53,17 @@ var mtypes, rtypes sync.Map
 type mtype string
 
 func newmtype(rt reflect.Type) *mtype {
-	var n string
+	var n, p string
+
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+		p += "*"
+	}
 
 	if rt.Name() == "" {
-		n = "<anonymous>"
+		n = "<" + p + "anonymous>"
 	} else {
-		n = rt.String()
+		n = p + rt.String()
 	}
 
 	mt := mtype(n)

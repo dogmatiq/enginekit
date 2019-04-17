@@ -1,5 +1,7 @@
 module github.com/dogmatiq/enginekit
 
+go 1.12
+
 require (
 	github.com/dogmatiq/dogma v0.4.0
 	github.com/dogmatiq/iago v0.4.0

@@ -24,6 +24,7 @@ var _ = Describe("type ProcessConfig", func() {
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ConsumesEventType(fixtures.MessageB{})
 					c.ProducesCommandType(fixtures.MessageC{})
+					c.SchedulesTimeoutType(fixtures.MessageT{})
 				},
 			}
 		})
@@ -59,6 +60,7 @@ var _ = Describe("type ProcessConfig", func() {
 						message.RoleMap{
 							fixtures.MessageAType: message.EventRole,
 							fixtures.MessageBType: message.EventRole,
+							fixtures.MessageTType: message.TimeoutRole,
 						},
 					))
 				})
@@ -69,6 +71,7 @@ var _ = Describe("type ProcessConfig", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
 						message.RoleMap{
 							fixtures.MessageCType: message.CommandRole,
+							fixtures.MessageTType: message.TimeoutRole,
 						},
 					))
 				})
@@ -141,6 +144,16 @@ var _ = Describe("type ProcessConfig", func() {
 				},
 			),
 			Entry(
+				"when the handler configures an event that was previously configured as a timeout",
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.SchedulesTimeoutType(fixtures.MessageA)`,
+				func(c dogma.ProcessConfigurer) {
+					c.Name("<name>")
+					c.SchedulesTimeoutType(fixtures.MessageA{})
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.ProducesCommandType(fixtures.MessageC{})
+				},
+			),
+			Entry(
 				"when the handler does not configure any produced commands",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ProducesCommandType()`,
 				func(c dogma.ProcessConfigurer) {
@@ -155,6 +168,16 @@ var _ = Describe("type ProcessConfig", func() {
 					c.Name("<name>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
+					c.ProducesCommandType(fixtures.MessageC{})
+				},
+			),
+			Entry(
+				"when the handler configures a command that was previously configured as a timeout",
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.SchedulesTimeoutType(fixtures.MessageC)`,
+				func(c dogma.ProcessConfigurer) {
+					c.Name("<name>")
+					c.ConsumesEventType(fixtures.MessageA{})
+					c.SchedulesTimeoutType(fixtures.MessageC{})
 					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),

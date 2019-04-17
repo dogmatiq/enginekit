@@ -36,6 +36,7 @@ var _ = Describe("type ApplicationConfig", func() {
 					c.ConsumesEventType(fixtures.MessageB{})
 					c.ConsumesEventType(fixtures.MessageE{}) // shared with <projection>
 					c.ProducesCommandType(fixtures.MessageC{})
+					c.SchedulesTimeoutType(fixtures.MessageT{})
 				},
 			}
 
@@ -88,6 +89,7 @@ var _ = Describe("type ApplicationConfig", func() {
 						fixtures.MessageDType: message.EventRole,
 						fixtures.MessageEType: message.EventRole,
 						fixtures.MessageFType: message.EventRole,
+						fixtures.MessageTType: message.TimeoutRole,
 					},
 				))
 			})
@@ -100,6 +102,7 @@ var _ = Describe("type ApplicationConfig", func() {
 						fixtures.MessageCType: {"<integration>"},
 						fixtures.MessageDType: {"<projection>"},
 						fixtures.MessageEType: {"<process>", "<projection>"},
+						fixtures.MessageTType: {"<process>"},
 					},
 				))
 			})
@@ -110,6 +113,7 @@ var _ = Describe("type ApplicationConfig", func() {
 						fixtures.MessageCType: {"<process>"},
 						fixtures.MessageEType: {"<aggregate>"},
 						fixtures.MessageFType: {"<integration>"},
+						fixtures.MessageTType: {"<process>"},
 					},
 				))
 			})
@@ -309,6 +313,38 @@ var _ = Describe("type ApplicationConfig", func() {
 					`the "<integration>" handler can not produce fixtures.MessageE events because they are already produced by "<aggregate>"`,
 				),
 			))
+		})
+
+		It("does not return an error when the app contains multiple processes that schedule the same timeout", func() {
+			process1 := &fixtures.ProcessMessageHandler{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Name("<process-1>")
+					c.ConsumesEventType(fixtures.MessageB{})
+					c.ProducesCommandType(fixtures.MessageC{})
+					c.SchedulesTimeoutType(fixtures.MessageT{})
+				},
+			}
+
+			process2 := &fixtures.ProcessMessageHandler{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Name("<process-2>")
+					c.ConsumesEventType(fixtures.MessageB{})
+					c.ProducesCommandType(fixtures.MessageC{})
+					c.SchedulesTimeoutType(fixtures.MessageT{})
+				},
+			}
+
+			app := &fixtures.Application{
+				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+					c.Name("<app>")
+					c.RegisterProcess(process1)
+					c.RegisterProcess(process2)
+				},
+			}
+
+			_, err := NewApplicationConfig(app)
+
+			Expect(err).ShouldNot(HaveOccurred())
 		})
 
 		When("multiple handlers use a single message type in differing roles", func() {

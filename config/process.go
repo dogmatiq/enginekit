@@ -120,21 +120,39 @@ func (c *processConfigurer) Name(n string) {
 }
 
 func (c *processConfigurer) ConsumesEventType(m dogma.Message) {
-	if !c.cfg.consumed.AddM(m, message.EventRole) {
-		panicf(
-			`%T.Configure() has already called ProcessConfigurer.ConsumesEventType(%T)`,
-			c.cfg.Handler,
-			m,
-		)
-	}
+	c.add(c.cfg.consumed, m, message.EventRole)
 }
 
 func (c *processConfigurer) ProducesCommandType(m dogma.Message) {
-	if !c.cfg.produced.AddM(m, message.CommandRole) {
-		panicf(
-			`%T.Configure() has already called ProcessConfigurer.ProducesCommandType(%T)`,
-			c.cfg.Handler,
-			m,
-		)
+	c.add(c.cfg.produced, m, message.CommandRole)
+}
+
+func (c *processConfigurer) SchedulesTimeoutType(m dogma.Message) {
+	c.add(c.cfg.consumed, m, message.TimeoutRole)
+	c.add(c.cfg.produced, m, message.TimeoutRole)
+}
+
+func (c *processConfigurer) add(rm message.RoleMap, m dogma.Message, r message.Role) {
+	mt := message.TypeOf(m)
+
+	if rm.Add(mt, r) {
+		return
 	}
+
+	var f string
+	switch rm[mt] {
+	case message.CommandRole:
+		f = "ProducesCommandType"
+	case message.EventRole:
+		f = "ConsumesEventType"
+	default: //case message.TimeoutRole
+		f = "SchedulesTimeoutType"
+	}
+
+	panicf(
+		`%T.Configure() has already called ProcessConfigurer.%s(%T)`,
+		c.cfg.Handler,
+		f,
+		m,
+	)
 }

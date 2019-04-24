@@ -19,7 +19,7 @@ type ApplicationConfig struct {
 	Handlers map[string]HandlerConfig
 
 	// Roles is a map of message type to the role it performs within the
-	// application. The map does not include timeout message types.
+	// application.
 	Roles message.RoleMap
 
 	// Consumers is a map of message type to the names of the handlers that

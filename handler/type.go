@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -29,15 +31,23 @@ var Types = []Type{
 	ProjectionType,
 }
 
+// Validate returns an error if r is not a valid message role.
+func (t Type) Validate() error {
+	switch t {
+	case AggregateType,
+		ProcessType,
+		IntegrationType,
+		ProjectionType:
+		return nil
+	default:
+		return fmt.Errorf("invalid handler type: %s", t)
+	}
+}
+
 // MustValidate panics if r is not a valid message role.
 func (t Type) MustValidate() {
-	switch t {
-	case AggregateType:
-	case ProcessType:
-	case IntegrationType:
-	case ProjectionType:
-	default:
-		panic("invalid type: " + t)
+	if err := t.Validate(); err != nil {
+		panic(err)
 	}
 }
 

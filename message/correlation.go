@@ -1,5 +1,7 @@
 package message
 
+import "errors"
+
 // Correlation is holds identifiers for a specific message.
 type Correlation struct {
 	// MessageID is a unique identifier for the message.
@@ -20,18 +22,27 @@ func NewCorrelation(id string) Correlation {
 	return Correlation{id, id, id}
 }
 
-// MustValidate panics if c is not a valid correlation.
-func (c Correlation) MustValidate() {
+// Validate returns an error if c is not a valid correlation.
+func (c Correlation) Validate() error {
 	if c.MessageID == "" {
-		panic("message ID is empty")
+		return errors.New("message ID is empty")
 	}
 
 	if c.CausationID == "" {
-		panic("causation ID is empty")
+		return errors.New("causation ID is empty")
 	}
 
 	if c.CorrelationID == "" {
-		panic("correlation ID is empty")
+		return errors.New("correlation ID is empty")
+	}
+
+	return nil
+}
+
+// MustValidate panics if c is not a valid correlation.
+func (c Correlation) MustValidate() {
+	if err := c.Validate(); err != nil {
+		panic(err)
 	}
 }
 

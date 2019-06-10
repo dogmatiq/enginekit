@@ -1,5 +1,7 @@
 package message
 
+import "fmt"
+
 // Direction is an enumeration of the "direction" a message is flowing, relative
 // to a handler.
 type Direction string
@@ -19,13 +21,21 @@ var Directions = []Direction{
 	OutboundDirection,
 }
 
+// Validate returns an error if r is not a valid message direction.
+func (d Direction) Validate() error {
+	switch d {
+	case InboundDirection,
+		OutboundDirection:
+		return nil
+	default:
+		return fmt.Errorf("invalid direction: %s", d)
+	}
+}
+
 // MustValidate panics if r is not a valid message direction.
 func (d Direction) MustValidate() {
-	switch d {
-	case InboundDirection:
-	case OutboundDirection:
-	default:
-		panic("invalid direction: " + d)
+	if err := d.Validate(); err != nil {
+		panic(err)
 	}
 }
 

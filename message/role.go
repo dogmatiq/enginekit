@@ -1,5 +1,7 @@
 package message
 
+import "fmt"
+
 // Role is an enumeration of the roles a message can perform within an engine.
 type Role string
 
@@ -21,14 +23,22 @@ var Roles = []Role{
 	TimeoutRole,
 }
 
+// Validate return an error if r is not a valid message role.
+func (r Role) Validate() error {
+	switch r {
+	case CommandRole,
+		EventRole,
+		TimeoutRole:
+		return nil
+	default:
+		return fmt.Errorf("invalid message role: %s", r)
+	}
+}
+
 // MustValidate panics if r is not a valid message role.
 func (r Role) MustValidate() {
-	switch r {
-	case CommandRole:
-	case EventRole:
-	case TimeoutRole:
-	default:
-		panic("invalid role: " + r)
+	if err := r.Validate(); err != nil {
+		panic(err)
 	}
 }
 

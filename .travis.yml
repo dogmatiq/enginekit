@@ -1,13 +1,11 @@
 language: go
-go:
-- '1.12'
-- 'tip'
-matrix:
-  fast_finish: true
-  allow_failures:
-  - go: 'tip'
+go: '1.12'
 env:
 - GO111MODULE=on
-install: go mod download
+before_install:
+- bash <(curl -s https://dogmatiq.io/makefiles/travis/protobuf)
+install:
+- go mod download
+- go install github.com/golang/protobuf/protoc-gen-go
 script: make ci
 after_success: bash <(curl -s https://codecov.io/bash)

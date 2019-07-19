@@ -1,5 +1,9 @@
 github.com/dogmatiq/dogma v0.4.0 h1:qOlzxJKWVK379IHoPFxAZYIdSi46/fSohfUt9AjwNLc=
 github.com/dogmatiq/dogma v0.4.0/go.mod h1:Im+Z77qgdIza8H5g/rrbrxCkHkJK7hHFs49MAqMHLTc=
+github.com/dogmatiq/dogma v0.4.1-0.20190701042156-be61a90b283d h1:dHihedqaWXeDjmgQFHG6kakxrwhZ4HK3GbdtEe40ros=
+github.com/dogmatiq/dogma v0.4.1-0.20190701042156-be61a90b283d/go.mod h1:Im+Z77qgdIza8H5g/rrbrxCkHkJK7hHFs49MAqMHLTc=
+github.com/dogmatiq/dogma v0.4.1-0.20190705064149-e2531b60d5da h1:OOOj4HcI+vVdsf/rvVbKmKGZ3UBFYlDjkk/aABC0Sg8=
+github.com/dogmatiq/dogma v0.4.1-0.20190705064149-e2531b60d5da/go.mod h1:Im+Z77qgdIza8H5g/rrbrxCkHkJK7hHFs49MAqMHLTc=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=
 github.com/dogmatiq/iago v0.4.0/go.mod h1:fishMWBtzYcjgis6d873VTv9kFm/wHYLOzOyO9ECBDc=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=

@@ -42,7 +42,7 @@ func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, erro
 		return nil, err
 	}
 
-	if c.cfg.HandlerName == "" || c.cfg.HandlerKey == "" {
+	if c.cfg.HandlerName == "" {
 		return nil, errorf(
 			"%T.Configure() did not call AggregateConfigurer.Identity()",
 			h,
@@ -107,8 +107,8 @@ type aggregateConfigurer struct {
 	cfg *AggregateConfig
 }
 
-func (c *aggregateConfigurer) Identity(name, key string) {
-	if c.cfg.HandlerName != "" && c.cfg.HandlerKey != "" {
+func (c *aggregateConfigurer) Identity(n, k string) {
+	if c.cfg.HandlerName != "" {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
@@ -117,24 +117,24 @@ func (c *aggregateConfigurer) Identity(name, key string) {
 		)
 	}
 
-	if !IsValidName(name) {
+	if !IsValidName(n) {
 		panicf(
 			`%T.Configure() called AggregateConfigurer.Identity() with an invalid name %#v`,
 			c.cfg.Handler,
-			name,
+			n,
 		)
 	}
 
-	if !IsValidKey(key) {
+	if !IsValidKey(k) {
 		panicf(
 			`%T.Configure() called AggregateConfigurer.Identity() with an invalid key %#v`,
 			c.cfg.Handler,
-			key,
+			k,
 		)
 	}
 
-	c.cfg.HandlerName = name
-	c.cfg.HandlerKey = key
+	c.cfg.HandlerName = n
+	c.cfg.HandlerKey = k
 }
 
 func (c *aggregateConfigurer) ConsumesCommandType(m dogma.Message) {

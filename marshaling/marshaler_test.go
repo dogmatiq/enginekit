@@ -92,11 +92,11 @@ var _ = Describe("type Marshaler", func() {
 		BeforeEach(func() {
 			app := &fixtures.Application{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-					c.Identity("<application-name>", "<application-key>")
+					c.Identity("<app>", "<app-key>")
 
 					c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
 						ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-							c.Identity("<integration-name>", "<integration-key>")
+							c.Identity("<integration>", "<integration-key>")
 							c.ConsumesCommandType(fixtures.MessageC{})
 							c.ProducesEventType(fixtures.MessageE{})
 						},

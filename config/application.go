@@ -58,7 +58,7 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 		return nil, err
 	}
 
-	if c.cfg.ApplicationName == "" || c.cfg.ApplicationKey == "" {
+	if c.cfg.ApplicationName == "" {
 		return nil, errorf(
 			"%T.Configure() did not call ApplicationConfigurer.Identity()",
 			app,
@@ -185,8 +185,8 @@ type applicationConfigurer struct {
 	cfg *ApplicationConfig
 }
 
-func (c *applicationConfigurer) Identity(name, key string) {
-	if c.cfg.ApplicationName != "" && c.cfg.ApplicationKey != "" {
+func (c *applicationConfigurer) Identity(n, k string) {
+	if c.cfg.ApplicationName != "" {
 		panicf(
 			`%T.Configure() has already called ApplicationConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Application,
@@ -195,24 +195,24 @@ func (c *applicationConfigurer) Identity(name, key string) {
 		)
 	}
 
-	if !IsValidName(name) {
+	if !IsValidName(n) {
 		panicf(
 			`%T.Configure() called ApplicationConfigurer.Identity() with an invalid name %#v`,
 			c.cfg.Application,
-			name,
+			n,
 		)
 	}
 
-	if !IsValidKey(key) {
+	if !IsValidKey(k) {
 		panicf(
 			`%T.Configure() called ApplicationConfigurer.Identity() with an invalid key %#v`,
 			c.cfg.Application,
-			key,
+			k,
 		)
 	}
 
-	c.cfg.ApplicationName = name
-	c.cfg.ApplicationKey = key
+	c.cfg.ApplicationName = n
+	c.cfg.ApplicationKey = k
 }
 
 // RegisterAggregate configures the engine to route messages to h.

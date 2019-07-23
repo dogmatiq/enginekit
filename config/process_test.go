@@ -20,7 +20,7 @@ var _ = Describe("type ProcessConfig", func() {
 		BeforeEach(func() {
 			handler = &fixtures.ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ConsumesEventType(fixtures.MessageB{})
 					c.ProducesCommandType(fixtures.MessageC{})
@@ -39,22 +39,22 @@ var _ = Describe("type ProcessConfig", func() {
 			})
 
 			It("the name is set", func() {
-				Expect(cfg.HandlerName).To(Equal("<process-name>"))
+				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
 			It("the key is set", func() {
-				Expect(cfg.HandlerKey).To(Equal("<process-key>"))
+				Expect(cfg.HandlerKey).To(Equal("<key>"))
 			})
 
 			Describe("func Name()", func() {
 				It("returns the name", func() {
-					Expect(cfg.Name()).To(Equal("<process-name>"))
+					Expect(cfg.Name()).To(Equal("<name>"))
 				})
 			})
 
 			Describe("func Key()", func() {
 				It("returns the key", func() {
-					Expect(cfg.Key()).To(Equal("<process-key>"))
+					Expect(cfg.Key()).To(Equal("<key>"))
 				})
 			})
 
@@ -118,10 +118,10 @@ var _ = Describe("type ProcessConfig", func() {
 			),
 			Entry(
 				"when the handler configures multiple identities",
-				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.Identity("<process-name-1>", "<process-key-1>")`,
+				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.Identity("<name>", "<key>")`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name-1>", "<process-key-1>")
-					c.Identity("<process-name-2>", "<process-key-2>")
+					c.Identity("<name>", "<key>")
+					c.Identity("<other>", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
 				},
@@ -130,7 +130,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler configures an invalid name",
 				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid name "\t \n"`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("\t \n", "<process-key>")
+					c.Identity("\t \n", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
 				},
@@ -139,7 +139,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler configures an invalid key",
 				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid key "\t \n"`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "\t \n")
+					c.Identity("<name>", "\t \n")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
 				},
@@ -148,7 +148,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler does not configure any consumed event types",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ConsumesEventType()`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.ProducesCommandType(fixtures.MessageC{})
 				},
 			),
@@ -156,7 +156,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler configures the same consumed event type multiple times",
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
@@ -166,7 +166,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler configures an event that was previously configured as a timeout",
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.SchedulesTimeoutType(fixtures.MessageA)`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.SchedulesTimeoutType(fixtures.MessageA{})
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
@@ -176,7 +176,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler does not configure any produced commands",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ProducesCommandType()`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
@@ -184,7 +184,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler configures the same produced command type multiple times",
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ProducesCommandType(fixtures.MessageC)`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ProducesCommandType(fixtures.MessageC{})
 					c.ProducesCommandType(fixtures.MessageC{})
@@ -194,7 +194,7 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler configures a command that was previously configured as a timeout",
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.SchedulesTimeoutType(fixtures.MessageC)`,
 				func(c dogma.ProcessConfigurer) {
-					c.Identity("<process-name>", "<process-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.SchedulesTimeoutType(fixtures.MessageC{})
 					c.ProducesCommandType(fixtures.MessageC{})

@@ -20,7 +20,7 @@ var _ = Describe("type AggregateConfig", func() {
 		BeforeEach(func() {
 			handler = &fixtures.AggregateMessageHandler{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name>", "<aggregate-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ConsumesCommandType(fixtures.MessageB{})
 					c.ProducesEventType(fixtures.MessageE{})
@@ -39,13 +39,13 @@ var _ = Describe("type AggregateConfig", func() {
 
 			Describe("func Name()", func() {
 				It("returns the name", func() {
-					Expect(cfg.Name()).To(Equal("<aggregate-name>"))
+					Expect(cfg.Name()).To(Equal("<name>"))
 				})
 			})
 
 			Describe("func Key()", func() {
 				It("returns the key", func() {
-					Expect(cfg.Key()).To(Equal("<aggregate-key>"))
+					Expect(cfg.Key()).To(Equal("<key>"))
 				})
 			})
 
@@ -107,10 +107,10 @@ var _ = Describe("type AggregateConfig", func() {
 			),
 			Entry(
 				"when the handler configures multiple identities",
-				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.Identity("<aggregate-name-1>", "<aggregate-key-1>")`,
+				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.Identity("<name>", "<key>")`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name-1>", "<aggregate-key-1>")
-					c.Identity("<aggregate-name-2>", "<aggregate-key-2>")
+					c.Identity("<name>", "<key>")
+					c.Identity("<other>", "<key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 				},
@@ -119,7 +119,7 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler configures an invalid name",
 				`*fixtures.AggregateMessageHandler.Configure() called AggregateConfigurer.Identity() with an invalid name "\t \n"`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("\t \n", "<aggregate-key>")
+					c.Identity("\t \n", "<key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 				},
@@ -128,7 +128,7 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler configures an invalid key",
 				`*fixtures.AggregateMessageHandler.Configure() called AggregateConfigurer.Identity() with an invalid key "\t \n"`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name>", "\t \n")
+					c.Identity("<name>", "\t \n")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 				},
@@ -137,7 +137,7 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler does not configure any consumed command types",
 				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.ConsumesCommandType()`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name>", "<aggregate-key>")
+					c.Identity("<name>", "<key>")
 					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
@@ -145,7 +145,7 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler configures the same consumed command type multiple times",
 				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name>", "<aggregate-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
@@ -155,7 +155,7 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler does not configure any produced events",
 				`*fixtures.AggregateMessageHandler.Configure() did not call AggregateConfigurer.ProducesEventType()`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name>", "<aggregate-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 				},
 			),
@@ -163,7 +163,7 @@ var _ = Describe("type AggregateConfig", func() {
 				"when the handler configures the same produced event type multiple times",
 				`*fixtures.AggregateMessageHandler.Configure() has already called AggregateConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.AggregateConfigurer) {
-					c.Identity("<aggregate-name>", "<aggregate-key>")
+					c.Identity("<name>", "<key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 					c.ProducesEventType(fixtures.MessageE{})

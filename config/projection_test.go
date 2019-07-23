@@ -36,22 +36,22 @@ var _ = Describe("type ProjectionConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("the name is set", func() {
+			It("the handler name is set", func() {
 				Expect(cfg.HandlerName).To(Equal("<name>"))
 			})
 
-			It("the key is set", func() {
+			It("the handler key is set", func() {
 				Expect(cfg.HandlerKey).To(Equal("<key>"))
 			})
 
 			Describe("func Name()", func() {
-				It("returns the name", func() {
+				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
 				})
 			})
 
 			Describe("func Key()", func() {
-				It("returns the key", func() {
+				It("returns the handler key", func() {
 					Expect(cfg.Key()).To(Equal("<key>"))
 				})
 			})

@@ -38,13 +38,13 @@ var _ = Describe("type AggregateConfig", func() {
 			})
 
 			Describe("func Name()", func() {
-				It("returns the name", func() {
+				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))
 				})
 			})
 
 			Describe("func Key()", func() {
-				It("returns the key", func() {
+				It("returns the handler key", func() {
 					Expect(cfg.Key()).To(Equal("<key>"))
 				})
 			})

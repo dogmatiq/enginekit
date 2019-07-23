@@ -20,7 +20,7 @@ var _ = Describe("type IntegrationConfig", func() {
 		BeforeEach(func() {
 			handler = &fixtures.IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-					c.Name("<name>")
+					c.Identity("<integration-name>", "<integration-key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ConsumesCommandType(fixtures.MessageB{})
 					c.ProducesEventType(fixtures.MessageE{})
@@ -38,8 +38,14 @@ var _ = Describe("type IntegrationConfig", func() {
 			})
 
 			Describe("func Name()", func() {
-				It("returns the handler name", func() {
-					Expect(cfg.Name()).To(Equal("<name>"))
+				It("returns the name", func() {
+					Expect(cfg.Name()).To(Equal("<integration-name>"))
+				})
+			})
+
+			Describe("func Key()", func() {
+				It("returns the key", func() {
+					Expect(cfg.Key()).To(Equal("<integration-key>"))
 				})
 			})
 
@@ -73,7 +79,7 @@ var _ = Describe("type IntegrationConfig", func() {
 			When("the handler does not configure any produced events", func() {
 				BeforeEach(func() {
 					handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
-						c.Name("<name>")
+						c.Identity("<integration-name>", "<integration-key>")
 						c.ConsumesCommandType(fixtures.MessageA{})
 					}
 				})
@@ -106,28 +112,37 @@ var _ = Describe("type IntegrationConfig", func() {
 				nil,
 			),
 			Entry(
-				"when the handler does not configure a name",
-				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.Name()`,
+				"when the handler does not configure an identity",
+				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.Identity()`,
 				func(c dogma.IntegrationConfigurer) {
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
-				"when the handler configures multiple names",
-				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.Name("<name>")`,
+				"when the handler configures multiple identities",
+				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.Identity("<integration-name-1>", "<integration-key-1>")`,
 				func(c dogma.IntegrationConfigurer) {
-					c.Name("<name>")
-					c.Name("<other>")
+					c.Identity("<integration-name-1>", "<integration-key-1>")
+					c.Identity("<integration-name-2>", "<integration-key-2>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
 			Entry(
 				"when the handler configures an invalid name",
-				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Name("\t \n") with an invalid name`,
+				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Identity() with an invalid name "\t \n"`,
 				func(c dogma.IntegrationConfigurer) {
-					c.Name("\t \n")
+					c.Identity("\t \n", "<integration-key>")
+					c.ConsumesCommandType(fixtures.MessageA{})
+					c.ProducesEventType(fixtures.MessageE{})
+				},
+			),
+			Entry(
+				"when the handler configures an invalid key",
+				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Identity() with an invalid key "\t \n"`,
+				func(c dogma.IntegrationConfigurer) {
+					c.Identity("<integration-name>", "\t \n")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 				},
@@ -136,7 +151,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				"when the handler does not configure any consumed command types",
 				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.ConsumesCommandType()`,
 				func(c dogma.IntegrationConfigurer) {
-					c.Name("<name>")
+					c.Identity("<integration-name>", "<integration-key>")
 					c.ProducesEventType(fixtures.MessageE{})
 				},
 			),
@@ -144,7 +159,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				"when the handler configures the same consumed command type multiple times",
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.IntegrationConfigurer) {
-					c.Name("<name>")
+					c.Identity("<integration-name>", "<integration-key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
@@ -154,7 +169,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				"when the handler configures the same produced event type multiple times",
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.IntegrationConfigurer) {
-					c.Name("<name>")
+					c.Identity("<integration-name>", "<integration-key>")
 					c.ConsumesCommandType(fixtures.MessageA{})
 					c.ProducesEventType(fixtures.MessageE{})
 					c.ProducesEventType(fixtures.MessageE{})

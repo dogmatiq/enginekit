@@ -19,3 +19,11 @@ func IsValidName(n string) bool {
 
 	return true
 }
+
+// IsValidKey returns true if n is a valid application or handler key.
+//
+// A valid key is a non-empty string consisting of Unicode printable characters,
+// except whitespace.
+func IsValidKey(k string) bool {
+	return IsValidName(k)
+}

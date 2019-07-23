@@ -20,7 +20,7 @@ var _ = Describe("type ProjectionConfig", func() {
 		BeforeEach(func() {
 			handler = &fixtures.ProjectionMessageHandler{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
-					c.Name("<name>")
+					c.Identity("<projection-name>", "<projection-key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ConsumesEventType(fixtures.MessageB{})
 				},
@@ -36,13 +36,23 @@ var _ = Describe("type ProjectionConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("the handler name is set", func() {
-				Expect(cfg.HandlerName).To(Equal("<name>"))
+			It("the name is set", func() {
+				Expect(cfg.HandlerName).To(Equal("<projection-name>"))
+			})
+
+			It("the key is set", func() {
+				Expect(cfg.HandlerKey).To(Equal("<projection-key>"))
 			})
 
 			Describe("func Name()", func() {
-				It("returns the handler name", func() {
-					Expect(cfg.Name()).To(Equal("<name>"))
+				It("returns the name", func() {
+					Expect(cfg.Name()).To(Equal("<projection-name>"))
+				})
+			})
+
+			Describe("func Key()", func() {
+				It("returns the key", func() {
+					Expect(cfg.Key()).To(Equal("<projection-key>"))
 				})
 			})
 
@@ -91,26 +101,34 @@ var _ = Describe("type ProjectionConfig", func() {
 				nil,
 			),
 			Entry(
-				"when the handler does not configure a name",
-				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.Name()`,
+				"when the handler does not configure an identity",
+				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.Identity()`,
 				func(c dogma.ProjectionConfigurer) {
 					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 			Entry(
-				"when the handler configures multiple names",
-				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.Name("<name>")`,
+				"when the handler configures multiple identities",
+				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.Identity("<projection-name-1>", "<projection-key-1>")`,
 				func(c dogma.ProjectionConfigurer) {
-					c.Name("<name>")
-					c.Name("<other>")
+					c.Identity("<projection-name-1>", "<projection-key-1>")
+					c.Identity("<projection-name-2>", "<projection-key-2>")
 					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
 			Entry(
 				"when the handler configures an invalid name",
-				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Name("\t \n") with an invalid name`,
+				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Identity() with an invalid name "\t \n"`,
 				func(c dogma.ProjectionConfigurer) {
-					c.Name("\t \n")
+					c.Identity("\t \n", "<projection-key>")
+					c.ConsumesEventType(fixtures.MessageA{})
+				},
+			),
+			Entry(
+				"when the handler configures an invalid key",
+				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Identity() with an invalid key "\t \n"`,
+				func(c dogma.ProjectionConfigurer) {
+					c.Identity("<projection-name>", "\t \n")
 					c.ConsumesEventType(fixtures.MessageA{})
 				},
 			),
@@ -118,14 +136,14 @@ var _ = Describe("type ProjectionConfig", func() {
 				"when the handler does not configure any consumed event types",
 				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.ConsumesEventType()`,
 				func(c dogma.ProjectionConfigurer) {
-					c.Name("<name>")
+					c.Identity("<projection-name>", "<projection-key>")
 				},
 			),
 			Entry(
 				"when the handler configures the same consumed event type multiple times",
 				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProjectionConfigurer) {
-					c.Name("<name>")
+					c.Identity("<projection-name>", "<projection-key>")
 					c.ConsumesEventType(fixtures.MessageA{})
 					c.ConsumesEventType(fixtures.MessageA{})
 				},

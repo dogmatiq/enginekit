@@ -17,6 +17,9 @@ type IntegrationConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
+	// HandlerKey is the handler's key, as specified by its Configure() method.
+	HandlerKey string
+
 	consumed message.RoleMap
 	produced message.RoleMap
 }
@@ -41,7 +44,7 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 
 	if c.cfg.HandlerName == "" {
 		return nil, errorf(
-			"%T.Configure() did not call IntegrationConfigurer.Name()",
+			"%T.Configure() did not call IntegrationConfigurer.Identity()",
 			h,
 		)
 	}
@@ -59,6 +62,11 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 // Name returns the integration name.
 func (c *IntegrationConfig) Name() string {
 	return c.HandlerName
+}
+
+// Key returns the integration key.
+func (c *IntegrationConfig) Key() string {
+	return c.HandlerKey
 }
 
 // HandlerType returns handler.IntegrationType.
@@ -92,24 +100,34 @@ type integrationConfigurer struct {
 	cfg *IntegrationConfig
 }
 
-func (c *integrationConfigurer) Name(n string) {
+func (c *integrationConfigurer) Identity(n, k string) {
 	if c.cfg.HandlerName != "" {
 		panicf(
-			`%T.Configure() has already called IntegrationConfigurer.Name(%#v)`,
+			`%T.Configure() has already called IntegrationConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
 			c.cfg.HandlerName,
+			c.cfg.HandlerKey,
 		)
 	}
 
 	if !IsValidName(n) {
 		panicf(
-			`%T.Configure() called IntegrationConfigurer.Name(%#v) with an invalid name`,
+			`%T.Configure() called IntegrationConfigurer.Identity() with an invalid name %#v`,
 			c.cfg.Handler,
 			n,
 		)
 	}
 
+	if !IsValidKey(k) {
+		panicf(
+			`%T.Configure() called IntegrationConfigurer.Identity() with an invalid key %#v`,
+			c.cfg.Handler,
+			k,
+		)
+	}
+
 	c.cfg.HandlerName = n
+	c.cfg.HandlerKey = k
 }
 
 func (c *integrationConfigurer) ConsumesCommandType(m dogma.Message) {

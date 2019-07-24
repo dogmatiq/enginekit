@@ -14,6 +14,10 @@ type Config interface {
 	// For example, the application or handler name.
 	Name() string
 
+	// Key returns the key of the configured item.
+	// For example, the application or handler unique key.
+	Key() string
+
 	// Accept calls the appropriate method on v for this configuration type.
 	Accept(ctx context.Context, v Visitor) error
 }

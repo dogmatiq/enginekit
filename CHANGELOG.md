@@ -9,13 +9,31 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [0.5.2]
+## [Unreleased]
+
+### Added
+
+- Add `config.ApplicationConfig.ApplicationKey`
+- Add `config.ApplicationConfig.HandlersByName`
+- Add `config.Aggregate.HandlerKey`
+- Add `config.Process.HandlerKey`
+- Add `config.Projection.HandlerKey`
+- Add `config.Integration.HandlerKey`
+
+### Changed
+
+- **[BC]** Replace configurer `Name()` methods with `Identity()`
+- **[BC]** Rename `config.ApplicationConfig.Handlers` to `HandlersByName`
+- **[BC]** `config.ApplicationConfig.Consumers` now maps to handler configs instead of names
+- **[BC]** `config.ApplicationConfig.Producers` now maps to handler configs instead of names
+
+## [0.5.2] - 2019-06-17
 
 ### Added
 
 - Add `marshaling` package, which marshals messages and state in various formats
 
-## [0.5.1]
+## [0.5.1] - 2019-06-10
 
 ### Added
 
@@ -24,7 +42,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Add `message.Direction.Validate()`
 - Add `message.Role.Validate()`
 
-## [0.5.0]
+## [0.5.0] - 2019-04-17
 
 ### Added
 

@@ -17,6 +17,9 @@ type ProcessConfig struct {
 	// HandlerName is the handler's name, as specified by its Configure() method.
 	HandlerName string
 
+	// HandlerKey is the handler's key, as specified by its Configure() method.
+	HandlerKey string
+
 	consumed message.RoleMap
 	produced message.RoleMap
 }
@@ -41,7 +44,7 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 
 	if c.cfg.HandlerName == "" {
 		return nil, errorf(
-			"%T.Configure() did not call ProcessConfigurer.Name()",
+			"%T.Configure() did not call ProcessConfigurer.Identity()",
 			h,
 		)
 	}
@@ -66,6 +69,11 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 // Name returns the process name.
 func (c *ProcessConfig) Name() string {
 	return c.HandlerName
+}
+
+// Key returns the process key.
+func (c *ProcessConfig) Key() string {
+	return c.HandlerKey
 }
 
 // HandlerType returns handler.ProcessType.
@@ -99,24 +107,34 @@ type processConfigurer struct {
 	cfg *ProcessConfig
 }
 
-func (c *processConfigurer) Name(n string) {
+func (c *processConfigurer) Identity(n, k string) {
 	if c.cfg.HandlerName != "" {
 		panicf(
-			`%T.Configure() has already called ProcessConfigurer.Name(%#v)`,
+			`%T.Configure() has already called ProcessConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
 			c.cfg.HandlerName,
+			c.cfg.HandlerKey,
 		)
 	}
 
 	if !IsValidName(n) {
 		panicf(
-			`%T.Configure() called ProcessConfigurer.Name(%#v) with an invalid name`,
+			`%T.Configure() called ProcessConfigurer.Identity() with an invalid name %#v`,
 			c.cfg.Handler,
 			n,
 		)
 	}
 
+	if !IsValidKey(k) {
+		panicf(
+			`%T.Configure() called ProcessConfigurer.Identity() with an invalid key %#v`,
+			c.cfg.Handler,
+			k,
+		)
+	}
+
 	c.cfg.HandlerName = n
+	c.cfg.HandlerKey = k
 }
 
 func (c *processConfigurer) ConsumesEventType(m dogma.Message) {

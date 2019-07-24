@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"context"
+	"time"
 
 	"github.com/dogmatiq/dogma"
 )
@@ -10,6 +11,7 @@ import (
 type IntegrationMessageHandler struct {
 	ConfigureFunc     func(dogma.IntegrationConfigurer)
 	HandleCommandFunc func(context.Context, dogma.IntegrationCommandScope, dogma.Message) error
+	TimeoutHintFunc   func(m dogma.Message) time.Duration
 }
 
 var _ dogma.IntegrationMessageHandler = &IntegrationMessageHandler{}
@@ -47,4 +49,16 @@ func (h *IntegrationMessageHandler) HandleCommand(
 	}
 
 	return nil
+}
+
+// TimeoutHint returns a duration that is suitable for computing a deadline
+// for the handling of the given message by this handler.
+//
+// If h.TimeoutHintFunc is non-nil it calls h.TimeoutHintFunc(m).
+func (h *IntegrationMessageHandler) TimeoutHint(m dogma.Message) time.Duration {
+	if h.TimeoutHintFunc != nil {
+		return h.TimeoutHintFunc(m)
+	}
+
+	return 0
 }

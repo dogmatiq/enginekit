@@ -38,14 +38,6 @@ var _ = Describe("type ProcessConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("the handler name is set", func() {
-				Expect(cfg.HandlerName).To(Equal("<name>"))
-			})
-
-			It("the handler key is set", func() {
-				Expect(cfg.HandlerKey).To(Equal("<key>"))
-			})
-
 			Describe("func Name()", func() {
 				It("returns the handler name", func() {
 					Expect(cfg.Name()).To(Equal("<name>"))

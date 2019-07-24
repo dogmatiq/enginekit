@@ -76,14 +76,6 @@ var _ = Describe("type ApplicationConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			It("sets the app name", func() {
-				Expect(cfg.ApplicationName).To(Equal("<app>"))
-			})
-
-			It("sets the app key", func() {
-				Expect(cfg.ApplicationKey).To(Equal("<app-key>"))
-			})
-
 			It("sets the roles map", func() {
 				Expect(cfg.Roles).To(Equal(
 					message.RoleMap{

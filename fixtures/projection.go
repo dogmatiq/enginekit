@@ -63,7 +63,7 @@ func (h *ProjectionMessageHandler) Recover(ctx context.Context, k []byte) (v []b
 		return h.RecoverFunc(ctx, k)
 	}
 
-	return nil, true, nil
+	return nil, false, nil
 }
 
 // Discard informs the projection that a specific key/value association is

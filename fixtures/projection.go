@@ -9,11 +9,11 @@ import (
 
 // ProjectionMessageHandler is a test implementation of dogma.ProjectionMessageHandler.
 type ProjectionMessageHandler struct {
-	ConfigureFunc   func(dogma.ProjectionConfigurer)
-	HandleEventFunc func(context.Context, dogma.ProjectionEventScope, dogma.Message, []byte, []byte) error
-	RecoverFunc     func(context.Context, []byte) (v []byte, ok bool, err error)
-	DiscardFunc     func(context.Context, []byte) error
-	TimeoutHintFunc func(m dogma.Message) time.Duration
+	ConfigureFunc       func(dogma.ProjectionConfigurer)
+	HandleEventFunc     func(context.Context, []byte, []byte, []byte, dogma.ProjectionEventScope, dogma.Message) (bool, error)
+	ResourceVersionFunc func(context.Context, []byte) ([]byte, error)
+	CloseResourceFunc   func(context.Context, []byte) error
+	TimeoutHintFunc     func(m dogma.Message) time.Duration
 }
 
 var _ dogma.ProjectionMessageHandler = &ProjectionMessageHandler{}
@@ -34,45 +34,43 @@ func (h *ProjectionMessageHandler) Configure(c dogma.ProjectionConfigurer) {
 // HandleEvent handles a domain event message that has been routed to this
 // handler.
 //
-// s provides access to the operations available within the scope of handling
-// m.
+// s provides access to the operations available within the scope of handling m.
 //
 // It panics with the UnexpectedMessage value if m is not one of the event
 // types that is routed to this handler via Configure().
 //
-// If h.HandleEventFunc is non-nil it calls h.HandleEventFunc(ctx, s, m, k, v).
+// If h.HandleEventFunc is non-nil it calls h.HandleEventFunc(ctx, r,c,n, s, m).
 func (h *ProjectionMessageHandler) HandleEvent(
 	ctx context.Context,
+	r, c, n []byte,
 	s dogma.ProjectionEventScope,
 	m dogma.Message,
-	k, v []byte,
-) error {
+) (bool, error) {
 	if h.HandleEventFunc != nil {
-		return h.HandleEventFunc(ctx, s, m, k, v)
+		return h.HandleEventFunc(ctx, r, c, n, s, m)
 	}
 
-	return nil
+	return true, nil
 }
 
-// Recover returns the value component of a key/value association persisted
-// by a call to HandleEvent().
+// ResourceVersion returns the version of the resource r.
 //
-// If h.RecoverFunc is non-nil it calls h.RecoverFunc(ctx, k).
-func (h *ProjectionMessageHandler) Recover(ctx context.Context, k []byte) (v []byte, ok bool, err error) {
-	if h.RecoverFunc != nil {
-		return h.RecoverFunc(ctx, k)
+// If h.ResourceVersionFunc is non-nil it calls h.ResourceVersionFunc(ctx, k).
+func (h *ProjectionMessageHandler) ResourceVersion(ctx context.Context, k []byte) ([]byte, error) {
+	if h.ResourceVersionFunc != nil {
+		return h.ResourceVersionFunc(ctx, k)
 	}
 
-	return nil, false, nil
+	return nil, nil
 }
 
-// Discard informs the projection that a specific key/value association is
-// no longer required.
+// CloseResource informs the projection that the resource r will not be used in
+// any future calls to HandleEvent().
 //
-// If h.DiscardFunc is non-nil it calls h.DiscardFunc(ctx, k).
-func (h *ProjectionMessageHandler) Discard(ctx context.Context, k []byte) error {
-	if h.DiscardFunc != nil {
-		return h.DiscardFunc(ctx, k)
+// If h.CloseResourceFunc is non-nil it calls h.CloseResourceFunc(ctx, k).
+func (h *ProjectionMessageHandler) CloseResource(ctx context.Context, k []byte) error {
+	if h.CloseResourceFunc != nil {
+		return h.CloseResourceFunc(ctx, k)
 	}
 
 	return nil

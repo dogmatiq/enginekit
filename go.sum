@@ -1,5 +1,5 @@
-github.com/dogmatiq/dogma v0.5.0 h1:r10zegvuYFyryIpG/uyg58r7oSK1eMM6xyxpjc2hfBI=
-github.com/dogmatiq/dogma v0.5.0/go.mod h1:Im+Z77qgdIza8H5g/rrbrxCkHkJK7hHFs49MAqMHLTc=
+github.com/dogmatiq/dogma v0.5.1-0.20190731043527-c095dceafd38 h1:z8LWiCKcoIs7zMEDedOx6EF1ha3QVLFBHiN5Yd27wMI=
+github.com/dogmatiq/dogma v0.5.1-0.20190731043527-c095dceafd38/go.mod h1:Im+Z77qgdIza8H5g/rrbrxCkHkJK7hHFs49MAqMHLTc=
 github.com/dogmatiq/iago v0.4.0 h1:57nZqVT34IZxtCZEW/RFif7DNUEjMXgevfr/Mmd0N8I=
 github.com/dogmatiq/iago v0.4.0/go.mod h1:fishMWBtzYcjgis6d873VTv9kFm/wHYLOzOyO9ECBDc=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=

@@ -1,6 +1,6 @@
 # Dogma Engine Development Kit
 
-[![Build Status](http://img.shields.io/travis/com/dogmatiq/enginekit/master.svg)](https://travis-ci.com/dogmatiq/enginekit)
+[![Build Status](https://github.com/dogmatiq/enginekit/workflows/CI/badge.svg)](https://github.com/dogmatiq/enginekit/actions?workflow=CI)
 [![Code Coverage](https://img.shields.io/codecov/c/github/dogmatiq/enginekit/master.svg)](https://codecov.io/github/dogmatiq/enginekit)
 [![Latest Version](https://img.shields.io/github/tag/dogmatiq/enginekit.svg?label=semver)](https://semver.org)
 [![GoDoc](https://godoc.org/github.com/dogmatiq/enginekit?status.svg)](https://godoc.org/github.com/dogmatiq/enginekit)

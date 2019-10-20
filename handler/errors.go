@@ -6,6 +6,7 @@ import "fmt"
 // attempted to route a message to an instance with an empty ID.
 type EmptyInstanceIDError struct {
 	HandlerName string
+	HandlerKey  string
 	HandlerType Type
 }
 
@@ -21,6 +22,7 @@ func (e EmptyInstanceIDError) Error() string {
 // returned a nil "root" value from its New() method.
 type NilRootError struct {
 	HandlerName string
+	HandlerKey  string
 	HandlerType Type
 }
 
@@ -36,6 +38,7 @@ func (e NilRootError) Error() string {
 // or destroyed without recording an event.
 type EventNotRecordedError struct {
 	HandlerName  string
+	HandlerKey   string
 	InstanceID   string
 	WasDestroyed bool
 }

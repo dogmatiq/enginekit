@@ -2,6 +2,7 @@ package message_test
 
 import (
 	"github.com/dogmatiq/enginekit/fixtures"
+	"github.com/dogmatiq/enginekit/message"
 	. "github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -181,6 +182,37 @@ var _ = Describe("type TypeSet", func() {
 			Expect(
 				s.RemoveM(fixtures.MessageA1),
 			).To(BeFalse())
+		})
+	})
+
+	Describe("func Each()", func() {
+		s := NewTypeSet(
+			fixtures.MessageAType,
+			fixtures.MessageBType,
+		)
+
+		It("calls fn for each type in the container", func() {
+			var types []message.Type
+
+			all := s.Each(func(t message.Type) bool {
+				types = append(types, t)
+				return true
+			})
+
+			Expect(types).To(ConsistOf(fixtures.MessageAType, fixtures.MessageBType))
+			Expect(all).To(BeTrue())
+		})
+
+		It("stops iterating if fn returns false", func() {
+			count := 0
+
+			all := s.Each(func(t message.Type) bool {
+				count++
+				return false
+			})
+
+			Expect(count).To(BeNumerically("==", 1))
+			Expect(all).To(BeFalse())
 		})
 	})
 })

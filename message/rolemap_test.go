@@ -2,6 +2,7 @@ package message_test
 
 import (
 	"github.com/dogmatiq/enginekit/fixtures"
+	"github.com/dogmatiq/enginekit/message"
 	. "github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -163,6 +164,37 @@ var _ = Describe("type RoleMap", func() {
 			Expect(
 				rm.RemoveM(fixtures.MessageA1),
 			).To(BeFalse())
+		})
+	})
+
+	Describe("func Each()", func() {
+		rm := RoleMap{
+			fixtures.MessageAType: CommandRole,
+			fixtures.MessageBType: EventRole,
+		}
+
+		It("calls fn for each type in the container", func() {
+			var types []message.Type
+
+			all := rm.Each(func(t message.Type) bool {
+				types = append(types, t)
+				return true
+			})
+
+			Expect(types).To(ConsistOf(fixtures.MessageAType, fixtures.MessageBType))
+			Expect(all).To(BeTrue())
+		})
+
+		It("stops iterating if fn returns false", func() {
+			count := 0
+
+			all := rm.Each(func(t message.Type) bool {
+				count++
+				return false
+			})
+
+			Expect(count).To(BeNumerically("==", 1))
+			Expect(all).To(BeFalse())
 		})
 	})
 })

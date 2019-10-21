@@ -46,9 +46,10 @@ var _ = Describe("type EventNotRecordedError", func() {
 			It("returns a meaningful error description", func() {
 				err := EventNotRecordedError{
 					HandlerName:  "<name>",
-					InstanceID:   "<instance>",
+					HandlerKey:   "<key>",
 					WasDestroyed: false,
 					Message:      fixtures.MessageA1,
+					InstanceID:   "<instance>",
 				}
 
 				Expect(err.Error()).To(Equal(
@@ -61,15 +62,34 @@ var _ = Describe("type EventNotRecordedError", func() {
 			It("returns a meaningful error description", func() {
 				err := EventNotRecordedError{
 					HandlerName:  "<name>",
-					InstanceID:   "<instance>",
+					HandlerKey:   "<key>",
 					WasDestroyed: true,
 					Message:      fixtures.MessageA1,
+					InstanceID:   "<instance>",
 				}
 
 				Expect(err.Error()).To(Equal(
 					"the '<name>' aggregate message handler destroyed the '<instance>' instance without recording an event while handling a fixtures.MessageA command",
 				))
 			})
+		})
+	})
+})
+
+var _ = Describe("type UnexpectedMessageError", func() {
+	Describe("func Error", func() {
+		It("returns a meaningful error description", func() {
+			err := UnexpectedMessageError{
+				HandlerName: "<name>",
+				HandlerKey:  "<key>",
+				HandlerType: AggregateType,
+				Message:     fixtures.MessageA1,
+				InstanceID:  "<instance>",
+			}
+
+			Expect(err.Error()).To(Equal(
+				"the '<name>' aggregate message handler does not expect fixtures.MessageA messages",
+			))
 		})
 	})
 })

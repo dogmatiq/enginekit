@@ -10,10 +10,17 @@ import (
 // EmptyInstanceIDError indicates that an aggregate or process message handler has
 // attempted to route a message to an instance with an empty ID.
 type EmptyInstanceIDError struct {
+	// HandleName is the name of the handler that caused the rror.
 	HandlerName string
-	HandlerKey  string
+
+	// HandlerKey is the immutable key of the handler that caused the error.
+	HandlerKey string
+
+	// HandlerType is the type of handler that caused the error.
 	HandlerType Type
-	Message     dogma.Message
+
+	// Message is the message that was being handled when the error occurred.
+	Message dogma.Message
 }
 
 func (e EmptyInstanceIDError) Error() string {
@@ -28,8 +35,13 @@ func (e EmptyInstanceIDError) Error() string {
 // NilRootError indicates that an aggregate or process message handler has
 // returned a nil "root" value from its New() method.
 type NilRootError struct {
+	// HandleName is the name of the handler that caused the rror.
 	HandlerName string
-	HandlerKey  string
+
+	// HandlerKey is the immutable key of the handler that caused the error.
+	HandlerKey string
+
+	// HandlerType is the type of handler that caused the error.
 	HandlerType Type
 }
 
@@ -44,11 +56,21 @@ func (e NilRootError) Error() string {
 // EventNotRecordedError indicates that an aggregate instance was created
 // or destroyed without recording an event.
 type EventNotRecordedError struct {
-	HandlerName  string
-	HandlerKey   string
-	InstanceID   string
+	// HandleName is the name of the handler that caused the rror.
+	HandlerName string
+
+	// HandlerKey is the immutable key of the handler that caused the error.
+	HandlerKey string
+
+	// WasDestroyed is true if the error occurred as a result of the description
+	// of an aggregate, as opposed to creation.
 	WasDestroyed bool
-	Message      dogma.Message
+
+	// Message is the message that was being handled when the error occurred.
+	Message dogma.Message
+
+	// InstanceID is the aggregate instance ID that the message was routed to.
+	InstanceID string
 }
 
 func (e EventNotRecordedError) Error() string {
@@ -63,6 +85,41 @@ func (e EventNotRecordedError) Error() string {
 		e.HandlerName,
 		s,
 		e.InstanceID,
+		message.TypeOf(e.Message),
+	)
+}
+
+// UnexpectedMessageError indicates that a message handler has panicked with a
+// dogma.UnexpectedMessage value.
+type UnexpectedMessageError struct {
+	// HandleName is the name of the handler that caused the rror.
+	HandlerName string
+
+	// HandlerKey is the immutable key of the handler that caused the error.
+	HandlerKey string
+
+	// HandlerType is the type of handler that caused the error.
+	HandlerType Type
+
+	// Message is the message that was being handled when the error occurred.
+	Message dogma.Message
+
+	// InstanceID is the aggregate instance ID that the message was routed to.
+	// It is empty if HandleType is not AggregateType or ProcessType, or
+	// otherwise if the error occurred outside the context of any specific
+	// instance.
+	InstanceID string
+
+	// StackTrace is the result of debug.Stack(), captured while recovering from
+	// the panic.
+	StackTrace []byte
+}
+
+func (e UnexpectedMessageError) Error() string {
+	return fmt.Sprintf(
+		"the '%s' %s message handler does not expect %s messages",
+		e.HandlerName,
+		e.HandlerType,
 		message.TypeOf(e.Message),
 	)
 }

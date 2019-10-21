@@ -7,9 +7,6 @@ import (
 	"github.com/dogmatiq/dogma"
 )
 
-// messageType is the reflect.Type for the dogma.Message interface.
-var messageType = reflect.TypeOf((*dogma.Message)(nil)).Elem()
-
 // TypeContainer is an interface for containers of message types.
 type TypeContainer interface {
 	// Has returns true if t is in the container.

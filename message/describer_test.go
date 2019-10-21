@@ -6,38 +6,38 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type messageStringerMessage struct{}
+type describer struct{}
 
-func (messageStringerMessage) MessageString() string {
-	return "<string>"
+func (describer) MessageDescription() string {
+	return "<description>"
 }
 
-func (messageStringerMessage) String() string {
+func (describer) String() string {
 	panic("unexpected call")
 }
 
-type fmtStringerMessage struct{}
+type stringer struct{}
 
-func (fmtStringerMessage) String() string {
+func (stringer) String() string {
 	return "<string>"
 }
 
-type nonStringerMessage struct {
+type indescribable struct {
 	Value int
 }
 
-var _ = Describe("func ToString", func() {
+var _ = Describe("func Description()", func() {
 	It("returns the result of MessageString() if the message implements message.Stringer", func() {
 		Expect(
-			ToString(messageStringerMessage{}),
+			Description(describer{}),
 		).To(Equal(
-			"<string>",
+			"<description>",
 		))
 	})
 
 	It("returns the result of String() if the message implements fmt.Stringer", func() {
 		Expect(
-			ToString(fmtStringerMessage{}),
+			Description(stringer{}),
 		).To(Equal(
 			"<string>",
 		))
@@ -45,7 +45,7 @@ var _ = Describe("func ToString", func() {
 
 	It("returns the standard Go representation if the message implements does not implement a Stringer interface", func() {
 		Expect(
-			ToString(nonStringerMessage{100}),
+			Description(indescribable{100}),
 		).To(Equal(
 			"{100}",
 		))

@@ -21,6 +21,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Add `handler.UnexpectedMessageError`
 - Add `type.FromReflectType()`
 
+### Added
+
+- **[BC]** Replace `message.Stringer` with `Describer`
+- **[BC]** Replace `message.ToString()` with `Description()`
+
 ## [0.6.0] - 2019-08-01
 
 ### Added

@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Add `type.RoleMap.Each()`
 - Add `type.TypeSet.Each()`
 - Add `handler.UnexpectedMessageError`
+- Add `type.FromReflectType()`
 
 ## [0.6.0] - 2019-08-01
 

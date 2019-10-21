@@ -28,6 +28,15 @@ var _ = Describe("type Type", func() {
 		})
 	})
 
+	Describe("func FromReflectType", func() {
+		It("returns the message type if the reflect type implements the dogma.Message interface", func() {
+			rt := reflect.TypeOf(fixtures.MessageA1)
+			mt, ok := FromReflectType(rt)
+			Expect(mt).To(Equal(TypeOf(fixtures.MessageA1)))
+			Expect(ok).To(BeTrue())
+		})
+	})
+
 	Describe("func ReflectType", func() {
 		It("returns the reflect.Type for the message", func() {
 			mt := TypeOf(fixtures.MessageA1)

@@ -13,7 +13,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Add `HandlerKey` field to handler related error types
+- **[BC]** Add `HandlerKey` field to handler-related error types
+- **[BC]** Add `Message` field to handler-related error types
 
 ## [0.6.0] - 2019-08-01
 

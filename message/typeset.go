@@ -82,3 +82,19 @@ func (s TypeSet) Remove(t Type) bool {
 func (s TypeSet) RemoveM(m dogma.Message) bool {
 	return s.Remove(TypeOf(m))
 }
+
+// Each invokes fn once for each type in the container.
+//
+// Iteration stops when fn returns false or once fn has been invoked for all
+// types in the container.
+//
+// It returns true if fn returned true for all types.
+func (s TypeSet) Each(fn func(Type) bool) bool {
+	for t := range s {
+		if !fn(t) {
+			return false
+		}
+	}
+
+	return true
+}

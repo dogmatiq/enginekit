@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - **[BC]** Add `HandlerKey` field to handler-related error types
 - **[BC]** Add `Message` field to handler-related error types
+- **[BC]** Add `type.TypeContainer.Each()`
+- Add `type.RoleMap.Each()`
+- Add `type.TypeSet.Each()`
 - Add `handler.UnexpectedMessageError`
 
 ## [0.6.0] - 2019-08-01

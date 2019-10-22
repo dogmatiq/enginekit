@@ -14,11 +14,9 @@ type ProcessConfig struct {
 	// Handler is the handler that the configuration applies to.
 	Handler dogma.ProcessMessageHandler
 
-	// HandlerName is the handler's name, as specified by its Configure() method.
-	HandlerName string
-
-	// HandlerKey is the handler's key, as specified by its Configure() method.
-	HandlerKey string
+	// HandlerIdentity is the handler's identity, as specified by its
+	// Configure() method.
+	HandlerIdentity Identity
 
 	consumed message.RoleMap
 	produced message.RoleMap
@@ -42,7 +40,7 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 		return nil, err
 	}
 
-	if c.cfg.HandlerName == "" {
+	if c.cfg.HandlerIdentity == (Identity{}) {
 		return nil, errorf(
 			"%T.Configure() did not call ProcessConfigurer.Identity()",
 			h,
@@ -66,14 +64,9 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 	return cfg, nil
 }
 
-// Name returns the process name.
-func (c *ProcessConfig) Name() string {
-	return c.HandlerName
-}
-
-// Key returns the process key.
-func (c *ProcessConfig) Key() string {
-	return c.HandlerKey
+// Identity returns the process identity.
+func (c *ProcessConfig) Identity() Identity {
+	return c.HandlerIdentity
 }
 
 // HandlerType returns handler.ProcessType.
@@ -108,33 +101,26 @@ type processConfigurer struct {
 }
 
 func (c *processConfigurer) Identity(n, k string) {
-	if c.cfg.HandlerName != "" {
+	if c.cfg.HandlerIdentity != (Identity{}) {
 		panicf(
 			`%T.Configure() has already called ProcessConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
-			c.cfg.HandlerName,
-			c.cfg.HandlerKey,
+			c.cfg.HandlerIdentity.Name,
+			c.cfg.HandlerIdentity.Key,
 		)
 	}
 
-	if !IsValidName(n) {
+	i := Identity{n, k}
+
+	if err := i.Validate(); err != nil {
 		panicf(
-			`%T.Configure() called ProcessConfigurer.Identity() with an invalid name %#v`,
+			`%T.Configure() called ProcessConfigurer.Identity() with an %s`,
 			c.cfg.Handler,
-			n,
+			err,
 		)
 	}
 
-	if !IsValidKey(k) {
-		panicf(
-			`%T.Configure() called ProcessConfigurer.Identity() with an invalid key %#v`,
-			c.cfg.Handler,
-			k,
-		)
-	}
-
-	c.cfg.HandlerName = n
-	c.cfg.HandlerKey = k
+	c.cfg.HandlerIdentity = i
 }
 
 func (c *processConfigurer) ConsumesEventType(m dogma.Message) {

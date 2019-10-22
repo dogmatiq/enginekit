@@ -14,23 +14,33 @@ var _ = Describe("type FuncVisitor", func() {
 	entries := []TableEntry{
 		Entry(
 			"ApplicationConfig",
-			&ApplicationConfig{ApplicationName: "<app>"},
+			&ApplicationConfig{
+				ApplicationIdentity: Identity{"<app-name>", "<app-key>"},
+			},
 		),
 		Entry(
 			"AggregateConfig",
-			&AggregateConfig{HandlerName: "<aggregate>"},
+			&AggregateConfig{
+				HandlerIdentity: Identity{"<aggregate-name>", "<aggregate-key>"},
+			},
 		),
 		Entry(
 			"ProcessConfig",
-			&ProcessConfig{HandlerName: "<process>"},
+			&ProcessConfig{
+				HandlerIdentity: Identity{"<process-name>", "<process-key>"},
+			},
 		),
 		Entry(
 			"IntegrationConfig",
-			&IntegrationConfig{HandlerName: "<integration>"},
+			&IntegrationConfig{
+				HandlerIdentity: Identity{"<integration-name>", "<integration-key>"},
+			},
 		),
 		Entry(
 			"ProjectionConfig",
-			&ProjectionConfig{HandlerName: "<projection>"},
+			&ProjectionConfig{
+				HandlerIdentity: Identity{"<projection-name>", "<projection-key>"},
+			},
 		),
 	}
 

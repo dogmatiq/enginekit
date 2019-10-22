@@ -114,15 +114,11 @@ var _ = Describe("type ApplicationConfig", func() {
 				))
 			})
 
-			Describe("func Name()", func() {
-				It("returns the app name", func() {
-					Expect(cfg.Name()).To(Equal("<app>"))
-				})
-			})
-
-			Describe("func Key()", func() {
-				It("returns the app key", func() {
-					Expect(cfg.Key()).To(Equal("<app-key>"))
+			Describe("func Identity()", func() {
+				It("returns the app identity", func() {
+					Expect(cfg.Identity()).To(Equal(
+						Identity{"<app>", "<app-key>"},
+					))
 				})
 			})
 		})
@@ -174,7 +170,7 @@ var _ = Describe("type ApplicationConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						`*fixtures.Application.Configure() called ApplicationConfigurer.Identity() with an invalid name "\t \n"`,
+						`*fixtures.Application.Configure() called ApplicationConfigurer.Identity() with an invalid name "\t \n", names must be non-empty, printable UTF-8 strings with no whitespace`,
 					),
 				))
 			})
@@ -192,7 +188,7 @@ var _ = Describe("type ApplicationConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						`*fixtures.Application.Configure() called ApplicationConfigurer.Identity() with an invalid key "\t \n"`,
+						`*fixtures.Application.Configure() called ApplicationConfigurer.Identity() with an invalid key "\t \n", keys must be non-empty, printable UTF-8 strings with no whitespace`,
 					),
 				))
 			})

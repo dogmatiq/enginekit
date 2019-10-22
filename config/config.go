@@ -10,13 +10,9 @@ import (
 
 // Config is an interface for all configuration values.
 type Config interface {
-	// Name returns the name of the configured item.
-	// For example, the application or handler name.
-	Name() string
-
-	// Key returns the key of the configured item.
-	// For example, the application or handler unique key.
-	Key() string
+	// Identity returns the identity of the configured item.
+	// For example, the application or handler identity.
+	Identity() Identity
 
 	// Accept calls the appropriate method on v for this configuration type.
 	Accept(ctx context.Context, v Visitor) error

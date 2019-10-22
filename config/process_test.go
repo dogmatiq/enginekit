@@ -38,15 +38,11 @@ var _ = Describe("type ProcessConfig", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-			Describe("func Name()", func() {
-				It("returns the handler name", func() {
-					Expect(cfg.Name()).To(Equal("<name>"))
-				})
-			})
-
-			Describe("func Key()", func() {
-				It("returns the handler key", func() {
-					Expect(cfg.Key()).To(Equal("<key>"))
+			Describe("func Identity()", func() {
+				It("returns the handler identity", func() {
+					Expect(cfg.Identity()).To(Equal(
+						Identity{"<name>", "<key>"},
+					))
 				})
 			})
 
@@ -120,7 +116,7 @@ var _ = Describe("type ProcessConfig", func() {
 			),
 			Entry(
 				"when the handler configures an invalid name",
-				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid name "\t \n"`,
+				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid name "\t \n", names must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("\t \n", "<key>")
 					c.ConsumesEventType(fixtures.MessageA{})
@@ -129,7 +125,7 @@ var _ = Describe("type ProcessConfig", func() {
 			),
 			Entry(
 				"when the handler configures an invalid key",
-				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid key "\t \n"`,
+				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid key "\t \n", keys must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "\t \n")
 					c.ConsumesEventType(fixtures.MessageA{})

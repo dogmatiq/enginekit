@@ -12,11 +12,9 @@ type ApplicationConfig struct {
 	// Application is the application that the configuration applies to.
 	Application dogma.Application
 
-	// ApplicationName is the application's unique name.
-	ApplicationName string
-
-	// ApplicationKey is the application's unique key.
-	ApplicationKey string
+	// ApplicationIdentity is the application's identity, as specified by its
+	// Configure() method.
+	ApplicationIdentity Identity
 
 	// handlersByName is a map of handler name to their respective configuration.
 	HandlersByName map[string]HandlerConfig
@@ -58,7 +56,7 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 		return nil, err
 	}
 
-	if c.cfg.ApplicationName == "" {
+	if c.cfg.ApplicationIdentity == (Identity{}) {
 		return nil, errorf(
 			"%T.Configure() did not call ApplicationConfigurer.Identity()",
 			app,
@@ -67,14 +65,9 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 	return cfg, nil
 }
 
-// Name returns the application name.
-func (c *ApplicationConfig) Name() string {
-	return c.ApplicationName
-}
-
-// Key returns the application key.
-func (c *ApplicationConfig) Key() string {
-	return c.ApplicationKey
+// Identity returns the application identity.
+func (c *ApplicationConfig) Identity() Identity {
+	return c.ApplicationIdentity
 }
 
 // Accept calls v.VisitApplicationConfig(ctx, c).
@@ -84,23 +77,22 @@ func (c *ApplicationConfig) Accept(ctx context.Context, v Visitor) error {
 
 // register adds the given handler configuration to the app configuration.
 func (c *ApplicationConfig) register(cfg HandlerConfig) {
-	n := cfg.Name()
-	k := cfg.Key()
+	i := cfg.Identity()
 
-	if x, ok := c.HandlersByName[n]; ok {
+	if x, ok := c.HandlersByName[i.Name]; ok {
 		panicf(
 			"%s can not use the handler name %#v, because it is already used by %s",
 			cfg.HandlerReflectType(),
-			n,
+			i.Name,
 			x.HandlerReflectType(),
 		)
 	}
 
-	if x, ok := c.HandlersByKey[k]; ok {
+	if x, ok := c.HandlersByKey[i.Key]; ok {
 		panicf(
 			"%s can not use the handler key %#v, because it is already used by %s",
 			cfg.HandlerReflectType(),
-			k,
+			i.Key,
 			x.HandlerReflectType(),
 		)
 	}
@@ -112,9 +104,9 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 			if x, ok := c.Consumers[t]; ok {
 				panicf(
 					"the %#v handler can not consume %s commands because they are already consumed by %#v",
-					cfg.Name(),
+					i.Name,
 					t,
-					x[0].Name(),
+					x[0].Identity().Name,
 				)
 			}
 		}
@@ -127,16 +119,16 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 			if x, ok := c.Producers[t]; ok {
 				panicf(
 					"the %#v handler can not produce %s events because they are already produced by %#v",
-					cfg.Name(),
+					i.Name,
 					t,
-					x[0].Name(),
+					x[0].Identity().Name,
 				)
 			}
 		}
 	}
 
-	c.HandlersByName[n] = cfg
-	c.HandlersByKey[k] = cfg
+	c.HandlersByName[i.Name] = cfg
+	c.HandlersByKey[i.Key] = cfg
 
 	for t, r := range cfg.ConsumedMessageTypes() {
 		c.Roles.Add(t, r)
@@ -164,14 +156,14 @@ func (c *ApplicationConfig) checkMessageType(
 	var h string
 
 	if hc, ok := c.Consumers[t]; ok {
-		h = hc[0].Name()
+		h = hc[0].Identity().Name
 	} else if hc, ok := c.Producers[t]; ok {
-		h = hc[0].Name()
+		h = hc[0].Identity().Name
 	}
 
 	panicf(
 		"the %#v handler configures %s as a %s but %#v configures it as a %s",
-		cfg.Name(),
+		cfg.Identity().Name,
 		t,
 		r,
 		h,
@@ -186,33 +178,26 @@ type applicationConfigurer struct {
 }
 
 func (c *applicationConfigurer) Identity(n, k string) {
-	if c.cfg.ApplicationName != "" {
+	if c.cfg.ApplicationIdentity != (Identity{}) {
 		panicf(
 			`%T.Configure() has already called ApplicationConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Application,
-			c.cfg.ApplicationName,
-			c.cfg.ApplicationKey,
+			c.cfg.ApplicationIdentity.Name,
+			c.cfg.ApplicationIdentity.Key,
 		)
 	}
 
-	if !IsValidName(n) {
+	i := Identity{n, k}
+
+	if err := i.Validate(); err != nil {
 		panicf(
-			`%T.Configure() called ApplicationConfigurer.Identity() with an invalid name %#v`,
+			`%T.Configure() called ApplicationConfigurer.Identity() with an %s`,
 			c.cfg.Application,
-			n,
+			err,
 		)
 	}
 
-	if !IsValidKey(k) {
-		panicf(
-			`%T.Configure() called ApplicationConfigurer.Identity() with an invalid key %#v`,
-			c.cfg.Application,
-			k,
-		)
-	}
-
-	c.cfg.ApplicationName = n
-	c.cfg.ApplicationKey = k
+	c.cfg.ApplicationIdentity = i
 }
 
 // RegisterAggregate configures the engine to route messages to h.

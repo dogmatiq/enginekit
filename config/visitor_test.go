@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/identity"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -14,23 +15,33 @@ var _ = Describe("type FuncVisitor", func() {
 	entries := []TableEntry{
 		Entry(
 			"ApplicationConfig",
-			&ApplicationConfig{ApplicationName: "<app>"},
+			&ApplicationConfig{
+				ApplicationIdentity: identity.MustNew("<app-name>", "<app-key>"),
+			},
 		),
 		Entry(
 			"AggregateConfig",
-			&AggregateConfig{HandlerName: "<aggregate>"},
+			&AggregateConfig{
+				HandlerIdentity: identity.MustNew("<aggregate-name>", "<aggregate-key>"),
+			},
 		),
 		Entry(
 			"ProcessConfig",
-			&ProcessConfig{HandlerName: "<process>"},
+			&ProcessConfig{
+				HandlerIdentity: identity.MustNew("<process-name>", "<process-key>"),
+			},
 		),
 		Entry(
 			"IntegrationConfig",
-			&IntegrationConfig{HandlerName: "<integration>"},
+			&IntegrationConfig{
+				HandlerIdentity: identity.MustNew("<integration-name>", "<integration-key>"),
+			},
 		),
 		Entry(
 			"ProjectionConfig",
-			&ProjectionConfig{HandlerName: "<projection>"},
+			&ProjectionConfig{
+				HandlerIdentity: identity.MustNew("<projection-name>", "<projection-key>"),
+			},
 		),
 	}
 

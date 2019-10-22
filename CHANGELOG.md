@@ -9,6 +9,25 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Added
+
+- Add the `identity.Identity` type to encapsulate name/key pairs for applications and handlers
+
+### Changed
+
+- **[BC]** Replace `config.Config.Name()` and `Key()` with `Identity()`.
+- **[BC]** Replace `config.ApplicationConfig.ApplicationName` and `ApplicationKey` with `Identity`.
+- **[BC]** Replace `config.AggregateConfig.HandlerName` and `HandlerKey` with `Identity`.
+- **[BC]** Replace `config.ProcessConfig.HandlerName` and `HandlerKey` with `Identity`.
+- **[BC]** Replace `config.IntegrationConfig.HandlerName` and `HandlerKey` with `Identity`.
+- **[BC]** Replace `config.ProjectionConfig.HandlerName` and `HandlerKey` with `Identity`.
+
+### Removed
+
+- **[BC]** Removed `config.IsValidName()` and `IsValidKey()`, use `identity.Identity.Validate()` instead
+
 ## [0.7.0] - 2019-10-22
 
 ### Added

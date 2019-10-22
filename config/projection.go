@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -14,11 +15,9 @@ type ProjectionConfig struct {
 	// Handler is the handler that the configuration applies to.
 	Handler dogma.ProjectionMessageHandler
 
-	// HandlerName is the handler's name, as specified by its Configure() method.
-	HandlerName string
-
-	// HandlerKey is the handler's key, as specified by its Configure() method.
-	HandlerKey string
+	// HandlerIdentity is the handler's identity, as specified by its
+	// Configure() method.
+	HandlerIdentity identity.Identity
 
 	consumed message.RoleMap
 }
@@ -40,7 +39,7 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 		return nil, err
 	}
 
-	if c.cfg.HandlerName == "" {
+	if c.cfg.HandlerIdentity.IsZero() {
 		return nil, errorf(
 			"%T.Configure() did not call ProjectionConfigurer.Identity()",
 			h,
@@ -57,14 +56,9 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 	return cfg, nil
 }
 
-// Name returns the projection name.
-func (c *ProjectionConfig) Name() string {
-	return c.HandlerName
-}
-
-// Key returns the projection key.
-func (c *ProjectionConfig) Key() string {
-	return c.HandlerKey
+// Identity returns the projection identity.
+func (c *ProjectionConfig) Identity() identity.Identity {
+	return c.HandlerIdentity
 }
 
 // HandlerType returns handler.ProjectionType.
@@ -99,33 +93,25 @@ type projectionConfigurer struct {
 }
 
 func (c *projectionConfigurer) Identity(n, k string) {
-	if c.cfg.HandlerName != "" {
+	if !c.cfg.HandlerIdentity.IsZero() {
 		panicf(
 			`%T.Configure() has already called ProjectionConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
-			c.cfg.HandlerName,
-			c.cfg.HandlerKey,
+			c.cfg.HandlerIdentity.Name,
+			c.cfg.HandlerIdentity.Key,
 		)
 	}
 
-	if !IsValidName(n) {
+	i, err := identity.New(n, k)
+	if err != nil {
 		panicf(
-			`%T.Configure() called ProjectionConfigurer.Identity() with an invalid name %#v`,
+			`%T.Configure() called ProjectionConfigurer.Identity() with an %s`,
 			c.cfg.Handler,
-			n,
+			err,
 		)
 	}
 
-	if !IsValidKey(k) {
-		panicf(
-			`%T.Configure() called ProjectionConfigurer.Identity() with an invalid key %#v`,
-			c.cfg.Handler,
-			k,
-		)
-	}
-
-	c.cfg.HandlerName = n
-	c.cfg.HandlerKey = k
+	c.cfg.HandlerIdentity = i
 }
 
 func (c *projectionConfigurer) ConsumesEventType(m dogma.Message) {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -14,11 +15,9 @@ type IntegrationConfig struct {
 	// Handler is the handler that the configuration applies to.
 	Handler dogma.IntegrationMessageHandler
 
-	// HandlerName is the handler's name, as specified by its Configure() method.
-	HandlerName string
-
-	// HandlerKey is the handler's key, as specified by its Configure() method.
-	HandlerKey string
+	// HandlerIdentity is the handler's identity, as specified by its
+	// Configure() method.
+	HandlerIdentity identity.Identity
 
 	consumed message.RoleMap
 	produced message.RoleMap
@@ -42,7 +41,7 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 		return nil, err
 	}
 
-	if c.cfg.HandlerName == "" {
+	if c.cfg.HandlerIdentity.IsZero() {
 		return nil, errorf(
 			"%T.Configure() did not call IntegrationConfigurer.Identity()",
 			h,
@@ -59,14 +58,9 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 	return cfg, nil
 }
 
-// Name returns the integration name.
-func (c *IntegrationConfig) Name() string {
-	return c.HandlerName
-}
-
-// Key returns the integration key.
-func (c *IntegrationConfig) Key() string {
-	return c.HandlerKey
+// Identity returns the integration identity.
+func (c *IntegrationConfig) Identity() identity.Identity {
+	return c.HandlerIdentity
 }
 
 // HandlerType returns handler.IntegrationType.
@@ -101,33 +95,25 @@ type integrationConfigurer struct {
 }
 
 func (c *integrationConfigurer) Identity(n, k string) {
-	if c.cfg.HandlerName != "" {
+	if !c.cfg.HandlerIdentity.IsZero() {
 		panicf(
 			`%T.Configure() has already called IntegrationConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
-			c.cfg.HandlerName,
-			c.cfg.HandlerKey,
+			c.cfg.HandlerIdentity.Name,
+			c.cfg.HandlerIdentity.Key,
 		)
 	}
 
-	if !IsValidName(n) {
+	i, err := identity.New(n, k)
+	if err != nil {
 		panicf(
-			`%T.Configure() called IntegrationConfigurer.Identity() with an invalid name %#v`,
+			`%T.Configure() called IntegrationConfigurer.Identity() with an %s`,
 			c.cfg.Handler,
-			n,
+			err,
 		)
 	}
 
-	if !IsValidKey(k) {
-		panicf(
-			`%T.Configure() called IntegrationConfigurer.Identity() with an invalid key %#v`,
-			c.cfg.Handler,
-			k,
-		)
-	}
-
-	c.cfg.HandlerName = n
-	c.cfg.HandlerKey = k
+	c.cfg.HandlerIdentity = i
 }
 
 func (c *integrationConfigurer) ConsumesCommandType(m dogma.Message) {

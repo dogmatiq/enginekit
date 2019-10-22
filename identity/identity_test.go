@@ -1,15 +1,62 @@
-package config_test
+package identity_test
 
 import (
 	"fmt"
 
-	. "github.com/dogmatiq/enginekit/config"
+	. "github.com/dogmatiq/enginekit/identity"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("type Identity", func() {
+	Describe("func New()", func() {
+		It("returns the identity", func() {
+			i, err := New("<name>", "<key>")
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(i).To(Equal(Identity{"<name>", "<key>"}))
+		})
+
+		It("returns an error if the name is invalid", func() {
+			_, err := New("", "<key>")
+			Expect(err).Should(HaveOccurred())
+		})
+
+		It("returns an error if the key is invalid", func() {
+			_, err := New("<name>", "")
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+
+	Describe("func MustNew()", func() {
+		It("returns the identity", func() {
+			i := MustNew("<name>", "<key>")
+			Expect(i).To(Equal(Identity{"<name>", "<key>"}))
+		})
+
+		It("panics if the name is invalid", func() {
+			Expect(func() {
+				MustNew("", "<key>")
+			}).To(Panic())
+		})
+
+		It("panics if the key is invalid", func() {
+			Expect(func() {
+				MustNew("<name>", "")
+			}).To(Panic())
+		})
+	})
+
+	Describe("func IsZero()", func() {
+		It("returns true if the identity is empty", func() {
+			Expect(Identity{}.IsZero()).To(BeTrue())
+		})
+
+		It("returns false if the identity is not empty", func() {
+			Expect(Identity{"<name>", "<key>"}.IsZero()).To(BeFalse())
+		})
+	})
+
 	Describe("func Validate()", func() {
 		DescribeTable(
 			"it returns nil if the name and key are valid",

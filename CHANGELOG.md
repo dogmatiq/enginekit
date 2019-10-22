@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Add the `config.Identity` type to encapsulate name/key pairs for applications and handlers
+- Add the `identity.Identity` type to encapsulate name/key pairs for applications and handlers
 
 ### Changed
 
@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Removed
 
-- **[BC]** Removed `config.IsValidName()` and `IsValidKey()`, use `config.Identity.Validate()` instead
+- **[BC]** Removed `config.IsValidName()` and `IsValidKey()`, use `identity.Identity.Validate()` instead
 
 ## [0.7.0] - 2019-10-22
 

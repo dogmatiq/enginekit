@@ -1,4 +1,4 @@
-package config
+package identity
 
 import (
 	"fmt"
@@ -10,6 +10,27 @@ import (
 type Identity struct {
 	Name string
 	Key  string
+}
+
+// New returns a new identity.
+func New(n, k string) (Identity, error) {
+	i := Identity{n, k}
+	return i, i.Validate()
+}
+
+// MustNew returns a new identity, or panics if the given name or key are invalid.
+func MustNew(n, k string) Identity {
+	i, err := New(n, k)
+	if err != nil {
+		panic(err)
+	}
+
+	return i
+}
+
+// IsZero returns true if the identity is the zero-value.
+func (i Identity) IsZero() bool {
+	return i.Name == "" && i.Key == ""
 }
 
 // Validate returns an error if i is not a valid identity.

@@ -5,6 +5,7 @@ import (
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
 	handlerkit "github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -40,7 +41,7 @@ var _ = Describe("type AggregateConfig", func() {
 			Describe("func Identity()", func() {
 				It("returns the handler identity", func() {
 					Expect(cfg.Identity()).To(Equal(
-						Identity{"<name>", "<key>"},
+						identity.MustNew("<name>", "<key>"),
 					))
 				})
 			})

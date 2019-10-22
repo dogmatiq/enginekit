@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -14,7 +15,7 @@ type ApplicationConfig struct {
 
 	// ApplicationIdentity is the application's identity, as specified by its
 	// Configure() method.
-	ApplicationIdentity Identity
+	ApplicationIdentity identity.Identity
 
 	// handlersByName is a map of handler name to their respective configuration.
 	HandlersByName map[string]HandlerConfig
@@ -56,7 +57,7 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 		return nil, err
 	}
 
-	if c.cfg.ApplicationIdentity == (Identity{}) {
+	if c.cfg.ApplicationIdentity.IsZero() {
 		return nil, errorf(
 			"%T.Configure() did not call ApplicationConfigurer.Identity()",
 			app,
@@ -66,7 +67,7 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 }
 
 // Identity returns the application identity.
-func (c *ApplicationConfig) Identity() Identity {
+func (c *ApplicationConfig) Identity() identity.Identity {
 	return c.ApplicationIdentity
 }
 
@@ -178,7 +179,7 @@ type applicationConfigurer struct {
 }
 
 func (c *applicationConfigurer) Identity(n, k string) {
-	if c.cfg.ApplicationIdentity != (Identity{}) {
+	if !c.cfg.ApplicationIdentity.IsZero() {
 		panicf(
 			`%T.Configure() has already called ApplicationConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Application,
@@ -187,9 +188,8 @@ func (c *applicationConfigurer) Identity(n, k string) {
 		)
 	}
 
-	i := Identity{n, k}
-
-	if err := i.Validate(); err != nil {
+	i, err := identity.New(n, k)
+	if err != nil {
 		panicf(
 			`%T.Configure() called ApplicationConfigurer.Identity() with an %s`,
 			c.cfg.Application,

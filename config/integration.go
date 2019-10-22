@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -16,7 +17,7 @@ type IntegrationConfig struct {
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
-	HandlerIdentity Identity
+	HandlerIdentity identity.Identity
 
 	consumed message.RoleMap
 	produced message.RoleMap
@@ -40,7 +41,7 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 		return nil, err
 	}
 
-	if c.cfg.HandlerIdentity == (Identity{}) {
+	if c.cfg.HandlerIdentity.IsZero() {
 		return nil, errorf(
 			"%T.Configure() did not call IntegrationConfigurer.Identity()",
 			h,
@@ -58,7 +59,7 @@ func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig
 }
 
 // Identity returns the integration identity.
-func (c *IntegrationConfig) Identity() Identity {
+func (c *IntegrationConfig) Identity() identity.Identity {
 	return c.HandlerIdentity
 }
 
@@ -94,7 +95,7 @@ type integrationConfigurer struct {
 }
 
 func (c *integrationConfigurer) Identity(n, k string) {
-	if c.cfg.HandlerIdentity != (Identity{}) {
+	if !c.cfg.HandlerIdentity.IsZero() {
 		panicf(
 			`%T.Configure() has already called IntegrationConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
@@ -103,9 +104,8 @@ func (c *integrationConfigurer) Identity(n, k string) {
 		)
 	}
 
-	i := Identity{n, k}
-
-	if err := i.Validate(); err != nil {
+	i, err := identity.New(n, k)
+	if err != nil {
 		panicf(
 			`%T.Configure() called IntegrationConfigurer.Identity() with an %s`,
 			c.cfg.Handler,

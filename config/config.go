@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -12,7 +13,7 @@ import (
 type Config interface {
 	// Identity returns the identity of the configured item.
 	// For example, the application or handler identity.
-	Identity() Identity
+	Identity() identity.Identity
 
 	// Accept calls the appropriate method on v for this configuration type.
 	Accept(ctx context.Context, v Visitor) error

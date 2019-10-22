@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -16,7 +17,7 @@ type ProcessConfig struct {
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
-	HandlerIdentity Identity
+	HandlerIdentity identity.Identity
 
 	consumed message.RoleMap
 	produced message.RoleMap
@@ -40,7 +41,7 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 		return nil, err
 	}
 
-	if c.cfg.HandlerIdentity == (Identity{}) {
+	if c.cfg.HandlerIdentity.IsZero() {
 		return nil, errorf(
 			"%T.Configure() did not call ProcessConfigurer.Identity()",
 			h,
@@ -65,7 +66,7 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 }
 
 // Identity returns the process identity.
-func (c *ProcessConfig) Identity() Identity {
+func (c *ProcessConfig) Identity() identity.Identity {
 	return c.HandlerIdentity
 }
 
@@ -101,7 +102,7 @@ type processConfigurer struct {
 }
 
 func (c *processConfigurer) Identity(n, k string) {
-	if c.cfg.HandlerIdentity != (Identity{}) {
+	if !c.cfg.HandlerIdentity.IsZero() {
 		panicf(
 			`%T.Configure() has already called ProcessConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
@@ -110,9 +111,8 @@ func (c *processConfigurer) Identity(n, k string) {
 		)
 	}
 
-	i := Identity{n, k}
-
-	if err := i.Validate(); err != nil {
+	i, err := identity.New(n, k)
+	if err != nil {
 		panicf(
 			`%T.Configure() called ProcessConfigurer.Identity() with an %s`,
 			c.cfg.Handler,

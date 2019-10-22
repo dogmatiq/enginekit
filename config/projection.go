@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/handler"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -16,7 +17,7 @@ type ProjectionConfig struct {
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
-	HandlerIdentity Identity
+	HandlerIdentity identity.Identity
 
 	consumed message.RoleMap
 }
@@ -38,7 +39,7 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 		return nil, err
 	}
 
-	if c.cfg.HandlerIdentity == (Identity{}) {
+	if c.cfg.HandlerIdentity.IsZero() {
 		return nil, errorf(
 			"%T.Configure() did not call ProjectionConfigurer.Identity()",
 			h,
@@ -56,7 +57,7 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 }
 
 // Identity returns the projection identity.
-func (c *ProjectionConfig) Identity() Identity {
+func (c *ProjectionConfig) Identity() identity.Identity {
 	return c.HandlerIdentity
 }
 
@@ -92,7 +93,7 @@ type projectionConfigurer struct {
 }
 
 func (c *projectionConfigurer) Identity(n, k string) {
-	if c.cfg.HandlerIdentity != (Identity{}) {
+	if !c.cfg.HandlerIdentity.IsZero() {
 		panicf(
 			`%T.Configure() has already called ProjectionConfigurer.Identity(%#v, %#v)`,
 			c.cfg.Handler,
@@ -101,9 +102,8 @@ func (c *projectionConfigurer) Identity(n, k string) {
 		)
 	}
 
-	i := Identity{n, k}
-
-	if err := i.Validate(); err != nil {
+	i, err := identity.New(n, k)
+	if err != nil {
 		panicf(
 			`%T.Configure() called ProjectionConfigurer.Identity() with an %s`,
 			c.cfg.Handler,

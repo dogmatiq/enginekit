@@ -4,17 +4,15 @@ import (
 	"fmt"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
 // EmptyInstanceIDError indicates that an aggregate or process message handler has
 // attempted to route a message to an instance with an empty ID.
 type EmptyInstanceIDError struct {
-	// HandleName is the name of the handler that caused the rror.
-	HandlerName string
-
-	// HandlerKey is the immutable key of the handler that caused the error.
-	HandlerKey string
+	// Handler is the identity of the handler that caused the rror.
+	Handler identity.Identity
 
 	// HandlerType is the type of handler that caused the error.
 	HandlerType Type
@@ -26,7 +24,7 @@ type EmptyInstanceIDError struct {
 func (e EmptyInstanceIDError) Error() string {
 	return fmt.Sprintf(
 		"the '%s' %s message handler attempted to route a %s message to an empty instance ID",
-		e.HandlerName,
+		e.Handler.Name,
 		e.HandlerType,
 		message.TypeOf(e.Message),
 	)
@@ -35,11 +33,8 @@ func (e EmptyInstanceIDError) Error() string {
 // NilRootError indicates that an aggregate or process message handler has
 // returned a nil "root" value from its New() method.
 type NilRootError struct {
-	// HandleName is the name of the handler that caused the rror.
-	HandlerName string
-
-	// HandlerKey is the immutable key of the handler that caused the error.
-	HandlerKey string
+	// Handler is the identity of the handler that caused the rror.
+	Handler identity.Identity
 
 	// HandlerType is the type of handler that caused the error.
 	HandlerType Type
@@ -48,7 +43,7 @@ type NilRootError struct {
 func (e NilRootError) Error() string {
 	return fmt.Sprintf(
 		"the '%s' %s message handler returned a nil root from New()",
-		e.HandlerName,
+		e.Handler.Name,
 		e.HandlerType,
 	)
 }
@@ -56,11 +51,8 @@ func (e NilRootError) Error() string {
 // EventNotRecordedError indicates that an aggregate instance was created
 // or destroyed without recording an event.
 type EventNotRecordedError struct {
-	// HandleName is the name of the handler that caused the rror.
-	HandlerName string
-
-	// HandlerKey is the immutable key of the handler that caused the error.
-	HandlerKey string
+	// Handler is the identity of the handler that caused the rror.
+	Handler identity.Identity
 
 	// WasDestroyed is true if the error occurred as a result of the description
 	// of an aggregate, as opposed to creation.
@@ -82,7 +74,7 @@ func (e EventNotRecordedError) Error() string {
 
 	return fmt.Sprintf(
 		"the '%s' aggregate message handler %s the '%s' instance without recording an event while handling a %s command",
-		e.HandlerName,
+		e.Handler.Name,
 		s,
 		e.InstanceID,
 		message.TypeOf(e.Message),
@@ -92,11 +84,8 @@ func (e EventNotRecordedError) Error() string {
 // UnexpectedMessageError indicates that a message handler has panicked with a
 // dogma.UnexpectedMessage value.
 type UnexpectedMessageError struct {
-	// HandleName is the name of the handler that caused the rror.
-	HandlerName string
-
-	// HandlerKey is the immutable key of the handler that caused the error.
-	HandlerKey string
+	// Handler is the identity of the handler that caused the rror.
+	Handler identity.Identity
 
 	// HandlerType is the type of handler that caused the error.
 	HandlerType Type
@@ -118,7 +107,7 @@ type UnexpectedMessageError struct {
 func (e UnexpectedMessageError) Error() string {
 	return fmt.Sprintf(
 		"the '%s' %s message handler does not expect %s messages",
-		e.HandlerName,
+		e.Handler.Name,
 		e.HandlerType,
 		message.TypeOf(e.Message),
 	)

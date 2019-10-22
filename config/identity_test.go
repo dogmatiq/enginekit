@@ -56,4 +56,11 @@ var _ = Describe("type Identity", func() {
 			invalidEntries...,
 		)
 	})
+
+	Describe("func String()", func() {
+		It("returns a string representation of the identity", func() {
+			i := Identity{"<name>", "<key>"}
+			Expect(i.String()).To(Equal("<name> (<key>)"))
+		})
+	})
 })

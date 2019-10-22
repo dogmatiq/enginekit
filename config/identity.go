@@ -12,7 +12,7 @@ type Identity struct {
 	Key  string
 }
 
-// Validate return an error if i is not a valid identity.
+// Validate returns an error if i is not a valid identity.
 func (i Identity) Validate() error {
 	if !isValidName(i.Name) {
 		return fmt.Errorf(

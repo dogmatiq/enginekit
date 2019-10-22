@@ -11,7 +11,7 @@ import (
 // EmptyInstanceIDError indicates that an aggregate or process message handler has
 // attempted to route a message to an instance with an empty ID.
 type EmptyInstanceIDError struct {
-	// Handler is the identity of the handler that caused the rror.
+	// Handler is the identity of the handler that caused the error.
 	Handler identity.Identity
 
 	// HandlerType is the type of handler that caused the error.
@@ -33,7 +33,7 @@ func (e EmptyInstanceIDError) Error() string {
 // NilRootError indicates that an aggregate or process message handler has
 // returned a nil "root" value from its New() method.
 type NilRootError struct {
-	// Handler is the identity of the handler that caused the rror.
+	// Handler is the identity of the handler that caused the error.
 	Handler identity.Identity
 
 	// HandlerType is the type of handler that caused the error.
@@ -51,7 +51,7 @@ func (e NilRootError) Error() string {
 // EventNotRecordedError indicates that an aggregate instance was created
 // or destroyed without recording an event.
 type EventNotRecordedError struct {
-	// Handler is the identity of the handler that caused the rror.
+	// Handler is the identity of the handler that caused the error.
 	Handler identity.Identity
 
 	// WasDestroyed is true if the error occurred as a result of the description
@@ -84,7 +84,7 @@ func (e EventNotRecordedError) Error() string {
 // UnexpectedMessageError indicates that a message handler has panicked with a
 // dogma.UnexpectedMessage value.
 type UnexpectedMessageError struct {
-	// Handler is the identity of the handler that caused the rror.
+	// Handler is the identity of the handler that caused the error.
 	Handler identity.Identity
 
 	// HandlerType is the type of handler that caused the error.

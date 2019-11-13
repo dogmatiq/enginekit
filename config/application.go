@@ -11,6 +11,7 @@ import (
 // ApplicationConfig represents the configuration of an entire Dogma application.
 type ApplicationConfig struct {
 	// Application is the application that the configuration applies to.
+	// It is nil if the config was obtained via the config API.
 	Application dogma.Application
 
 	// ApplicationIdentity is the application's identity, as specified by its

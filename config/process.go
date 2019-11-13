@@ -13,6 +13,7 @@ import (
 // ProcessConfig represents the configuration of an process message handler.
 type ProcessConfig struct {
 	// Handler is the handler that the configuration applies to.
+	// It is nil if the config was obtained via the config API.
 	Handler dogma.ProcessMessageHandler
 
 	// HandlerIdentity is the handler's identity, as specified by its

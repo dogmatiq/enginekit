@@ -13,6 +13,7 @@ import (
 // ProjectionConfig represents the configuration of an aggregate message handler.
 type ProjectionConfig struct {
 	// Handler is the handler that the configuration applies to.
+	// It is nil if the config was obtained via the config API.
 	Handler dogma.ProjectionMessageHandler
 
 	// HandlerIdentity is the handler's identity, as specified by its

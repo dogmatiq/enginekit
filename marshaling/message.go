@@ -17,7 +17,7 @@ func MarshalMessageType(ma *Marshaler, mt message.Type) (string, error) {
 func MustMarshalMessageType(ma *Marshaler, mt message.Type) string {
 	s, err := MarshalMessageType(ma, mt)
 	if err != nil {
-		panic(err)
+		panic(PanicSentinel{err})
 	}
 
 	return s
@@ -55,7 +55,7 @@ func MarshalMessage(ma *Marshaler, m dogma.Message) (Packet, error) {
 func MustMarshalMessage(ma *Marshaler, m dogma.Message) Packet {
 	p, err := ma.Marshal(m)
 	if err != nil {
-		panic(err)
+		panic(PanicSentinel{err})
 	}
 
 	return p

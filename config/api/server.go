@@ -13,7 +13,7 @@ import (
 func RegisterServer(
 	s *grpc.Server,
 	m *marshaling.Marshaler,
-	apps []*config.ApplicationConfig,
+	apps ...*config.ApplicationConfig,
 ) {
 	svr := &server{}
 

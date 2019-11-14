@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-// Client is used to query a server about it's application configurations.
+// Client is used to query a server about its application configurations.
 type Client struct {
 	Connection *grpc.ClientConn
 	Marshaler  *marshaling.Marshaler

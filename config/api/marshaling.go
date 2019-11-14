@@ -133,11 +133,7 @@ func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]stri
 			out = map[string]string{}
 		}
 
-		k, err := marshaling.MarshalMessageType(m, mt)
-		if err != nil {
-			panic(err)
-		}
-
+		k := marshaling.MustMarshalMessageType(m, mt)
 		out[k] = string(r)
 	}
 
@@ -154,11 +150,7 @@ func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) message.Rol
 			out = message.RoleMap{}
 		}
 
-		k, err := marshaling.UnmarshalMessageType(m, mt)
-		if err != nil {
-			panic(err)
-		}
-
+		k := marshaling.MustUnmarshalMessageType(m, mt)
 		v := message.Role(r)
 		v.MustValidate()
 

@@ -27,7 +27,7 @@ func (c *Client) ListApplicationIdentities(
 		return nil, err
 	}
 
-	defer catch(&err)
+	defer marshaling.Recover(&err)
 
 	var idents []identity.Identity
 	for _, i := range res.Identities {
@@ -48,7 +48,7 @@ func (c *Client) ListApplications(
 		return nil, err
 	}
 
-	defer catch(&err)
+	defer marshaling.Recover(&err)
 
 	var configs []*config.ApplicationConfig
 	for _, cfg := range res.Applications {
@@ -56,13 +56,4 @@ func (c *Client) ListApplications(
 	}
 
 	return configs, nil
-}
-
-func catch(err *error) {
-	r := recover()
-	if e, ok := r.(error); ok {
-		*err = e
-	} else if r != nil {
-		panic(r)
-	}
 }

@@ -13,20 +13,23 @@ import (
 // ProjectionConfig represents the configuration of an aggregate message handler.
 type ProjectionConfig struct {
 	// Handler is the handler that the configuration applies to.
+	// It is nil if the config was obtained via the config API.
 	Handler dogma.ProjectionMessageHandler
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
 	HandlerIdentity identity.Identity
 
-	consumed message.RoleMap
+	// Consumed is a map of message type to role for those message types
+	// consumed by this handler.
+	Consumed message.RoleMap
 }
 
 // NewProjectionConfig returns an ProjectionConfig for the given handler.
 func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, error) {
 	cfg := &ProjectionConfig{
 		Handler:  h,
-		consumed: message.RoleMap{},
+		Consumed: message.RoleMap{},
 	}
 
 	c := &projectionConfigurer{
@@ -46,7 +49,7 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 		)
 	}
 
-	if len(c.cfg.consumed) == 0 {
+	if len(c.cfg.Consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call ProjectionConfigurer.ConsumesEventType()",
 			h,
@@ -73,7 +76,7 @@ func (c *ProjectionConfig) HandlerReflectType() reflect.Type {
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
 func (c *ProjectionConfig) ConsumedMessageTypes() message.RoleMap {
-	return c.consumed
+	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
@@ -115,7 +118,7 @@ func (c *projectionConfigurer) Identity(n, k string) {
 }
 
 func (c *projectionConfigurer) ConsumesEventType(m dogma.Message) {
-	if !c.cfg.consumed.AddM(m, message.EventRole) {
+	if !c.cfg.Consumed.AddM(m, message.EventRole) {
 		panicf(
 			`%T.Configure() has already called ProjectionConfigurer.ConsumesEventType(%T)`,
 			c.cfg.Handler,

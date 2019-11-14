@@ -13,22 +13,28 @@ import (
 // ProcessConfig represents the configuration of an process message handler.
 type ProcessConfig struct {
 	// Handler is the handler that the configuration applies to.
+	// It is nil if the config was obtained via the config API.
 	Handler dogma.ProcessMessageHandler
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
 	HandlerIdentity identity.Identity
 
-	consumed message.RoleMap
-	produced message.RoleMap
+	// Consumed is a map of message type to role for those message types
+	// consumed by this handler.
+	Consumed message.RoleMap
+
+	// Produced is a map of message type to role for those message types
+	// produced by this handler.
+	Produced message.RoleMap
 }
 
 // NewProcessConfig returns an ProcessConfig for the given handler.
 func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 	cfg := &ProcessConfig{
 		Handler:  h,
-		consumed: message.RoleMap{},
-		produced: message.RoleMap{},
+		Consumed: message.RoleMap{},
+		Produced: message.RoleMap{},
 	}
 
 	c := &processConfigurer{
@@ -48,14 +54,14 @@ func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 		)
 	}
 
-	if len(c.cfg.consumed) == 0 {
+	if len(c.cfg.Consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call ProcessConfigurer.ConsumesEventType()",
 			h,
 		)
 	}
 
-	if len(c.cfg.produced) == 0 {
+	if len(c.cfg.Produced) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call ProcessConfigurer.ProducesCommandType()",
 			h,
@@ -82,12 +88,12 @@ func (c *ProcessConfig) HandlerReflectType() reflect.Type {
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
 func (c *ProcessConfig) ConsumedMessageTypes() message.RoleMap {
-	return c.consumed
+	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
 func (c *ProcessConfig) ProducedMessageTypes() message.RoleMap {
-	return c.produced
+	return c.Produced
 }
 
 // Accept calls v.VisitProcessConfig(ctx, c).
@@ -124,16 +130,16 @@ func (c *processConfigurer) Identity(n, k string) {
 }
 
 func (c *processConfigurer) ConsumesEventType(m dogma.Message) {
-	c.add(c.cfg.consumed, m, message.EventRole)
+	c.add(c.cfg.Consumed, m, message.EventRole)
 }
 
 func (c *processConfigurer) ProducesCommandType(m dogma.Message) {
-	c.add(c.cfg.produced, m, message.CommandRole)
+	c.add(c.cfg.Produced, m, message.CommandRole)
 }
 
 func (c *processConfigurer) SchedulesTimeoutType(m dogma.Message) {
-	c.add(c.cfg.consumed, m, message.TimeoutRole)
-	c.add(c.cfg.produced, m, message.TimeoutRole)
+	c.add(c.cfg.Consumed, m, message.TimeoutRole)
+	c.add(c.cfg.Produced, m, message.TimeoutRole)
 }
 
 func (c *processConfigurer) add(rm message.RoleMap, m dogma.Message, r message.Role) {

@@ -13,22 +13,28 @@ import (
 // AggregateConfig represents the configuration of an aggregate message handler.
 type AggregateConfig struct {
 	// Handler is the handler that the configuration applies to.
+	// It is nil if the config was obtained via the config API.
 	Handler dogma.AggregateMessageHandler
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
 	HandlerIdentity identity.Identity
 
-	consumed message.RoleMap
-	produced message.RoleMap
+	// Consumed is a map of message type to role for those message types
+	// consumed by this handler.
+	Consumed message.RoleMap
+
+	// Produced is a map of message type to role for those message types
+	// produced by this handler.
+	Produced message.RoleMap
 }
 
 // NewAggregateConfig returns an AggregateConfig for the given handler.
 func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, error) {
 	cfg := &AggregateConfig{
 		Handler:  h,
-		consumed: message.RoleMap{},
-		produced: message.RoleMap{},
+		Consumed: message.RoleMap{},
+		Produced: message.RoleMap{},
 	}
 
 	c := &aggregateConfigurer{
@@ -48,14 +54,14 @@ func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, erro
 		)
 	}
 
-	if len(c.cfg.consumed) == 0 {
+	if len(c.cfg.Consumed) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call AggregateConfigurer.ConsumesCommandType()",
 			h,
 		)
 	}
 
-	if len(c.cfg.produced) == 0 {
+	if len(c.cfg.Produced) == 0 {
 		return nil, errorf(
 			"%T.Configure() did not call AggregateConfigurer.ProducesEventType()",
 			h,
@@ -82,12 +88,12 @@ func (c *AggregateConfig) HandlerReflectType() reflect.Type {
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
 func (c *AggregateConfig) ConsumedMessageTypes() message.RoleMap {
-	return c.consumed
+	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
 func (c *AggregateConfig) ProducedMessageTypes() message.RoleMap {
-	return c.produced
+	return c.Produced
 }
 
 // Accept calls v.VisitAggregateConfig(ctx, c).
@@ -124,7 +130,7 @@ func (c *aggregateConfigurer) Identity(n, k string) {
 }
 
 func (c *aggregateConfigurer) ConsumesCommandType(m dogma.Message) {
-	if !c.cfg.consumed.AddM(m, message.CommandRole) {
+	if !c.cfg.Consumed.AddM(m, message.CommandRole) {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.ConsumesCommandType(%T)`,
 			c.cfg.Handler,
@@ -134,7 +140,7 @@ func (c *aggregateConfigurer) ConsumesCommandType(m dogma.Message) {
 }
 
 func (c *aggregateConfigurer) ProducesEventType(m dogma.Message) {
-	if !c.cfg.produced.AddM(m, message.EventRole) {
+	if !c.cfg.Produced.AddM(m, message.EventRole) {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.ProducesEventType(%T)`,
 			c.cfg.Handler,

@@ -138,6 +138,12 @@ var _ = Describe("type Client", func() {
 				identity.MustNew("<app-2>", "<app-key-2>"),
 			))
 		})
+
+		It("returns an error if the gRPC call fails", func() {
+			gserver.Stop()
+			_, err := client.ListApplicationIdentities(ctx)
+			Expect(err).Should(HaveOccurred())
+		})
 	})
 
 	Describe("func ListApplications()", func() {
@@ -148,6 +154,12 @@ var _ = Describe("type Client", func() {
 				cfg1,
 				cfg2,
 			))
+		})
+
+		It("returns an error if the gRPC call fails", func() {
+			gserver.Stop()
+			_, err := client.ListApplications(ctx)
+			Expect(err).Should(HaveOccurred())
 		})
 	})
 })

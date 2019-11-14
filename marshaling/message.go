@@ -94,6 +94,17 @@ func UnmarshalMessage(ma *Marshaler, p Packet) (dogma.Message, error) {
 	return ma.Unmarshal(p)
 }
 
+// MustUnmarshalMessage returns a message from its binary representation.
+// It panics if un marshaling fails.
+func MustUnmarshalMessage(ma *Marshaler, p Packet) dogma.Message {
+	m, err := UnmarshalMessage(ma, p)
+	if err != nil {
+		panic(PanicSentinel{err})
+	}
+
+	return m
+}
+
 // toMessageType converts a reflect.Type to a message.Type.
 //
 // TODO: Remove this function. Blocked by

@@ -3,6 +3,7 @@ package api_test
 import (
 	"context"
 	"net"
+	"reflect"
 	"time"
 
 	"github.com/dogmatiq/dogma"
@@ -89,8 +90,15 @@ var _ = Describe("type Client", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 		cfg2.Accept(context.Background(), stripEntities{})
 
-		marshaler, err = marshaling.NewMarshalerForApplications(
-			[]*config.ApplicationConfig{cfg1, cfg2},
+		var types []reflect.Type
+		for mt := range cfg1.Roles {
+			types = append(types, mt.ReflectType())
+		}
+		for mt := range cfg2.Roles {
+			types = append(types, mt.ReflectType())
+		}
+		marshaler, err = marshaling.NewMarshaler(
+			types,
 			[]marshaling.Codec{
 				&json.Codec{},
 			},

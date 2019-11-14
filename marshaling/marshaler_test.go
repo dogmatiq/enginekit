@@ -3,8 +3,6 @@ package marshaling_test
 import (
 	"reflect"
 
-	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
 	. "github.com/dogmatiq/enginekit/marshaling"
 	"github.com/dogmatiq/enginekit/marshaling/internal/pbfixtures"
@@ -83,68 +81,6 @@ var _ = Describe("type Marshaler", func() {
 			Expect(err).To(MatchError(
 				"no codecs support the 'fixtures.MessageA' type",
 			))
-		})
-	})
-
-	Describe("func NewMarshaler()", func() {
-		var cfg *config.ApplicationConfig
-
-		BeforeEach(func() {
-			app := &fixtures.Application{
-				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-					c.Identity("<app>", "<app-key>")
-
-					c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
-						ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-							c.Identity("<integration>", "<integration-key>")
-							c.ConsumesCommandType(fixtures.MessageC{})
-							c.ProducesEventType(fixtures.MessageE{})
-						},
-					})
-				},
-			}
-
-			var err error
-			cfg, err = config.NewApplicationConfig(app)
-			Expect(err).ShouldNot(HaveOccurred())
-		})
-
-		It("returns the expected marshaler", func() {
-			m, err := NewMarshalerForApplication(
-				cfg,
-				[]Codec{
-					&protobuf.NativeCodec{},
-					&protobuf.JSONCodec{},
-					&protobuf.TextCodec{},
-					&json.Codec{},
-				},
-			)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			expected, err := NewMarshaler(
-				[]reflect.Type{
-					fixtures.MessageCType.ReflectType(),
-					fixtures.MessageEType.ReflectType(),
-				},
-				[]Codec{
-					&protobuf.NativeCodec{},
-					&protobuf.JSONCodec{},
-					&protobuf.TextCodec{},
-					&json.Codec{},
-				},
-			)
-
-			Expect(m).To(Equal(expected))
-		})
-
-		It("returns the an error if there is an error constructing the marshaler", func() {
-			_, err := NewMarshalerForApplication(
-				cfg,
-				[]Codec{
-					&protobuf.NativeCodec{}, // fixture messages are not protobufs
-				},
-			)
-			Expect(err).Should(HaveOccurred())
 		})
 	})
 

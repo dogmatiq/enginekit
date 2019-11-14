@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"mime"
 	"reflect"
-
-	"github.com/dogmatiq/enginekit/config"
 )
 
 // Marshaler uses a set of codecs to marshal and unmarshal values.
@@ -83,38 +81,6 @@ func NewMarshaler(
 	}
 
 	return m, nil
-}
-
-// NewMarshalerForApplication returns a new marshaler for the given application
-// config.
-func NewMarshalerForApplication(
-	cfg *config.ApplicationConfig,
-	codecs []Codec,
-) (*Marshaler, error) {
-	return NewMarshalerForApplications(
-		[]*config.ApplicationConfig{cfg},
-		codecs,
-	)
-}
-
-// NewMarshalerForApplications returns a new marshaler for the given application
-// configs.
-func NewMarshalerForApplications(
-	configs []*config.ApplicationConfig,
-	codecs []Codec,
-) (*Marshaler, error) {
-	var types []reflect.Type
-
-	for _, cfg := range configs {
-		for mt := range cfg.Roles {
-			types = append(
-				types,
-				mt.ReflectType(),
-			)
-		}
-	}
-
-	return NewMarshaler(types, codecs)
 }
 
 // MarshalType marshals a type to its portable representation.

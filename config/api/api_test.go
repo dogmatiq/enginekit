@@ -39,26 +39,45 @@ var _ = Describe("type Client", func() {
 		app1 = &fixtures.Application{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("<app-1>", "<app-key-1>")
-				// c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
-				// 	ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-				// 		c.Identity("<integration>", "<integration-key>")
-				// 		c.ConsumesCommandType(fixtures.MessageC{})
-				// 		c.ProducesEventType(fixtures.MessageE{})
-				// 	},
-				// })
+
+				c.RegisterAggregate(&fixtures.AggregateMessageHandler{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("<aggregate>", "<aggregate-key>")
+						c.ConsumesCommandType(fixtures.MessageC{})
+						c.ProducesEventType(fixtures.MessageE{})
+					},
+				})
+
+				c.RegisterProcess(&fixtures.ProcessMessageHandler{
+					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+						c.Identity("<process>", "<process-key>")
+						c.ConsumesEventType(fixtures.MessageE{})
+						c.ProducesCommandType(fixtures.MessageC{})
+						c.SchedulesTimeoutType(fixtures.MessageT{})
+					},
+				})
 			},
 		}
 
 		app2 = &fixtures.Application{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("<app-2>", "<app-key-2>")
-				// c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
-				// 	ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-				// 		c.Identity("<integration>", "<integration-key>")
-				// 		c.ConsumesCommandType(fixtures.MessageC{})
-				// 		c.ProducesEventType(fixtures.MessageE{})
-				// 	},
-				// })
+
+				c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
+					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+						c.Identity("<integration>", "<integration-key>")
+						c.ConsumesCommandType(fixtures.MessageI{})
+						c.ProducesEventType(fixtures.MessageJ{})
+					},
+				})
+
+				c.RegisterProjection(&fixtures.ProjectionMessageHandler{
+					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+						c.Identity("<projection>", "<projection-key>")
+						c.ConsumesEventType(fixtures.MessageE{})
+						c.ConsumesEventType(fixtures.MessageJ{})
+					},
+				})
 			},
 		}
 

@@ -34,6 +34,17 @@ func UnmarshalMessageType(ma *Marshaler, n string) (message.Type, error) {
 	return toMessageType(rt), nil
 }
 
+// MustUnmarshalMessageType unmarshals a message type from its portable
+// representation. It panics if unmarshaling fails.
+func MustUnmarshalMessageType(ma *Marshaler, n string) message.Type {
+	mt, err := UnmarshalMessageType(ma, n)
+	if err != nil {
+		panic(PanicSentinel{err})
+	}
+
+	return mt
+}
+
 // UnmarshalMessageTypeFromMediaType unmarshals a message type from a MIME
 // media-type.
 func UnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) (message.Type, error) {

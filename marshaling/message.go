@@ -12,6 +12,17 @@ func MarshalMessageType(ma *Marshaler, mt message.Type) (string, error) {
 	return ma.MarshalType(mt.ReflectType())
 }
 
+// MustMarshalMessageType marshals a message type to its portable representation.
+// It panics if marshaling fails.
+func MustMarshalMessageType(ma *Marshaler, mt message.Type) string {
+	s, err := MarshalMessageType(ma, mt)
+	if err != nil {
+		panic(err)
+	}
+
+	return s
+}
+
 // UnmarshalMessageType unmarshals a message type from its portable
 // representation.
 func UnmarshalMessageType(ma *Marshaler, n string) (message.Type, error) {

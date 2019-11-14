@@ -47,6 +47,26 @@ var _ = Context("messages", func() {
 		})
 	})
 
+	Describe("func MustMarshalMessageType()", func() {
+		It("marshals the type name using the marshaler", func() {
+			n := MustMarshalMessageType(
+				marshaler,
+				fixtures.MessageAType,
+			)
+			Expect(n).To(Equal("MessageA"))
+		})
+
+		It("panics if marshaling fails", func() {
+			Expect(func() {
+				MustMarshalMessageType(
+					marshaler,
+					fixtures.MessageCType,
+				)
+
+			}).To(Panic())
+		})
+	})
+
 	Describe("func UnmarshalMessageType()", func() {
 		It("returns the message type", func() {
 			t, err := UnmarshalMessageType(

@@ -91,13 +91,27 @@ func NewMarshalerForApplication(
 	cfg *config.ApplicationConfig,
 	codecs []Codec,
 ) (*Marshaler, error) {
+	return NewMarshalerForApplications(
+		[]*config.ApplicationConfig{cfg},
+		codecs,
+	)
+}
+
+// NewMarshalerForApplications returns a new marshaler for the given application
+// configs.
+func NewMarshalerForApplications(
+	configs []*config.ApplicationConfig,
+	codecs []Codec,
+) (*Marshaler, error) {
 	var types []reflect.Type
 
-	for mt := range cfg.Roles {
-		types = append(
-			types,
-			mt.ReflectType(),
-		)
+	for _, cfg := range configs {
+		for mt := range cfg.Roles {
+			types = append(
+				types,
+				mt.ReflectType(),
+			)
+		}
 	}
 
 	return NewMarshaler(types, codecs)

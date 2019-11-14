@@ -47,6 +47,26 @@ var _ = Context("messages", func() {
 		})
 	})
 
+	Describe("func MustMarshalMessageType()", func() {
+		It("marshals the type name using the marshaler", func() {
+			n := MustMarshalMessageType(
+				marshaler,
+				fixtures.MessageAType,
+			)
+			Expect(n).To(Equal("MessageA"))
+		})
+
+		It("panics if marshaling fails", func() {
+			Expect(func() {
+				MustMarshalMessageType(
+					marshaler,
+					fixtures.MessageCType,
+				)
+
+			}).To(Panic())
+		})
+	})
+
 	Describe("func UnmarshalMessageType()", func() {
 		It("returns the message type", func() {
 			t, err := UnmarshalMessageType(
@@ -68,6 +88,25 @@ var _ = Context("messages", func() {
 		})
 	})
 
+	Describe("func MustUnmarshalMessageType()", func() {
+		It("returns the message type", func() {
+			t := MustUnmarshalMessageType(
+				marshaler,
+				"MessageA",
+			)
+			Expect(t).To(Equal(fixtures.MessageAType))
+		})
+
+		It("panics if the type is not registered", func() {
+			Expect(func() {
+				MustUnmarshalMessageType(
+					marshaler,
+					"MessageC",
+				)
+			}).To(Panic())
+		})
+	})
+
 	Describe("func UnmarshalMessageTypeFromMediaType()", func() {
 		It("returns the message type", func() {
 			t, err := UnmarshalMessageTypeFromMediaType(
@@ -86,6 +125,25 @@ var _ = Context("messages", func() {
 			Expect(err).To(MatchError(
 				"the portable type name 'MessageC' is not recognized",
 			))
+		})
+	})
+
+	Describe("func MustUnmarshalMessageTypeFromMediaType()", func() {
+		It("returns the message type", func() {
+			t := MustUnmarshalMessageTypeFromMediaType(
+				marshaler,
+				"application/json; type=MessageA",
+			)
+			Expect(t).To(Equal(fixtures.MessageAType))
+		})
+
+		It("returns an error if the type is not registered", func() {
+			Expect(func() {
+				MustUnmarshalMessageTypeFromMediaType(
+					marshaler,
+					"application/json; type=MessageC",
+				)
+			}).To(Panic())
 		})
 	})
 
@@ -141,6 +199,46 @@ var _ = Context("messages", func() {
 					Value: "<value>",
 				},
 			))
+		})
+
+		It("returns an error if the type is not registered", func() {
+			_, err := UnmarshalMessage(
+				marshaler,
+				Packet{
+					"application/json; type=MessageC",
+					[]byte(`{"Value":"\u003cvalue\u003e"}`),
+				},
+			)
+			Expect(err).To(MatchError("the portable type name 'MessageC' is not recognized"))
+		})
+	})
+
+	Describe("func MustUnmarshalMessage()", func() {
+		It("unmarshals the message using the marshaler", func() {
+			m := MustUnmarshalMessage(
+				marshaler,
+				Packet{
+					"application/json; type=MessageA",
+					[]byte(`{"Value":"\u003cvalue\u003e"}`),
+				},
+			)
+			Expect(m).To(Equal(
+				fixtures.MessageA{
+					Value: "<value>",
+				},
+			))
+		})
+
+		It("panics if the type is not registered", func() {
+			Expect(func() {
+				MustUnmarshalMessage(
+					marshaler,
+					Packet{
+						"application/json; type=MessageC",
+						[]byte(`{"Value":"\u003cvalue\u003e"}`),
+					},
+				)
+			}).To(Panic())
 		})
 	})
 })

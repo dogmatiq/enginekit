@@ -11,5 +11,4 @@ require (
 	github.com/onsi/gomega v1.7.1
 	golang.org/x/net v0.0.0-20190311183353-d8887717615a // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
 )

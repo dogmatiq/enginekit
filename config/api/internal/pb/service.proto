@@ -6,7 +6,7 @@ option go_package = "github.com/dogmatiq/enginekit/config/api/internal/pb";
 import "config/api/internal/pb/identity.proto";
 import "config/api/internal/pb/config.proto";
 
-// Config is a service for inspecting the configuration Dogma applications
+// Config is a service for inspecting the configuration of Dogma applications
 // hosted by the engine on the server.
 service Config {
   // ListApplicationIdentities returns the identity of all applications.

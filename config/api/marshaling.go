@@ -43,7 +43,7 @@ func marshalApplication(m *marshaling.Marshaler, in *config.ApplicationConfig) *
 	return out
 }
 
-// unmarshalApplication marshals a config.ApplicationConfig from its protocol
+// unmarshalApplication unmarshals a config.ApplicationConfig from its protocol
 // buffers representation.
 func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *config.ApplicationConfig {
 	out := &config.ApplicationConfig{
@@ -86,7 +86,7 @@ func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.Handle
 	}
 }
 
-// unmarshalHandler marshals a config.HandlerConfig to its protocol buffers
+// unmarshalHandler unmarshals a config.HandlerConfig from its protocol buffers
 // representation.
 func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.HandlerConfig {
 	t := handler.Type(in.Type)
@@ -144,7 +144,7 @@ func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]stri
 	return out
 }
 
-// unmarshalRoleMap marshals a message.RoleMap from its protocol buffers
+// unmarshalRoleMap unmarshals a message.RoleMap from its protocol buffers
 // representation.
 func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) message.RoleMap {
 	var out message.RoleMap

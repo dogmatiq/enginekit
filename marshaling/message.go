@@ -95,7 +95,7 @@ func UnmarshalMessage(ma *Marshaler, p Packet) (dogma.Message, error) {
 }
 
 // MustUnmarshalMessage returns a message from its binary representation.
-// It panics if un marshaling fails.
+// It panics if unmarshaling fails.
 func MustUnmarshalMessage(ma *Marshaler, p Packet) dogma.Message {
 	m, err := UnmarshalMessage(ma, p)
 	if err != nil {

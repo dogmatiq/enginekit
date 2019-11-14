@@ -128,6 +128,25 @@ var _ = Context("messages", func() {
 		})
 	})
 
+	Describe("func MustUnmarshalMessageTypeFromMediaType()", func() {
+		It("returns the message type", func() {
+			t := MustUnmarshalMessageTypeFromMediaType(
+				marshaler,
+				"application/json; type=MessageA",
+			)
+			Expect(t).To(Equal(fixtures.MessageAType))
+		})
+
+		It("returns an error if the type is not registered", func() {
+			Expect(func() {
+				MustUnmarshalMessageTypeFromMediaType(
+					marshaler,
+					"application/json; type=MessageC",
+				)
+			}).To(Panic())
+		})
+	})
+
 	Describe("func MarshalMessage()", func() {
 		It("marshals the message using the marshaler", func() {
 			p, err := MarshalMessage(

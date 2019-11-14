@@ -1,0 +1,214 @@
+package api_test
+
+import (
+	"context"
+	"net"
+	"time"
+
+	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config"
+	. "github.com/dogmatiq/enginekit/config/api"
+	"github.com/dogmatiq/enginekit/fixtures"
+	"github.com/dogmatiq/enginekit/identity"
+	"github.com/dogmatiq/enginekit/marshaling"
+	"github.com/dogmatiq/enginekit/marshaling/json"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"google.golang.org/grpc"
+)
+
+var _ = Describe("type Client", func() {
+	var (
+		ctx        context.Context
+		cancel     func()
+		app1, app2 dogma.Application
+		cfg1, cfg2 *config.ApplicationConfig
+		marshaler  *marshaling.Marshaler
+		listener   net.Listener
+		gserver    *grpc.Server
+		client     *Client
+	)
+
+	BeforeEach(func() {
+		var fn func()
+		ctx, fn = context.WithTimeout(context.Background(), 1*time.Second)
+		cancel = fn // bypass linter warning about cancel being unused
+
+		var err error
+
+		app1 = &fixtures.Application{
+			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+				c.Identity("<app-1>", "<app-key-1>")
+
+				c.RegisterAggregate(&fixtures.AggregateMessageHandler{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("<aggregate>", "<aggregate-key>")
+						c.ConsumesCommandType(fixtures.MessageC{})
+						c.ProducesEventType(fixtures.MessageE{})
+					},
+				})
+
+				c.RegisterProcess(&fixtures.ProcessMessageHandler{
+					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+						c.Identity("<process>", "<process-key>")
+						c.ConsumesEventType(fixtures.MessageE{})
+						c.ProducesCommandType(fixtures.MessageC{})
+						c.SchedulesTimeoutType(fixtures.MessageT{})
+					},
+				})
+			},
+		}
+
+		app2 = &fixtures.Application{
+			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+				c.Identity("<app-2>", "<app-key-2>")
+
+				c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
+					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+						c.Identity("<integration>", "<integration-key>")
+						c.ConsumesCommandType(fixtures.MessageI{})
+						c.ProducesEventType(fixtures.MessageJ{})
+					},
+				})
+
+				c.RegisterProjection(&fixtures.ProjectionMessageHandler{
+					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+						c.Identity("<projection>", "<projection-key>")
+						c.ConsumesEventType(fixtures.MessageE{})
+						c.ConsumesEventType(fixtures.MessageJ{})
+					},
+				})
+			},
+		}
+
+		cfg1, err = config.NewApplicationConfig(app1)
+		Expect(err).ShouldNot(HaveOccurred())
+		cfg1.Accept(context.Background(), stripEntities{})
+
+		cfg2, err = config.NewApplicationConfig(app2)
+		Expect(err).ShouldNot(HaveOccurred())
+		cfg2.Accept(context.Background(), stripEntities{})
+
+		marshaler, err = marshaling.NewMarshalerForApplications(
+			[]*config.ApplicationConfig{cfg1, cfg2},
+			[]marshaling.Codec{
+				&json.Codec{},
+			},
+		)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		listener, err = net.Listen("tcp", ":")
+		Expect(err).ShouldNot(HaveOccurred())
+
+		gserver = grpc.NewServer()
+		RegisterServer(gserver, marshaler, cfg1, cfg2)
+
+		go gserver.Serve(listener)
+
+		conn, err := grpc.Dial(
+			listener.Addr().String(),
+			grpc.WithInsecure(),
+		)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		client = &Client{
+			conn,
+			marshaler,
+		}
+	})
+
+	AfterEach(func() {
+		if listener != nil {
+			listener.Close()
+		}
+
+		if gserver != nil {
+			gserver.Stop()
+		}
+
+		cancel()
+	})
+
+	Describe("func ListApplicationIdentities()", func() {
+		It("returns the application identities", func() {
+			idents, err := client.ListApplicationIdentities(ctx)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(idents).To(ConsistOf(
+				identity.MustNew("<app-1>", "<app-key-1>"),
+				identity.MustNew("<app-2>", "<app-key-2>"),
+			))
+		})
+
+		It("returns an error if the gRPC call fails", func() {
+			gserver.Stop()
+			_, err := client.ListApplicationIdentities(ctx)
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+
+	Describe("func ListApplications()", func() {
+		It("returns the application configurations", func() {
+			configs, err := client.ListApplications(ctx)
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(configs).To(ConsistOf(
+				cfg1,
+				cfg2,
+			))
+		})
+
+		It("returns an error if the gRPC call fails", func() {
+			gserver.Stop()
+			_, err := client.ListApplications(ctx)
+			Expect(err).Should(HaveOccurred())
+		})
+	})
+})
+
+// stripEntities is a config visitor that sets all application/handler values to
+// nil, to mimic how the config would appear when obtained via the API.
+type stripEntities struct{}
+
+func (v stripEntities) VisitApplicationConfig(
+	ctx context.Context,
+	cfg *config.ApplicationConfig,
+) error {
+	cfg.Application = nil
+
+	for _, h := range cfg.HandlersByKey {
+		h.Accept(ctx, v)
+	}
+
+	return nil
+}
+
+func (v stripEntities) VisitAggregateConfig(
+	ctx context.Context,
+	cfg *config.AggregateConfig,
+) error {
+	cfg.Handler = nil
+	return nil
+}
+
+func (v stripEntities) VisitProcessConfig(
+	ctx context.Context,
+	cfg *config.ProcessConfig,
+) error {
+	cfg.Handler = nil
+	return nil
+}
+
+func (v stripEntities) VisitIntegrationConfig(
+	ctx context.Context,
+	cfg *config.IntegrationConfig,
+) error {
+	cfg.Handler = nil
+	return nil
+}
+
+func (v stripEntities) VisitProjectionConfig(
+	ctx context.Context,
+	cfg *config.ProjectionConfig,
+) error {
+	cfg.Handler = nil
+	return nil
+}

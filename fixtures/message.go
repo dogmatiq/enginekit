@@ -1,8 +1,6 @@
 package fixtures
 
-import (
-	"github.com/dogmatiq/enginekit/message"
-)
+import "github.com/dogmatiq/enginekit/config"
 
 // MessageA is type used as a dogma.Message in tests.
 type MessageA struct {
@@ -11,7 +9,7 @@ type MessageA struct {
 
 var (
 	// MessageAType is the message.Type for the MessageA struct.
-	MessageAType = message.TypeOf(MessageA{})
+	MessageAType = config.MessageTypeOf(MessageA{})
 
 	// MessageA1 is an instance of MessageA with a distinct value to be used in tests.
 	MessageA1 = MessageA{"A1"}
@@ -28,7 +26,7 @@ type MessageB struct {
 
 var (
 	// MessageBType is the message.Type for the MessageB struct.
-	MessageBType = message.TypeOf(MessageB{})
+	MessageBType = config.MessageTypeOf(MessageB{})
 
 	// MessageB1 is an instance of MessageB with a distinct value to be used in tests.
 	MessageB1 = MessageB{"B1"}
@@ -45,7 +43,7 @@ type MessageC struct {
 
 var (
 	// MessageCType is the message.Type for the MessageC struct.
-	MessageCType = message.TypeOf(MessageC{})
+	MessageCType = config.MessageTypeOf(MessageC{})
 
 	// MessageC1 is an instance of MessageC with a distinct value to be used in tests.
 	MessageC1 = MessageC{"C1"}
@@ -62,7 +60,7 @@ type MessageD struct {
 
 var (
 	// MessageDType is the message.Type for the MessageD struct.
-	MessageDType = message.TypeOf(MessageD{})
+	MessageDType = config.MessageTypeOf(MessageD{})
 
 	// MessageD1 is an instance of MessageD with a distinct value to be used in tests.
 	MessageD1 = MessageD{"D1"}
@@ -79,7 +77,7 @@ type MessageE struct {
 
 var (
 	// MessageEType is the message.Type for the MessageE struct.
-	MessageEType = message.TypeOf(MessageE{})
+	MessageEType = config.MessageTypeOf(MessageE{})
 
 	// MessageE1 is an instance of MessageE with a distinct value to be used in tests.
 	MessageE1 = MessageE{"E1"}
@@ -96,7 +94,7 @@ type MessageF struct {
 
 var (
 	// MessageFType is the message.Type for the MessageF struct.
-	MessageFType = message.TypeOf(MessageF{})
+	MessageFType = config.MessageTypeOf(MessageF{})
 
 	// MessageF1 is an instance of MessageF with a distinct value to be used in tests.
 	MessageF1 = MessageF{"F1"}
@@ -113,7 +111,7 @@ type MessageG struct {
 
 var (
 	// MessageGType is the message.Type for the MessageG struct.
-	MessageGType = message.TypeOf(MessageG{})
+	MessageGType = config.MessageTypeOf(MessageG{})
 
 	// MessageG1 is an instance of MessageG with a distinct value to be used in tests.
 	MessageG1 = MessageG{"G1"}
@@ -130,7 +128,7 @@ type MessageH struct {
 
 var (
 	// MessageHType is the message.Type for the MessageH struct.
-	MessageHType = message.TypeOf(MessageH{})
+	MessageHType = config.MessageTypeOf(MessageH{})
 
 	// MessageH1 is an instance of MessageH with a distinct value to be used in tests.
 	MessageH1 = MessageH{"H1"}
@@ -147,7 +145,7 @@ type MessageI struct {
 
 var (
 	// MessageIType is the message.Type for the MessageI struct.
-	MessageIType = message.TypeOf(MessageI{})
+	MessageIType = config.MessageTypeOf(MessageI{})
 
 	// MessageI1 is an instance of MessageI with a distinct value to be used in tests.
 	MessageI1 = MessageI{"I1"}
@@ -164,7 +162,7 @@ type MessageJ struct {
 
 var (
 	// MessageJType is the message.Type for the MessageJ struct.
-	MessageJType = message.TypeOf(MessageJ{})
+	MessageJType = config.MessageTypeOf(MessageJ{})
 
 	// MessageJ1 is an instance of MessageJ with a distinct value to be used in tests.
 	MessageJ1 = MessageJ{"J1"}
@@ -181,7 +179,7 @@ type MessageK struct {
 
 var (
 	// MessageKType is the message.Type for the MessageK struct.
-	MessageKType = message.TypeOf(MessageK{})
+	MessageKType = config.MessageTypeOf(MessageK{})
 
 	// MessageK1 is an instance of MessageK with a distinct value to be used in tests.
 	MessageK1 = MessageK{"K1"}
@@ -198,7 +196,7 @@ type MessageL struct {
 
 var (
 	// MessageLType is the message.Type for the MessageL struct.
-	MessageLType = message.TypeOf(MessageL{})
+	MessageLType = config.MessageTypeOf(MessageL{})
 
 	// MessageL1 is an instance of MessageL with a distinct value to be used in tests.
 	MessageL1 = MessageL{"L1"}
@@ -215,7 +213,7 @@ type MessageM struct {
 
 var (
 	// MessageMType is the message.Type for the MessageM struct.
-	MessageMType = message.TypeOf(MessageM{})
+	MessageMType = config.MessageTypeOf(MessageM{})
 
 	// MessageM1 is an instance of MessageM with a distinct value to be used in tests.
 	MessageM1 = MessageM{"M1"}
@@ -232,7 +230,7 @@ type MessageN struct {
 
 var (
 	// MessageNType is the message.Type for the MessageN struct.
-	MessageNType = message.TypeOf(MessageN{})
+	MessageNType = config.MessageTypeOf(MessageN{})
 
 	// MessageN1 is an instance of MessageN with a distinct value to be used in tests.
 	MessageN1 = MessageN{"N1"}
@@ -249,7 +247,7 @@ type MessageO struct {
 
 var (
 	// MessageOType is the message.Type for the MessageO struct.
-	MessageOType = message.TypeOf(MessageO{})
+	MessageOType = config.MessageTypeOf(MessageO{})
 
 	// MessageO1 is an instance of MessageO with a distinct value to be used in tests.
 	MessageO1 = MessageO{"O1"}
@@ -266,7 +264,7 @@ type MessageP struct {
 
 var (
 	// MessagePType is the message.Type for the MessageP struct.
-	MessagePType = message.TypeOf(MessageP{})
+	MessagePType = config.MessageTypeOf(MessageP{})
 
 	// MessageP1 is an instance of MessageP with a distinct value to be used in tests.
 	MessageP1 = MessageP{"P1"}
@@ -283,7 +281,7 @@ type MessageQ struct {
 
 var (
 	// MessageQType is the message.Type for the MessageQ struct.
-	MessageQType = message.TypeOf(MessageQ{})
+	MessageQType = config.MessageTypeOf(MessageQ{})
 
 	// MessageQ1 is an instance of MessageQ with a distinct value to be used in tests.
 	MessageQ1 = MessageQ{"Q1"}
@@ -300,7 +298,7 @@ type MessageR struct {
 
 var (
 	// MessageRType is the message.Type for the MessageR struct.
-	MessageRType = message.TypeOf(MessageR{})
+	MessageRType = config.MessageTypeOf(MessageR{})
 
 	// MessageR1 is an instance of MessageR with a distinct value to be used in tests.
 	MessageR1 = MessageR{"R1"}
@@ -317,7 +315,7 @@ type MessageS struct {
 
 var (
 	// MessageSType is the message.Type for the MessageS struct.
-	MessageSType = message.TypeOf(MessageS{})
+	MessageSType = config.MessageTypeOf(MessageS{})
 
 	// MessageS1 is an instance of MessageS with a distinct value to be used in tests.
 	MessageS1 = MessageS{"S1"}
@@ -334,7 +332,7 @@ type MessageT struct {
 
 var (
 	// MessageTType is the message.Type for the MessageT struct.
-	MessageTType = message.TypeOf(MessageT{})
+	MessageTType = config.MessageTypeOf(MessageT{})
 
 	// MessageT1 is an instance of MessageT with a distinct value to be used in tests.
 	MessageT1 = MessageT{"T1"}
@@ -351,7 +349,7 @@ type MessageU struct {
 
 var (
 	// MessageUType is the message.Type for the MessageU struct.
-	MessageUType = message.TypeOf(MessageU{})
+	MessageUType = config.MessageTypeOf(MessageU{})
 
 	// MessageU1 is an instance of MessageU with a distinct value to be used in tests.
 	MessageU1 = MessageU{"U1"}
@@ -368,7 +366,7 @@ type MessageV struct {
 
 var (
 	// MessageVType is the message.Type for the MessageV struct.
-	MessageVType = message.TypeOf(MessageV{})
+	MessageVType = config.MessageTypeOf(MessageV{})
 
 	// MessageV1 is an instance of MessageV with a distinct value to be used in tests.
 	MessageV1 = MessageV{"V1"}
@@ -385,7 +383,7 @@ type MessageW struct {
 
 var (
 	// MessageWType is the message.Type for the MessageW struct.
-	MessageWType = message.TypeOf(MessageW{})
+	MessageWType = config.MessageTypeOf(MessageW{})
 
 	// MessageW1 is an instance of MessageW with a distinct value to be used in tests.
 	MessageW1 = MessageW{"W1"}
@@ -402,7 +400,7 @@ type MessageX struct {
 
 var (
 	// MessageXType is the message.Type for the MessageX struct.
-	MessageXType = message.TypeOf(MessageX{})
+	MessageXType = config.MessageTypeOf(MessageX{})
 
 	// MessageX1 is an instance of MessageX with a distinct value to be used in tests.
 	MessageX1 = MessageX{"X1"}
@@ -419,7 +417,7 @@ type MessageY struct {
 
 var (
 	// MessageYType is the message.Type for the MessageY struct.
-	MessageYType = message.TypeOf(MessageY{})
+	MessageYType = config.MessageTypeOf(MessageY{})
 
 	// MessageY1 is an instance of MessageY with a distinct value to be used in tests.
 	MessageY1 = MessageY{"Y1"}
@@ -436,7 +434,7 @@ type MessageZ struct {
 
 var (
 	// MessageZType is the message.Type for the MessageZ struct.
-	MessageZType = message.TypeOf(MessageZ{})
+	MessageZType = config.MessageTypeOf(MessageZ{})
 
 	// MessageZ1 is an instance of MessageZ with a distinct value to be used in tests.
 	MessageZ1 = MessageZ{"Z1"}

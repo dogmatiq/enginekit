@@ -1,20 +1,19 @@
-package message_test
+package config_test
 
 import (
+	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/message"
-	. "github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ TypeContainer = RoleMap{}
+var _ MessageTypeContainer = MessageRoleMap{}
 
-var _ = Describe("type RoleMap", func() {
+var _ = Describe("type MessageRoleMap", func() {
 	Describe("func Has()", func() {
-		rm := RoleMap{
-			fixtures.MessageAType: CommandRole,
-			fixtures.MessageBType: EventRole,
+		rm := MessageRoleMap{
+			fixtures.MessageAType: CommandMessageRole,
+			fixtures.MessageBType: EventMessageRole,
 		}
 
 		It("returns true if the type is in the map", func() {
@@ -31,9 +30,9 @@ var _ = Describe("type RoleMap", func() {
 	})
 
 	Describe("func HasM()", func() {
-		rm := RoleMap{
-			fixtures.MessageAType: CommandRole,
-			fixtures.MessageBType: EventRole,
+		rm := MessageRoleMap{
+			fixtures.MessageAType: CommandMessageRole,
+			fixtures.MessageBType: EventMessageRole,
 		}
 
 		It("returns true if the type is in the map", func() {
@@ -51,8 +50,8 @@ var _ = Describe("type RoleMap", func() {
 
 	Describe("func Add()", func() {
 		It("adds the type to the map", func() {
-			rm := RoleMap{}
-			rm.Add(fixtures.MessageAType, CommandRole)
+			rm := MessageRoleMap{}
+			rm.Add(fixtures.MessageAType, CommandMessageRole)
 
 			Expect(
 				rm.Has(fixtures.MessageAType),
@@ -60,31 +59,31 @@ var _ = Describe("type RoleMap", func() {
 		})
 
 		It("returns true if the type is not already in the map", func() {
-			rm := RoleMap{}
+			rm := MessageRoleMap{}
 
 			Expect(
-				rm.Add(fixtures.MessageAType, CommandRole),
+				rm.Add(fixtures.MessageAType, CommandMessageRole),
 			).To(BeTrue())
 		})
 
 		It("returns false if the type is already in the map", func() {
-			rm := RoleMap{}
-			rm.Add(fixtures.MessageAType, CommandRole)
+			rm := MessageRoleMap{}
+			rm.Add(fixtures.MessageAType, CommandMessageRole)
 
 			Expect(
-				rm.Add(fixtures.MessageAType, EventRole),
+				rm.Add(fixtures.MessageAType, EventMessageRole),
 			).To(BeFalse())
 
 			Expect(
 				rm[fixtures.MessageAType],
-			).To(Equal(CommandRole))
+			).To(Equal(CommandMessageRole))
 		})
 	})
 
 	Describe("func AddM()", func() {
 		It("adds the type of the message to the map", func() {
-			rm := RoleMap{}
-			rm.AddM(fixtures.MessageA1, CommandRole)
+			rm := MessageRoleMap{}
+			rm.AddM(fixtures.MessageA1, CommandMessageRole)
 
 			Expect(
 				rm.Has(fixtures.MessageAType),
@@ -92,30 +91,30 @@ var _ = Describe("type RoleMap", func() {
 		})
 
 		It("returns true if the type is not already in the map", func() {
-			rm := RoleMap{}
+			rm := MessageRoleMap{}
 
 			Expect(
-				rm.AddM(fixtures.MessageA1, CommandRole),
+				rm.AddM(fixtures.MessageA1, CommandMessageRole),
 			).To(BeTrue())
 		})
 
 		It("returns false if the type is already in the map", func() {
-			rm := RoleMap{}
-			rm.AddM(fixtures.MessageA1, CommandRole)
+			rm := MessageRoleMap{}
+			rm.AddM(fixtures.MessageA1, CommandMessageRole)
 
 			Expect(
-				rm.AddM(fixtures.MessageA1, EventRole),
+				rm.AddM(fixtures.MessageA1, EventMessageRole),
 			).To(BeFalse())
 
 			Expect(
 				rm[fixtures.MessageAType],
-			).To(Equal(CommandRole))
+			).To(Equal(CommandMessageRole))
 		})
 	})
 
 	Describe("func Remove()", func() {
 		It("removes the type from the set", func() {
-			rm := RoleMap{fixtures.MessageAType: CommandRole}
+			rm := MessageRoleMap{fixtures.MessageAType: CommandMessageRole}
 			rm.Remove(fixtures.MessageAType)
 
 			Expect(
@@ -124,7 +123,7 @@ var _ = Describe("type RoleMap", func() {
 		})
 
 		It("returns true if the type is already in the set", func() {
-			rm := RoleMap{fixtures.MessageAType: CommandRole}
+			rm := MessageRoleMap{fixtures.MessageAType: CommandMessageRole}
 
 			Expect(
 				rm.Remove(fixtures.MessageAType),
@@ -132,7 +131,7 @@ var _ = Describe("type RoleMap", func() {
 		})
 
 		It("returns false if the type is not already in the set", func() {
-			rm := RoleMap{}
+			rm := MessageRoleMap{}
 
 			Expect(
 				rm.Remove(fixtures.MessageAType),
@@ -142,7 +141,7 @@ var _ = Describe("type RoleMap", func() {
 
 	Describe("func RemoveM()", func() {
 		It("removes the type of the message from the set", func() {
-			rm := RoleMap{fixtures.MessageAType: CommandRole}
+			rm := MessageRoleMap{fixtures.MessageAType: CommandMessageRole}
 			rm.RemoveM(fixtures.MessageA1)
 
 			Expect(
@@ -151,7 +150,7 @@ var _ = Describe("type RoleMap", func() {
 		})
 
 		It("returns true if the type is already in the set", func() {
-			rm := RoleMap{fixtures.MessageAType: CommandRole}
+			rm := MessageRoleMap{fixtures.MessageAType: CommandMessageRole}
 
 			Expect(
 				rm.RemoveM(fixtures.MessageA1),
@@ -159,7 +158,7 @@ var _ = Describe("type RoleMap", func() {
 		})
 
 		It("returns false if the type is not already in the set", func() {
-			rm := RoleMap{}
+			rm := MessageRoleMap{}
 
 			Expect(
 				rm.RemoveM(fixtures.MessageA1),
@@ -168,15 +167,15 @@ var _ = Describe("type RoleMap", func() {
 	})
 
 	Describe("func Each()", func() {
-		rm := RoleMap{
-			fixtures.MessageAType: CommandRole,
-			fixtures.MessageBType: EventRole,
+		rm := MessageRoleMap{
+			fixtures.MessageAType: CommandMessageRole,
+			fixtures.MessageBType: EventMessageRole,
 		}
 
 		It("calls fn for each type in the container", func() {
-			var types []message.Type
+			var types []MessageType
 
-			all := rm.Each(func(t message.Type) bool {
+			all := rm.Each(func(t MessageType) bool {
 				types = append(types, t)
 				return true
 			})
@@ -188,7 +187,7 @@ var _ = Describe("type RoleMap", func() {
 		It("stops iterating if fn returns false", func() {
 			count := 0
 
-			all := rm.Each(func(t message.Type) bool {
+			all := rm.Each(func(t MessageType) bool {
 				count++
 				return false
 			})

@@ -4,7 +4,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -78,21 +77,21 @@ var _ = Describe("type ApplicationConfig", func() {
 
 			It("sets the roles map", func() {
 				Expect(cfg.Roles).To(Equal(
-					message.RoleMap{
-						fixtures.MessageAType: message.CommandRole,
-						fixtures.MessageBType: message.EventRole,
-						fixtures.MessageCType: message.CommandRole,
-						fixtures.MessageDType: message.EventRole,
-						fixtures.MessageEType: message.EventRole,
-						fixtures.MessageFType: message.EventRole,
-						fixtures.MessageTType: message.TimeoutRole,
+					MessageRoleMap{
+						fixtures.MessageAType: CommandMessageRole,
+						fixtures.MessageBType: EventMessageRole,
+						fixtures.MessageCType: CommandMessageRole,
+						fixtures.MessageDType: EventMessageRole,
+						fixtures.MessageEType: EventMessageRole,
+						fixtures.MessageFType: EventMessageRole,
+						fixtures.MessageTType: TimeoutMessageRole,
 					},
 				))
 			})
 
 			It("sets the consumers map", func() {
 				Expect(cfg.Consumers).To(Equal(
-					map[message.Type][]HandlerConfig{
+					map[MessageType][]HandlerConfig{
 						fixtures.MessageAType: {cfg.HandlersByName["<aggregate>"]},
 						fixtures.MessageBType: {cfg.HandlersByName["<process>"]},
 						fixtures.MessageCType: {cfg.HandlersByName["<integration>"]},
@@ -105,7 +104,7 @@ var _ = Describe("type ApplicationConfig", func() {
 
 			It("sets the producers map", func() {
 				Expect(cfg.Producers).To(Equal(
-					map[message.Type][]HandlerConfig{
+					map[MessageType][]HandlerConfig{
 						fixtures.MessageCType: {cfg.HandlersByName["<process>"]},
 						fixtures.MessageEType: {cfg.HandlersByName["<aggregate>"]},
 						fixtures.MessageFType: {cfg.HandlersByName["<integration>"]},

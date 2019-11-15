@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // ApplicationConfig represents the configuration of an entire Dogma application.
@@ -25,15 +24,15 @@ type ApplicationConfig struct {
 
 	// Roles is a map of message type to the role it performs within the
 	// application.
-	Roles message.RoleMap
+	Roles MessageRoleMap
 
 	// Consumers is a map of message type to the handler configs of the handlers
 	// that consume messages of that type.
-	Consumers map[message.Type][]HandlerConfig
+	Consumers map[MessageType][]HandlerConfig
 
 	// Producers is a map of message type to the handler configs of the handlers
 	// that produce messages of that type.
-	Producers map[message.Type][]HandlerConfig
+	Producers map[MessageType][]HandlerConfig
 }
 
 // NewApplicationConfig returns a new application config for the given application.
@@ -42,9 +41,9 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 		Application:    app,
 		HandlersByName: map[string]HandlerConfig{},
 		HandlersByKey:  map[string]HandlerConfig{},
-		Roles:          message.RoleMap{},
-		Consumers:      map[message.Type][]HandlerConfig{},
-		Producers:      map[message.Type][]HandlerConfig{},
+		Roles:          MessageRoleMap{},
+		Consumers:      map[MessageType][]HandlerConfig{},
+		Producers:      map[MessageType][]HandlerConfig{},
 	}
 
 	c := &applicationConfigurer{
@@ -101,7 +100,7 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 	for t, r := range cfg.ConsumedMessageTypes() {
 		c.checkMessageType(cfg, t, r)
 
-		if r == message.CommandRole {
+		if r == CommandMessageRole {
 			if x, ok := c.Consumers[t]; ok {
 				panicf(
 					"the %#v handler can not consume %s commands because they are already consumed by %#v",
@@ -116,7 +115,7 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 	for t, r := range cfg.ProducedMessageTypes() {
 		c.checkMessageType(cfg, t, r)
 
-		if r == message.EventRole {
+		if r == EventMessageRole {
 			if x, ok := c.Producers[t]; ok {
 				panicf(
 					"the %#v handler can not produce %s events because they are already produced by %#v",
@@ -146,8 +145,8 @@ func (c *ApplicationConfig) register(cfg HandlerConfig) {
 // a different role.
 func (c *ApplicationConfig) checkMessageType(
 	cfg HandlerConfig,
-	t message.Type,
-	r message.Role,
+	t MessageType,
+	r MessageRole,
 ) {
 	x, ok := c.Roles[t]
 	if !ok || x == r {

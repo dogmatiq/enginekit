@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // AggregateConfig represents the configuration of an aggregate message handler.
@@ -20,19 +19,19 @@ type AggregateConfig struct {
 
 	// Consumed is a map of message type to role for those message types
 	// consumed by this handler.
-	Consumed message.RoleMap
+	Consumed MessageRoleMap
 
 	// Produced is a map of message type to role for those message types
 	// produced by this handler.
-	Produced message.RoleMap
+	Produced MessageRoleMap
 }
 
 // NewAggregateConfig returns an AggregateConfig for the given handler.
 func NewAggregateConfig(h dogma.AggregateMessageHandler) (*AggregateConfig, error) {
 	cfg := &AggregateConfig{
 		Handler:  h,
-		Consumed: message.RoleMap{},
-		Produced: message.RoleMap{},
+		Consumed: MessageRoleMap{},
+		Produced: MessageRoleMap{},
 	}
 
 	c := &aggregateConfigurer{
@@ -85,12 +84,12 @@ func (c *AggregateConfig) HandlerReflectType() reflect.Type {
 }
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
-func (c *AggregateConfig) ConsumedMessageTypes() message.RoleMap {
+func (c *AggregateConfig) ConsumedMessageTypes() MessageRoleMap {
 	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
-func (c *AggregateConfig) ProducedMessageTypes() message.RoleMap {
+func (c *AggregateConfig) ProducedMessageTypes() MessageRoleMap {
 	return c.Produced
 }
 
@@ -128,7 +127,7 @@ func (c *aggregateConfigurer) Identity(n, k string) {
 }
 
 func (c *aggregateConfigurer) ConsumesCommandType(m dogma.Message) {
-	if !c.cfg.Consumed.AddM(m, message.CommandRole) {
+	if !c.cfg.Consumed.AddM(m, CommandMessageRole) {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.ConsumesCommandType(%T)`,
 			c.cfg.Handler,
@@ -138,7 +137,7 @@ func (c *aggregateConfigurer) ConsumesCommandType(m dogma.Message) {
 }
 
 func (c *aggregateConfigurer) ProducesEventType(m dogma.Message) {
-	if !c.cfg.Produced.AddM(m, message.EventRole) {
+	if !c.cfg.Produced.AddM(m, EventMessageRole) {
 		panicf(
 			`%T.Configure() has already called AggregateConfigurer.ProducesEventType(%T)`,
 			c.cfg.Handler,

@@ -4,7 +4,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -54,10 +53,10 @@ var _ = Describe("type ProcessConfig", func() {
 			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
-						message.RoleMap{
-							fixtures.MessageAType: message.EventRole,
-							fixtures.MessageBType: message.EventRole,
-							fixtures.MessageTType: message.TimeoutRole,
+						MessageRoleMap{
+							fixtures.MessageAType: EventMessageRole,
+							fixtures.MessageBType: EventMessageRole,
+							fixtures.MessageTType: TimeoutMessageRole,
 						},
 					))
 				})
@@ -66,9 +65,9 @@ var _ = Describe("type ProcessConfig", func() {
 			Describe("func ProducedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
-						message.RoleMap{
-							fixtures.MessageCType: message.CommandRole,
-							fixtures.MessageTType: message.TimeoutRole,
+						MessageRoleMap{
+							fixtures.MessageCType: CommandMessageRole,
+							fixtures.MessageTType: TimeoutMessageRole,
 						},
 					))
 				})

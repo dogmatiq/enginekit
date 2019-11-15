@@ -1,34 +1,33 @@
-package message_test
+package config_test
 
 import (
+	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/message"
-	. "github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ TypeContainer = TypeSet{}
+var _ MessageTypeContainer = MessageTypeSet{}
 
-var _ = Describe("type TypeSet", func() {
-	Describe("func NewTypeSet", func() {
+var _ = Describe("type MessageTypeSet", func() {
+	Describe("func NewMessageTypeSet", func() {
 		It("returns a set containing the given types", func() {
-			Expect(NewTypeSet(
+			Expect(NewMessageTypeSet(
 				fixtures.MessageAType,
 				fixtures.MessageBType,
-			)).To(Equal(TypeSet{
+			)).To(Equal(MessageTypeSet{
 				fixtures.MessageAType: struct{}{},
 				fixtures.MessageBType: struct{}{},
 			}))
 		})
 	})
 
-	Describe("func TypesOf", func() {
+	Describe("func MessageTypesOf", func() {
 		It("returns a set containing the types of the given messages", func() {
-			Expect(TypesOf(
+			Expect(MessageTypesOf(
 				fixtures.MessageA1,
 				fixtures.MessageB1,
-			)).To(Equal(TypeSet{
+			)).To(Equal(MessageTypeSet{
 				fixtures.MessageAType: struct{}{},
 				fixtures.MessageBType: struct{}{},
 			}))
@@ -36,7 +35,7 @@ var _ = Describe("type TypeSet", func() {
 	})
 
 	Describe("func Has", func() {
-		set := TypesOf(
+		set := MessageTypesOf(
 			fixtures.MessageA1,
 			fixtures.MessageB1,
 		)
@@ -55,7 +54,7 @@ var _ = Describe("type TypeSet", func() {
 	})
 
 	Describe("func HasM", func() {
-		set := TypesOf(
+		set := MessageTypesOf(
 			fixtures.MessageA1,
 			fixtures.MessageB1,
 		)
@@ -75,7 +74,7 @@ var _ = Describe("type TypeSet", func() {
 
 	Describe("func Add", func() {
 		It("adds the type to the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 			s.Add(fixtures.MessageAType)
 
 			Expect(
@@ -84,7 +83,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns true if the type is not already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 
 			Expect(
 				s.Add(fixtures.MessageAType),
@@ -92,7 +91,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns false if the type is already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 			s.Add(fixtures.MessageAType)
 
 			Expect(
@@ -103,7 +102,7 @@ var _ = Describe("type TypeSet", func() {
 
 	Describe("func AddM", func() {
 		It("adds the type of the message to the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 			s.AddM(fixtures.MessageA1)
 
 			Expect(
@@ -112,7 +111,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns true if the type is not already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 
 			Expect(
 				s.AddM(fixtures.MessageA1),
@@ -120,7 +119,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns false if the type is already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 			s.Add(fixtures.MessageAType)
 
 			Expect(
@@ -131,7 +130,7 @@ var _ = Describe("type TypeSet", func() {
 
 	Describe("func Remove", func() {
 		It("removes the type from the set", func() {
-			s := TypesOf(fixtures.MessageA1)
+			s := MessageTypesOf(fixtures.MessageA1)
 			s.Remove(fixtures.MessageAType)
 
 			Expect(
@@ -140,7 +139,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns true if the type is already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 			s.Add(fixtures.MessageAType)
 
 			Expect(
@@ -149,7 +148,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns false if the type is not already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 
 			Expect(
 				s.Remove(fixtures.MessageAType),
@@ -159,7 +158,7 @@ var _ = Describe("type TypeSet", func() {
 
 	Describe("func RemoveM", func() {
 		It("removes the type of the message from the set", func() {
-			s := TypesOf(fixtures.MessageA1)
+			s := MessageTypesOf(fixtures.MessageA1)
 			s.RemoveM(fixtures.MessageA1)
 
 			Expect(
@@ -168,7 +167,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns true if the type is already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 			s.Add(fixtures.MessageAType)
 
 			Expect(
@@ -177,7 +176,7 @@ var _ = Describe("type TypeSet", func() {
 		})
 
 		It("returns false if the type is not already in the set", func() {
-			s := TypesOf()
+			s := MessageTypesOf()
 
 			Expect(
 				s.RemoveM(fixtures.MessageA1),
@@ -186,15 +185,15 @@ var _ = Describe("type TypeSet", func() {
 	})
 
 	Describe("func Each()", func() {
-		s := NewTypeSet(
+		s := NewMessageTypeSet(
 			fixtures.MessageAType,
 			fixtures.MessageBType,
 		)
 
 		It("calls fn for each type in the container", func() {
-			var types []message.Type
+			var types []MessageType
 
-			all := s.Each(func(t message.Type) bool {
+			all := s.Each(func(t MessageType) bool {
 				types = append(types, t)
 				return true
 			})
@@ -206,7 +205,7 @@ var _ = Describe("type TypeSet", func() {
 		It("stops iterating if fn returns false", func() {
 			count := 0
 
-			all := s.Each(func(t message.Type) bool {
+			all := s.Each(func(t MessageType) bool {
 				count++
 				return false
 			})

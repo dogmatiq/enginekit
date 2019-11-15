@@ -4,17 +4,17 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/enginekit/config"
 )
 
 // MarshalMessageType marshals a message type to its portable representation.
-func MarshalMessageType(ma *Marshaler, mt message.Type) (string, error) {
+func MarshalMessageType(ma *Marshaler, mt config.MessageType) (string, error) {
 	return ma.MarshalType(mt.ReflectType())
 }
 
 // MustMarshalMessageType marshals a message type to its portable representation.
 // It panics if marshaling fails.
-func MustMarshalMessageType(ma *Marshaler, mt message.Type) string {
+func MustMarshalMessageType(ma *Marshaler, mt config.MessageType) string {
 	s, err := MarshalMessageType(ma, mt)
 	if err != nil {
 		panic(PanicSentinel{err})
@@ -25,7 +25,7 @@ func MustMarshalMessageType(ma *Marshaler, mt message.Type) string {
 
 // UnmarshalMessageType unmarshals a message type from its portable
 // representation.
-func UnmarshalMessageType(ma *Marshaler, mt string) (message.Type, error) {
+func UnmarshalMessageType(ma *Marshaler, mt string) (config.MessageType, error) {
 	rt, err := ma.UnmarshalType(mt)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func UnmarshalMessageType(ma *Marshaler, mt string) (message.Type, error) {
 
 // MustUnmarshalMessageType unmarshals a message type from its portable
 // representation. It panics if unmarshaling fails.
-func MustUnmarshalMessageType(ma *Marshaler, mt string) message.Type {
+func MustUnmarshalMessageType(ma *Marshaler, mt string) config.MessageType {
 	t, err := UnmarshalMessageType(ma, mt)
 	if err != nil {
 		panic(PanicSentinel{err})
@@ -47,7 +47,7 @@ func MustUnmarshalMessageType(ma *Marshaler, mt string) message.Type {
 
 // UnmarshalMessageTypeFromMediaType unmarshals a message type from a MIME
 // media-type.
-func UnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) (message.Type, error) {
+func UnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) (config.MessageType, error) {
 	rt, err := ma.UnmarshalTypeFromMediaType(mt)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func UnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) (message.Type, 
 
 // MustUnmarshalMessageTypeFromMediaType unmarshals a message type from a MIME
 // media-type. It panics if unmarshaling fails.
-func MustUnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) message.Type {
+func MustUnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) config.MessageType {
 	t, err := UnmarshalMessageTypeFromMediaType(ma, mt)
 	if err != nil {
 		panic(PanicSentinel{err})
@@ -105,12 +105,12 @@ func MustUnmarshalMessage(ma *Marshaler, p Packet) dogma.Message {
 	return m
 }
 
-// toMessageType converts a reflect.Type to a message.Type.
+// toMessageType converts a reflect.Type to a config.MessageType.
 //
 // TODO: Remove this function. Blocked by
 // https://github.com/dogmatiq/enginekit/issues/8.
-func toMessageType(rt reflect.Type) message.Type {
-	return message.TypeOf(
+func toMessageType(rt reflect.Type) config.MessageType {
+	return config.MessageTypeOf(
 		reflect.Zero(rt).Interface(),
 	)
 }

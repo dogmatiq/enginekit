@@ -4,7 +4,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -53,9 +52,9 @@ var _ = Describe("type IntegrationConfig", func() {
 			Describe("func ConsumedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
-						message.RoleMap{
-							fixtures.MessageAType: message.CommandRole,
-							fixtures.MessageBType: message.CommandRole,
+						MessageRoleMap{
+							fixtures.MessageAType: CommandMessageRole,
+							fixtures.MessageBType: CommandMessageRole,
 						},
 					))
 				})
@@ -64,8 +63,8 @@ var _ = Describe("type IntegrationConfig", func() {
 			Describe("func ProducedMessageTypes()", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
-						message.RoleMap{
-							fixtures.MessageEType: message.EventRole,
+						MessageRoleMap{
+							fixtures.MessageEType: EventMessageRole,
 						},
 					))
 				})

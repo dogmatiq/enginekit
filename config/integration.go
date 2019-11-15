@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // IntegrationConfig represents the configuration of an integration message handler.
@@ -20,19 +19,19 @@ type IntegrationConfig struct {
 
 	// Consumed is a map of message type to role for those message types
 	// consumed by this handler.
-	Consumed message.RoleMap
+	Consumed MessageRoleMap
 
 	// Produced is a map of message type to role for those message types
 	// produced by this handler.
-	Produced message.RoleMap
+	Produced MessageRoleMap
 }
 
 // NewIntegrationConfig returns an IntegrationConfig for the given handler.
 func NewIntegrationConfig(h dogma.IntegrationMessageHandler) (*IntegrationConfig, error) {
 	cfg := &IntegrationConfig{
 		Handler:  h,
-		Consumed: message.RoleMap{},
-		Produced: message.RoleMap{},
+		Consumed: MessageRoleMap{},
+		Produced: MessageRoleMap{},
 	}
 
 	c := &integrationConfigurer{
@@ -78,12 +77,12 @@ func (c *IntegrationConfig) HandlerReflectType() reflect.Type {
 }
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
-func (c *IntegrationConfig) ConsumedMessageTypes() message.RoleMap {
+func (c *IntegrationConfig) ConsumedMessageTypes() MessageRoleMap {
 	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
-func (c *IntegrationConfig) ProducedMessageTypes() message.RoleMap {
+func (c *IntegrationConfig) ProducedMessageTypes() MessageRoleMap {
 	return c.Produced
 }
 
@@ -121,7 +120,7 @@ func (c *integrationConfigurer) Identity(n, k string) {
 }
 
 func (c *integrationConfigurer) ConsumesCommandType(m dogma.Message) {
-	if !c.cfg.Consumed.AddM(m, message.CommandRole) {
+	if !c.cfg.Consumed.AddM(m, CommandMessageRole) {
 		panicf(
 			`%T.Configure() has already called IntegrationConfigurer.ConsumesCommandType(%T)`,
 			c.cfg.Handler,
@@ -131,7 +130,7 @@ func (c *integrationConfigurer) ConsumesCommandType(m dogma.Message) {
 }
 
 func (c *integrationConfigurer) ProducesEventType(m dogma.Message) {
-	if !c.cfg.Produced.AddM(m, message.EventRole) {
+	if !c.cfg.Produced.AddM(m, EventMessageRole) {
 		panicf(
 			`%T.Configure() has already called IntegrationConfigurer.ProducesEventType(%T)`,
 			c.cfg.Handler,

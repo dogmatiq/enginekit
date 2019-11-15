@@ -1,4 +1,4 @@
-package message
+package config
 
 import (
 	"reflect"
@@ -7,10 +7,10 @@ import (
 	"github.com/dogmatiq/dogma"
 )
 
-// TypeContainer is an interface for containers of message types.
-type TypeContainer interface {
+// MessageTypeContainer is an interface for containers of message types.
+type MessageTypeContainer interface {
 	// Has returns true if t is in the container.
-	Has(t Type) bool
+	Has(t MessageType) bool
 
 	// HasM returns true if TypeOf(m) is in the container.
 	HasM(m dogma.Message) bool
@@ -21,11 +21,11 @@ type TypeContainer interface {
 	// types in the container.
 	//
 	// It returns true if fn returned true for all types.
-	Each(fn func(Type) bool) bool
+	Each(fn func(MessageType) bool) bool
 }
 
-// Type is a value that identifies the type of a message.
-type Type interface {
+// MessageType is a value that identifies the type of a message.
+type MessageType interface {
 	// ReflectType returns the reflect.Type for this message type.
 	ReflectType() reflect.Type
 
@@ -34,16 +34,10 @@ type Type interface {
 	String() string
 }
 
-// TypeOf returns the message type of m.
-func TypeOf(m dogma.Message) Type {
-	rt := reflect.TypeOf(m)
-	return fromReflectType(rt)
-}
-
-// FromReflectType returns the message type for the Go type reprsented by rt.
+// NewMessageType returns the message type for the Go type reprsented by rt.
 //
 // If rt does not implement dogma.Message then mt is nil, and ok is false.
-func FromReflectType(rt reflect.Type) (mt Type, ok bool) {
+func NewMessageType(rt reflect.Type) (mt MessageType, ok bool) {
 	// This is a compile time assertion that the dogma.Message interface
 	// contains no methods. If this line fails to compile due to missing
 	// methods, additional logic must be added to handle the case where rt
@@ -52,13 +46,19 @@ func FromReflectType(rt reflect.Type) (mt Type, ok bool) {
 
 	// The current implementation always returns true, as the dogma.Message
 	// interface is empty, and hence all types satisfy it.
-	return fromReflectType(rt), true
+	return newMessageType(rt), true
 }
 
-// fromReflectType returns the message type for the Go type reprsented by t.
+// MessageTypeOf returns the message type of m.
+func MessageTypeOf(m dogma.Message) MessageType {
+	rt := reflect.TypeOf(m)
+	return newMessageType(rt)
+}
+
+// newMessageType returns the message type for the Go type reprsented by t.
 //
 // It is assumed that t implements dogma.Message.
-func fromReflectType(rt reflect.Type) Type {
+func newMessageType(rt reflect.Type) MessageType {
 	// try to load first, to avoid building the string if it's already stored
 	v, loaded := mtypes.Load(rt)
 

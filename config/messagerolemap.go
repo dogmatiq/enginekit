@@ -1,29 +1,27 @@
-package message
+package config
 
-import (
-	"github.com/dogmatiq/dogma"
-)
+import "github.com/dogmatiq/dogma"
 
-// RoleMap is a map of message type to role.
-// It implements the TypeContainer interface.
-type RoleMap map[Type]Role
+// MessageRoleMap is a map of message type to role.
+// It implements the MessageTypeContainer interface.
+type MessageRoleMap map[MessageType]MessageRole
 
 // Has returns true if rm contains t.
-func (rm RoleMap) Has(t Type) bool {
+func (rm MessageRoleMap) Has(t MessageType) bool {
 	_, ok := rm[t]
 	return ok
 }
 
-// HasM returns true if rm contains TypeOf(m).
-func (rm RoleMap) HasM(m dogma.Message) bool {
-	return rm.Has(TypeOf(m))
+// HasM returns true if rm contains MessageTypeOf(m).
+func (rm MessageRoleMap) HasM(m dogma.Message) bool {
+	return rm.Has(MessageTypeOf(m))
 }
 
 // Add maps t to r.
 //
 // It returns true if the mapping was added, or false if the map already
 // contained the type.
-func (rm RoleMap) Add(t Type, r Role) bool {
+func (rm MessageRoleMap) Add(t MessageType, r MessageRole) bool {
 	if _, ok := rm[t]; ok {
 		return false
 	}
@@ -32,19 +30,19 @@ func (rm RoleMap) Add(t Type, r Role) bool {
 	return true
 }
 
-// AddM adds TypeOf(m) to rm.
+// AddM adds MessageTypeOf(m) to rm.
 //
 // It returns true if the mapping was added, or false if the map already
 // contained the type.
-func (rm RoleMap) AddM(m dogma.Message, r Role) bool {
-	return rm.Add(TypeOf(m), r)
+func (rm MessageRoleMap) AddM(m dogma.Message, r MessageRole) bool {
+	return rm.Add(MessageTypeOf(m), r)
 }
 
 // Remove removes t from rm.
 //
 // It returns true if the type was removed, or false if the set did not contain
 // the type.
-func (rm RoleMap) Remove(t Type) bool {
+func (rm MessageRoleMap) Remove(t MessageType) bool {
 	if _, ok := rm[t]; ok {
 		delete(rm, t)
 		return true
@@ -53,12 +51,12 @@ func (rm RoleMap) Remove(t Type) bool {
 	return false
 }
 
-// RemoveM removes TypeOf(m) from rm.
+// RemoveM removes MessageTypeOf(m) from rm.
 //
 // It returns true if the type was removed, or false if the set did not contain
 // the type.
-func (rm RoleMap) RemoveM(m dogma.Message) bool {
-	return rm.Remove(TypeOf(m))
+func (rm MessageRoleMap) RemoveM(m dogma.Message) bool {
+	return rm.Remove(MessageTypeOf(m))
 }
 
 // Each invokes fn once for each type in the container.
@@ -67,7 +65,7 @@ func (rm RoleMap) RemoveM(m dogma.Message) bool {
 // types in the container.
 //
 // It returns true if fn returned true for all types.
-func (rm RoleMap) Each(fn func(Type) bool) bool {
+func (rm MessageRoleMap) Each(fn func(MessageType) bool) bool {
 	for t := range rm {
 		if !fn(t) {
 			return false

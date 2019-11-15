@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // ProcessConfig represents the configuration of an process message handler.
@@ -20,19 +19,19 @@ type ProcessConfig struct {
 
 	// Consumed is a map of message type to role for those message types
 	// consumed by this handler.
-	Consumed message.RoleMap
+	Consumed MessageRoleMap
 
 	// Produced is a map of message type to role for those message types
 	// produced by this handler.
-	Produced message.RoleMap
+	Produced MessageRoleMap
 }
 
 // NewProcessConfig returns an ProcessConfig for the given handler.
 func NewProcessConfig(h dogma.ProcessMessageHandler) (*ProcessConfig, error) {
 	cfg := &ProcessConfig{
 		Handler:  h,
-		Consumed: message.RoleMap{},
-		Produced: message.RoleMap{},
+		Consumed: MessageRoleMap{},
+		Produced: MessageRoleMap{},
 	}
 
 	c := &processConfigurer{
@@ -85,12 +84,12 @@ func (c *ProcessConfig) HandlerReflectType() reflect.Type {
 }
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
-func (c *ProcessConfig) ConsumedMessageTypes() message.RoleMap {
+func (c *ProcessConfig) ConsumedMessageTypes() MessageRoleMap {
 	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
-func (c *ProcessConfig) ProducedMessageTypes() message.RoleMap {
+func (c *ProcessConfig) ProducedMessageTypes() MessageRoleMap {
 	return c.Produced
 }
 
@@ -128,20 +127,20 @@ func (c *processConfigurer) Identity(n, k string) {
 }
 
 func (c *processConfigurer) ConsumesEventType(m dogma.Message) {
-	c.add(c.cfg.Consumed, m, message.EventRole)
+	c.add(c.cfg.Consumed, m, EventMessageRole)
 }
 
 func (c *processConfigurer) ProducesCommandType(m dogma.Message) {
-	c.add(c.cfg.Produced, m, message.CommandRole)
+	c.add(c.cfg.Produced, m, CommandMessageRole)
 }
 
 func (c *processConfigurer) SchedulesTimeoutType(m dogma.Message) {
-	c.add(c.cfg.Consumed, m, message.TimeoutRole)
-	c.add(c.cfg.Produced, m, message.TimeoutRole)
+	c.add(c.cfg.Consumed, m, TimeoutMessageRole)
+	c.add(c.cfg.Produced, m, TimeoutMessageRole)
 }
 
-func (c *processConfigurer) add(rm message.RoleMap, m dogma.Message, r message.Role) {
-	mt := message.TypeOf(m)
+func (c *processConfigurer) add(rm MessageRoleMap, m dogma.Message, r MessageRole) {
+	mt := MessageTypeOf(m)
 
 	if rm.Add(mt, r) {
 		return
@@ -149,11 +148,11 @@ func (c *processConfigurer) add(rm message.RoleMap, m dogma.Message, r message.R
 
 	var f string
 	switch rm[mt] {
-	case message.CommandRole:
+	case CommandMessageRole:
 		f = "ProducesCommandType"
-	case message.EventRole:
+	case EventMessageRole:
 		f = "ConsumesEventType"
-	default: //case message.TimeoutRole
+	default: // TimeoutMessageRole
 		f = "SchedulesTimeoutType"
 	}
 

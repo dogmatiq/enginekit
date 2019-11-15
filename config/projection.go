@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // ProjectionConfig represents the configuration of an aggregate message handler.
@@ -20,14 +19,14 @@ type ProjectionConfig struct {
 
 	// Consumed is a map of message type to role for those message types
 	// consumed by this handler.
-	Consumed message.RoleMap
+	Consumed MessageRoleMap
 }
 
 // NewProjectionConfig returns an ProjectionConfig for the given handler.
 func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, error) {
 	cfg := &ProjectionConfig{
 		Handler:  h,
-		Consumed: message.RoleMap{},
+		Consumed: MessageRoleMap{},
 	}
 
 	c := &projectionConfigurer{
@@ -73,12 +72,12 @@ func (c *ProjectionConfig) HandlerReflectType() reflect.Type {
 }
 
 // ConsumedMessageTypes returns the message types consumed by the handler.
-func (c *ProjectionConfig) ConsumedMessageTypes() message.RoleMap {
+func (c *ProjectionConfig) ConsumedMessageTypes() MessageRoleMap {
 	return c.Consumed
 }
 
 // ProducedMessageTypes returns the message types produced by the handler.
-func (c *ProjectionConfig) ProducedMessageTypes() message.RoleMap {
+func (c *ProjectionConfig) ProducedMessageTypes() MessageRoleMap {
 	return nil
 }
 
@@ -116,7 +115,7 @@ func (c *projectionConfigurer) Identity(n, k string) {
 }
 
 func (c *projectionConfigurer) ConsumesEventType(m dogma.Message) {
-	if !c.cfg.Consumed.AddM(m, message.EventRole) {
+	if !c.cfg.Consumed.AddM(m, EventMessageRole) {
 		panicf(
 			`%T.Configure() has already called ProjectionConfigurer.ConsumesEventType(%T)`,
 			c.cfg.Handler,

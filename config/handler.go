@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // HandlerType is an enumeration of the types of handlers.
@@ -82,45 +80,45 @@ func (t HandlerType) MustNotBe(types ...HandlerType) {
 
 // IsConsumerOf returns true if handlers of type t can consume messages with the
 // given role.
-func (t HandlerType) IsConsumerOf(r message.Role) bool {
+func (t HandlerType) IsConsumerOf(r MessageRole) bool {
 	return r.Is(t.Consumes()...)
 }
 
 // IsProducerOf returns true if handlers of type t can produce messages with the
 // given role.
-func (t HandlerType) IsProducerOf(r message.Role) bool {
+func (t HandlerType) IsProducerOf(r MessageRole) bool {
 	return r.Is(t.Produces()...)
 }
 
 // Consumes returns the roles of messages that can be consumed by handlers of
 // this type.
-func (t HandlerType) Consumes() []message.Role {
+func (t HandlerType) Consumes() []MessageRole {
 	t.MustValidate()
 
 	switch t {
 	case AggregateHandlerType:
-		return []message.Role{message.CommandRole}
+		return []MessageRole{CommandMessageRole}
 	case ProcessHandlerType:
-		return []message.Role{message.EventRole, message.TimeoutRole}
+		return []MessageRole{EventMessageRole, TimeoutMessageRole}
 	case IntegrationHandlerType:
-		return []message.Role{message.CommandRole}
+		return []MessageRole{CommandMessageRole}
 	default: // ProjectionHandlerType
-		return []message.Role{message.EventRole}
+		return []MessageRole{EventMessageRole}
 	}
 }
 
 // Produces returns the roles of messages that can be produced by handlers of
 // this type.
-func (t HandlerType) Produces() []message.Role {
+func (t HandlerType) Produces() []MessageRole {
 	t.MustValidate()
 
 	switch t {
 	case AggregateHandlerType:
-		return []message.Role{message.EventRole}
+		return []MessageRole{EventMessageRole}
 	case ProcessHandlerType:
-		return []message.Role{message.CommandRole, message.TimeoutRole}
+		return []MessageRole{CommandMessageRole, TimeoutMessageRole}
 	case IntegrationHandlerType:
-		return []message.Role{message.EventRole}
+		return []MessageRole{EventMessageRole}
 	default: // ProjectionHandlerType
 		return nil
 	}
@@ -148,28 +146,28 @@ func (t HandlerType) String() string {
 
 // ConsumersOf returns the handler types that can consume messages with the
 // given role.
-func ConsumersOf(r message.Role) []HandlerType {
+func ConsumersOf(r MessageRole) []HandlerType {
 	r.MustValidate()
 
 	switch r {
-	case message.CommandRole:
+	case CommandMessageRole:
 		return []HandlerType{AggregateHandlerType, IntegrationHandlerType}
-	case message.EventRole:
+	case EventMessageRole:
 		return []HandlerType{ProcessHandlerType, ProjectionHandlerType}
-	default: // message.TimeoutRole
+	default: // TimeoutMessageRole
 		return []HandlerType{ProcessHandlerType}
 	}
 }
 
 // ProducersOf returns the handler types that can produces messages with the
 // given role.
-func ProducersOf(r message.Role) []HandlerType {
+func ProducersOf(r MessageRole) []HandlerType {
 	switch r {
-	case message.CommandRole:
+	case CommandMessageRole:
 		return []HandlerType{ProcessHandlerType}
-	case message.EventRole:
+	case EventMessageRole:
 		return []HandlerType{AggregateHandlerType, IntegrationHandlerType}
-	default: // message.TimeoutRole
+	default: // TimeoutMessageRole
 		return []HandlerType{ProcessHandlerType}
 	}
 }

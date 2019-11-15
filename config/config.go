@@ -3,8 +3,6 @@ package config
 import (
 	"context"
 	"reflect"
-
-	"github.com/dogmatiq/enginekit/message"
 )
 
 // Config is an interface for all configuration values.
@@ -29,8 +27,8 @@ type HandlerConfig interface {
 	HandlerReflectType() reflect.Type
 
 	// ConsumedMessageTypes returns the message types consumed by the handler.
-	ConsumedMessageTypes() message.RoleMap
+	ConsumedMessageTypes() MessageRoleMap
 
 	// ProducedMessageTypes returns the message types produced by the handler.
-	ProducedMessageTypes() message.RoleMap
+	ProducedMessageTypes() MessageRoleMap
 }

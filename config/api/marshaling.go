@@ -4,7 +4,6 @@ import (
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
 	"github.com/dogmatiq/enginekit/marshaling"
-	"github.com/dogmatiq/enginekit/message"
 )
 
 type unmarshalError string
@@ -48,9 +47,9 @@ func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *co
 		ApplicationIdentity: unmarshalIdentity(in.GetIdentity()),
 		HandlersByName:      map[string]config.HandlerConfig{},
 		HandlersByKey:       map[string]config.HandlerConfig{},
-		Roles:               message.RoleMap{},
-		Consumers:           map[message.Type][]config.HandlerConfig{},
-		Producers:           map[message.Type][]config.HandlerConfig{},
+		Roles:               config.MessageRoleMap{},
+		Consumers:           map[config.MessageType][]config.HandlerConfig{},
+		Producers:           map[config.MessageType][]config.HandlerConfig{},
 	}
 
 	for _, h := range in.GetHandlers() {
@@ -121,9 +120,9 @@ func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.Hand
 	}
 }
 
-// marshalRoleMap marshals a message.RoleMap to its protocol buffers
+// marshalRoleMap marshals a config.MessageRoleMap to its protocol buffers
 // representation.
-func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]string {
+func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[string]string {
 	var out map[string]string
 
 	for mt, r := range in {
@@ -138,18 +137,18 @@ func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]stri
 	return out
 }
 
-// unmarshalRoleMap unmarshals a message.RoleMap from its protocol buffers
+// unmarshalRoleMap unmarshals a config.MessageRoleMap from its protocol buffers
 // representation.
-func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) message.RoleMap {
-	var out message.RoleMap
+func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) config.MessageRoleMap {
+	var out config.MessageRoleMap
 
 	for mt, r := range in {
 		if out == nil {
-			out = message.RoleMap{}
+			out = config.MessageRoleMap{}
 		}
 
 		k := marshaling.MustUnmarshalMessageType(m, mt)
-		v := message.Role(r)
+		v := config.MessageRole(r)
 		v.MustValidate()
 
 		out[k] = v

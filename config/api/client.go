@@ -5,7 +5,6 @@ import (
 
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/marshaling"
 	"google.golang.org/grpc"
 )
@@ -20,7 +19,7 @@ type Client struct {
 // the server.
 func (c *Client) ListApplicationIdentities(
 	ctx context.Context,
-) (_ []identity.Identity, err error) {
+) (_ []config.Identity, err error) {
 	req := &pb.ListApplicationIdentitiesRequest{}
 	res, err := pb.NewConfigClient(c.Connection).ListApplicationIdentities(ctx, req)
 	if err != nil {
@@ -29,7 +28,7 @@ func (c *Client) ListApplicationIdentities(
 
 	defer marshaling.Recover(&err)
 
-	var idents []identity.Identity
+	var idents []config.Identity
 	for _, i := range res.Identities {
 		idents = append(idents, unmarshalIdentity(i))
 	}

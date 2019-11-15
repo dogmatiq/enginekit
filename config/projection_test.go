@@ -4,8 +4,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	handlerkit "github.com/dogmatiq/enginekit/handler"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
@@ -40,14 +38,14 @@ var _ = Describe("type ProjectionConfig", func() {
 			Describe("func Identity()", func() {
 				It("returns the handler identity", func() {
 					Expect(cfg.Identity()).To(Equal(
-						identity.MustNew("<name>", "<key>"),
+						MustNewIdentity("<name>", "<key>"),
 					))
 				})
 			})
 
 			Describe("func HandlerType()", func() {
-				It("returns handler.ProjectionType", func() {
-					Expect(cfg.HandlerType()).To(Equal(handlerkit.ProjectionType))
+				It("returns ProjectionHandlerType", func() {
+					Expect(cfg.HandlerType()).To(Equal(ProjectionHandlerType))
 				})
 			})
 

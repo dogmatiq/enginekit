@@ -5,8 +5,6 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/handler"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -18,7 +16,7 @@ type ProjectionConfig struct {
 
 	// HandlerIdentity is the handler's identity, as specified by its
 	// Configure() method.
-	HandlerIdentity identity.Identity
+	HandlerIdentity Identity
 
 	// Consumed is a map of message type to role for those message types
 	// consumed by this handler.
@@ -60,13 +58,13 @@ func NewProjectionConfig(h dogma.ProjectionMessageHandler) (*ProjectionConfig, e
 }
 
 // Identity returns the projection identity.
-func (c *ProjectionConfig) Identity() identity.Identity {
+func (c *ProjectionConfig) Identity() Identity {
 	return c.HandlerIdentity
 }
 
-// HandlerType returns handler.ProjectionType.
-func (c *ProjectionConfig) HandlerType() handler.Type {
-	return handler.ProjectionType
+// HandlerType returns ProjectionHandlerType.
+func (c *ProjectionConfig) HandlerType() HandlerType {
+	return ProjectionHandlerType
 }
 
 // HandlerReflectType returns the reflect.Type of the handler.
@@ -105,7 +103,7 @@ func (c *projectionConfigurer) Identity(n, k string) {
 		)
 	}
 
-	i, err := identity.New(n, k)
+	i, err := NewIdentity(n, k)
 	if err != nil {
 		panicf(
 			`%T.Configure() called ProjectionConfigurer.Identity() with an %s`,

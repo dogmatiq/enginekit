@@ -1,9 +1,9 @@
 package handler_test
 
 import (
+	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
 	. "github.com/dogmatiq/enginekit/handler"
-	"github.com/dogmatiq/enginekit/identity"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -12,8 +12,8 @@ var _ = Describe("type EmptyInstanceIDError", func() {
 	Describe("func Error", func() {
 		It("returns a meaningful error description", func() {
 			err := EmptyInstanceIDError{
-				Handler:     identity.MustNew("<name>", "<key>"),
-				HandlerType: AggregateType,
+				Handler:     config.MustNewIdentity("<name>", "<key>"),
+				HandlerType: config.AggregateHandlerType,
 				Message:     fixtures.MessageA1,
 			}
 
@@ -28,8 +28,8 @@ var _ = Describe("type NilRootError", func() {
 	Describe("func Error", func() {
 		It("returns a meaningful error description", func() {
 			err := NilRootError{
-				Handler:     identity.MustNew("<name>", "<key>"),
-				HandlerType: AggregateType,
+				Handler:     config.MustNewIdentity("<name>", "<key>"),
+				HandlerType: config.AggregateHandlerType,
 			}
 
 			Expect(err.Error()).To(Equal(
@@ -44,7 +44,7 @@ var _ = Describe("type EventNotRecordedError", func() {
 		When("the instance was created", func() {
 			It("returns a meaningful error description", func() {
 				err := EventNotRecordedError{
-					Handler:      identity.MustNew("<name>", "<key>"),
+					Handler:      config.MustNewIdentity("<name>", "<key>"),
 					WasDestroyed: false,
 					Message:      fixtures.MessageA1,
 					InstanceID:   "<instance>",
@@ -59,7 +59,7 @@ var _ = Describe("type EventNotRecordedError", func() {
 		When("the instance was destroyed", func() {
 			It("returns a meaningful error description", func() {
 				err := EventNotRecordedError{
-					Handler:      identity.MustNew("<name>", "<key>"),
+					Handler:      config.MustNewIdentity("<name>", "<key>"),
 					WasDestroyed: true,
 					Message:      fixtures.MessageA1,
 					InstanceID:   "<instance>",
@@ -77,8 +77,8 @@ var _ = Describe("type UnexpectedMessageError", func() {
 	Describe("func Error", func() {
 		It("returns a meaningful error description", func() {
 			err := UnexpectedMessageError{
-				Handler:     identity.MustNew("<name>", "<key>"),
-				HandlerType: AggregateType,
+				Handler:     config.MustNewIdentity("<name>", "<key>"),
+				HandlerType: config.AggregateHandlerType,
 				Message:     fixtures.MessageA1,
 				InstanceID:  "<instance>",
 			}

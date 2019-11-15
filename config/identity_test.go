@@ -1,48 +1,48 @@
-package identity_test
+package config_test
 
 import (
 	"fmt"
 
-	. "github.com/dogmatiq/enginekit/identity"
+	. "github.com/dogmatiq/enginekit/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("type Identity", func() {
-	Describe("func New()", func() {
+	Describe("func NewIdentity()", func() {
 		It("returns the identity", func() {
-			i, err := New("<name>", "<key>")
+			i, err := NewIdentity("<name>", "<key>")
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(i).To(Equal(Identity{"<name>", "<key>"}))
 		})
 
 		It("returns an error if the name is invalid", func() {
-			_, err := New("", "<key>")
+			_, err := NewIdentity("", "<key>")
 			Expect(err).Should(HaveOccurred())
 		})
 
 		It("returns an error if the key is invalid", func() {
-			_, err := New("<name>", "")
+			_, err := NewIdentity("<name>", "")
 			Expect(err).Should(HaveOccurred())
 		})
 	})
 
-	Describe("func MustNew()", func() {
+	Describe("func MustNewIdentity()", func() {
 		It("returns the identity", func() {
-			i := MustNew("<name>", "<key>")
+			i := MustNewIdentity("<name>", "<key>")
 			Expect(i).To(Equal(Identity{"<name>", "<key>"}))
 		})
 
 		It("panics if the name is invalid", func() {
 			Expect(func() {
-				MustNew("", "<key>")
+				MustNewIdentity("", "<key>")
 			}).To(Panic())
 		})
 
 		It("panics if the key is invalid", func() {
 			Expect(func() {
-				MustNew("<name>", "")
+				MustNewIdentity("<name>", "")
 			}).To(Panic())
 		})
 	})

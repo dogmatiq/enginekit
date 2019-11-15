@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/identity"
+	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -12,10 +12,10 @@ import (
 // attempted to route a message to an instance with an empty ID.
 type EmptyInstanceIDError struct {
 	// Handler is the identity of the handler that caused the error.
-	Handler identity.Identity
+	Handler config.Identity
 
 	// HandlerType is the type of handler that caused the error.
-	HandlerType Type
+	HandlerType config.HandlerType
 
 	// Message is the message that was being handled when the error occurred.
 	Message dogma.Message
@@ -34,10 +34,10 @@ func (e EmptyInstanceIDError) Error() string {
 // returned a nil "root" value from its New() method.
 type NilRootError struct {
 	// Handler is the identity of the handler that caused the error.
-	Handler identity.Identity
+	Handler config.Identity
 
 	// HandlerType is the type of handler that caused the error.
-	HandlerType Type
+	HandlerType config.HandlerType
 }
 
 func (e NilRootError) Error() string {
@@ -52,7 +52,7 @@ func (e NilRootError) Error() string {
 // or destroyed without recording an event.
 type EventNotRecordedError struct {
 	// Handler is the identity of the handler that caused the error.
-	Handler identity.Identity
+	Handler config.Identity
 
 	// WasDestroyed is true if the error occurred as a result of the description
 	// of an aggregate, as opposed to creation.
@@ -85,10 +85,10 @@ func (e EventNotRecordedError) Error() string {
 // dogma.UnexpectedMessage value.
 type UnexpectedMessageError struct {
 	// Handler is the identity of the handler that caused the error.
-	Handler identity.Identity
+	Handler config.Identity
 
 	// HandlerType is the type of handler that caused the error.
-	HandlerType Type
+	HandlerType config.HandlerType
 
 	// Message is the message that was being handled when the error occurred.
 	Message dogma.Message

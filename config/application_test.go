@@ -4,7 +4,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -118,7 +117,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			Describe("func Identity()", func() {
 				It("returns the app identity", func() {
 					Expect(cfg.Identity()).To(Equal(
-						identity.MustNew("<app>", "<app-key>"),
+						MustNewIdentity("<app>", "<app-key>"),
 					))
 				})
 			})

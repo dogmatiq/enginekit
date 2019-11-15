@@ -1,4 +1,4 @@
-package identity
+package config
 
 import (
 	"fmt"
@@ -12,15 +12,15 @@ type Identity struct {
 	Key  string
 }
 
-// New returns a new identity.
-func New(n, k string) (Identity, error) {
+// NewIdentity returns a new identity.
+func NewIdentity(n, k string) (Identity, error) {
 	i := Identity{n, k}
 	return i, i.Validate()
 }
 
-// MustNew returns a new identity, or panics if the given name or key are invalid.
-func MustNew(n, k string) Identity {
-	i, err := New(n, k)
+// MustNewIdentity returns a new identity, or panics if the given name or key are invalid.
+func MustNewIdentity(n, k string) Identity {
+	i, err := NewIdentity(n, k)
 	if err != nil {
 		panic(err)
 	}

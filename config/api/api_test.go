@@ -10,7 +10,6 @@ import (
 	"github.com/dogmatiq/enginekit/config"
 	. "github.com/dogmatiq/enginekit/config/api"
 	"github.com/dogmatiq/enginekit/fixtures"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/marshaling"
 	"github.com/dogmatiq/enginekit/marshaling/json"
 	. "github.com/onsi/ginkgo"
@@ -142,8 +141,8 @@ var _ = Describe("type Client", func() {
 			idents, err := client.ListApplicationIdentities(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(idents).To(ConsistOf(
-				identity.MustNew("<app-1>", "<app-key-1>"),
-				identity.MustNew("<app-2>", "<app-key-2>"),
+				config.MustNewIdentity("<app-1>", "<app-key-1>"),
+				config.MustNewIdentity("<app-2>", "<app-key-2>"),
 			))
 		})
 

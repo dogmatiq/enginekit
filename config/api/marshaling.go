@@ -3,27 +3,25 @@ package api
 import (
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
-	"github.com/dogmatiq/enginekit/handler"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/marshaling"
 	"github.com/dogmatiq/enginekit/message"
 )
 
 type unmarshalError string
 
-// marshalIdentity marshals an identity.Identity to its protocol buffers
+// marshalIdentity marshals an config.Identity to its protocol buffers
 // representation.
-func marshalIdentity(in identity.Identity) *pb.Identity {
+func marshalIdentity(in config.Identity) *pb.Identity {
 	return &pb.Identity{
 		Name: in.Name,
 		Key:  in.Key,
 	}
 }
 
-// unmarshalIdentity unmarshals an identity.Identity from its protocol buffers
+// unmarshalIdentity unmarshals an config.Identity from its protocol buffers
 // representation.
-func unmarshalIdentity(in *pb.Identity) identity.Identity {
-	return identity.MustNew(in.Name, in.Key)
+func unmarshalIdentity(in *pb.Identity) config.Identity {
+	return config.MustNewIdentity(in.Name, in.Key)
 }
 
 // marshalApplication marshals a config.ApplicationConfig to its protocol
@@ -89,7 +87,7 @@ func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.Handle
 // unmarshalHandler unmarshals a config.HandlerConfig from its protocol buffers
 // representation.
 func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.HandlerConfig {
-	t := handler.Type(in.Type)
+	t := config.HandlerType(in.Type)
 	t.MustValidate()
 
 	i := unmarshalIdentity(in.GetIdentity())
@@ -97,25 +95,25 @@ func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.Hand
 	p := unmarshalRoleMap(m, in.Produced)
 
 	switch t {
-	case handler.AggregateType:
+	case config.AggregateHandlerType:
 		return &config.AggregateConfig{
 			HandlerIdentity: i,
 			Consumed:        c,
 			Produced:        p,
 		}
-	case handler.ProcessType:
+	case config.ProcessHandlerType:
 		return &config.ProcessConfig{
 			HandlerIdentity: i,
 			Consumed:        c,
 			Produced:        p,
 		}
-	case handler.IntegrationType:
+	case config.IntegrationHandlerType:
 		return &config.IntegrationConfig{
 			HandlerIdentity: i,
 			Consumed:        c,
 			Produced:        p,
 		}
-	default: // case handler.ProjectionType:
+	default: // config.ProjectionHandlerType:
 		return &config.ProjectionConfig{
 			HandlerIdentity: i,
 			Consumed:        c,

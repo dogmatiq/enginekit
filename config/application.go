@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/identity"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -16,7 +15,7 @@ type ApplicationConfig struct {
 
 	// ApplicationIdentity is the application's identity, as specified by its
 	// Configure() method.
-	ApplicationIdentity identity.Identity
+	ApplicationIdentity Identity
 
 	// handlersByName is a map of handler name to their respective configuration.
 	HandlersByName map[string]HandlerConfig
@@ -68,7 +67,7 @@ func NewApplicationConfig(app dogma.Application) (*ApplicationConfig, error) {
 }
 
 // Identity returns the application identity.
-func (c *ApplicationConfig) Identity() identity.Identity {
+func (c *ApplicationConfig) Identity() Identity {
 	return c.ApplicationIdentity
 }
 
@@ -189,7 +188,7 @@ func (c *applicationConfigurer) Identity(n, k string) {
 		)
 	}
 
-	i, err := identity.New(n, k)
+	i, err := NewIdentity(n, k)
 	if err != nil {
 		panicf(
 			`%T.Configure() called ApplicationConfigurer.Identity() with an %s`,

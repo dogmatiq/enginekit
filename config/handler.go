@@ -1,4 +1,4 @@
-package handler
+package config
 
 import (
 	"fmt"
@@ -6,38 +6,38 @@ import (
 	"github.com/dogmatiq/enginekit/message"
 )
 
-// Type is an enumeration of the types of handlers.
-type Type string
+// HandlerType is an enumeration of the types of handlers.
+type HandlerType string
 
 const (
-	// AggregateType is the handler type for dogma.AggregateMessageHandler.
-	AggregateType Type = "aggregate"
+	// AggregateHandlerType is the handler type for dogma.AggregateMessageHandler.
+	AggregateHandlerType HandlerType = "aggregate"
 
-	// ProcessType is the handler type for dogma.ProcessMessageHandler.
-	ProcessType Type = "process"
+	// ProcessHandlerType is the handler type for dogma.ProcessMessageHandler.
+	ProcessHandlerType HandlerType = "process"
 
-	// IntegrationType is the handler type for dogma.IntegrationMessageHandler.
-	IntegrationType Type = "integration"
+	// IntegrationHandlerType is the handler type for dogma.IntegrationMessageHandler.
+	IntegrationHandlerType HandlerType = "integration"
 
-	// ProjectionType is the handler type for dogma.ProjectionMessageHandler.
-	ProjectionType Type = "projection"
+	// ProjectionHandlerType is the handler type for dogma.ProjectionMessageHandler.
+	ProjectionHandlerType HandlerType = "projection"
 )
 
-// Types is a slice of the valid handler types.
-var Types = []Type{
-	AggregateType,
-	ProcessType,
-	IntegrationType,
-	ProjectionType,
+// HandlerTypes is a slice of the valid handler types.
+var HandlerTypes = []HandlerType{
+	AggregateHandlerType,
+	ProcessHandlerType,
+	IntegrationHandlerType,
+	ProjectionHandlerType,
 }
 
 // Validate returns an error if r is not a valid message role.
-func (t Type) Validate() error {
+func (t HandlerType) Validate() error {
 	switch t {
-	case AggregateType,
-		ProcessType,
-		IntegrationType,
-		ProjectionType:
+	case AggregateHandlerType,
+		ProcessHandlerType,
+		IntegrationHandlerType,
+		ProjectionHandlerType:
 		return nil
 	default:
 		return fmt.Errorf("invalid handler type: %s", t)
@@ -45,14 +45,14 @@ func (t Type) Validate() error {
 }
 
 // MustValidate panics if r is not a valid message role.
-func (t Type) MustValidate() {
+func (t HandlerType) MustValidate() {
 	if err := t.Validate(); err != nil {
 		panic(err)
 	}
 }
 
 // Is returns true if t is one of the given types.
-func (t Type) Is(types ...Type) bool {
+func (t HandlerType) Is(types ...HandlerType) bool {
 	t.MustValidate()
 
 	for _, x := range types {
@@ -67,14 +67,14 @@ func (t Type) Is(types ...Type) bool {
 }
 
 // MustBe panics if t is not one of the given types.
-func (t Type) MustBe(types ...Type) {
+func (t HandlerType) MustBe(types ...HandlerType) {
 	if !t.Is(types...) {
 		panic("unexpected type: " + t)
 	}
 }
 
 // MustNotBe panics if t is one of the given types.
-func (t Type) MustNotBe(types ...Type) {
+func (t HandlerType) MustNotBe(types ...HandlerType) {
 	if t.Is(types...) {
 		panic("unexpected type: " + t)
 	}
@@ -82,94 +82,94 @@ func (t Type) MustNotBe(types ...Type) {
 
 // IsConsumerOf returns true if handlers of type t can consume messages with the
 // given role.
-func (t Type) IsConsumerOf(r message.Role) bool {
+func (t HandlerType) IsConsumerOf(r message.Role) bool {
 	return r.Is(t.Consumes()...)
 }
 
 // IsProducerOf returns true if handlers of type t can produce messages with the
 // given role.
-func (t Type) IsProducerOf(r message.Role) bool {
+func (t HandlerType) IsProducerOf(r message.Role) bool {
 	return r.Is(t.Produces()...)
 }
 
 // Consumes returns the roles of messages that can be consumed by handlers of
 // this type.
-func (t Type) Consumes() []message.Role {
+func (t HandlerType) Consumes() []message.Role {
 	t.MustValidate()
 
 	switch t {
-	case AggregateType:
+	case AggregateHandlerType:
 		return []message.Role{message.CommandRole}
-	case ProcessType:
+	case ProcessHandlerType:
 		return []message.Role{message.EventRole, message.TimeoutRole}
-	case IntegrationType:
+	case IntegrationHandlerType:
 		return []message.Role{message.CommandRole}
-	default: // ProjectionType
+	default: // ProjectionHandlerType
 		return []message.Role{message.EventRole}
 	}
 }
 
 // Produces returns the roles of messages that can be produced by handlers of
 // this type.
-func (t Type) Produces() []message.Role {
+func (t HandlerType) Produces() []message.Role {
 	t.MustValidate()
 
 	switch t {
-	case AggregateType:
+	case AggregateHandlerType:
 		return []message.Role{message.EventRole}
-	case ProcessType:
+	case ProcessHandlerType:
 		return []message.Role{message.CommandRole, message.TimeoutRole}
-	case IntegrationType:
+	case IntegrationHandlerType:
 		return []message.Role{message.EventRole}
-	default: // ProjectionType
+	default: // ProjectionHandlerType
 		return nil
 	}
 }
 
 // ShortString returns a short (3-character) representation of the handler type.
-func (t Type) ShortString() string {
+func (t HandlerType) ShortString() string {
 	t.MustValidate()
 
 	switch t {
-	case AggregateType:
+	case AggregateHandlerType:
 		return "agg"
-	case ProcessType:
+	case ProcessHandlerType:
 		return "prc"
-	case IntegrationType:
+	case IntegrationHandlerType:
 		return "int"
-	default: // ProjectionType
+	default: // ProjectionHandlerType
 		return "prj"
 	}
 }
 
-func (t Type) String() string {
+func (t HandlerType) String() string {
 	return string(t)
 }
 
 // ConsumersOf returns the handler types that can consume messages with the
 // given role.
-func ConsumersOf(r message.Role) []Type {
+func ConsumersOf(r message.Role) []HandlerType {
 	r.MustValidate()
 
 	switch r {
 	case message.CommandRole:
-		return []Type{AggregateType, IntegrationType}
+		return []HandlerType{AggregateHandlerType, IntegrationHandlerType}
 	case message.EventRole:
-		return []Type{ProcessType, ProjectionType}
+		return []HandlerType{ProcessHandlerType, ProjectionHandlerType}
 	default: // message.TimeoutRole
-		return []Type{ProcessType}
+		return []HandlerType{ProcessHandlerType}
 	}
 }
 
 // ProducersOf returns the handler types that can produces messages with the
 // given role.
-func ProducersOf(r message.Role) []Type {
+func ProducersOf(r message.Role) []HandlerType {
 	switch r {
 	case message.CommandRole:
-		return []Type{ProcessType}
+		return []HandlerType{ProcessHandlerType}
 	case message.EventRole:
-		return []Type{AggregateType, IntegrationType}
+		return []HandlerType{AggregateHandlerType, IntegrationHandlerType}
 	default: // message.TimeoutRole
-		return []Type{ProcessType}
+		return []HandlerType{ProcessHandlerType}
 	}
 }

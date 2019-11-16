@@ -1,24 +1,25 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 )
 
 // HandlerType is an enumeration of the types of handlers.
-type HandlerType string
+type HandlerType byte
 
 const (
 	// AggregateHandlerType is the handler type for dogma.AggregateMessageHandler.
-	AggregateHandlerType HandlerType = "aggregate"
+	AggregateHandlerType HandlerType = 'A'
 
 	// ProcessHandlerType is the handler type for dogma.ProcessMessageHandler.
-	ProcessHandlerType HandlerType = "process"
+	ProcessHandlerType HandlerType = 'P'
 
 	// IntegrationHandlerType is the handler type for dogma.IntegrationMessageHandler.
-	IntegrationHandlerType HandlerType = "integration"
+	IntegrationHandlerType HandlerType = 'I'
 
 	// ProjectionHandlerType is the handler type for dogma.ProjectionMessageHandler.
-	ProjectionHandlerType HandlerType = "projection"
+	ProjectionHandlerType HandlerType = 'R'
 )
 
 // HandlerTypes is a slice of the valid handler types.
@@ -29,6 +30,13 @@ var HandlerTypes = []HandlerType{
 	ProjectionHandlerType,
 }
 
+var (
+	aggregateHandlerTypeText   = []byte("aggregate")
+	processHandlerTypeText     = []byte("process")
+	integrationHandlerTypeText = []byte("integration")
+	projectionHandlerTypeText  = []byte("projection")
+)
+
 // Validate returns an error if r is not a valid message role.
 func (t HandlerType) Validate() error {
 	switch t {
@@ -38,7 +46,7 @@ func (t HandlerType) Validate() error {
 		ProjectionHandlerType:
 		return nil
 	default:
-		return fmt.Errorf("invalid handler type: %s", t)
+		return fmt.Errorf("invalid handler type: %#v", t)
 	}
 }
 
@@ -67,14 +75,14 @@ func (t HandlerType) Is(types ...HandlerType) bool {
 // MustBe panics if t is not one of the given types.
 func (t HandlerType) MustBe(types ...HandlerType) {
 	if !t.Is(types...) {
-		panic("unexpected type: " + t)
+		panic("unexpected type: " + t.String())
 	}
 }
 
 // MustNotBe panics if t is one of the given types.
 func (t HandlerType) MustNotBe(types ...HandlerType) {
 	if t.Is(types...) {
-		panic("unexpected type: " + t)
+		panic("unexpected type: " + t.String())
 	}
 }
 
@@ -140,8 +148,74 @@ func (t HandlerType) ShortString() string {
 	}
 }
 
+// String returns a string representation of the handler type.
 func (t HandlerType) String() string {
-	return string(t)
+	switch t {
+	case AggregateHandlerType:
+		return "aggregate"
+	case ProcessHandlerType:
+		return "process"
+	case IntegrationHandlerType:
+		return "integration"
+	case ProjectionHandlerType:
+		return "projection"
+	default:
+		return fmt.Sprintf("<invalid handler type %#v>", t)
+	}
+}
+
+// MarshalText returns a UTF-8 representation of the handler type.
+func (t HandlerType) MarshalText() ([]byte, error) {
+	if err := t.Validate(); err != nil {
+		return nil, err
+	}
+
+	switch t {
+	case AggregateHandlerType:
+		return aggregateHandlerTypeText, nil
+	case ProcessHandlerType:
+		return processHandlerTypeText, nil
+	case IntegrationHandlerType:
+		return integrationHandlerTypeText, nil
+	default: // ProjectionHandlerType
+		return projectionHandlerTypeText, nil
+	}
+}
+
+// UnmarshalText unmarshals a type from its UTF-8 representation.
+func (t *HandlerType) UnmarshalText(text []byte) error {
+	if bytes.Equal(text, aggregateHandlerTypeText) {
+		*t = AggregateHandlerType
+	} else if bytes.Equal(text, processHandlerTypeText) {
+		*t = ProcessHandlerType
+	} else if bytes.Equal(text, integrationHandlerTypeText) {
+		*t = IntegrationHandlerType
+	} else if bytes.Equal(text, projectionHandlerTypeText) {
+		*t = ProjectionHandlerType
+	} else {
+		return fmt.Errorf("invalid text representation of handler type: %s", text)
+	}
+
+	return nil
+}
+
+// MarshalBinary returns a binary representation of the handler type.
+func (t HandlerType) MarshalBinary() ([]byte, error) {
+	if err := t.Validate(); err != nil {
+		return nil, err
+	}
+
+	return []byte{byte(t)}, nil
+}
+
+// UnmarshalBinary unmarshals a type from its binary representation.
+func (t *HandlerType) UnmarshalBinary(data []byte) error {
+	if len(data) != 1 {
+		return fmt.Errorf("invalid binary representation of handler type, expected exactly 1 byte")
+	}
+
+	*t = HandlerType(data[0])
+	return t.Validate()
 }
 
 // ConsumersOf returns the handler types that can consume messages with the

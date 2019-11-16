@@ -75,9 +75,12 @@ func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *co
 // marshalHandler marshals a config.HandlerConfig to its protocol buffers
 // representation.
 func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.HandlerConfig {
+	t, err := in.HandlerType().MarshalBinary()
+	marshaling.Must(err)
+
 	return &pb.HandlerConfig{
 		Identity: marshalIdentity(in.Identity()),
-		Type:     string(in.HandlerType()),
+		Type:     t,
 		Consumed: marshalRoleMap(m, in.ConsumedMessageTypes()),
 		Produced: marshalRoleMap(m, in.ProducedMessageTypes()),
 	}
@@ -86,8 +89,8 @@ func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.Handle
 // unmarshalHandler unmarshals a config.HandlerConfig from its protocol buffers
 // representation.
 func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.HandlerConfig {
-	t := config.HandlerType(in.Type)
-	t.MustValidate()
+	var t config.HandlerType
+	marshaling.Must(t.UnmarshalBinary(in.Type))
 
 	i := unmarshalIdentity(in.GetIdentity())
 	c := unmarshalRoleMap(m, in.Consumed)

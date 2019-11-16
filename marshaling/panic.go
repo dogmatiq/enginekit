@@ -25,3 +25,10 @@ type PanicSentinel struct {
 	// Cause is the error that caused the panic.
 	Cause error
 }
+
+// Must panics if err is non-nil.
+func Must(err error) {
+	if err != nil {
+		panic(PanicSentinel{err})
+	}
+}

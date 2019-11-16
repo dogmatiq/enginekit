@@ -16,10 +16,7 @@ func MarshalMessageType(ma *Marshaler, mt config.MessageType) (string, error) {
 // It panics if marshaling fails.
 func MustMarshalMessageType(ma *Marshaler, mt config.MessageType) string {
 	s, err := MarshalMessageType(ma, mt)
-	if err != nil {
-		panic(PanicSentinel{err})
-	}
-
+	Must(err)
 	return s
 }
 
@@ -38,10 +35,7 @@ func UnmarshalMessageType(ma *Marshaler, mt string) (config.MessageType, error) 
 // representation. It panics if unmarshaling fails.
 func MustUnmarshalMessageType(ma *Marshaler, mt string) config.MessageType {
 	t, err := UnmarshalMessageType(ma, mt)
-	if err != nil {
-		panic(PanicSentinel{err})
-	}
-
+	Must(err)
 	return t
 }
 
@@ -60,10 +54,7 @@ func UnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) (config.Message
 // media-type. It panics if unmarshaling fails.
 func MustUnmarshalMessageTypeFromMediaType(ma *Marshaler, mt string) config.MessageType {
 	t, err := UnmarshalMessageTypeFromMediaType(ma, mt)
-	if err != nil {
-		panic(PanicSentinel{err})
-	}
-
+	Must(err)
 	return t
 }
 
@@ -76,10 +67,7 @@ func MarshalMessage(ma *Marshaler, m dogma.Message) (Packet, error) {
 // It panics if marshaling fails.
 func MustMarshalMessage(ma *Marshaler, m dogma.Message) Packet {
 	p, err := ma.Marshal(m)
-	if err != nil {
-		panic(PanicSentinel{err})
-	}
-
+	Must(err)
 	return p
 }
 
@@ -98,10 +86,7 @@ func UnmarshalMessage(ma *Marshaler, p Packet) (dogma.Message, error) {
 // It panics if unmarshaling fails.
 func MustUnmarshalMessage(ma *Marshaler, p Packet) dogma.Message {
 	m, err := UnmarshalMessage(ma, p)
-	if err != nil {
-		panic(PanicSentinel{err})
-	}
-
+	Must(err)
 	return m
 }
 

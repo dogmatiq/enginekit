@@ -138,10 +138,10 @@ var _ = Describe("type HandlerType", func() {
 
 	Describe("func ShortString()", func() {
 		It("returns the type value as a short string", func() {
-			Expect(AggregateHandlerType.ShortString()).To(Equal("agg"))
-			Expect(ProcessHandlerType.ShortString()).To(Equal("prc"))
-			Expect(IntegrationHandlerType.ShortString()).To(Equal("int"))
-			Expect(ProjectionHandlerType.ShortString()).To(Equal("prj"))
+			Expect(AggregateHandlerType.ShortString()).To(Equal("AGG"))
+			Expect(ProcessHandlerType.ShortString()).To(Equal("PRC"))
+			Expect(IntegrationHandlerType.ShortString()).To(Equal("INT"))
+			Expect(ProjectionHandlerType.ShortString()).To(Equal("PRJ"))
 		})
 	})
 

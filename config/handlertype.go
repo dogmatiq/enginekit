@@ -30,11 +30,23 @@ var HandlerTypes = []HandlerType{
 	ProjectionHandlerType,
 }
 
+const (
+	aggregateHandlerTypeString   = "aggregate"
+	processHandlerTypeString     = "process"
+	integrationHandlerTypeString = "integration"
+	projectionHandlerTypeString  = "projection"
+
+	aggregateHandlerTypeShortString   = "AGG"
+	processHandlerTypeShortString     = "PRC"
+	integrationHandlerTypeShortString = "INT"
+	projectionHandlerTypeShortString  = "PRJ"
+)
+
 var (
-	aggregateHandlerTypeText   = []byte("aggregate")
-	processHandlerTypeText     = []byte("process")
-	integrationHandlerTypeText = []byte("integration")
-	projectionHandlerTypeText  = []byte("projection")
+	aggregateHandlerTypeBytes   = []byte(aggregateHandlerTypeString)
+	processHandlerTypeBytes     = []byte(processHandlerTypeString)
+	integrationHandlerTypeBytes = []byte(integrationHandlerTypeString)
+	projectionHandlerTypeBytes  = []byte(projectionHandlerTypeString)
 )
 
 // Validate returns an error if r is not a valid message role.
@@ -75,14 +87,14 @@ func (t HandlerType) Is(types ...HandlerType) bool {
 // MustBe panics if t is not one of the given types.
 func (t HandlerType) MustBe(types ...HandlerType) {
 	if !t.Is(types...) {
-		panic("unexpected type: " + t.String())
+		panic("unexpected handler type: " + t.String())
 	}
 }
 
 // MustNotBe panics if t is one of the given types.
 func (t HandlerType) MustNotBe(types ...HandlerType) {
 	if t.Is(types...) {
-		panic("unexpected type: " + t.String())
+		panic("unexpected handler type: " + t.String())
 	}
 }
 
@@ -138,13 +150,13 @@ func (t HandlerType) ShortString() string {
 
 	switch t {
 	case AggregateHandlerType:
-		return "agg"
+		return aggregateHandlerTypeShortString
 	case ProcessHandlerType:
-		return "prc"
+		return processHandlerTypeShortString
 	case IntegrationHandlerType:
-		return "int"
+		return integrationHandlerTypeShortString
 	default: // ProjectionHandlerType
-		return "prj"
+		return projectionHandlerTypeShortString
 	}
 }
 
@@ -152,13 +164,13 @@ func (t HandlerType) ShortString() string {
 func (t HandlerType) String() string {
 	switch t {
 	case AggregateHandlerType:
-		return "aggregate"
+		return aggregateHandlerTypeString
 	case ProcessHandlerType:
-		return "process"
+		return processHandlerTypeString
 	case IntegrationHandlerType:
-		return "integration"
+		return integrationHandlerTypeString
 	case ProjectionHandlerType:
-		return "projection"
+		return projectionHandlerTypeString
 	default:
 		return fmt.Sprintf("<invalid handler type %#v>", t)
 	}
@@ -172,25 +184,25 @@ func (t HandlerType) MarshalText() ([]byte, error) {
 
 	switch t {
 	case AggregateHandlerType:
-		return aggregateHandlerTypeText, nil
+		return aggregateHandlerTypeBytes, nil
 	case ProcessHandlerType:
-		return processHandlerTypeText, nil
+		return processHandlerTypeBytes, nil
 	case IntegrationHandlerType:
-		return integrationHandlerTypeText, nil
+		return integrationHandlerTypeBytes, nil
 	default: // ProjectionHandlerType
-		return projectionHandlerTypeText, nil
+		return projectionHandlerTypeBytes, nil
 	}
 }
 
 // UnmarshalText unmarshals a type from its UTF-8 representation.
 func (t *HandlerType) UnmarshalText(text []byte) error {
-	if bytes.Equal(text, aggregateHandlerTypeText) {
+	if bytes.Equal(text, aggregateHandlerTypeBytes) {
 		*t = AggregateHandlerType
-	} else if bytes.Equal(text, processHandlerTypeText) {
+	} else if bytes.Equal(text, processHandlerTypeBytes) {
 		*t = ProcessHandlerType
-	} else if bytes.Equal(text, integrationHandlerTypeText) {
+	} else if bytes.Equal(text, integrationHandlerTypeBytes) {
 		*t = IntegrationHandlerType
-	} else if bytes.Equal(text, projectionHandlerTypeText) {
+	} else if bytes.Equal(text, projectionHandlerTypeBytes) {
 		*t = ProjectionHandlerType
 	} else {
 		return fmt.Errorf("invalid text representation of handler type: %s", text)

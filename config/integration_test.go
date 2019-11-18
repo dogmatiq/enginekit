@@ -2,8 +2,9 @@ package config_test
 
 import (
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/fixtures"
+	. "github.com/dogmatiq/enginekit/config/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -13,15 +14,15 @@ var _ HandlerConfig = &IntegrationConfig{}
 
 var _ = Describe("type IntegrationConfig", func() {
 	Describe("func NewIntegrationConfig", func() {
-		var handler *fixtures.IntegrationMessageHandler
+		var handler *IntegrationMessageHandler
 
 		BeforeEach(func() {
-			handler = &fixtures.IntegrationMessageHandler{
+			handler = &IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ConsumesCommandType(fixtures.MessageB{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ConsumesCommandType(MessageB{})
+					c.ProducesEventType(MessageE{})
 				},
 			}
 		})
@@ -53,8 +54,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
 						MessageRoleMap{
-							fixtures.MessageAType: CommandMessageRole,
-							fixtures.MessageBType: CommandMessageRole,
+							MessageAType: CommandMessageRole,
+							MessageBType: CommandMessageRole,
 						},
 					))
 				})
@@ -64,7 +65,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
 						MessageRoleMap{
-							fixtures.MessageEType: EventMessageRole,
+							MessageEType: EventMessageRole,
 						},
 					))
 				})
@@ -74,7 +75,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				BeforeEach(func() {
 					handler.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 						c.Identity("<name>", "<key>")
-						c.ConsumesCommandType(fixtures.MessageA{})
+						c.ConsumesCommandType(MessageA{})
 					}
 				})
 
@@ -109,8 +110,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				"when the handler does not configure an identity",
 				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.Identity()`,
 				func(c dogma.IntegrationConfigurer) {
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 			Entry(
@@ -119,8 +120,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				func(c dogma.IntegrationConfigurer) {
 					c.Identity("<name>", "<key>")
 					c.Identity("<other>", "<key>")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 			Entry(
@@ -128,8 +129,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Identity() with an invalid name "\t \n", names must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Identity("\t \n", "<key>")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 			Entry(
@@ -137,8 +138,8 @@ var _ = Describe("type IntegrationConfig", func() {
 				`*fixtures.IntegrationMessageHandler.Configure() called IntegrationConfigurer.Identity() with an invalid key "\t \n", keys must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Identity("<name>", "\t \n")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 			Entry(
@@ -146,7 +147,7 @@ var _ = Describe("type IntegrationConfig", func() {
 				`*fixtures.IntegrationMessageHandler.Configure() did not call IntegrationConfigurer.ConsumesCommandType()`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 			Entry(
@@ -154,9 +155,9 @@ var _ = Describe("type IntegrationConfig", func() {
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ConsumesCommandType(fixtures.MessageA)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 			Entry(
@@ -164,9 +165,9 @@ var _ = Describe("type IntegrationConfig", func() {
 				`*fixtures.IntegrationMessageHandler.Configure() has already called IntegrationConfigurer.ProducesEventType(fixtures.MessageE)`,
 				func(c dogma.IntegrationConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
+					c.ProducesEventType(MessageE{})
 				},
 			),
 		)

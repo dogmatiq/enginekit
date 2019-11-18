@@ -2,8 +2,9 @@ package config_test
 
 import (
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/fixtures"
+	. "github.com/dogmatiq/enginekit/config/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -13,49 +14,49 @@ var _ Config = &ApplicationConfig{}
 var _ = Describe("type ApplicationConfig", func() {
 	Describe("func NewApplicationConfig", func() {
 		var (
-			aggregate   *fixtures.AggregateMessageHandler
-			process     *fixtures.ProcessMessageHandler
-			integration *fixtures.IntegrationMessageHandler
-			projection  *fixtures.ProjectionMessageHandler
-			app         *fixtures.Application
+			aggregate   *AggregateMessageHandler
+			process     *ProcessMessageHandler
+			integration *IntegrationMessageHandler
+			projection  *ProjectionMessageHandler
+			app         *Application
 		)
 
 		BeforeEach(func() {
-			aggregate = &fixtures.AggregateMessageHandler{
+			aggregate = &AggregateMessageHandler{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("<aggregate>", "<aggregate-key>")
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				},
 			}
 
-			process = &fixtures.ProcessMessageHandler{
+			process = &ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("<process>", "<process-key>")
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ConsumesEventType(fixtures.MessageE{}) // shared with <projection>
-					c.ProducesCommandType(fixtures.MessageC{})
-					c.SchedulesTimeoutType(fixtures.MessageT{})
+					c.ConsumesEventType(MessageB{})
+					c.ConsumesEventType(MessageE{}) // shared with <projection>
+					c.ProducesCommandType(MessageC{})
+					c.SchedulesTimeoutType(MessageT{})
 				},
 			}
 
-			integration = &fixtures.IntegrationMessageHandler{
+			integration = &IntegrationMessageHandler{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("<integration>", "<integration-key>")
-					c.ConsumesCommandType(fixtures.MessageC{})
-					c.ProducesEventType(fixtures.MessageF{})
+					c.ConsumesCommandType(MessageC{})
+					c.ProducesEventType(MessageF{})
 				},
 			}
 
-			projection = &fixtures.ProjectionMessageHandler{
+			projection = &ProjectionMessageHandler{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Identity("<projection>", "<projection-key>")
-					c.ConsumesEventType(fixtures.MessageD{})
-					c.ConsumesEventType(fixtures.MessageE{}) // shared with <process>
+					c.ConsumesEventType(MessageD{})
+					c.ConsumesEventType(MessageE{}) // shared with <process>
 				},
 			}
 
-			app = &fixtures.Application{
+			app = &Application{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("<app>", "<app-key>")
 					c.RegisterAggregate(aggregate)
@@ -78,13 +79,13 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("sets the roles map", func() {
 				Expect(cfg.Roles).To(Equal(
 					MessageRoleMap{
-						fixtures.MessageAType: CommandMessageRole,
-						fixtures.MessageBType: EventMessageRole,
-						fixtures.MessageCType: CommandMessageRole,
-						fixtures.MessageDType: EventMessageRole,
-						fixtures.MessageEType: EventMessageRole,
-						fixtures.MessageFType: EventMessageRole,
-						fixtures.MessageTType: TimeoutMessageRole,
+						MessageAType: CommandMessageRole,
+						MessageBType: EventMessageRole,
+						MessageCType: CommandMessageRole,
+						MessageDType: EventMessageRole,
+						MessageEType: EventMessageRole,
+						MessageFType: EventMessageRole,
+						MessageTType: TimeoutMessageRole,
 					},
 				))
 			})
@@ -92,12 +93,12 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("sets the consumers map", func() {
 				Expect(cfg.Consumers).To(Equal(
 					map[MessageType][]HandlerConfig{
-						fixtures.MessageAType: {cfg.HandlersByName["<aggregate>"]},
-						fixtures.MessageBType: {cfg.HandlersByName["<process>"]},
-						fixtures.MessageCType: {cfg.HandlersByName["<integration>"]},
-						fixtures.MessageDType: {cfg.HandlersByName["<projection>"]},
-						fixtures.MessageEType: {cfg.HandlersByName["<process>"], cfg.HandlersByName["<projection>"]},
-						fixtures.MessageTType: {cfg.HandlersByName["<process>"]},
+						MessageAType: {cfg.HandlersByName["<aggregate>"]},
+						MessageBType: {cfg.HandlersByName["<process>"]},
+						MessageCType: {cfg.HandlersByName["<integration>"]},
+						MessageDType: {cfg.HandlersByName["<projection>"]},
+						MessageEType: {cfg.HandlersByName["<process>"], cfg.HandlersByName["<projection>"]},
+						MessageTType: {cfg.HandlersByName["<process>"]},
 					},
 				))
 			})
@@ -105,10 +106,10 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("sets the producers map", func() {
 				Expect(cfg.Producers).To(Equal(
 					map[MessageType][]HandlerConfig{
-						fixtures.MessageCType: {cfg.HandlersByName["<process>"]},
-						fixtures.MessageEType: {cfg.HandlersByName["<aggregate>"]},
-						fixtures.MessageFType: {cfg.HandlersByName["<integration>"]},
-						fixtures.MessageTType: {cfg.HandlersByName["<process>"]},
+						MessageCType: {cfg.HandlersByName["<process>"]},
+						MessageEType: {cfg.HandlersByName["<aggregate>"]},
+						MessageFType: {cfg.HandlersByName["<integration>"]},
+						MessageTType: {cfg.HandlersByName["<process>"]},
 					},
 				))
 			})
@@ -132,7 +133,7 @@ var _ = Describe("type ApplicationConfig", func() {
 
 				Expect(err).To(Equal(
 					Error(
-						"*fixtures.Application.Configure() did not call ApplicationConfigurer.Identity()",
+						`*fixtures.Application.Configure() did not call ApplicationConfigurer.Identity()`,
 					),
 				))
 			})
@@ -231,8 +232,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when an aggregate name is in conflict", func() {
 				aggregate.ConfigureFunc = func(c dogma.AggregateConfigurer) {
 					c.Identity("<process>", "<aggregate-key>") // conflict!
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				}
 
 				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {
@@ -253,8 +254,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when an aggregate key is in conflict", func() {
 				aggregate.ConfigureFunc = func(c dogma.AggregateConfigurer) {
 					c.Identity("<aggregate>", "<process-key>") // conflict!
-					c.ConsumesCommandType(fixtures.MessageA{})
-					c.ProducesEventType(fixtures.MessageE{})
+					c.ConsumesCommandType(MessageA{})
+					c.ProducesEventType(MessageE{})
 				}
 
 				app.ConfigureFunc = func(c dogma.ApplicationConfigurer) {
@@ -275,8 +276,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a process name is in conflict", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Identity("<aggregate>", "<process-key>") // conflict!
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageB{})
+					c.ProducesCommandType(MessageC{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -291,8 +292,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a process key is in conflict", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Identity("<process>", "<aggregate-key>") // conflict!
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageB{})
+					c.ProducesCommandType(MessageC{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -307,8 +308,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when an integration name is in conflict", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Identity("<process>", "<integration-key>") // conflict!
-					c.ConsumesCommandType(fixtures.MessageC{})
-					c.ProducesEventType(fixtures.MessageF{})
+					c.ConsumesCommandType(MessageC{})
+					c.ProducesEventType(MessageF{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -323,8 +324,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when an integration key is in conflict", func() {
 				integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 					c.Identity("<integration>", "<process-key>") // conflict!
-					c.ConsumesCommandType(fixtures.MessageC{})
-					c.ProducesEventType(fixtures.MessageF{})
+					c.ConsumesCommandType(MessageC{})
+					c.ProducesEventType(MessageF{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -339,7 +340,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a projection name is in conflict", func() {
 				projection.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
 					c.Identity("<integration>", "<projection-key>") // conflict!
-					c.ConsumesEventType(fixtures.MessageD{})
+					c.ConsumesEventType(MessageD{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -354,7 +355,7 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a projection key is in conflict", func() {
 				projection.ConfigureFunc = func(c dogma.ProjectionConfigurer) {
 					c.Identity("<projection>", "<integration-key>") // conflict!
-					c.ConsumesEventType(fixtures.MessageD{})
+					c.ConsumesEventType(MessageD{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -370,8 +371,8 @@ var _ = Describe("type ApplicationConfig", func() {
 		It("returns an error when the app contains multiple consumers of the same command", func() {
 			integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 				c.Identity("<integration>", "<integration-key>")
-				c.ConsumesCommandType(fixtures.MessageA{}) // conflict with <aggregate>
-				c.ProducesEventType(fixtures.MessageF{})
+				c.ConsumesCommandType(MessageA{}) // conflict with <aggregate>
+				c.ProducesEventType(MessageF{})
 			}
 
 			_, err := NewApplicationConfig(app)
@@ -386,8 +387,8 @@ var _ = Describe("type ApplicationConfig", func() {
 		It("returns an error when the app contains multiple producers of the same event", func() {
 			integration.ConfigureFunc = func(c dogma.IntegrationConfigurer) {
 				c.Identity("<integration>", "<integration-key>")
-				c.ConsumesCommandType(fixtures.MessageC{})
-				c.ProducesEventType(fixtures.MessageE{}) // conflict with <aggregate>
+				c.ConsumesCommandType(MessageC{})
+				c.ProducesEventType(MessageE{}) // conflict with <aggregate>
 			}
 
 			_, err := NewApplicationConfig(app)
@@ -400,25 +401,25 @@ var _ = Describe("type ApplicationConfig", func() {
 		})
 
 		It("does not return an error when the app contains multiple processes that schedule the same timeout", func() {
-			process1 := &fixtures.ProcessMessageHandler{
+			process1 := &ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("<process-1>", "<process-1-key>")
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ProducesCommandType(fixtures.MessageC{})
-					c.SchedulesTimeoutType(fixtures.MessageT{})
+					c.ConsumesEventType(MessageB{})
+					c.ProducesCommandType(MessageC{})
+					c.SchedulesTimeoutType(MessageT{})
 				},
 			}
 
-			process2 := &fixtures.ProcessMessageHandler{
+			process2 := &ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("<process-2>", "<process-2-key>")
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ProducesCommandType(fixtures.MessageC{})
-					c.SchedulesTimeoutType(fixtures.MessageT{})
+					c.ConsumesEventType(MessageB{})
+					c.ProducesCommandType(MessageC{})
+					c.SchedulesTimeoutType(MessageT{})
 				},
 			}
 
-			app := &fixtures.Application{
+			app := &Application{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("<app>", "<app-key>")
 					c.RegisterProcess(process1)
@@ -435,8 +436,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a conflict occurs with a consumed message", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Identity("<process>", "<process-key>")
-					c.ConsumesEventType(fixtures.MessageA{}) // conflict with <aggregate>
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{}) // conflict with <aggregate>
+					c.ProducesCommandType(MessageC{})
 				}
 
 				_, err := NewApplicationConfig(app)
@@ -451,8 +452,8 @@ var _ = Describe("type ApplicationConfig", func() {
 			It("returns an error when a conflict occurs with a produced message", func() {
 				process.ConfigureFunc = func(c dogma.ProcessConfigurer) {
 					c.Identity("<process>", "<process-key>")
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ProducesCommandType(fixtures.MessageE{}) // conflict with <aggregate>
+					c.ConsumesEventType(MessageB{})
+					c.ProducesCommandType(MessageE{}) // conflict with <aggregate>
 				}
 
 				_, err := NewApplicationConfig(app)

@@ -2,8 +2,9 @@ package config_test
 
 import (
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/fixtures"
+	. "github.com/dogmatiq/enginekit/config/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -13,16 +14,16 @@ var _ HandlerConfig = &ProcessConfig{}
 
 var _ = Describe("type ProcessConfig", func() {
 	Describe("func NewProcessConfig", func() {
-		var handler *fixtures.ProcessMessageHandler
+		var handler *ProcessMessageHandler
 
 		BeforeEach(func() {
-			handler = &fixtures.ProcessMessageHandler{
+			handler = &ProcessMessageHandler{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ConsumesEventType(fixtures.MessageB{})
-					c.ProducesCommandType(fixtures.MessageC{})
-					c.SchedulesTimeoutType(fixtures.MessageT{})
+					c.ConsumesEventType(MessageA{})
+					c.ConsumesEventType(MessageB{})
+					c.ProducesCommandType(MessageC{})
+					c.SchedulesTimeoutType(MessageT{})
 				},
 			}
 		})
@@ -54,9 +55,9 @@ var _ = Describe("type ProcessConfig", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
 						MessageRoleMap{
-							fixtures.MessageAType: EventMessageRole,
-							fixtures.MessageBType: EventMessageRole,
-							fixtures.MessageTType: TimeoutMessageRole,
+							MessageAType: EventMessageRole,
+							MessageBType: EventMessageRole,
+							MessageTType: TimeoutMessageRole,
 						},
 					))
 				})
@@ -66,8 +67,8 @@ var _ = Describe("type ProcessConfig", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ProducedMessageTypes()).To(Equal(
 						MessageRoleMap{
-							fixtures.MessageCType: CommandMessageRole,
-							fixtures.MessageTType: TimeoutMessageRole,
+							MessageCType: CommandMessageRole,
+							MessageTType: TimeoutMessageRole,
 						},
 					))
 				})
@@ -98,8 +99,8 @@ var _ = Describe("type ProcessConfig", func() {
 				"when the handler does not configure an identity",
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.Identity()`,
 				func(c dogma.ProcessConfigurer) {
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -108,8 +109,8 @@ var _ = Describe("type ProcessConfig", func() {
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
 					c.Identity("<other>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -117,8 +118,8 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid name "\t \n", names must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("\t \n", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -126,8 +127,8 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() called ProcessConfigurer.Identity() with an invalid key "\t \n", keys must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "\t \n")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -135,7 +136,7 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ConsumesEventType()`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -143,9 +144,9 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -153,9 +154,9 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.SchedulesTimeoutType(fixtures.MessageA)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.SchedulesTimeoutType(fixtures.MessageA{})
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.SchedulesTimeoutType(MessageA{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -163,7 +164,7 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() did not call ProcessConfigurer.ProducesCommandType()`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(MessageA{})
 				},
 			),
 			Entry(
@@ -171,9 +172,9 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.ProducesCommandType(fixtures.MessageC)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ProducesCommandType(fixtures.MessageC{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.ProducesCommandType(MessageC{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 			Entry(
@@ -181,9 +182,9 @@ var _ = Describe("type ProcessConfig", func() {
 				`*fixtures.ProcessMessageHandler.Configure() has already called ProcessConfigurer.SchedulesTimeoutType(fixtures.MessageC)`,
 				func(c dogma.ProcessConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.SchedulesTimeoutType(fixtures.MessageC{})
-					c.ProducesCommandType(fixtures.MessageC{})
+					c.ConsumesEventType(MessageA{})
+					c.SchedulesTimeoutType(MessageC{})
+					c.ProducesCommandType(MessageC{})
 				},
 			),
 		)

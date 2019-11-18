@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	"github.com/dogmatiq/enginekit/config"
 	. "github.com/dogmatiq/enginekit/config/api"
-	"github.com/dogmatiq/enginekit/fixtures"
 	"github.com/dogmatiq/enginekit/marshaling"
 	"github.com/dogmatiq/enginekit/marshaling/json"
 	. "github.com/onsi/ginkgo"
@@ -36,46 +36,46 @@ var _ = Describe("type Client", func() {
 
 		var err error
 
-		app1 = &fixtures.Application{
+		app1 = &Application{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("<app-1>", "<app-key-1>")
 
-				c.RegisterAggregate(&fixtures.AggregateMessageHandler{
+				c.RegisterAggregate(&AggregateMessageHandler{
 					ConfigureFunc: func(c dogma.AggregateConfigurer) {
 						c.Identity("<aggregate>", "<aggregate-key>")
-						c.ConsumesCommandType(fixtures.MessageC{})
-						c.ProducesEventType(fixtures.MessageE{})
+						c.ConsumesCommandType(MessageC{})
+						c.ProducesEventType(MessageE{})
 					},
 				})
 
-				c.RegisterProcess(&fixtures.ProcessMessageHandler{
+				c.RegisterProcess(&ProcessMessageHandler{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("<process>", "<process-key>")
-						c.ConsumesEventType(fixtures.MessageE{})
-						c.ProducesCommandType(fixtures.MessageC{})
-						c.SchedulesTimeoutType(fixtures.MessageT{})
+						c.ConsumesEventType(MessageE{})
+						c.ProducesCommandType(MessageC{})
+						c.SchedulesTimeoutType(MessageT{})
 					},
 				})
 			},
 		}
 
-		app2 = &fixtures.Application{
+		app2 = &Application{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("<app-2>", "<app-key-2>")
 
-				c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
+				c.RegisterIntegration(&IntegrationMessageHandler{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("<integration>", "<integration-key>")
-						c.ConsumesCommandType(fixtures.MessageI{})
-						c.ProducesEventType(fixtures.MessageJ{})
+						c.ConsumesCommandType(MessageI{})
+						c.ProducesEventType(MessageJ{})
 					},
 				})
 
-				c.RegisterProjection(&fixtures.ProjectionMessageHandler{
+				c.RegisterProjection(&ProjectionMessageHandler{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 						c.Identity("<projection>", "<projection-key>")
-						c.ConsumesEventType(fixtures.MessageE{})
-						c.ConsumesEventType(fixtures.MessageJ{})
+						c.ConsumesEventType(MessageE{})
+						c.ConsumesEventType(MessageJ{})
 					},
 				})
 			},

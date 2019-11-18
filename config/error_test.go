@@ -2,8 +2,8 @@ package config_test
 
 import (
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -20,7 +20,7 @@ var _ = Describe("type Error", func() {
 var _ = Describe("func catch", func() {
 	It("does not catch non-config panics", func() {
 		Expect(func() {
-			NewAggregateConfig(&fixtures.AggregateMessageHandler{
+			NewAggregateConfig(&AggregateMessageHandler{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					panic("<panic>")
 				},

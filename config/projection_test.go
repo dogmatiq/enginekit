@@ -2,8 +2,9 @@ package config_test
 
 import (
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/fixtures"
+	. "github.com/dogmatiq/enginekit/config/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
@@ -13,14 +14,14 @@ var _ HandlerConfig = &ProjectionConfig{}
 
 var _ = Describe("type ProjectionConfig", func() {
 	Describe("func NewProjectionConfig", func() {
-		var handler *fixtures.ProjectionMessageHandler
+		var handler *ProjectionMessageHandler
 
 		BeforeEach(func() {
-			handler = &fixtures.ProjectionMessageHandler{
+			handler = &ProjectionMessageHandler{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ConsumesEventType(fixtures.MessageB{})
+					c.ConsumesEventType(MessageA{})
+					c.ConsumesEventType(MessageB{})
 				},
 			}
 		})
@@ -52,8 +53,8 @@ var _ = Describe("type ProjectionConfig", func() {
 				It("returns the expected message types", func() {
 					Expect(cfg.ConsumedMessageTypes()).To(Equal(
 						MessageRoleMap{
-							fixtures.MessageAType: EventMessageRole,
-							fixtures.MessageBType: EventMessageRole,
+							MessageAType: EventMessageRole,
+							MessageBType: EventMessageRole,
 						},
 					))
 				})
@@ -90,7 +91,7 @@ var _ = Describe("type ProjectionConfig", func() {
 				"when the handler does not configure an identity",
 				`*fixtures.ProjectionMessageHandler.Configure() did not call ProjectionConfigurer.Identity()`,
 				func(c dogma.ProjectionConfigurer) {
-					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(MessageA{})
 				},
 			),
 			Entry(
@@ -99,7 +100,7 @@ var _ = Describe("type ProjectionConfig", func() {
 				func(c dogma.ProjectionConfigurer) {
 					c.Identity("<name>", "<key>")
 					c.Identity("<other>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(MessageA{})
 				},
 			),
 			Entry(
@@ -107,7 +108,7 @@ var _ = Describe("type ProjectionConfig", func() {
 				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Identity() with an invalid name "\t \n", names must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Identity("\t \n", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(MessageA{})
 				},
 			),
 			Entry(
@@ -115,7 +116,7 @@ var _ = Describe("type ProjectionConfig", func() {
 				`*fixtures.ProjectionMessageHandler.Configure() called ProjectionConfigurer.Identity() with an invalid key "\t \n", keys must be non-empty, printable UTF-8 strings with no whitespace`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Identity("<name>", "\t \n")
-					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(MessageA{})
 				},
 			),
 			Entry(
@@ -130,8 +131,8 @@ var _ = Describe("type ProjectionConfig", func() {
 				`*fixtures.ProjectionMessageHandler.Configure() has already called ProjectionConfigurer.ConsumesEventType(fixtures.MessageA)`,
 				func(c dogma.ProjectionConfigurer) {
 					c.Identity("<name>", "<key>")
-					c.ConsumesEventType(fixtures.MessageA{})
-					c.ConsumesEventType(fixtures.MessageA{})
+					c.ConsumesEventType(MessageA{})
+					c.ConsumesEventType(MessageA{})
 				},
 			),
 		)

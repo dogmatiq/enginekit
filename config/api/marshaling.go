@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
-	"github.com/dogmatiq/enginekit/marshaling"
+	"github.com/dogmatiq/marshalkit"
 )
 
 type unmarshalError string
@@ -25,7 +25,7 @@ func unmarshalIdentity(in *pb.Identity) config.Identity {
 
 // marshalApplication marshals a config.ApplicationConfig to its protocol
 // buffers representation.
-func marshalApplication(m *marshaling.Marshaler, in *config.ApplicationConfig) *pb.ApplicationConfig {
+func marshalApplication(m *marshalkit.Marshaler, in *config.ApplicationConfig) *pb.ApplicationConfig {
 	out := &pb.ApplicationConfig{
 		Identity: marshalIdentity(in.Identity()),
 	}
@@ -42,7 +42,7 @@ func marshalApplication(m *marshaling.Marshaler, in *config.ApplicationConfig) *
 
 // unmarshalApplication unmarshals a config.ApplicationConfig from its protocol
 // buffers representation.
-func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *config.ApplicationConfig {
+func unmarshalApplication(m *marshalkit.Marshaler, in *pb.ApplicationConfig) *config.ApplicationConfig {
 	out := &config.ApplicationConfig{
 		ApplicationIdentity: unmarshalIdentity(in.GetIdentity()),
 		HandlersByName:      map[string]config.HandlerConfig{},
@@ -74,9 +74,9 @@ func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *co
 
 // marshalHandler marshals a config.HandlerConfig to its protocol buffers
 // representation.
-func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.HandlerConfig {
+func marshalHandler(m *marshalkit.Marshaler, in config.HandlerConfig) *pb.HandlerConfig {
 	t, err := in.HandlerType().MarshalBinary()
-	marshaling.Must(err)
+	assertOk(err)
 
 	return &pb.HandlerConfig{
 		Identity: marshalIdentity(in.Identity()),
@@ -88,9 +88,10 @@ func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.Handle
 
 // unmarshalHandler unmarshals a config.HandlerConfig from its protocol buffers
 // representation.
-func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.HandlerConfig {
+func unmarshalHandler(m *marshalkit.Marshaler, in *pb.HandlerConfig) config.HandlerConfig {
 	var t config.HandlerType
-	marshaling.Must(t.UnmarshalBinary(in.Type))
+	err := t.UnmarshalBinary(in.Type)
+	assertOk(err)
 
 	i := unmarshalIdentity(in.GetIdentity())
 	c := unmarshalRoleMap(m, in.Consumed)
@@ -125,7 +126,7 @@ func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.Hand
 
 // marshalRoleMap marshals a config.MessageRoleMap to its protocol buffers
 // representation.
-func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[string][]byte {
+func marshalRoleMap(m *marshalkit.Marshaler, in config.MessageRoleMap) map[string][]byte {
 	var out map[string][]byte
 
 	for mt, r := range in {
@@ -133,9 +134,10 @@ func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[strin
 			out = map[string][]byte{}
 		}
 
-		k := marshaling.MustMarshalMessageType(m, mt)
+		k, err := config.MarshalMessageType(m, mt)
+		assertOk(err)
 		v, err := r.MarshalBinary()
-		marshaling.Must(err)
+		assertOk(err)
 
 		out[k] = v
 	}
@@ -145,7 +147,7 @@ func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[strin
 
 // unmarshalRoleMap unmarshals a config.MessageRoleMap from its protocol buffers
 // representation.
-func unmarshalRoleMap(m *marshaling.Marshaler, in map[string][]byte) config.MessageRoleMap {
+func unmarshalRoleMap(m *marshalkit.Marshaler, in map[string][]byte) config.MessageRoleMap {
 	var out config.MessageRoleMap
 
 	var v config.MessageRole
@@ -155,12 +157,34 @@ func unmarshalRoleMap(m *marshaling.Marshaler, in map[string][]byte) config.Mess
 			out = config.MessageRoleMap{}
 		}
 
-		k := marshaling.MustUnmarshalMessageType(m, mt)
-		err := v.UnmarshalBinary(r)
-		marshaling.Must(err)
+		k, err := config.UnmarshalMessageType(m, mt)
+		assertOk(err)
+		err = v.UnmarshalBinary(r)
+		assertOk(err)
 
 		out[k] = v
 	}
 
 	return out
+}
+
+type sentinel struct {
+	cause error
+}
+
+func assertOk(err error) {
+	if err != nil {
+		panic(sentinel{err})
+	}
+}
+
+func catch(err *error) {
+	switch r := recover().(type) {
+	case error:
+		*err = r
+	case nil:
+		return
+	default:
+		panic(r)
+	}
 }

@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/dogmatiq/dogma v0.6.1-0.20191118082625-b8374624fff5
-	github.com/dogmatiq/marshalkit v0.0.0-20191118084120-1c93a4a66492 // indirect
+	github.com/dogmatiq/marshalkit v0.0.0-20191118084120-1c93a4a66492
 	github.com/golang/protobuf v1.3.2
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/onsi/ginkgo v1.10.3

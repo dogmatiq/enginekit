@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/marshalkit"
 )
 
 // MessageTypeContainer is an interface for containers of message types.
@@ -38,12 +39,6 @@ type MessageType interface {
 //
 // If rt does not implement dogma.Message then mt is nil, and ok is false.
 func NewMessageType(rt reflect.Type) (mt MessageType, ok bool) {
-	// This is a compile time assertion that the dogma.Message interface
-	// contains no methods. If this line fails to compile due to missing
-	// methods, additional logic must be added to handle the case where rt
-	// does not implement dogma.Message.
-	var _ dogma.Message = interface{}(nil)
-
 	// The current implementation always returns true, as the dogma.Message
 	// interface is empty, and hence all types satisfy it.
 	return newMessageType(rt), true
@@ -55,10 +50,49 @@ func MessageTypeOf(m dogma.Message) MessageType {
 	return newMessageType(rt)
 }
 
+// MarshalMessageType marshals a message type to its portable representation.
+func MarshalMessageType(ma *marshalkit.Marshaler, mt MessageType) (string, error) {
+	return ma.MarshalType(mt.ReflectType())
+}
+
+// UnmarshalMessageType unmarshals a message type from its portable
+// representation.
+func UnmarshalMessageType(ma *marshalkit.Marshaler, mt string) (MessageType, error) {
+	rt, err := ma.UnmarshalType(mt)
+	if err != nil {
+		return nil, err
+	}
+
+	return newMessageType(rt), nil
+}
+
+// UnmarshalMessageTypeFromMediaType unmarshals a message type from a MIME
+// media-type.
+func UnmarshalMessageTypeFromMediaType(ma *marshalkit.Marshaler, mt string) (MessageType, error) {
+	rt, err := ma.UnmarshalTypeFromMediaType(mt)
+	if err != nil {
+		return nil, err
+	}
+
+	return newMessageType(rt), nil
+}
+
 // newMessageType returns the message type for the Go type reprsented by t.
 //
 // It is assumed that t implements dogma.Message.
 func newMessageType(rt reflect.Type) MessageType {
+	// This is a compile time assertion that the dogma.Message interface
+	// contains no methods.
+	//
+	// If this line fails to compile due to missing methods, then the contents
+	// of this function should be moved into the exposed NewMessageType()
+	// function, which returns a boolean to indicate the type's compatibility
+	// with dogma.Message.
+	//
+	// This function should then be removed, and any callers updated to use
+	// NewMessageType() instead.
+	var _ dogma.Message = interface{}(nil)
+
 	// try to load first, to avoid building the string if it's already stored
 	v, loaded := mtypes.Load(rt)
 

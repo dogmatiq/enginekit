@@ -2,12 +2,8 @@ cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/dogmatiq/dogma v0.6.0 h1:HdJ0cTcORIxZRTB5Z7RdsBXEr18gB3so7FMIHYiAhEQ=
-github.com/dogmatiq/dogma v0.6.0/go.mod h1:Im+Z77qgdIza8H5g/rrbrxCkHkJK7hHFs49MAqMHLTc=
 github.com/dogmatiq/dogma v0.6.1-0.20191118082625-b8374624fff5 h1:WpUVk973p6qxQDyEFrzfjBDQfS6f+/P1iHFj/xmxmjw=
 github.com/dogmatiq/dogma v0.6.1-0.20191118082625-b8374624fff5/go.mod h1:8TdjQ5jjV2DcCPb/jjHPgSrqU66H6092yMEIF5HGx0g=
-github.com/dogmatiq/marshalkit v0.0.0-20191118075135-a31c50de5117 h1:6JKVzDN05xtfY/4HyziSnwwbe5j4z0F9CdWCHiR0eFo=
-github.com/dogmatiq/marshalkit v0.0.0-20191118075135-a31c50de5117/go.mod h1:4Q/4swuUjCYhP2B8K1OjRTCcvYJo/RskNdptZ5okuLc=
 github.com/dogmatiq/marshalkit v0.0.0-20191118084120-1c93a4a66492 h1:3tTUhEoLD/FOQZb5pOjP/7rJf4NoDTxRxWY0HMoyZAQ=
 github.com/dogmatiq/marshalkit v0.0.0-20191118084120-1c93a4a66492/go.mod h1:nDwXy1Beuynjn2H221yDIkSEIOM8oprluctPOFLft+M=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

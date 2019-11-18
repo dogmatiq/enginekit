@@ -10,8 +10,8 @@ import (
 	. "github.com/dogmatiq/dogma/fixtures"
 	"github.com/dogmatiq/enginekit/config"
 	. "github.com/dogmatiq/enginekit/config/api"
-	"github.com/dogmatiq/enginekit/marshaling"
-	"github.com/dogmatiq/enginekit/marshaling/json"
+	"github.com/dogmatiq/marshalkit"
+	"github.com/dogmatiq/marshalkit/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"google.golang.org/grpc"
@@ -23,7 +23,7 @@ var _ = Describe("type Client", func() {
 		cancel     func()
 		app1, app2 dogma.Application
 		cfg1, cfg2 *config.ApplicationConfig
-		marshaler  *marshaling.Marshaler
+		marshaler  *marshalkit.Marshaler
 		listener   net.Listener
 		gserver    *grpc.Server
 		client     *Client
@@ -96,9 +96,9 @@ var _ = Describe("type Client", func() {
 		for mt := range cfg2.Roles {
 			types = append(types, mt.ReflectType())
 		}
-		marshaler, err = marshaling.NewMarshaler(
+		marshaler, err = marshalkit.NewMarshaler(
 			types,
-			[]marshaling.Codec{
+			[]marshalkit.Codec{
 				&json.Codec{},
 			},
 		)

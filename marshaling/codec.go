@@ -21,6 +21,6 @@ type Codec interface {
 // CodecCapabilities describes the capabilities of a codec as it relates to
 // specific Go types.
 type CodecCapabilities struct {
-	// Types is a map of the support types to their portable type name.
+	// Types is a map of the supported types to their portable type name.
 	Types map[reflect.Type]string
 }

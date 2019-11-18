@@ -199,7 +199,7 @@ var _ = Describe("type HandlerType", func() {
 	})
 
 	Describe("func MarshalBinary()", func() {
-		It("marshals the type to text", func() {
+		It("marshals the type to binary", func() {
 			Expect(AggregateHandlerType.MarshalBinary()).To(Equal([]byte("A")))
 			Expect(ProcessHandlerType.MarshalBinary()).To(Equal([]byte("P")))
 			Expect(IntegrationHandlerType.MarshalBinary()).To(Equal([]byte("I")))
@@ -213,7 +213,7 @@ var _ = Describe("type HandlerType", func() {
 	})
 
 	Describe("func UnmarshalBinary()", func() {
-		It("unmarshals the type from text", func() {
+		It("unmarshals the type from binary", func() {
 			var t HandlerType
 
 			err := t.UnmarshalBinary([]byte("A"))

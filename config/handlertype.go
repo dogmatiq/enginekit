@@ -213,11 +213,7 @@ func (t *HandlerType) UnmarshalText(text []byte) error {
 
 // MarshalBinary returns a binary representation of the handler type.
 func (t HandlerType) MarshalBinary() ([]byte, error) {
-	if err := t.Validate(); err != nil {
-		return nil, err
-	}
-
-	return []byte{byte(t)}, nil
+	return []byte{byte(t)}, t.Validate()
 }
 
 // UnmarshalBinary unmarshals a type from its binary representation.

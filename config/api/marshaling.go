@@ -125,16 +125,19 @@ func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.Hand
 
 // marshalRoleMap marshals a config.MessageRoleMap to its protocol buffers
 // representation.
-func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[string]string {
-	var out map[string]string
+func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[string][]byte {
+	var out map[string][]byte
 
 	for mt, r := range in {
 		if out == nil {
-			out = map[string]string{}
+			out = map[string][]byte{}
 		}
 
 		k := marshaling.MustMarshalMessageType(m, mt)
-		out[k] = string(r)
+		v, err := r.MarshalBinary()
+		marshaling.Must(err)
+
+		out[k] = v
 	}
 
 	return out
@@ -142,8 +145,10 @@ func marshalRoleMap(m *marshaling.Marshaler, in config.MessageRoleMap) map[strin
 
 // unmarshalRoleMap unmarshals a config.MessageRoleMap from its protocol buffers
 // representation.
-func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) config.MessageRoleMap {
+func unmarshalRoleMap(m *marshaling.Marshaler, in map[string][]byte) config.MessageRoleMap {
 	var out config.MessageRoleMap
+
+	var v config.MessageRole
 
 	for mt, r := range in {
 		if out == nil {
@@ -151,8 +156,8 @@ func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) config.Mess
 		}
 
 		k := marshaling.MustUnmarshalMessageType(m, mt)
-		v := config.MessageRole(r)
-		v.MustValidate()
+		err := v.UnmarshalBinary(r)
+		marshaling.Must(err)
 
 		out[k] = v
 	}

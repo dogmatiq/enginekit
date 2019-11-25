@@ -3,7 +3,7 @@ module github.com/dogmatiq/enginekit
 go 1.13
 
 require (
-	github.com/dogmatiq/dogma v0.6.0
+	github.com/dogmatiq/dogma v0.6.1
 	github.com/dogmatiq/iago v0.4.0
 	github.com/golang/protobuf v1.3.2
 	github.com/kr/pretty v0.1.0 // indirect

@@ -1,12 +1,13 @@
 package api
 
 import (
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
 	"github.com/dogmatiq/enginekit/handler"
 	"github.com/dogmatiq/enginekit/identity"
-	"github.com/dogmatiq/enginekit/marshaling"
 	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/marshalkit"
 )
 
 type unmarshalError string
@@ -28,7 +29,7 @@ func unmarshalIdentity(in *pb.Identity) identity.Identity {
 
 // marshalApplication marshals a config.ApplicationConfig to its protocol
 // buffers representation.
-func marshalApplication(m *marshaling.Marshaler, in *config.ApplicationConfig) *pb.ApplicationConfig {
+func marshalApplication(m marshalkit.TypeMarshaler, in *config.ApplicationConfig) *pb.ApplicationConfig {
 	out := &pb.ApplicationConfig{
 		Identity: marshalIdentity(in.Identity()),
 	}
@@ -45,7 +46,7 @@ func marshalApplication(m *marshaling.Marshaler, in *config.ApplicationConfig) *
 
 // unmarshalApplication unmarshals a config.ApplicationConfig from its protocol
 // buffers representation.
-func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *config.ApplicationConfig {
+func unmarshalApplication(m marshalkit.TypeMarshaler, in *pb.ApplicationConfig) *config.ApplicationConfig {
 	out := &config.ApplicationConfig{
 		ApplicationIdentity: unmarshalIdentity(in.GetIdentity()),
 		HandlersByName:      map[string]config.HandlerConfig{},
@@ -77,7 +78,7 @@ func unmarshalApplication(m *marshaling.Marshaler, in *pb.ApplicationConfig) *co
 
 // marshalHandler marshals a config.HandlerConfig to its protocol buffers
 // representation.
-func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.HandlerConfig {
+func marshalHandler(m marshalkit.TypeMarshaler, in config.HandlerConfig) *pb.HandlerConfig {
 	return &pb.HandlerConfig{
 		Identity: marshalIdentity(in.Identity()),
 		Type:     string(in.HandlerType()),
@@ -88,7 +89,7 @@ func marshalHandler(m *marshaling.Marshaler, in config.HandlerConfig) *pb.Handle
 
 // unmarshalHandler unmarshals a config.HandlerConfig from its protocol buffers
 // representation.
-func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.HandlerConfig {
+func unmarshalHandler(m marshalkit.TypeMarshaler, in *pb.HandlerConfig) config.HandlerConfig {
 	t := handler.Type(in.Type)
 	t.MustValidate()
 
@@ -125,7 +126,7 @@ func unmarshalHandler(m *marshaling.Marshaler, in *pb.HandlerConfig) config.Hand
 
 // marshalRoleMap marshals a message.RoleMap to its protocol buffers
 // representation.
-func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]string {
+func marshalRoleMap(m marshalkit.TypeMarshaler, in message.RoleMap) map[string]string {
 	var out map[string]string
 
 	for mt, r := range in {
@@ -133,7 +134,7 @@ func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]stri
 			out = map[string]string{}
 		}
 
-		k := marshaling.MustMarshalMessageType(m, mt)
+		k := marshalkit.MustMarshalType(m, mt.ReflectType())
 		out[k] = string(r)
 	}
 
@@ -142,7 +143,7 @@ func marshalRoleMap(m *marshaling.Marshaler, in message.RoleMap) map[string]stri
 
 // unmarshalRoleMap unmarshals a message.RoleMap from its protocol buffers
 // representation.
-func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) message.RoleMap {
+func unmarshalRoleMap(m marshalkit.TypeMarshaler, in map[string]string) message.RoleMap {
 	var out message.RoleMap
 
 	for mt, r := range in {
@@ -150,7 +151,14 @@ func unmarshalRoleMap(m *marshaling.Marshaler, in map[string]string) message.Rol
 			out = message.RoleMap{}
 		}
 
-		k := marshaling.MustUnmarshalMessageType(m, mt)
+		rt := marshalkit.MustUnmarshalType(m, mt)
+		k, _ := message.FromReflectType(rt)
+
+		// This is a static assertion that the dogma.Message interface is empty.
+		// If this fails to compile in the future, the code must be updated to
+		// check the second return value of message.FromReflectType().
+		var _ dogma.Message = (*interface{})(nil)
+
 		v := message.Role(r)
 		v.MustValidate()
 

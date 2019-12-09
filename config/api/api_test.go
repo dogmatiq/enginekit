@@ -6,12 +6,11 @@ import (
 	"time"
 
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/dogma/fixtures"
 	"github.com/dogmatiq/enginekit/config"
 	. "github.com/dogmatiq/enginekit/config/api"
-	"github.com/dogmatiq/enginekit/fixtures"
 	"github.com/dogmatiq/enginekit/identity"
-	"github.com/dogmatiq/enginekit/marshaling"
-	"github.com/dogmatiq/enginekit/marshaling/json"
+	. "github.com/dogmatiq/marshalkit/fixtures"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"google.golang.org/grpc"
@@ -23,7 +22,6 @@ var _ = Describe("type Client", func() {
 		cancel     func()
 		app1, app2 dogma.Application
 		cfg1, cfg2 *config.ApplicationConfig
-		marshaler  *marshaling.Marshaler
 		listener   net.Listener
 		gserver    *grpc.Server
 		client     *Client
@@ -36,46 +34,46 @@ var _ = Describe("type Client", func() {
 
 		var err error
 
-		app1 = &fixtures.Application{
+		app1 = &Application{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("<app-1>", "<app-key-1>")
 
-				c.RegisterAggregate(&fixtures.AggregateMessageHandler{
+				c.RegisterAggregate(&AggregateMessageHandler{
 					ConfigureFunc: func(c dogma.AggregateConfigurer) {
 						c.Identity("<aggregate>", "<aggregate-key>")
-						c.ConsumesCommandType(fixtures.MessageC{})
-						c.ProducesEventType(fixtures.MessageE{})
+						c.ConsumesCommandType(MessageC{})
+						c.ProducesEventType(MessageE{})
 					},
 				})
 
-				c.RegisterProcess(&fixtures.ProcessMessageHandler{
+				c.RegisterProcess(&ProcessMessageHandler{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("<process>", "<process-key>")
-						c.ConsumesEventType(fixtures.MessageE{})
-						c.ProducesCommandType(fixtures.MessageC{})
-						c.SchedulesTimeoutType(fixtures.MessageT{})
+						c.ConsumesEventType(MessageE{})
+						c.ProducesCommandType(MessageC{})
+						c.SchedulesTimeoutType(MessageT{})
 					},
 				})
 			},
 		}
 
-		app2 = &fixtures.Application{
+		app2 = &Application{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("<app-2>", "<app-key-2>")
 
-				c.RegisterIntegration(&fixtures.IntegrationMessageHandler{
+				c.RegisterIntegration(&IntegrationMessageHandler{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("<integration>", "<integration-key>")
-						c.ConsumesCommandType(fixtures.MessageI{})
-						c.ProducesEventType(fixtures.MessageJ{})
+						c.ConsumesCommandType(MessageI{})
+						c.ProducesEventType(MessageJ{})
 					},
 				})
 
-				c.RegisterProjection(&fixtures.ProjectionMessageHandler{
+				c.RegisterProjection(&ProjectionMessageHandler{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 						c.Identity("<projection>", "<projection-key>")
-						c.ConsumesEventType(fixtures.MessageE{})
-						c.ConsumesEventType(fixtures.MessageJ{})
+						c.ConsumesEventType(MessageE{})
+						c.ConsumesEventType(MessageJ{})
 					},
 				})
 			},
@@ -89,19 +87,11 @@ var _ = Describe("type Client", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 		cfg2.Accept(context.Background(), stripEntities{})
 
-		marshaler, err = marshaling.NewMarshalerForApplications(
-			[]*config.ApplicationConfig{cfg1, cfg2},
-			[]marshaling.Codec{
-				&json.Codec{},
-			},
-		)
-		Expect(err).ShouldNot(HaveOccurred())
-
 		listener, err = net.Listen("tcp", ":")
 		Expect(err).ShouldNot(HaveOccurred())
 
 		gserver = grpc.NewServer()
-		RegisterServer(gserver, marshaler, cfg1, cfg2)
+		RegisterServer(gserver, Marshaler, cfg1, cfg2)
 
 		go gserver.Serve(listener)
 
@@ -113,7 +103,7 @@ var _ = Describe("type Client", func() {
 
 		client = &Client{
 			conn,
-			marshaler,
+			Marshaler,
 		}
 	})
 

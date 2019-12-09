@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package dogmatiq.enginekit.marshaling.pbfixtures;
-
-option go_package = "github.com/dogmatiq/enginekit/marshaling/internal/pbfixtures";
-
-message Message {
-    string value = 1;
-}

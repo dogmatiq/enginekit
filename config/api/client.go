@@ -6,14 +6,14 @@ import (
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
 	"github.com/dogmatiq/enginekit/identity"
-	"github.com/dogmatiq/enginekit/marshaling"
+	"github.com/dogmatiq/marshalkit"
 	"google.golang.org/grpc"
 )
 
 // Client is used to query a server about its application configurations.
 type Client struct {
 	Connection *grpc.ClientConn
-	Marshaler  *marshaling.Marshaler
+	Marshaler  marshalkit.TypeMarshaler
 }
 
 // ListApplicationIdentities returns the identities of applications hosted by
@@ -27,7 +27,7 @@ func (c *Client) ListApplicationIdentities(
 		return nil, err
 	}
 
-	defer marshaling.Recover(&err)
+	defer marshalkit.Recover(&err)
 
 	var idents []identity.Identity
 	for _, i := range res.Identities {
@@ -48,7 +48,7 @@ func (c *Client) ListApplications(
 		return nil, err
 	}
 
-	defer marshaling.Recover(&err)
+	defer marshalkit.Recover(&err)
 
 	var configs []*config.ApplicationConfig
 	for _, cfg := range res.Applications {

@@ -5,14 +5,14 @@ import (
 
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
-	"github.com/dogmatiq/enginekit/marshaling"
+	"github.com/dogmatiq/marshalkit"
 	"google.golang.org/grpc"
 )
 
 // RegisterServer registers a config server for the config applications.
 func RegisterServer(
 	s *grpc.Server,
-	m *marshaling.Marshaler,
+	m marshalkit.TypeMarshaler,
 	apps ...*config.ApplicationConfig,
 ) {
 	svr := &server{}

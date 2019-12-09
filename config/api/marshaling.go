@@ -1,8 +1,7 @@
 package api
 
 import (
-	"fmt"
-
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/api/internal/pb"
 	"github.com/dogmatiq/enginekit/handler"
@@ -153,12 +152,12 @@ func unmarshalRoleMap(m marshalkit.TypeMarshaler, in map[string]string) message.
 		}
 
 		rt := marshalkit.MustUnmarshalType(m, mt)
-		k, ok := message.FromReflectType(rt)
-		if !ok {
-			panic(marshalkit.PanicSentinel{
-				Cause: fmt.Errorf("%s is not a Dogma message type", rt),
-			})
-		}
+		k, _ := message.FromReflectType(rt)
+
+		// This is a static assertion that the dogma.Message interface is empty.
+		// If this fails to compile in the future, the code must be updated to
+		// check the second return value of message.FromReflectType().
+		var _ dogma.Message = (*interface{})(nil)
 
 		v := message.Role(r)
 		v.MustValidate()

@@ -1,0 +1,10 @@
+syntax = "proto3";
+package dogma.configapi.v1;
+
+option go_package = "github.com/dogmatiq/enginekit/configapi/internal/pb";
+
+// Identity is a protocol buffers representation of the identity.Identity type.
+message Identity {
+  string name = 1;
+  string key = 2;
+}

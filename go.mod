@@ -3,6 +3,7 @@ module github.com/dogmatiq/enginekit
 go 1.13
 
 require (
+	github.com/dogmatiq/configkit v0.1.2-0.20191210235820-81de2ecbcf1a
 	github.com/dogmatiq/dogma v0.6.3
 	github.com/dogmatiq/marshalkit v0.2.0
 	github.com/golang/protobuf v1.3.2

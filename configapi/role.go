@@ -38,18 +38,18 @@ func unmarshalRole(in pb.MessageRole) (message.Role, error) {
 func marshalRoles(
 	in message.NameRoles,
 ) (
-	[]*pb.RolePair,
+	[]*pb.MessageRolePair,
 	map[message.Name]uint32,
 	error,
 ) {
 	var (
-		out     []*pb.RolePair
+		out     []*pb.MessageRolePair
 		indices = map[message.Name]uint32{}
 		index   uint32
 	)
 
 	for n, r := range in {
-		p := &pb.RolePair{}
+		p := &pb.MessageRolePair{}
 
 		var err error
 		p.Name, err = n.MarshalBinary()
@@ -70,7 +70,7 @@ func marshalRoles(
 	return out, indices, nil
 }
 
-func unmarshalRoles(in []*pb.RolePair) (
+func unmarshalRoles(in []*pb.MessageRolePair) (
 	message.NameRoles,
 	[]rolePair,
 	error,

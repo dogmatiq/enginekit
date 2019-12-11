@@ -3,8 +3,7 @@ package dogma.configapi.v1;
 
 option go_package = "github.com/dogmatiq/enginekit/configapi/internal/pb";
 
-import "configapi/internal/pb/identity.proto";
-import "configapi/internal/pb/config.proto";
+import "configapi/internal/pb/types.proto";
 
 // Config is a service for inspecting the configuration of Dogma applications
 // hosted by the engine on the server.

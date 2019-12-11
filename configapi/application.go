@@ -13,7 +13,6 @@ type application struct {
 	identity configkit.Identity
 	typeName string
 	messages configkit.EntityMessageNames
-	foreign  configkit.EntityMessageNames
 	handlers configkit.HandlerSet
 }
 
@@ -27,10 +26,6 @@ func (a *application) TypeName() string {
 
 func (a *application) MessageNames() configkit.EntityMessageNames {
 	return a.messages
-}
-
-func (a *application) ForeignMessageNames() configkit.EntityMessageNames {
-	return a.foreign
 }
 
 func (a *application) Handlers() configkit.HandlerSet {
@@ -81,11 +76,6 @@ func unmarshalApplication(in *pb.Application) (configkit.Application, error) {
 			Produced: message.NameRoles{},
 			Consumed: message.NameRoles{},
 		},
-		foreign: configkit.EntityMessageNames{
-			Roles:    message.NameRoles{},
-			Produced: message.NameRoles{},
-			Consumed: message.NameRoles{},
-		},
 		handlers: configkit.HandlerSet{},
 	}
 
@@ -115,26 +105,6 @@ func unmarshalApplication(in *pb.Application) (configkit.Application, error) {
 
 		for n, r := range ih.MessageNames().Consumed {
 			out.messages.Consumed[n] = r
-		}
-	}
-
-	for n, r := range out.messages.Consumed {
-		if _, ok := out.messages.Produced[n]; ok {
-			continue
-		}
-
-		out.foreign.Roles[n] = r
-		out.foreign.Consumed[n] = r
-	}
-
-	for n, r := range out.messages.Produced {
-		if _, ok := out.messages.Consumed[n]; ok {
-			continue
-		}
-
-		if r == message.CommandRole {
-			out.foreign.Roles[n] = r
-			out.foreign.Produced[n] = r
 		}
 	}
 

@@ -47,15 +47,15 @@ message Application {
   // value. The produced/consumed message names are not encoded directly in the
   // application, but rather rebuilt from the handlers when the application is
   // unmarshaled.
-  repeated MessageRolePair messages = 3;
+  repeated NameRole messages = 3;
 
   // Handlers is the set of handlers within the application.
   repeated Handler handlers = 4;
 }
 
-// MessageRolePair is a 2-tuple containing a message name and its role.
-message MessageRolePair {
-  // Name is the fully-qualified message name, serialized in its binary format.
+// NameRole is a 2-tuple containing a message name and its role.
+message NameRole {
+  // Name is the fully-qualified message name.
   bytes name = 1;
 
   // Role is the role this message plays within the application.

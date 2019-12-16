@@ -134,15 +134,35 @@ var _ = Describe("type Client", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(configs).To(HaveLen(2))
 
+			var res1, res2 configkit.Application
+
 			for _, cfg := range configs {
 				switch cfg.Identity() {
 				case cfg1.Identity():
-					Expect(configkit.IsApplicationEqual(cfg, cfg1)).To(BeTrue())
+					res1 = cfg
 				case cfg2.Identity():
-					Expect(configkit.IsApplicationEqual(cfg, cfg2)).To(BeTrue())
+					res2 = cfg
 				default:
 					Fail("unexpected config in response")
 				}
+			}
+
+			if !configkit.IsApplicationEqual(res1, cfg1) {
+				Fail(
+					"expected:\n\n" +
+						configkit.ToString(res1) +
+						"\nto equal:\n\n" +
+						configkit.ToString(cfg1),
+				)
+			}
+
+			if !configkit.IsApplicationEqual(res2, cfg2) {
+				Fail(
+					"expected:\n\n" +
+						configkit.ToString(res2) +
+						"\nto equal:\n\n" +
+						configkit.ToString(cfg2),
+				)
 			}
 		})
 

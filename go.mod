@@ -8,7 +8,7 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/onsi/ginkgo v1.11.0
-	github.com/onsi/gomega v1.7.1
+	github.com/onsi/gomega v1.8.1
 	golang.org/x/net v0.0.0-20190620200207-3b0461eec859 // indirect
 	golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd // indirect
 	google.golang.org/grpc v1.25.1

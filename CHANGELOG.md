@@ -9,6 +9,18 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Removed
+
+- **[BC]** This release removes the entire existing API of the `enginekit` module.
+
+The `configkit` module provides the same or similar functionality as the `enginekit/config` package.
+
+### Added
+
+- Add the `configapi` package for transfering application configurations via gRPC
+
 ## [0.8.0] - 2019-10-23
 
 ### Added

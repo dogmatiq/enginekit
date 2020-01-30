@@ -1,33 +1,34 @@
-package api
+package configapi
 
 import (
 	"context"
 
-	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/config/api/internal/pb"
-	"github.com/dogmatiq/marshalkit"
+	"github.com/dogmatiq/configkit"
+	"github.com/dogmatiq/enginekit/configapi/internal/pb"
 	"google.golang.org/grpc"
 )
 
 // RegisterServer registers a config server for the config applications.
 func RegisterServer(
 	s *grpc.Server,
-	m marshalkit.TypeMarshaler,
-	apps ...*config.ApplicationConfig,
+	apps ...configkit.Application,
 ) {
 	svr := &server{}
 
-	for _, cfg := range apps {
-		app := marshalApplication(m, cfg)
+	for _, in := range apps {
+		out, err := marshalApplication(in)
+		if err != nil {
+			panic(err)
+		}
 
 		svr.ListApplicationIdentitiesResponse.Identities = append(
 			svr.ListApplicationIdentitiesResponse.Identities,
-			app.Identity,
+			out.Identity,
 		)
 
 		svr.ListApplicationsResponse.Applications = append(
 			svr.ListApplicationsResponse.Applications,
-			app,
+			out,
 		)
 	}
 

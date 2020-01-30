@@ -1,10 +1,9 @@
 syntax = "proto3";
-package dogma.config.api.v1;
+package dogma.configapi.v1;
 
-option go_package = "github.com/dogmatiq/enginekit/config/api/internal/pb";
+option go_package = "github.com/dogmatiq/enginekit/configapi/internal/pb";
 
-import "config/api/internal/pb/identity.proto";
-import "config/api/internal/pb/config.proto";
+import "configapi/internal/pb/types.proto";
 
 // Config is a service for inspecting the configuration of Dogma applications
 // hosted by the engine on the server.
@@ -27,5 +26,5 @@ message ListApplicationsRequest{
 }
 
 message ListApplicationsResponse{
-  repeated ApplicationConfig applications = 1;
+  repeated Application applications = 1;
 }

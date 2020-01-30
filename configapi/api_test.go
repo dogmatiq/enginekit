@@ -1,16 +1,14 @@
-package api_test
+package configapi_test
 
 import (
 	"context"
 	"net"
 	"time"
 
+	"github.com/dogmatiq/configkit"
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/dogma/fixtures"
-	"github.com/dogmatiq/enginekit/config"
-	. "github.com/dogmatiq/enginekit/config/api"
-	"github.com/dogmatiq/enginekit/identity"
-	. "github.com/dogmatiq/marshalkit/fixtures"
+	. "github.com/dogmatiq/enginekit/configapi"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"google.golang.org/grpc"
@@ -21,7 +19,7 @@ var _ = Describe("type Client", func() {
 		ctx        context.Context
 		cancel     func()
 		app1, app2 dogma.Application
-		cfg1, cfg2 *config.ApplicationConfig
+		cfg1, cfg2 configkit.Application
 		listener   net.Listener
 		gserver    *grpc.Server
 		client     *Client
@@ -79,19 +77,14 @@ var _ = Describe("type Client", func() {
 			},
 		}
 
-		cfg1, err = config.NewApplicationConfig(app1)
-		Expect(err).ShouldNot(HaveOccurred())
-		cfg1.Accept(context.Background(), stripEntities{})
-
-		cfg2, err = config.NewApplicationConfig(app2)
-		Expect(err).ShouldNot(HaveOccurred())
-		cfg2.Accept(context.Background(), stripEntities{})
+		cfg1 = configkit.FromApplication(app1)
+		cfg2 = configkit.FromApplication(app2)
 
 		listener, err = net.Listen("tcp", ":")
 		Expect(err).ShouldNot(HaveOccurred())
 
 		gserver = grpc.NewServer()
-		RegisterServer(gserver, Marshaler, cfg1, cfg2)
+		RegisterServer(gserver, cfg1, cfg2)
 
 		go gserver.Serve(listener)
 
@@ -103,7 +96,6 @@ var _ = Describe("type Client", func() {
 
 		client = &Client{
 			conn,
-			Marshaler,
 		}
 	})
 
@@ -124,8 +116,8 @@ var _ = Describe("type Client", func() {
 			idents, err := client.ListApplicationIdentities(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(idents).To(ConsistOf(
-				identity.MustNew("<app-1>", "<app-key-1>"),
-				identity.MustNew("<app-2>", "<app-key-2>"),
+				configkit.MustNewIdentity("<app-1>", "<app-key-1>"),
+				configkit.MustNewIdentity("<app-2>", "<app-key-2>"),
 			))
 		})
 
@@ -140,10 +132,38 @@ var _ = Describe("type Client", func() {
 		It("returns the application configurations", func() {
 			configs, err := client.ListApplications(ctx)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(configs).To(ConsistOf(
-				cfg1,
-				cfg2,
-			))
+			Expect(configs).To(HaveLen(2))
+
+			var res1, res2 configkit.Application
+
+			for _, cfg := range configs {
+				switch cfg.Identity() {
+				case cfg1.Identity():
+					res1 = cfg
+				case cfg2.Identity():
+					res2 = cfg
+				default:
+					Fail("unexpected config in response")
+				}
+			}
+
+			if !configkit.IsApplicationEqual(res1, cfg1) {
+				Fail(
+					"expected:\n\n" +
+						configkit.ToString(res1) +
+						"\nto equal:\n\n" +
+						configkit.ToString(cfg1),
+				)
+			}
+
+			if !configkit.IsApplicationEqual(res2, cfg2) {
+				Fail(
+					"expected:\n\n" +
+						configkit.ToString(res2) +
+						"\nto equal:\n\n" +
+						configkit.ToString(cfg2),
+				)
+			}
 		})
 
 		It("returns an error if the gRPC call fails", func() {
@@ -153,52 +173,3 @@ var _ = Describe("type Client", func() {
 		})
 	})
 })
-
-// stripEntities is a config visitor that sets all application/handler values to
-// nil, to mimic how the config would appear when obtained via the API.
-type stripEntities struct{}
-
-func (v stripEntities) VisitApplicationConfig(
-	ctx context.Context,
-	cfg *config.ApplicationConfig,
-) error {
-	cfg.Application = nil
-
-	for _, h := range cfg.HandlersByKey {
-		h.Accept(ctx, v)
-	}
-
-	return nil
-}
-
-func (v stripEntities) VisitAggregateConfig(
-	ctx context.Context,
-	cfg *config.AggregateConfig,
-) error {
-	cfg.Handler = nil
-	return nil
-}
-
-func (v stripEntities) VisitProcessConfig(
-	ctx context.Context,
-	cfg *config.ProcessConfig,
-) error {
-	cfg.Handler = nil
-	return nil
-}
-
-func (v stripEntities) VisitIntegrationConfig(
-	ctx context.Context,
-	cfg *config.IntegrationConfig,
-) error {
-	cfg.Handler = nil
-	return nil
-}
-
-func (v stripEntities) VisitProjectionConfig(
-	ctx context.Context,
-	cfg *config.ProjectionConfig,
-) error {
-	cfg.Handler = nil
-	return nil
-}

@@ -10,7 +10,7 @@ import (
 
 // Client is used to query a server about its application configurations.
 type Client struct {
-	Connection *grpc.ClientConn
+	Connection grpc.ClientConnInterface
 }
 
 // ListApplicationIdentities returns the identities of applications hosted by

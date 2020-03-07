@@ -7,3 +7,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/dogmatiq/enginekit)](https://goreportcard.com/report/github.com/dogmatiq/enginekit)
 
 Utilities for [Dogma](https://github.com/dogmatiq/dogma) engine developers.
+
+> **This module is deprecated. Most of the functionality has been moved into the
+> following modules.**
+
+- [dogmatiq/configkit](https://github.com/dogmatiq/configkit)
+- [dogmatiq/marshalkit](https://github.com/dogmatiq/marshalkit)

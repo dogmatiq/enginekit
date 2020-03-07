@@ -1,5 +1,6 @@
-// Package enginekit provides utilities for building Dogma engines.
+// Package enginekit (deprecated) provides utilities for building Dogma engines.
 //
-// It is recommended that engine implementations do not expose the contents of
-// enginekit to to application developers directly.
+// See instead:
+//   - github.com/dogmatiq/configkit
+//   - github.com/dogmatiq/marshalkit
 package enginekit

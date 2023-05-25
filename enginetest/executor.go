@@ -14,7 +14,7 @@ func testCommandExecutor(ctx context.Context, t *testing.T, e *engine) {
 	t.Run("command executor", func(t *testing.T) {
 		t.Parallel()
 
-		t.Run("it panics if passed an invalid command", func(t *testing.T) {
+		t.Run("panics if passed an invalid command", func(t *testing.T) {
 			t.Parallel()
 
 			defer func() {
@@ -34,7 +34,7 @@ func testCommandExecutor(ctx context.Context, t *testing.T, e *engine) {
 			)
 		})
 
-		t.Run("it panics if passed an unrecognized command", func(t *testing.T) {
+		t.Run("panics if passed an unrecognized command", func(t *testing.T) {
 			t.Parallel()
 
 			defer func() {

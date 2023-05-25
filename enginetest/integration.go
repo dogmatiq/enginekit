@@ -10,10 +10,10 @@ import (
 )
 
 func testIntegration(ctx context.Context, t *testing.T, e *engine) {
-	t.Run("integration message handler", func(t *testing.T) {
+	t.Run("integration message handlers", func(t *testing.T) {
 		t.Parallel()
 
-		t.Run("it can record events", func(t *testing.T) {
+		t.Run("can record events", func(t *testing.T) {
 			t.Parallel()
 
 			id := uuid.NewString()

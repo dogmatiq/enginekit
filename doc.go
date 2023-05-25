@@ -1,1 +1,2 @@
-package GITHUB_REPO_NAME
+// Package enginekit provides tools for building Dogma engines.
+package enginekit

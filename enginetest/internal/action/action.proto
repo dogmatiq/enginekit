@@ -1,0 +1,26 @@
+syntax = "proto3";
+package dogmatiq.enginekit.enginetest;
+
+option go_package = "github.com/dogmatiq/enginekit/enginetest/internal/action";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
+
+message Action {
+  oneof behavior {
+    string fail = 1;
+    string log = 2;
+    google.protobuf.Any execute_command = 3;
+    google.protobuf.Any record_event = 4;
+    ScheduleTimeoutDetails schedule_timeout = 5;
+    Empty destroy = 6;
+    Empty end = 7;
+  }
+}
+
+message ScheduleTimeoutDetails {
+  google.protobuf.Any timeout = 1;
+  google.protobuf.Timestamp at = 2;
+}
+
+message Empty {}

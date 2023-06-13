@@ -5,12 +5,13 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"strconv"
 	"unicode/utf8"
 )
 
-// New returns a new randonly generated UUID.
-func New() *UUID {
+// Generate returns a new randonly generated UUID.
+func Generate() *UUID {
 	var data [16]byte
 	_, err := rand.Read(data[:])
 	if err != nil {
@@ -26,30 +27,74 @@ func New() *UUID {
 	}
 }
 
-// FromBytes returns a UUID from a byte slice.
-func FromBytes(data []byte) *UUID {
-	if len(data) != 16 {
-		panic("invalid UUID byte slice length")
-	}
+// Nil returns the "nil UUID", that is, a UUID with all bits set to zero.
+//
+// This should not be confused with Go's nil value.
+func Nil() *UUID {
+	return &UUID{}
+}
 
+// Omni returns the "omni UUID", that is, a UUID with all bits set to one.
+func Omni() *UUID {
 	return &UUID{
-		Upper: binary.BigEndian.Uint64(data[:8]),
-		Lower: binary.BigEndian.Uint64(data[8:]),
+		Upper: math.MaxUint64,
+		Lower: math.MaxUint64,
 	}
 }
 
-// ToBytes returns the UUID as a byte slice.
-func (x *UUID) ToBytes() []byte {
-	var data [16]byte
-	binary.BigEndian.PutUint64(data[:8], x.Upper)
-	binary.BigEndian.PutUint64(data[8:], x.Lower)
-	return data[:]
+// FromByteArray returns a UUID from a byte array.
+func FromByteArray[T ~byte](data [16]T) *UUID {
+	return &UUID{
+		Upper: uint64(data[0])<<56 |
+			uint64(data[1])<<48 |
+			uint64(data[2])<<40 |
+			uint64(data[3])<<32 |
+			uint64(data[4])<<24 |
+			uint64(data[5])<<16 |
+			uint64(data[6])<<8 |
+			uint64(data[7]),
+		Lower: uint64(data[8])<<56 |
+			uint64(data[9])<<48 |
+			uint64(data[10])<<40 |
+			uint64(data[11])<<32 |
+			uint64(data[12])<<24 |
+			uint64(data[13])<<16 |
+			uint64(data[14])<<8 |
+			uint64(data[15]),
+	}
+}
+
+// ToByteArray returns the UUID as a byte array.
+func ToByteArray[T ~byte](x *UUID) [16]T {
+	var data [16]T
+
+	if x != nil {
+		data[0] = T(x.Upper >> 56)
+		data[1] = T(x.Upper >> 48)
+		data[2] = T(x.Upper >> 40)
+		data[3] = T(x.Upper >> 32)
+		data[4] = T(x.Upper >> 24)
+		data[5] = T(x.Upper >> 16)
+		data[6] = T(x.Upper >> 8)
+		data[7] = T(x.Upper)
+
+		data[8] = T(x.Lower >> 56)
+		data[9] = T(x.Lower >> 48)
+		data[10] = T(x.Lower >> 40)
+		data[11] = T(x.Lower >> 32)
+		data[12] = T(x.Lower >> 24)
+		data[13] = T(x.Lower >> 16)
+		data[14] = T(x.Lower >> 8)
+		data[15] = T(x.Lower)
+	}
+
+	return data
 }
 
 // ToString returns the UUID as an RFC 4122 string.
 func (x *UUID) ToString() string {
 	var str [36]byte
-	uuid := x.ToBytes()
+	uuid := ToByteArray[byte](x)
 
 	hex.Encode(str[:], uuid[:4])
 	str[8] = '-'
@@ -72,6 +117,23 @@ func (x *UUID) Format(f fmt.State, verb rune) {
 		formatString(f, verb),
 		x.ToString(),
 	)
+}
+
+// IsNil returns true if x is the "nil UUID".
+//
+// The nil UUID is a UUID with all bits set to zero.
+//
+// This should not be confused with Go's nil value, although in this
+// implementation a nil *UUID is one possible representation of the nil UUID.
+func (x *UUID) IsNil() bool {
+	return x.GetUpper() == 0 && x.GetLower() == 0
+}
+
+// IsOmni returns true if x is the "omni UUID".
+//
+// The omni UUID is a UUID with all bits set to one.
+func (x *UUID) IsOmni() bool {
+	return x.GetUpper() == math.MaxUint64 && x.GetLower() == math.MaxUint64
 }
 
 // FormatString returns a string representing the fully qualified formatting

@@ -1,7 +1,6 @@
 package uuidpb_test
 
 import (
-	"bytes"
 	"fmt"
 	"testing"
 
@@ -9,21 +8,16 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func TestUUID_New(t *testing.T) {
+func TestGenerate(t *testing.T) {
 	t.Parallel()
 
-	uuid := New()
+	uuid := Generate()
 
-	if proto.Equal(uuid, &UUID{}) {
+	if uuid.IsNil() {
 		t.Fatal("got 'nil' UUID (all zeroes), want random UUID")
 	}
 
-	omni := &UUID{
-		Upper: 0xffffffffffffffff,
-		Lower: 0xffffffffffffffff,
-	}
-
-	if proto.Equal(uuid, omni) {
+	if uuid.IsOmni() {
 		t.Fatal("got 'omni' UUID (all ones), want random UUID")
 	}
 
@@ -42,17 +36,17 @@ func TestUUID_New(t *testing.T) {
 	}
 }
 
-func TestUUID_FromBytes(t *testing.T) {
+func TestFromByteArray(t *testing.T) {
 	t.Parallel()
 
-	data := []byte{
+	data := [16]byte{
 		0xa9, 0x67, 0xa8, 0xb9,
 		0x3f, 0x9c, 0x49, 0x18,
 		0x9a, 0x41, 0x19, 0x57,
 		0x7b, 0xe5, 0xfe, 0xc5,
 	}
 
-	actual := FromBytes(data)
+	actual := FromByteArray(data)
 	expect := &UUID{
 		Upper: 0xa967a8b93f9c4918,
 		Lower: 0x9a4119577be5fec5,
@@ -63,7 +57,7 @@ func TestUUID_FromBytes(t *testing.T) {
 	}
 }
 
-func TestUUID_ToBytes(t *testing.T) {
+func TestToByteArray(t *testing.T) {
 	t.Parallel()
 
 	uuid := &UUID{
@@ -71,15 +65,15 @@ func TestUUID_ToBytes(t *testing.T) {
 		Lower: 0x9a4119577be5fec5,
 	}
 
-	actual := uuid.ToBytes()
-	expect := []byte{
+	actual := ToByteArray[byte](uuid)
+	expect := [16]byte{
 		0xa9, 0x67, 0xa8, 0xb9,
 		0x3f, 0x9c, 0x49, 0x18,
 		0x9a, 0x41, 0x19, 0x57,
 		0x7b, 0xe5, 0xfe, 0xc5,
 	}
 
-	if !bytes.Equal(actual, expect) {
+	if actual != expect {
 		t.Fatalf("got %#v, want %#v", actual, expect)
 	}
 }
@@ -113,5 +107,62 @@ func TestUUID_Format(t *testing.T) {
 
 	if actual != expect {
 		t.Fatalf("got %q, want %q", actual, expect)
+	}
+}
+
+func TestUUID_IsNil(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		Description string
+		UUID        *UUID
+		Expect      bool
+	}{
+		{"nil pointer", nil, true},
+		{"zero value", &UUID{}, true},
+		{"non-zero upper component", &UUID{Upper: 1}, false},
+		{"non-zero lower component", &UUID{Lower: 1}, false},
+		{"result of Nil()", Nil(), true},
+	}
+
+	for _, c := range cases {
+		c := c // capture loop variable
+		t.Run(c.Description, func(t *testing.T) {
+			t.Parallel()
+
+			actual := c.UUID.IsNil()
+			if actual != c.Expect {
+				t.Fatalf("got %t, want %t", actual, c.Expect)
+			}
+		})
+	}
+}
+
+func TestUUID_IsOmni(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		Description string
+		UUID        *UUID
+		Expect      bool
+	}{
+		{"nil pointer", nil, false},
+		{"zero value", &UUID{}, false},
+		{"all ones in upper component", &UUID{Upper: 0xffffffffffffffff}, false},
+		{"all ones in lower component", &UUID{Lower: 0xffffffffffffffff}, false},
+		{"all ones", &UUID{Upper: 0xffffffffffffffff, Lower: 0xffffffffffffffff}, true},
+		{"result of Omni()", Omni(), true},
+	}
+
+	for _, c := range cases {
+		c := c // capture loop variable
+		t.Run(c.Description, func(t *testing.T) {
+			t.Parallel()
+
+			actual := c.UUID.IsOmni()
+			if actual != c.Expect {
+				t.Fatalf("got %t, want %t", actual, c.Expect)
+			}
+		})
 	}
 }

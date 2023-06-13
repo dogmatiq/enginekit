@@ -1,3 +1,2 @@
-// Package uuidpb provides a protocol buffers representation of an RFC 4122
-// UUID.
+// Package uuidpb represents RFC 4122 UUIDs as Protocol Buffers messages.
 package uuidpb

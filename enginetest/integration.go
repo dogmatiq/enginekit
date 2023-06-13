@@ -6,7 +6,7 @@ import (
 
 	"github.com/dogmatiq/enginekit/enginetest/internal/action"
 	"github.com/dogmatiq/enginekit/enginetest/internal/testapp"
-	"github.com/google/uuid"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 func testIntegration(ctx context.Context, t *testing.T, e *engine) {
@@ -16,9 +16,8 @@ func testIntegration(ctx context.Context, t *testing.T, e *engine) {
 		t.Run("can record events", func(t *testing.T) {
 			t.Parallel()
 
-			id := uuid.NewString()
 			expect := &testapp.IntegrationEventA{
-				Value: id,
+				Value: uuidpb.New().ToString(),
 			}
 
 			e.ExecuteCommand(

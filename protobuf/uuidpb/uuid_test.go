@@ -48,7 +48,7 @@ func TestAsByteArray(t *testing.T) {
 		Lower: 0x9a4119577be5fec5,
 	}
 
-	actual := AsByteArray[byte](subject)
+	actual := AsByteArray[[16]byte](subject)
 	expect := [16]byte{
 		0xa9, 0x67, 0xa8, 0xb9,
 		0x3f, 0x9c, 0x49, 0x18,

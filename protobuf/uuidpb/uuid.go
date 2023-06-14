@@ -23,7 +23,7 @@ func Generate() *UUID {
 }
 
 // FromByteArray returns a UUID from a byte array.
-func FromByteArray[T ~byte](data [16]T) *UUID {
+func FromByteArray[T ~[16]B, B byte](data T) *UUID {
 	return &UUID{
 		Upper: uint64(data[0])<<56 |
 			uint64(data[1])<<48 |
@@ -45,27 +45,27 @@ func FromByteArray[T ~byte](data [16]T) *UUID {
 }
 
 // AsByteArray returns the UUID as a byte array.
-func AsByteArray[T ~byte](x *UUID) [16]T {
-	var data [16]T
+func AsByteArray[T ~[16]B, B ~byte](x *UUID) T {
+	var data T
 
 	if x != nil {
-		data[0] = T(x.Upper >> 56)
-		data[1] = T(x.Upper >> 48)
-		data[2] = T(x.Upper >> 40)
-		data[3] = T(x.Upper >> 32)
-		data[4] = T(x.Upper >> 24)
-		data[5] = T(x.Upper >> 16)
-		data[6] = T(x.Upper >> 8)
-		data[7] = T(x.Upper)
+		data[0] = B(x.Upper >> 56)
+		data[1] = B(x.Upper >> 48)
+		data[2] = B(x.Upper >> 40)
+		data[3] = B(x.Upper >> 32)
+		data[4] = B(x.Upper >> 24)
+		data[5] = B(x.Upper >> 16)
+		data[6] = B(x.Upper >> 8)
+		data[7] = B(x.Upper)
 
-		data[8] = T(x.Lower >> 56)
-		data[9] = T(x.Lower >> 48)
-		data[10] = T(x.Lower >> 40)
-		data[11] = T(x.Lower >> 32)
-		data[12] = T(x.Lower >> 24)
-		data[13] = T(x.Lower >> 16)
-		data[14] = T(x.Lower >> 8)
-		data[15] = T(x.Lower)
+		data[8] = B(x.Lower >> 56)
+		data[9] = B(x.Lower >> 48)
+		data[10] = B(x.Lower >> 40)
+		data[11] = B(x.Lower >> 32)
+		data[12] = B(x.Lower >> 24)
+		data[13] = B(x.Lower >> 16)
+		data[14] = B(x.Lower >> 8)
+		data[15] = B(x.Lower)
 	}
 
 	return data
@@ -73,14 +73,14 @@ func AsByteArray[T ~byte](x *UUID) [16]T {
 
 // AsBytes returns the UUID as a byte slice.
 func (x *UUID) AsBytes() []byte {
-	data := AsByteArray[byte](x)
+	data := AsByteArray[[16]byte](x)
 	return data[:]
 }
 
 // AsString returns the UUID as an RFC 4122 string.
 func (x *UUID) AsString() string {
 	var str [36]byte
-	uuid := AsByteArray[byte](x)
+	uuid := AsByteArray[[16]byte](x)
 
 	hex.Encode(str[:], uuid[:4])
 	str[8] = '-'

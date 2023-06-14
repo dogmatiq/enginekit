@@ -1,0 +1,99 @@
+syntax = "proto3";
+package dogma.eventstream.v1;
+
+option go_package = "github.com/dogmatiq/enginekit/grpc/eventstreamgrpc";
+
+import "github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto";
+import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
+
+// API is a service for consuming offset-based ordered streams of event
+// messages.
+service API {
+  // List lists the streams that the server provides.
+  rpc List(ListRequest) returns (ListResponse);
+
+  // Consume starts consuming from a specific offset within an event stream.
+  //
+  // If the requested stream ID is unknown to the server it MUST return a
+  // NOT_FOUND error with an attached [UnrecognizedStream] value.
+  //
+  // If the requested offset is beyond the end of the stream, the server SHOULD
+  // keep the stream open and send new events as they are written to the stream.
+  //
+  // The requested event types MUST be a subset of those event types associated
+  // with the stream, as per the List operation. If any other event types are
+  // requested the server MUST return an INVALID_ARGUMENT error with an attached
+  // [UnrecognizedEventType] value for each unrecognized event type.
+  //
+  // If none of the requested media-types for a given event type are supported
+  // the server MUST return an INVALID_ARGUMENT error with an attached
+  // [NoRecognizedMediaTypes] value for each such event type.
+  rpc Consume(ConsumeRequest) returns (stream ConsumeResponse);
+}
+
+message ListRequest {}
+message ListResponse { repeated Stream streams = 1; }
+
+message Stream {
+  // StreamId is a unique identifier for the stream.
+  dogma.protobuf.UUID stream_id = 1;
+
+  // EventTypes is the set of event types that may appear on the stream.
+  repeated EventType event_types = 2;
+}
+
+message ConsumeRequest {
+  // StreamId is the ID from which events are consumed.
+  dogma.protobuf.UUID stream_id = 1;
+
+  // Offset is the offset of the earliest event to be consumed.
+  uint64 offset = 2;
+
+  // EventTypes is a list of event types to be consumed. Consumers must be
+  // explicit about the event types that it understands; there is no mechanism
+  // to request all event types.
+  repeated EventType event_types = 3;
+}
+
+message ConsumeResponse {
+  // Offset is the offset of the event within the stream.
+  uint64 offset = 1;
+
+  // Envelope is the envelope containing the event.
+  dogma.protobuf.Envelope envelope = 2;
+}
+
+message EventType {
+  // PortableName is a name that uniquely identifies the event type across
+  // process boundaries.
+  string portable_name = 1;
+
+  // MediaTypes is the set of supported media-types that can be used to
+  // represent events of this type, in order of preference.
+  repeated string media_types = 2;
+}
+
+// UnrecognizedStream is an error-details value for INVALID_ARGUMENT errors that
+// occurred because a consumer requested an unrecognized stream ID.
+message UnrecognizedStream {
+  // ApplicationKey is the ID of the unrecognized stream.
+  dogma.protobuf.UUID stream_id = 1;
+}
+
+// UnrecognizedEventType is an error-details value for INVALID_ARGUMENT errors
+// that occurred because a specific event type was not recognized by the
+// server.
+message UnrecognizedEventType {
+  // PortableName is a name that uniquely identifies the event type across
+  // process boundaries.
+  string portable_name = 2;
+}
+
+// NoRecognizedMediaTypes is an error-details value for INVALID_ARGUMENT errors
+// that occurred because a the server does not support any of the media-types
+// requested by the client for a specific event type.
+message NoRecognizedMediaTypes {
+  // PortableName is a name that uniquely identifies the event type across
+  // process boundaries.
+  string portable_name = 2;
+}

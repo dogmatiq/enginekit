@@ -1,6 +1,7 @@
 package identitypb_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -14,11 +15,8 @@ func TestIdentity_Validate(t *testing.T) {
 	t.Run("when the identity is valid", func(t *testing.T) {
 		t.Parallel()
 
-		valid := &Identity{
-			Name: "<name>",
-			Key:  uuidpb.Generate(),
-		}
-		if err := valid.Validate(); err != nil {
+		subject := New("<name>", uuidpb.Generate())
+		if err := subject.Validate(); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -37,7 +35,7 @@ func TestIdentity_Validate(t *testing.T) {
 					Name: "",
 					Key:  uuidpb.Generate(),
 				},
-				"invalid identity name: must be between 1 and 255 bytes",
+				"invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"too long",
@@ -45,23 +43,15 @@ func TestIdentity_Validate(t *testing.T) {
 					Name: strings.Repeat("*", 256),
 					Key:  uuidpb.Generate(),
 				},
-				"invalid identity name: must be between 1 and 255 bytes",
+				"invalid name: must be between 1 and 255 bytes",
 			},
 			{
-				"nil-uuid key",
+				"invalid key",
 				&Identity{
 					Name: "<name>",
-					Key:  uuidpb.Nil(),
+					Key:  &uuidpb.UUID{},
 				},
-				"invalid identity key: must not be the nil UUID (all zeroes)",
-			},
-			{
-				"omni-uuid key",
-				&Identity{
-					Name: "<name>",
-					Key:  uuidpb.Omni(),
-				},
-				"invalid identity key: must not be the omni UUID (all ones)",
+				"invalid key: UUID must use version 4",
 			},
 		}
 
@@ -80,4 +70,23 @@ func TestIdentity_Validate(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestIdentity_Format(t *testing.T) {
+	t.Parallel()
+
+	subject := New(
+		"<name>",
+		&uuidpb.UUID{
+			Upper: 0xa967a8b93f9c4918,
+			Lower: 0x9a4119577be5fec5,
+		},
+	)
+
+	expect := "<name>/a967a8b9-3f9c-4918-9a41-19577be5fec5"
+	actual := fmt.Sprintf("%s", subject)
+
+	if actual != expect {
+		t.Fatalf("got %q, want %q", actual, expect)
+	}
 }

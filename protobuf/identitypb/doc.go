@@ -1,3 +1,3 @@
-// Package identitypb provides the "Identity" well-known type for identifying
-// various entities within a Dogma engine and application.
+// Package identitypb provides the "well-known" Identity type for representing
+// application and handler (etc) identifies as Protocol Buffers messages.
 package identitypb

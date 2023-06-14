@@ -2,7 +2,6 @@ package uuidpb
 
 import (
 	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"fmt"
 
@@ -20,6 +19,42 @@ func Generate() *UUID {
 	data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 4122)
 
 	return FromByteArray(data)
+}
+
+// FromString returns a UUID from an RFC 4122 string
+func FromString(str string) (*UUID, error) {
+	if len(str) != 36 {
+		return nil, errors.New("invalid UUID format, expected 36 characters")
+	}
+
+	uuid := &UUID{}
+	target := &uuid.Upper
+	shift := 60
+
+	for index := 0; index < 36; index++ {
+		char := str[index]
+
+		switch index {
+		case 18:
+			target = &uuid.Lower
+			shift = 60
+			fallthrough
+		case 8, 13, 23:
+			if char != '-' {
+				return nil, errors.New("invalid UUID format, expected hyphen")
+			}
+		default:
+			value := fromHex[char]
+			if value == bad {
+				return nil, errors.New("invalid UUID format, expected hex digit")
+			}
+
+			*target |= uint64(value) << shift
+			shift -= 4
+		}
+	}
+
+	return uuid, nil
 }
 
 // FromByteArray returns a UUID from a byte array.
@@ -79,18 +114,29 @@ func (x *UUID) AsBytes() []byte {
 
 // AsString returns the UUID as an RFC 4122 string.
 func (x *UUID) AsString() string {
-	var str [36]byte
-	uuid := AsByteArray[[16]byte](x)
+	if x == nil {
+		return "00000000-0000-0000-0000-000000000000"
+	}
 
-	hex.Encode(str[:], uuid[:4])
-	str[8] = '-'
-	hex.Encode(str[9:], uuid[4:6])
-	str[13] = '-'
-	hex.Encode(str[14:], uuid[6:8])
-	str[18] = '-'
-	hex.Encode(str[19:], uuid[8:10])
-	str[23] = '-'
-	hex.Encode(str[24:], uuid[10:])
+	var str [36]byte
+
+	source := &x.Upper
+	shift := 60
+
+	for index := 0; index < 36; index++ {
+		switch index {
+		case 18:
+			source = &x.Lower
+			shift = 60
+			fallthrough
+		case 8, 13, 23:
+			str[index] = '-'
+		default:
+			value := (*source >> shift) & 0xf
+			str[index] = toHex[value]
+			shift -= 4
+		}
+	}
 
 	return string(str[:])
 }
@@ -117,3 +163,34 @@ func (x *UUID) Validate() error {
 
 	return nil
 }
+
+// bad is a sentinel value that indicates an invalid hexadecimal digit.
+const bad = 255
+
+var (
+	toHex = [16]byte{
+		'0', '1', '2', '3',
+		'4', '5', '6', '7',
+		'8', '9', 'a', 'b',
+		'c', 'd', 'e', 'f',
+	}
+
+	fromHex = [256]byte{
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, bad, bad, bad, bad, bad, bad,
+		bad, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
+	}
+)

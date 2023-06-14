@@ -19,6 +19,73 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+func TestFromString(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		cases := []struct {
+			Desc   string
+			String string
+		}{
+			{"lowercase", "a967a8b9-3f9c-4918-9a41-19577be5fec5"},
+			{"uppercase", "A967A8B9-3F9C-4918-9A41-19577BE5FEC5"},
+		}
+
+		for _, c := range cases {
+			c := c // capture loop variable
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				expect := &UUID{
+					Upper: 0xa967a8b93f9c4918,
+					Lower: 0x9a4119577be5fec5,
+				}
+				actual, err := FromString(c.String)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if !proto.Equal(actual, expect) {
+					t.Fatalf("got %q, want %q", actual, expect)
+				}
+			})
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		cases := []struct {
+			Desc   string
+			String string
+		}{
+			{"empty string", ""},
+			{"too short", "3493af5d-e4d0-4f3b-a73d-048e6b08496"},
+			{"too long", "3493af5d-e4d0-4f3b-a73d-048e6b08496ab"},
+			{"no hyphens", "a967a8b93f9c49189a4119577be5fec5"},
+			{"no hyphens at position 8", "7e770248_7336-4cee-881d-f24013e6c1bf"},
+			{"no hyphens at position 13", "7e770248-7336_4cee-881d-f24013e6c1bf"},
+			{"no hyphens at position 18", "7e770248-7336-4cee_881d-f24013e6c1bf"},
+			{"no hyphens at position 23", "7e770248-7336-4cee-881d_f24013e6c1bf"},
+			{"non-hex character", "26c4a622-e4b4-4Xe7-8454-e3dc90f7d1d8"},
+		}
+
+		for _, c := range cases {
+			c := c // capture loop variable
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				_, err := FromString(c.String)
+				if err == nil {
+					t.Fatal("expected an error")
+				}
+			})
+		}
+	})
+}
+
 func TestFromByteArray(t *testing.T) {
 	t.Parallel()
 
@@ -64,37 +131,91 @@ func TestAsByteArray(t *testing.T) {
 func TestUUID_AsBytes(t *testing.T) {
 	t.Parallel()
 
-	subject := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
+	cases := []struct {
+		Desc    string
+		Subject *UUID
+		Expect  []byte
+	}{
+		{
+			"nil",
+			nil,
+			[]byte{
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+			},
+		},
+		{
+			"zero",
+			&UUID{},
+			[]byte{
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, 0x00, 0x00,
+			},
+		},
+		{
+			"non-zero",
+			&UUID{
+				Upper: 0xa967a8b93f9c4918,
+				Lower: 0x9a4119577be5fec5,
+			},
+			[]byte{
+				0xa9, 0x67, 0xa8, 0xb9,
+				0x3f, 0x9c, 0x49, 0x18,
+				0x9a, 0x41, 0x19, 0x57,
+				0x7b, 0xe5, 0xfe, 0xc5,
+			},
+		},
 	}
 
-	actual := subject.AsBytes()
-	expect := []byte{
-		0xa9, 0x67, 0xa8, 0xb9,
-		0x3f, 0x9c, 0x49, 0x18,
-		0x9a, 0x41, 0x19, 0x57,
-		0x7b, 0xe5, 0xfe, 0xc5,
-	}
+	for _, c := range cases {
+		c := c // capture loop variable
+		t.Run(c.Desc, func(t *testing.T) {
+			t.Parallel()
 
-	if !bytes.Equal(actual, expect) {
-		t.Fatalf("got %q, want %q", actual, expect)
+			actual := c.Subject.AsBytes()
+
+			if !bytes.Equal(actual, c.Expect) {
+				t.Fatalf("got %q, want %q", actual, c.Expect)
+			}
+		})
 	}
 }
 
 func TestUUID_AsString(t *testing.T) {
 	t.Parallel()
 
-	subject := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
+	cases := []struct {
+		Desc    string
+		Subject *UUID
+		Expect  string
+	}{
+		{"nil", nil, "00000000-0000-0000-0000-000000000000"},
+		{"zero", &UUID{}, "00000000-0000-0000-0000-000000000000"},
+		{
+			"non-zero",
+			&UUID{
+				Upper: 0xa967a8b93f9c4918,
+				Lower: 0x9a4119577be5fec5,
+			},
+			"a967a8b9-3f9c-4918-9a41-19577be5fec5",
+		},
 	}
 
-	expect := "a967a8b9-3f9c-4918-9a41-19577be5fec5"
-	actual := subject.AsString()
+	for _, c := range cases {
+		c := c // capture loop variable
+		t.Run(c.Desc, func(t *testing.T) {
+			t.Parallel()
 
-	if actual != expect {
-		t.Fatalf("got %q, want %q", actual, expect)
+			actual := c.Subject.AsString()
+
+			if actual != c.Expect {
+				t.Fatalf("got %q, want %q", actual, c.Expect)
+			}
+		})
 	}
 }
 

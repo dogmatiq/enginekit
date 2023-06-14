@@ -17,7 +17,7 @@ func testIntegration(ctx context.Context, t *testing.T, e *engine) {
 			t.Parallel()
 
 			expect := &testapp.IntegrationEventA{
-				Value: uuidpb.Generate().ToString(),
+				Value: uuidpb.Generate().AsString(),
 			}
 
 			e.ExecuteCommand(

@@ -1,0 +1,83 @@
+syntax = "proto3";
+package dogma.protobuf;
+
+option go_package = "github.com/dogmatiq/enginekit/protobuf/envelopepb";
+
+import "google/protobuf/timestamp.proto";
+import "github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto";
+import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
+
+// Envelope is a container for a Dogma message and its meta-data.
+message Envelope {
+  // MessageId is a unique identifier for the message in this envelope.
+  UUID message_id = 1;
+
+  // CausationId is the (optional) ID of the message that was the direct cause
+  // of the message in this envelope.
+  //
+  // If it is the zero-value, the message was not caused by any other message.
+  UUID causation_id = 2;
+
+  // CorrelationId is the (optional) ID of the first ancestor of the message in
+  // this envelope that was not caused by another message.
+  //
+  // If it is the zero-value, the message was not caused by any other message.
+  UUID correlation_id = 3;
+
+  // SourceSite is the (optional) identity of the "site" that the source
+  // application is running within.
+  //
+  // The site is used to disambiguate between messages from different
+  // installations of the same application.
+  Identity source_site = 4;
+
+  // SourceApplication is the identity of the Dogma application that produced
+  // the message in this envelope.
+  Identity source_application = 5;
+
+  // SourceHandler is the identity of the Dogma handler that produced the
+  // message in this envelope.
+  //
+  // It is the zero-value if the message was not produced by a handler.
+  Identity source_handler = 6;
+
+  // SourceInstanceId is the ID of the aggregate or process instance that
+  // produced the message in this envelope.
+  //
+  // It is empty if the message was not produced by an aggregate or process
+  // handler.
+  string source_instance_id = 7;
+
+  // CreatedAt is the time at which the envelope was created.
+  //
+  // This is typically the point at which the message first enters the engine.
+  google.protobuf.Timestamp created_at = 8;
+
+  // ScheduledFor is the time at which a timeout message is scheduled to occur.
+  //
+  // It is the zero-value if the message is a command or event.
+  google.protobuf.Timestamp scheduled_for = 9;
+
+  // Description is a human-readable description of the message.
+  string description = 10;
+
+  // PortableName is the unique name used to identify messages of this type.
+  string portable_name = 11;
+
+  // MediaType is a MIME media-type describing the content and encoding of the
+  // binary message data.
+  string media_type = 12;
+
+  // Attributes is a set of arbitrary key/value pairs that provide additional
+  // information about the message.
+  //
+  // Keys beginning with "_" are reserved for use by the enginekit module. All
+  // other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
+  map<string, string> attributes = 13;
+
+  // Data is the binary message data.
+  //
+  // The data format is described by MediaType, the allowed values of both are
+  // outside the scope of this specification.
+  bytes data = 14;
+}

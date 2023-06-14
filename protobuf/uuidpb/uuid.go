@@ -2,44 +2,24 @@ package uuidpb
 
 import (
 	"crypto/rand"
-	"encoding/binary"
 	"encoding/hex"
+	"errors"
 	"fmt"
-	"math"
-	"strconv"
-	"unicode/utf8"
+
+	"github.com/dogmatiq/enginekit/internal/fmtbackport"
 )
 
 // Generate returns a new randonly generated UUID.
 func Generate() *UUID {
 	var data [16]byte
-	_, err := rand.Read(data[:])
-	if err != nil {
+	if _, err := rand.Read(data[:]); err != nil {
 		panic(err)
 	}
 
 	data[6] = (data[6] & 0x0f) | 0x40 // Version 4
-	data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10
+	data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 4122)
 
-	return &UUID{
-		Upper: binary.BigEndian.Uint64(data[:8]),
-		Lower: binary.BigEndian.Uint64(data[8:]),
-	}
-}
-
-// Nil returns the "nil UUID", that is, a UUID with all bits set to zero.
-//
-// This should not be confused with Go's nil value.
-func Nil() *UUID {
-	return &UUID{}
-}
-
-// Omni returns the "omni UUID", that is, a UUID with all bits set to one.
-func Omni() *UUID {
-	return &UUID{
-		Upper: math.MaxUint64,
-		Lower: math.MaxUint64,
-	}
+	return FromByteArray(data)
 }
 
 // FromByteArray returns a UUID from a byte array.
@@ -64,8 +44,8 @@ func FromByteArray[T ~byte](data [16]T) *UUID {
 	}
 }
 
-// ToByteArray returns the UUID as a byte array.
-func ToByteArray[T ~byte](x *UUID) [16]T {
+// AsByteArray returns the UUID as a byte array.
+func AsByteArray[T ~byte](x *UUID) [16]T {
 	var data [16]T
 
 	if x != nil {
@@ -91,10 +71,16 @@ func ToByteArray[T ~byte](x *UUID) [16]T {
 	return data
 }
 
-// ToString returns the UUID as an RFC 4122 string.
-func (x *UUID) ToString() string {
+// AsBytes returns the UUID as a byte slice.
+func (x *UUID) AsBytes() []byte {
+	data := AsByteArray[byte](x)
+	return data[:]
+}
+
+// AsString returns the UUID as an RFC 4122 string.
+func (x *UUID) AsString() string {
 	var str [36]byte
-	uuid := ToByteArray[byte](x)
+	uuid := AsByteArray[byte](x)
 
 	hex.Encode(str[:], uuid[:4])
 	str[8] = '-'
@@ -114,48 +100,20 @@ func (x *UUID) ToString() string {
 func (x *UUID) Format(f fmt.State, verb rune) {
 	fmt.Fprintf(
 		f,
-		formatString(f, verb),
-		x.ToString(),
+		fmtbackport.FormatString(f, verb),
+		x.AsString(),
 	)
 }
 
-// IsNil returns true if x is the "nil UUID".
-//
-// The nil UUID is a UUID with all bits set to zero.
-//
-// This should not be confused with Go's nil value, although in this
-// implementation a nil *UUID is one possible representation of the nil UUID.
-func (x *UUID) IsNil() bool {
-	return x.GetUpper() == 0 && x.GetLower() == 0
-}
+// Validate returns an error if x is not a valid Version 4 (random) UUID.
+func (x *UUID) Validate() error {
+	if version := (x.GetUpper() >> 8) & 0xf0; version != 0x40 {
+		return errors.New("UUID must use version 4")
+	}
 
-// IsOmni returns true if x is the "omni UUID".
-//
-// The omni UUID is a UUID with all bits set to one.
-func (x *UUID) IsOmni() bool {
-	return x.GetUpper() == math.MaxUint64 && x.GetLower() == math.MaxUint64
-}
+	if variant := (x.GetLower() >> 56) & 0xc0; variant != 0x80 {
+		return fmt.Errorf("UUID must use RFC 4122 variant")
+	}
 
-// FormatString returns a string representing the fully qualified formatting
-// directive captured by the State, followed by the argument verb.
-//
-// It is a copy of the fmt.FormatString() function in Go v1.20, and may be
-// removed once this Go v1.19 support is dropped.
-func formatString(state fmt.State, verb rune) string {
-	var tmp [16]byte // Use a local buffer.
-	b := append(tmp[:0], '%')
-	for _, c := range " +-#0" { // All known flags
-		if state.Flag(int(c)) { // The argument is an int for historical reasons.
-			b = append(b, byte(c))
-		}
-	}
-	if w, ok := state.Width(); ok {
-		b = strconv.AppendInt(b, int64(w), 10)
-	}
-	if p, ok := state.Precision(); ok {
-		b = append(b, '.')
-		b = strconv.AppendInt(b, int64(p), 10)
-	}
-	b = utf8.AppendRune(b, verb)
-	return string(b)
+	return nil
 }

@@ -1,14 +1,14 @@
 syntax = "proto3";
-package dogma.eventstream.v1;
+package dogma.eventstream.consume.v1;
 
 option go_package = "github.com/dogmatiq/enginekit/grpc/eventstreamgrpc";
 
 import "github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto";
 import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 
-// API is a service for consuming offset-based ordered streams of event
-// messages.
-service API {
+// ConsumeAPI is a service for consuming events from an offset-based ordered
+// stream.
+service ConsumeAPI {
   // List lists the streams that the server provides.
   rpc List(ListRequest) returns (ListResponse);
 
@@ -56,6 +56,10 @@ message ConsumeRequest {
 }
 
 message ConsumeResponse {
+  oneof response { Event event = 1; }
+}
+
+message Event {
   // Offset is the offset of the event within the stream.
   uint64 offset = 1;
 
@@ -86,7 +90,7 @@ message UnrecognizedStream {
 message UnrecognizedEventType {
   // PortableName is a name that uniquely identifies the event type across
   // process boundaries.
-  string portable_name = 2;
+  string portable_name = 1;
 }
 
 // NoRecognizedMediaTypes is an error-details value for INVALID_ARGUMENT errors
@@ -95,5 +99,5 @@ message UnrecognizedEventType {
 message NoRecognizedMediaTypes {
   // PortableName is a name that uniquely identifies the event type across
   // process boundaries.
-  string portable_name = 2;
+  string portable_name = 1;
 }

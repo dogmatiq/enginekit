@@ -164,6 +164,11 @@ func (x *UUID) Validate() error {
 	return nil
 }
 
+// Equal returns true if x and id are equal.
+func (x *UUID) Equal(id *UUID) bool {
+	return x.GetUpper() == id.GetUpper() && x.GetLower() == id.GetLower()
+}
+
 // bad is a sentinel value that indicates an invalid hexadecimal digit.
 const bad = 255
 

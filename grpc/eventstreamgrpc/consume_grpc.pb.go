@@ -32,7 +32,8 @@ type ConsumeAPIClient interface {
 	// Consume starts consuming from a specific offset within an event stream.
 	//
 	// If the requested stream ID is unknown to the server it MUST return a
-	// NOT_FOUND error with an attached [UnrecognizedStream] value.
+	// NOT_FOUND error with an attached [UnrecognizedStream] value. See
+	// [UnrecognizedStreamError].
 	//
 	// If the requested offset is beyond the end of the stream, the server SHOULD
 	// keep the stream open and send new events as they are written to the stream.
@@ -40,11 +41,13 @@ type ConsumeAPIClient interface {
 	// The requested event types MUST be a subset of those event types associated
 	// with the stream, as per the List operation. If any other event types are
 	// requested the server MUST return an INVALID_ARGUMENT error with an attached
-	// [UnrecognizedEventType] value for each unrecognized event type.
+	// [UnrecognizedEventType] value for each unrecognized event type. See
+	// [UnrecognizedEventTypeError].
 	//
 	// If none of the requested media-types for a given event type are supported
 	// the server MUST return an INVALID_ARGUMENT error with an attached
-	// [NoRecognizedMediaTypes] value for each such event type.
+	// [NoRecognizedMediaTypes] value for each such event type. See
+	// [NoRecognizedMediaTypesError].
 	Consume(ctx context.Context, in *ConsumeRequest, opts ...grpc.CallOption) (ConsumeAPI_ConsumeClient, error)
 }
 
@@ -106,7 +109,8 @@ type ConsumeAPIServer interface {
 	// Consume starts consuming from a specific offset within an event stream.
 	//
 	// If the requested stream ID is unknown to the server it MUST return a
-	// NOT_FOUND error with an attached [UnrecognizedStream] value.
+	// NOT_FOUND error with an attached [UnrecognizedStream] value. See
+	// [UnrecognizedStreamError].
 	//
 	// If the requested offset is beyond the end of the stream, the server SHOULD
 	// keep the stream open and send new events as they are written to the stream.
@@ -114,11 +118,13 @@ type ConsumeAPIServer interface {
 	// The requested event types MUST be a subset of those event types associated
 	// with the stream, as per the List operation. If any other event types are
 	// requested the server MUST return an INVALID_ARGUMENT error with an attached
-	// [UnrecognizedEventType] value for each unrecognized event type.
+	// [UnrecognizedEventType] value for each unrecognized event type. See
+	// [UnrecognizedEventTypeError].
 	//
 	// If none of the requested media-types for a given event type are supported
 	// the server MUST return an INVALID_ARGUMENT error with an attached
-	// [NoRecognizedMediaTypes] value for each such event type.
+	// [NoRecognizedMediaTypes] value for each such event type. See
+	// [NoRecognizedMediaTypesError].
 	Consume(*ConsumeRequest, ConsumeAPI_ConsumeServer) error
 }
 

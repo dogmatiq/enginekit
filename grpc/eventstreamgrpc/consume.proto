@@ -59,15 +59,11 @@ message ConsumeRequest {
 }
 
 message ConsumeResponse {
-  oneof response { Event event = 1; }
-}
-
-message Event {
   // Offset is the offset of the event within the stream.
   uint64 offset = 1;
 
-  // Envelope is the envelope containing the event.
-  dogma.protobuf.Envelope envelope = 2;
+  // Event is the envelope containing the event.
+  dogma.protobuf.Envelope event = 2;
 }
 
 message EventType {

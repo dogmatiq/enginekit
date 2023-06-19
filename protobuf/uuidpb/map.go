@@ -5,25 +5,25 @@ type Map[V any] map[MapKey]V
 
 // Set associates v with k.
 func (m Map[V]) Set(k *UUID, v V) {
-	m[asMapKey(k)] = v
+	m[k.AsMapKey()] = v
 }
 
 // Get returns the value associated with k, or the zero-value if k is not
 // present in the map.
 func (m Map[V]) Get(k *UUID) V {
-	return m[asMapKey(k)]
+	return m[k.AsMapKey()]
 }
 
 // TryGet returns the value associated with k, or false if k is not present in
 // the map.
 func (m Map[V]) TryGet(k *UUID) (V, bool) {
-	v, ok := m[asMapKey(k)]
+	v, ok := m[k.AsMapKey()]
 	return v, ok
 }
 
 // Delete removes the value associated with k.
 func (m Map[V]) Delete(k *UUID) {
-	delete(m, asMapKey(k))
+	delete(m, k.AsMapKey())
 }
 
 // MapKey is an opaque representation of a UUID that can be used as a map key.
@@ -39,8 +39,8 @@ func (k MapKey) AsUUID() *UUID {
 	}
 }
 
-// asMapKey returns an opaque representation of the UUID that can be used as a
+// AsMapKey returns an opaque representation of the UUID that can be used as a
 // map key.
-func asMapKey(x *UUID) MapKey {
+func (x *UUID) AsMapKey() MapKey {
 	return MapKey{x.GetUpper(), x.GetLower()}
 }

@@ -22,6 +22,20 @@ func UnrecognizedStreamError(id *uuidpb.UUID) error {
 	return s.Err()
 }
 
+// NoEventTypesError returns an error indicating that the that the client made a
+// consume request without specifying any event types.
+func NoEventTypesError() error {
+	s, err := status.
+		New(codes.InvalidArgument, "no event types specified").
+		WithDetails(&NoEventTypes{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	return s.Err()
+}
+
 // UnrecognizedEventTypeError returns an error indicating that the given event
 // type is not recognized by the server.
 func UnrecognizedEventTypeError(portableName string) error {

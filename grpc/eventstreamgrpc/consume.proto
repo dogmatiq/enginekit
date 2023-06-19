@@ -27,6 +27,9 @@ service ConsumeAPI {
   // [UnrecognizedEventType] value for each unrecognized event type. See
   // [UnrecognizedEventTypeError].
   //
+  // If no types are specified the server MUST return an INVALID_ARGUMENT error
+  // with an attached [NoEventTypes] value. See [NoEventTypesError].
+  //
   // If none of the requested media-types for a given event type are supported
   // the server MUST return an INVALID_ARGUMENT error with an attached
   // [NoRecognizedMediaTypes] value for each such event type. See
@@ -82,6 +85,11 @@ message UnrecognizedStream {
   // ApplicationKey is the ID of the unrecognized stream.
   dogma.protobuf.UUID stream_id = 1;
 }
+
+// NoEventTypes is an error-details value for INVALID_ARGUMENT errors that
+// occurred because a client sent a consume request without specifying any event
+// types.
+message NoEventTypes {}
 
 // UnrecognizedEventType is an error-details value for INVALID_ARGUMENT errors
 // that occurred because a specific event type was not recognized by the

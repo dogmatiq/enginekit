@@ -327,3 +327,29 @@ func TestUUID_Equal(t *testing.T) {
 		t.Fatal("did not expect a != b")
 	}
 }
+
+func TestUUID_Less(t *testing.T) {
+	t.Parallel()
+
+	a := &UUID{
+		Upper: 0xa967a8b93f9c4918,
+		Lower: 0x9a4119577be5fec5,
+	}
+
+	b := &UUID{
+		Upper: 0x3f9c4918a967a8b9,
+		Lower: 0x7be5fec59a411957,
+	}
+
+	if a.Less(b) {
+		t.Fatal("did not expect a < b")
+	}
+
+	if !b.Less(a) {
+		t.Fatal("did not expect b >= a")
+	}
+
+	if a.Less(a) {
+		t.Fatal("did not expect a < b")
+	}
+}

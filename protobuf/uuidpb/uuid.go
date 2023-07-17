@@ -141,6 +141,11 @@ func (x *UUID) AsString() string {
 	return string(str[:])
 }
 
+// DapperString implements [github.com/dogmatiq/dapper.Stringer].
+func (x *UUID) DapperString() string {
+	return x.AsString()
+}
+
 // Format implements the fmt.Formatter interface, allowing UUIDs to be formatted
 // with functions from the fmt package.
 func (x *UUID) Format(f fmt.State, verb rune) {

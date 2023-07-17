@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/dogmatiq/dapper"
 	. "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	"google.golang.org/protobuf/proto"
 )
@@ -216,6 +217,22 @@ func TestUUID_AsString(t *testing.T) {
 				t.Fatalf("got %q, want %q", actual, c.Expect)
 			}
 		})
+	}
+}
+
+func TestUUID_DapperString(t *testing.T) {
+	t.Parallel()
+
+	id := &UUID{
+		Upper: 0xa967a8b93f9c4918,
+		Lower: 0x9a4119577be5fec5,
+	}
+
+	actual := dapper.Format(id)
+	expect := "*uuidpb.UUID [a967a8b9-3f9c-4918-9a41-19577be5fec5]"
+
+	if actual != expect {
+		t.Fatalf("got %q, want %q", actual, expect)
 	}
 }
 

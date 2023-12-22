@@ -6,7 +6,7 @@ require (
 	github.com/dogmatiq/dapper v0.5.0
 	github.com/dogmatiq/dogma v0.12.1
 	google.golang.org/grpc v1.60.1
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.32.0
 )
 
 require (

@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/dogmatiq/dapper v0.5.1
-	github.com/dogmatiq/dogma v0.12.1
+	github.com/dogmatiq/dogma v0.13.0
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 )

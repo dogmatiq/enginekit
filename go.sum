@@ -1,7 +1,7 @@
 github.com/dogmatiq/dapper v0.5.1 h1:ukchNhVD9XUPsdEebJCmCsi1LaTDyouz3HrwoiYUSSU=
 github.com/dogmatiq/dapper v0.5.1/go.mod h1:GkboktespYmpKgOG70ylT1gmD0LE12NL1YtDnLd1j/E=
-github.com/dogmatiq/dogma v0.12.1 h1:mWIzmi3jio9ZnHJeJKNS5D19O2S4x4SLSxGXXn3IQiQ=
-github.com/dogmatiq/dogma v0.12.1/go.mod h1:op4IjAGC593ONvvUPhh2xNyk/3Ezv9HkCPRlzdbkX9Y=
+github.com/dogmatiq/dogma v0.13.0 h1:MKk9MHErGKD53Y+43I4fcoPZMQjX0N2DUZEc4rLp+Hk=
+github.com/dogmatiq/dogma v0.13.0/go.mod h1:9lyVA+6V2+E/exV0IrBOrkUiyFwIATEhv+b0vnB2umQ=
 github.com/dogmatiq/jumble v0.1.0 h1:Cb3ExfxY+AoUP4G9/sOwoOdYX8o+kOLK8+dhXAry+QA=
 github.com/dogmatiq/jumble v0.1.0/go.mod h1:FCGV2ImXu8zvThxhd4QLstiEdu74vbIVw9bFJSBcKr4=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=

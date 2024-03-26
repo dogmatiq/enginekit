@@ -9,8 +9,8 @@ import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 // ConsumeAPI is a service for consuming events from an offset-based ordered
 // stream.
 service ConsumeAPI {
-  // List lists the streams that the server provides.
-  rpc List(ListRequest) returns (ListResponse);
+  // ListStreams lists the streams that the server provides.
+  rpc ListStreams(ListStreamsRequest) returns (ListStreamsResponse);
 
   // Consume starts consuming from a specific offset within an event stream.
   //
@@ -22,10 +22,10 @@ service ConsumeAPI {
   // keep the stream open and send new events as they are written to the stream.
   //
   // The requested event types MUST be a subset of those event types associated
-  // with the stream, as per the List operation. If any other event types are
-  // requested the server MUST return an INVALID_ARGUMENT error with an attached
-  // [UnrecognizedEventType] value for each unrecognized event type. See
-  // [UnrecognizedEventTypeError].
+  // with the stream, as per the result of the ListStreams operation. If any
+  // other event types are requested the server MUST return an INVALID_ARGUMENT
+  // error with an attached [UnrecognizedEventType] value for each unrecognized
+  // event type. See [UnrecognizedEventTypeError].
   //
   // If no types are specified the server MUST return an INVALID_ARGUMENT error
   // with an attached [NoEventTypes] value. See [NoEventTypesError].
@@ -34,12 +34,20 @@ service ConsumeAPI {
   // the server MUST return an INVALID_ARGUMENT error with an attached
   // [NoRecognizedMediaTypes] value for each such event type. See
   // [NoRecognizedMediaTypesError].
-  rpc Consume(ConsumeRequest) returns (stream ConsumeResponse);
+  rpc ConsumeEvents(ConsumeEventsRequest)
+      returns (stream ConsumeEventsResponse);
 }
 
-message ListRequest {}
-message ListResponse { repeated Stream streams = 1; }
+// ListStreamsRequest is the input to the ConsumeAPI.ListStreams method.
+message ListStreamsRequest {}
 
+// ListStreamsResponse is the output of the ConsumeAPI.ListStreams method.
+message ListStreamsResponse {
+  // Streams is a list of event streams that can be consumed from this server.
+  repeated Stream streams = 1;
+}
+
+// Stream describes an offset-based ordered event stream.
 message Stream {
   // StreamId is a unique identifier for the stream.
   dogma.protobuf.UUID stream_id = 1;
@@ -48,27 +56,36 @@ message Stream {
   repeated EventType event_types = 2;
 }
 
-message ConsumeRequest {
+// ConsumeEventsRequest is the input to the ConsumeAPI.ConsumeEvents method.
+message ConsumeEventsRequest {
   // StreamId is the ID from which events are consumed.
   dogma.protobuf.UUID stream_id = 1;
 
   // Offset is the offset of the earliest event to be consumed.
   uint64 offset = 2;
 
-  // EventTypes is a list of event types to be consumed. Consumers must be
+  // EventTypes is a list of event types to be consumed. The consumer must be
   // explicit about the event types that it understands; there is no mechanism
   // to request all event types.
   repeated EventType event_types = 3;
 }
 
-message ConsumeResponse {
-  // Offset is the offset of the event within the stream.
-  uint64 offset = 1;
+// ConsumeResponse is the (streaming) output of the ConsumeAPI.ConsumeEvents
+// method.
+message ConsumeEventsResponse {
+  // EventDelivery represents the delivery of a single event to the consumer.
+  message EventDelivery {
+    // Offset is the event's offset within the stream.
+    uint64 offset = 1;
 
-  // Event is the envelope containing the event.
-  dogma.protobuf.Envelope event = 2;
+    // Envelope is the envelope containing the event.
+    dogma.protobuf.Envelope envelope = 2;
+  }
+
+  oneof operation { EventDelivery event_delivery = 1; }
 }
 
+// EventType describes a type of event that may appear on a stream.
 message EventType {
   // PortableName is a name that uniquely identifies the event type across
   // process boundaries.

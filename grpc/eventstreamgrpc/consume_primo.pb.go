@@ -6,18 +6,15 @@
 
 package eventstreamgrpc
 
-import (
-	envelopepb "github.com/dogmatiq/enginekit/protobuf/envelopepb"
-	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
-)
+import uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 
-type ListRequestBuilder struct {
-	prototype ListRequest
+type ListStreamsRequestBuilder struct {
+	prototype ListStreamsRequest
 }
 
-// NewListRequestBuilder returns a builder that constructs [ListRequest] messages.
-func NewListRequestBuilder() *ListRequestBuilder {
-	return &ListRequestBuilder{}
+// NewListStreamsRequestBuilder returns a builder that constructs [ListStreamsRequest] messages.
+func NewListStreamsRequestBuilder() *ListStreamsRequestBuilder {
+	return &ListStreamsRequestBuilder{}
 }
 
 // From configures the builder to use x as the prototype for new messages,
@@ -25,25 +22,25 @@ func NewListRequestBuilder() *ListRequestBuilder {
 //
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
-func (b *ListRequestBuilder) From(x *ListRequest) *ListRequestBuilder {
+func (b *ListStreamsRequestBuilder) From(x *ListStreamsRequest) *ListStreamsRequestBuilder {
 	return b
 }
 
-// Build returns a new [ListRequest] containing the values configured via the builder.
+// Build returns a new [ListStreamsRequest] containing the values configured via the builder.
 //
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
-func (b *ListRequestBuilder) Build() *ListRequest {
-	return &ListRequest{}
+func (b *ListStreamsRequestBuilder) Build() *ListStreamsRequest {
+	return &ListStreamsRequest{}
 }
 
-type ListResponseBuilder struct {
-	prototype ListResponse
+type ListStreamsResponseBuilder struct {
+	prototype ListStreamsResponse
 }
 
-// NewListResponseBuilder returns a builder that constructs [ListResponse] messages.
-func NewListResponseBuilder() *ListResponseBuilder {
-	return &ListResponseBuilder{}
+// NewListStreamsResponseBuilder returns a builder that constructs [ListStreamsResponse] messages.
+func NewListStreamsResponseBuilder() *ListStreamsResponseBuilder {
+	return &ListStreamsResponseBuilder{}
 }
 
 // From configures the builder to use x as the prototype for new messages,
@@ -51,24 +48,24 @@ func NewListResponseBuilder() *ListResponseBuilder {
 //
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
-func (b *ListResponseBuilder) From(x *ListResponse) *ListResponseBuilder {
+func (b *ListStreamsResponseBuilder) From(x *ListStreamsResponse) *ListStreamsResponseBuilder {
 	b.prototype.Streams = x.Streams
 	return b
 }
 
-// Build returns a new [ListResponse] containing the values configured via the builder.
+// Build returns a new [ListStreamsResponse] containing the values configured via the builder.
 //
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
-func (b *ListResponseBuilder) Build() *ListResponse {
-	return &ListResponse{
+func (b *ListStreamsResponseBuilder) Build() *ListStreamsResponse {
+	return &ListStreamsResponse{
 		Streams: b.prototype.Streams,
 	}
 }
 
 // WithStreams configures the builder to set the Streams field to v,
 // then returns b.
-func (b *ListResponseBuilder) WithStreams(v []*Stream) *ListResponseBuilder {
+func (b *ListStreamsResponseBuilder) WithStreams(v []*Stream) *ListStreamsResponseBuilder {
 	b.prototype.Streams = v
 	return b
 }
@@ -118,13 +115,13 @@ func (b *StreamBuilder) WithEventTypes(v []*EventType) *StreamBuilder {
 	return b
 }
 
-type ConsumeRequestBuilder struct {
-	prototype ConsumeRequest
+type ConsumeEventsRequestBuilder struct {
+	prototype ConsumeEventsRequest
 }
 
-// NewConsumeRequestBuilder returns a builder that constructs [ConsumeRequest] messages.
-func NewConsumeRequestBuilder() *ConsumeRequestBuilder {
-	return &ConsumeRequestBuilder{}
+// NewConsumeEventsRequestBuilder returns a builder that constructs [ConsumeEventsRequest] messages.
+func NewConsumeEventsRequestBuilder() *ConsumeEventsRequestBuilder {
+	return &ConsumeEventsRequestBuilder{}
 }
 
 // From configures the builder to use x as the prototype for new messages,
@@ -132,19 +129,19 @@ func NewConsumeRequestBuilder() *ConsumeRequestBuilder {
 //
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
-func (b *ConsumeRequestBuilder) From(x *ConsumeRequest) *ConsumeRequestBuilder {
+func (b *ConsumeEventsRequestBuilder) From(x *ConsumeEventsRequest) *ConsumeEventsRequestBuilder {
 	b.prototype.StreamId = x.StreamId
 	b.prototype.Offset = x.Offset
 	b.prototype.EventTypes = x.EventTypes
 	return b
 }
 
-// Build returns a new [ConsumeRequest] containing the values configured via the builder.
+// Build returns a new [ConsumeEventsRequest] containing the values configured via the builder.
 //
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
-func (b *ConsumeRequestBuilder) Build() *ConsumeRequest {
-	return &ConsumeRequest{
+func (b *ConsumeEventsRequestBuilder) Build() *ConsumeEventsRequest {
+	return &ConsumeEventsRequest{
 		StreamId:   b.prototype.StreamId,
 		Offset:     b.prototype.Offset,
 		EventTypes: b.prototype.EventTypes,
@@ -153,32 +150,32 @@ func (b *ConsumeRequestBuilder) Build() *ConsumeRequest {
 
 // WithStreamId configures the builder to set the StreamId field to v,
 // then returns b.
-func (b *ConsumeRequestBuilder) WithStreamId(v *uuidpb.UUID) *ConsumeRequestBuilder {
+func (b *ConsumeEventsRequestBuilder) WithStreamId(v *uuidpb.UUID) *ConsumeEventsRequestBuilder {
 	b.prototype.StreamId = v
 	return b
 }
 
 // WithOffset configures the builder to set the Offset field to v,
 // then returns b.
-func (b *ConsumeRequestBuilder) WithOffset(v uint64) *ConsumeRequestBuilder {
+func (b *ConsumeEventsRequestBuilder) WithOffset(v uint64) *ConsumeEventsRequestBuilder {
 	b.prototype.Offset = v
 	return b
 }
 
 // WithEventTypes configures the builder to set the EventTypes field to v,
 // then returns b.
-func (b *ConsumeRequestBuilder) WithEventTypes(v []*EventType) *ConsumeRequestBuilder {
+func (b *ConsumeEventsRequestBuilder) WithEventTypes(v []*EventType) *ConsumeEventsRequestBuilder {
 	b.prototype.EventTypes = v
 	return b
 }
 
-type ConsumeResponseBuilder struct {
-	prototype ConsumeResponse
+type ConsumeEventsResponseBuilder struct {
+	prototype ConsumeEventsResponse
 }
 
-// NewConsumeResponseBuilder returns a builder that constructs [ConsumeResponse] messages.
-func NewConsumeResponseBuilder() *ConsumeResponseBuilder {
-	return &ConsumeResponseBuilder{}
+// NewConsumeEventsResponseBuilder returns a builder that constructs [ConsumeEventsResponse] messages.
+func NewConsumeEventsResponseBuilder() *ConsumeEventsResponseBuilder {
+	return &ConsumeEventsResponseBuilder{}
 }
 
 // From configures the builder to use x as the prototype for new messages,
@@ -186,34 +183,25 @@ func NewConsumeResponseBuilder() *ConsumeResponseBuilder {
 //
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
-func (b *ConsumeResponseBuilder) From(x *ConsumeResponse) *ConsumeResponseBuilder {
-	b.prototype.Offset = x.Offset
-	b.prototype.Event = x.Event
+func (b *ConsumeEventsResponseBuilder) From(x *ConsumeEventsResponse) *ConsumeEventsResponseBuilder {
+	b.prototype.Operation = x.Operation
 	return b
 }
 
-// Build returns a new [ConsumeResponse] containing the values configured via the builder.
+// Build returns a new [ConsumeEventsResponse] containing the values configured via the builder.
 //
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
-func (b *ConsumeResponseBuilder) Build() *ConsumeResponse {
-	return &ConsumeResponse{
-		Offset: b.prototype.Offset,
-		Event:  b.prototype.Event,
+func (b *ConsumeEventsResponseBuilder) Build() *ConsumeEventsResponse {
+	return &ConsumeEventsResponse{
+		Operation: b.prototype.Operation,
 	}
 }
 
-// WithOffset configures the builder to set the Offset field to v,
-// then returns b.
-func (b *ConsumeResponseBuilder) WithOffset(v uint64) *ConsumeResponseBuilder {
-	b.prototype.Offset = v
-	return b
-}
-
-// WithEvent configures the builder to set the Event field to v,
-// then returns b.
-func (b *ConsumeResponseBuilder) WithEvent(v *envelopepb.Envelope) *ConsumeResponseBuilder {
-	b.prototype.Event = v
+// WithEventDelivery configures the builder to set the Operation field to a
+// [ConsumeEventsResponse_EventDelivery_] value containing v, then returns b
+func (b *ConsumeEventsResponseBuilder) WithEventDelivery(v *ConsumeEventsResponse_EventDelivery) *ConsumeEventsResponseBuilder {
+	b.prototype.Operation = &ConsumeEventsResponse_EventDelivery_{EventDelivery: v}
 	return b
 }
 
@@ -396,8 +384,41 @@ func (b *NoRecognizedMediaTypesBuilder) WithPortableName(v string) *NoRecognized
 	return b
 }
 
+// Switch_ConsumeEventsResponse_Operation invokes one of the given functions based on
+// the value of x.Operation.
+//
+// It panics if x.Operation is nil.
+func Switch_ConsumeEventsResponse_Operation(
+	x *ConsumeEventsResponse,
+	caseEventDelivery func(*ConsumeEventsResponse_EventDelivery),
+) {
+	switch v := x.Operation.(type) {
+	case *ConsumeEventsResponse_EventDelivery_:
+		caseEventDelivery(v.EventDelivery)
+	default:
+		panic("Switch_ConsumeEventsResponse_Operation: x.Operation is nil")
+	}
+}
+
+// Map_ConsumeEventsResponse_Operation maps x.Operation to a value of type T by invoking
+// one of the given functions.
+//
+// It invokes the function that corresponds to the value of x.Operation,
+// and returns that function's result. It panics if x.Operation is nil.
+func Map_ConsumeEventsResponse_Operation[T any](
+	x *ConsumeEventsResponse,
+	caseEventDelivery func(*ConsumeEventsResponse_EventDelivery) T,
+) T {
+	switch v := x.Operation.(type) {
+	case *ConsumeEventsResponse_EventDelivery_:
+		return caseEventDelivery(v.EventDelivery)
+	default:
+		panic("Map_ConsumeEventsResponse_Operation: x.Operation is nil")
+	}
+}
+
 // SetStreams sets the x.Streams field to v, then returns x.
-func (x *ListResponse) SetStreams(v []*Stream) {
+func (x *ListStreamsResponse) SetStreams(v []*Stream) {
 	x.Streams = v
 }
 
@@ -412,28 +433,24 @@ func (x *Stream) SetEventTypes(v []*EventType) {
 }
 
 // SetStreamId sets the x.StreamId field to v, then returns x.
-func (x *ConsumeRequest) SetStreamId(v *uuidpb.UUID) {
+func (x *ConsumeEventsRequest) SetStreamId(v *uuidpb.UUID) {
 	x.StreamId = v
 }
 
 // SetOffset sets the x.Offset field to v, then returns x.
-func (x *ConsumeRequest) SetOffset(v uint64) {
+func (x *ConsumeEventsRequest) SetOffset(v uint64) {
 	x.Offset = v
 }
 
 // SetEventTypes sets the x.EventTypes field to v, then returns x.
-func (x *ConsumeRequest) SetEventTypes(v []*EventType) {
+func (x *ConsumeEventsRequest) SetEventTypes(v []*EventType) {
 	x.EventTypes = v
 }
 
-// SetOffset sets the x.Offset field to v, then returns x.
-func (x *ConsumeResponse) SetOffset(v uint64) {
-	x.Offset = v
-}
-
-// SetEvent sets the x.Event field to v, then returns x.
-func (x *ConsumeResponse) SetEvent(v *envelopepb.Envelope) {
-	x.Event = v
+// SetEventDelivery sets the x.Operation field to a [ConsumeEventsResponse_EventDelivery_] value containing v,
+// then returns x.
+func (x *ConsumeEventsResponse) SetEventDelivery(v *ConsumeEventsResponse_EventDelivery) {
+	x.Operation = &ConsumeEventsResponse_EventDelivery_{EventDelivery: v}
 }
 
 // SetPortableName sets the x.PortableName field to v, then returns x.

@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ConsumeAPI_List_FullMethodName    = "/dogma.eventstream.consume.v1.ConsumeAPI/List"
-	ConsumeAPI_Consume_FullMethodName = "/dogma.eventstream.consume.v1.ConsumeAPI/Consume"
+	ConsumeAPI_ListStreams_FullMethodName   = "/dogma.eventstream.consume.v1.ConsumeAPI/ListStreams"
+	ConsumeAPI_ConsumeEvents_FullMethodName = "/dogma.eventstream.consume.v1.ConsumeAPI/ConsumeEvents"
 )
 
 // ConsumeAPIClient is the client API for ConsumeAPI service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ConsumeAPIClient interface {
-	// List lists the streams that the server provides.
-	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error)
+	// ListStreams lists the streams that the server provides.
+	ListStreams(ctx context.Context, in *ListStreamsRequest, opts ...grpc.CallOption) (*ListStreamsResponse, error)
 	// Consume starts consuming from a specific offset within an event stream.
 	//
 	// If the requested stream ID is unknown to the server it MUST return a
@@ -39,10 +39,10 @@ type ConsumeAPIClient interface {
 	// keep the stream open and send new events as they are written to the stream.
 	//
 	// The requested event types MUST be a subset of those event types associated
-	// with the stream, as per the List operation. If any other event types are
-	// requested the server MUST return an INVALID_ARGUMENT error with an attached
-	// [UnrecognizedEventType] value for each unrecognized event type. See
-	// [UnrecognizedEventTypeError].
+	// with the stream, as per the result of the ListStreams operation. If any
+	// other event types are requested the server MUST return an INVALID_ARGUMENT
+	// error with an attached [UnrecognizedEventType] value for each unrecognized
+	// event type. See [UnrecognizedEventTypeError].
 	//
 	// If no types are specified the server MUST return an INVALID_ARGUMENT error
 	// with an attached [NoEventTypes] value. See [NoEventTypesError].
@@ -51,7 +51,7 @@ type ConsumeAPIClient interface {
 	// the server MUST return an INVALID_ARGUMENT error with an attached
 	// [NoRecognizedMediaTypes] value for each such event type. See
 	// [NoRecognizedMediaTypesError].
-	Consume(ctx context.Context, in *ConsumeRequest, opts ...grpc.CallOption) (ConsumeAPI_ConsumeClient, error)
+	ConsumeEvents(ctx context.Context, in *ConsumeEventsRequest, opts ...grpc.CallOption) (ConsumeAPI_ConsumeEventsClient, error)
 }
 
 type consumeAPIClient struct {
@@ -62,21 +62,21 @@ func NewConsumeAPIClient(cc grpc.ClientConnInterface) ConsumeAPIClient {
 	return &consumeAPIClient{cc}
 }
 
-func (c *consumeAPIClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListResponse, error) {
-	out := new(ListResponse)
-	err := c.cc.Invoke(ctx, ConsumeAPI_List_FullMethodName, in, out, opts...)
+func (c *consumeAPIClient) ListStreams(ctx context.Context, in *ListStreamsRequest, opts ...grpc.CallOption) (*ListStreamsResponse, error) {
+	out := new(ListStreamsResponse)
+	err := c.cc.Invoke(ctx, ConsumeAPI_ListStreams_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *consumeAPIClient) Consume(ctx context.Context, in *ConsumeRequest, opts ...grpc.CallOption) (ConsumeAPI_ConsumeClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ConsumeAPI_ServiceDesc.Streams[0], ConsumeAPI_Consume_FullMethodName, opts...)
+func (c *consumeAPIClient) ConsumeEvents(ctx context.Context, in *ConsumeEventsRequest, opts ...grpc.CallOption) (ConsumeAPI_ConsumeEventsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ConsumeAPI_ServiceDesc.Streams[0], ConsumeAPI_ConsumeEvents_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &consumeAPIConsumeClient{stream}
+	x := &consumeAPIConsumeEventsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -86,17 +86,17 @@ func (c *consumeAPIClient) Consume(ctx context.Context, in *ConsumeRequest, opts
 	return x, nil
 }
 
-type ConsumeAPI_ConsumeClient interface {
-	Recv() (*ConsumeResponse, error)
+type ConsumeAPI_ConsumeEventsClient interface {
+	Recv() (*ConsumeEventsResponse, error)
 	grpc.ClientStream
 }
 
-type consumeAPIConsumeClient struct {
+type consumeAPIConsumeEventsClient struct {
 	grpc.ClientStream
 }
 
-func (x *consumeAPIConsumeClient) Recv() (*ConsumeResponse, error) {
-	m := new(ConsumeResponse)
+func (x *consumeAPIConsumeEventsClient) Recv() (*ConsumeEventsResponse, error) {
+	m := new(ConsumeEventsResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -107,8 +107,8 @@ func (x *consumeAPIConsumeClient) Recv() (*ConsumeResponse, error) {
 // All implementations should embed UnimplementedConsumeAPIServer
 // for forward compatibility
 type ConsumeAPIServer interface {
-	// List lists the streams that the server provides.
-	List(context.Context, *ListRequest) (*ListResponse, error)
+	// ListStreams lists the streams that the server provides.
+	ListStreams(context.Context, *ListStreamsRequest) (*ListStreamsResponse, error)
 	// Consume starts consuming from a specific offset within an event stream.
 	//
 	// If the requested stream ID is unknown to the server it MUST return a
@@ -119,10 +119,10 @@ type ConsumeAPIServer interface {
 	// keep the stream open and send new events as they are written to the stream.
 	//
 	// The requested event types MUST be a subset of those event types associated
-	// with the stream, as per the List operation. If any other event types are
-	// requested the server MUST return an INVALID_ARGUMENT error with an attached
-	// [UnrecognizedEventType] value for each unrecognized event type. See
-	// [UnrecognizedEventTypeError].
+	// with the stream, as per the result of the ListStreams operation. If any
+	// other event types are requested the server MUST return an INVALID_ARGUMENT
+	// error with an attached [UnrecognizedEventType] value for each unrecognized
+	// event type. See [UnrecognizedEventTypeError].
 	//
 	// If no types are specified the server MUST return an INVALID_ARGUMENT error
 	// with an attached [NoEventTypes] value. See [NoEventTypesError].
@@ -131,18 +131,18 @@ type ConsumeAPIServer interface {
 	// the server MUST return an INVALID_ARGUMENT error with an attached
 	// [NoRecognizedMediaTypes] value for each such event type. See
 	// [NoRecognizedMediaTypesError].
-	Consume(*ConsumeRequest, ConsumeAPI_ConsumeServer) error
+	ConsumeEvents(*ConsumeEventsRequest, ConsumeAPI_ConsumeEventsServer) error
 }
 
 // UnimplementedConsumeAPIServer should be embedded to have forward compatible implementations.
 type UnimplementedConsumeAPIServer struct {
 }
 
-func (UnimplementedConsumeAPIServer) List(context.Context, *ListRequest) (*ListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+func (UnimplementedConsumeAPIServer) ListStreams(context.Context, *ListStreamsRequest) (*ListStreamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListStreams not implemented")
 }
-func (UnimplementedConsumeAPIServer) Consume(*ConsumeRequest, ConsumeAPI_ConsumeServer) error {
-	return status.Errorf(codes.Unimplemented, "method Consume not implemented")
+func (UnimplementedConsumeAPIServer) ConsumeEvents(*ConsumeEventsRequest, ConsumeAPI_ConsumeEventsServer) error {
+	return status.Errorf(codes.Unimplemented, "method ConsumeEvents not implemented")
 }
 
 // UnsafeConsumeAPIServer may be embedded to opt out of forward compatibility for this service.
@@ -156,42 +156,42 @@ func RegisterConsumeAPIServer(s grpc.ServiceRegistrar, srv ConsumeAPIServer) {
 	s.RegisterService(&ConsumeAPI_ServiceDesc, srv)
 }
 
-func _ConsumeAPI_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListRequest)
+func _ConsumeAPI_ListStreams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListStreamsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ConsumeAPIServer).List(ctx, in)
+		return srv.(ConsumeAPIServer).ListStreams(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ConsumeAPI_List_FullMethodName,
+		FullMethod: ConsumeAPI_ListStreams_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ConsumeAPIServer).List(ctx, req.(*ListRequest))
+		return srv.(ConsumeAPIServer).ListStreams(ctx, req.(*ListStreamsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ConsumeAPI_Consume_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ConsumeRequest)
+func _ConsumeAPI_ConsumeEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ConsumeEventsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ConsumeAPIServer).Consume(m, &consumeAPIConsumeServer{stream})
+	return srv.(ConsumeAPIServer).ConsumeEvents(m, &consumeAPIConsumeEventsServer{stream})
 }
 
-type ConsumeAPI_ConsumeServer interface {
-	Send(*ConsumeResponse) error
+type ConsumeAPI_ConsumeEventsServer interface {
+	Send(*ConsumeEventsResponse) error
 	grpc.ServerStream
 }
 
-type consumeAPIConsumeServer struct {
+type consumeAPIConsumeEventsServer struct {
 	grpc.ServerStream
 }
 
-func (x *consumeAPIConsumeServer) Send(m *ConsumeResponse) error {
+func (x *consumeAPIConsumeEventsServer) Send(m *ConsumeEventsResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -203,14 +203,14 @@ var ConsumeAPI_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ConsumeAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "List",
-			Handler:    _ConsumeAPI_List_Handler,
+			MethodName: "ListStreams",
+			Handler:    _ConsumeAPI_ListStreams_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Consume",
-			Handler:       _ConsumeAPI_Consume_Handler,
+			StreamName:    "ConsumeEvents",
+			Handler:       _ConsumeAPI_ConsumeEvents_Handler,
 			ServerStreams: true,
 		},
 	},

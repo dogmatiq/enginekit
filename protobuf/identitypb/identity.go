@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dogmatiq/enginekit/internal/fmtbackport"
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
@@ -45,7 +44,7 @@ func (x *Identity) Validate() error {
 func (x *Identity) Format(f fmt.State, verb rune) {
 	fmt.Fprintf(
 		f,
-		fmtbackport.FormatString(f, verb),
+		fmt.FormatString(f, verb),
 		fmt.Sprintf("%s/%s", x.GetName(), x.GetKey()),
 	)
 }

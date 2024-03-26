@@ -4,8 +4,6 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-
-	"github.com/dogmatiq/enginekit/internal/fmtbackport"
 )
 
 // Generate returns a new randonly generated UUID.
@@ -151,7 +149,7 @@ func (x *UUID) DapperString() string {
 func (x *UUID) Format(f fmt.State, verb rune) {
 	fmt.Fprintf(
 		f,
-		fmtbackport.FormatString(f, verb),
+		fmt.FormatString(f, verb),
 		x.AsString(),
 	)
 }

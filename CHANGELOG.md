@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.10.1] - 2024-04-08
+
+### Added
+
+- Added `uuidpb.MapKey.Format()`, `String()` and `DapperString()` methods.
+
 ## [0.10.0] - 2024-03-27
 
 - Initial release.
@@ -23,6 +29,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 [Unreleased]: https://github.com/dogmatiq/enginekit
 [0.10.0]: https://github.com/dogmatiq/enginekit/releases/v0.10.0
+[0.10.1]: https://github.com/dogmatiq/enginekit/releases/v0.10.1
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

@@ -223,13 +223,13 @@ func TestUUID_AsString(t *testing.T) {
 func TestUUID_DapperString(t *testing.T) {
 	t.Parallel()
 
-	id := &UUID{
+	subject := &UUID{
 		Upper: 0xa967a8b93f9c4918,
 		Lower: 0x9a4119577be5fec5,
 	}
 
-	actual := dapper.Format(id)
-	expect := "*uuidpb.UUID [a967a8b9-3f9c-4918-9a41-19577be5fec5]"
+	actual := dapper.Format(subject)
+	expect := "*github.com/dogmatiq/enginekit/protobuf/uuidpb.UUID [a967a8b9-3f9c-4918-9a41-19577be5fec5]"
 
 	if actual != expect {
 		t.Fatalf("got %q, want %q", actual, expect)

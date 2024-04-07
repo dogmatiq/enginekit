@@ -1,5 +1,7 @@
 package uuidpb
 
+import "fmt"
+
 // Map is a map data structure that uses a UUID as its key.
 type Map[V any] map[MapKey]V
 
@@ -37,6 +39,22 @@ func (k MapKey) AsUUID() *UUID {
 		Upper: k.upper,
 		Lower: k.lower,
 	}
+}
+
+// Format implements the fmt.Formatter interface, allowing UUIDs to be formatted
+// with functions from the fmt package.
+func (k MapKey) Format(f fmt.State, verb rune) {
+	k.AsUUID().Format(f, verb)
+}
+
+// String returns a string representation of the UUID.
+func (k MapKey) String() string {
+	return k.AsUUID().AsString()
+}
+
+// DapperString implements [github.com/dogmatiq/dapper.Stringer].
+func (k MapKey) DapperString() string {
+	return k.String()
 }
 
 // AsMapKey returns an opaque representation of the UUID that can be used as a

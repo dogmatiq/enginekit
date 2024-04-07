@@ -1,6 +1,6 @@
 module github.com/dogmatiq/enginekit
 
-go 1.21
+go 1.22
 
 require (
 	github.com/dogmatiq/dapper v0.5.2
@@ -8,6 +8,7 @@ require (
 	github.com/dogmatiq/primo v0.2.0
 	google.golang.org/grpc v1.63.0
 	google.golang.org/protobuf v1.33.0
+	pgregory.net/rapid v1.1.0
 )
 
 require (

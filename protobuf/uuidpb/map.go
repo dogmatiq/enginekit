@@ -16,6 +16,12 @@ func (m Map[V]) Get(k *UUID) V {
 	return m[k.AsMapKey()]
 }
 
+// Has returns true if k is present in the map.
+func (m Map[V]) Has(k *UUID) bool {
+	_, ok := m[k.AsMapKey()]
+	return ok
+}
+
 // TryGet returns the value associated with k, or false if k is not present in
 // the map.
 func (m Map[V]) TryGet(k *UUID) (V, bool) {

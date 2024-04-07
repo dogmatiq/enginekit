@@ -179,10 +179,16 @@ func (x *UUID) Less(id *UUID) bool {
 
 // Compare performs a three-way comparison between x and id.
 func (x *UUID) Compare(id *UUID) int {
-	if delta := x.GetUpper() - id.GetUpper(); delta != 0 {
-		return int(delta)
+	if x.GetUpper() > id.GetUpper() {
+		return 1
+	} else if x.GetUpper() < id.GetUpper() {
+		return -1
+	} else if x.GetLower() > id.GetLower() {
+		return 1
+	} else if x.GetLower() < id.GetLower() {
+		return -1
 	}
-	return int(x.GetLower() - id.GetLower())
+	return 0
 }
 
 // bad is a sentinel value that indicates an invalid hexadecimal digit.

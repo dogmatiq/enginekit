@@ -10,11 +10,15 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## Unreleased
+## [0.10.2] - 2024-04-08
 
 ### Added
 
 - Added `uuidpb.Map.Has()`.
+
+### Fixed
+
+- Fixed unsigned integer overflow in `uuidpb.Compare()`.
 
 ## [0.10.1] - 2024-04-08
 
@@ -36,6 +40,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Unreleased]: https://github.com/dogmatiq/enginekit
 [0.10.0]: https://github.com/dogmatiq/enginekit/releases/v0.10.0
 [0.10.1]: https://github.com/dogmatiq/enginekit/releases/v0.10.1
+[0.10.2]: https://github.com/dogmatiq/enginekit/releases/v0.10.2
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

@@ -3,7 +3,7 @@ module github.com/dogmatiq/enginekit
 go 1.22
 
 require (
-	github.com/dogmatiq/dapper v0.5.2
+	github.com/dogmatiq/dapper v0.5.3
 	github.com/dogmatiq/dogma v0.13.0
 	github.com/dogmatiq/primo v0.2.0
 	google.golang.org/grpc v1.63.2

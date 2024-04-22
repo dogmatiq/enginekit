@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/dogmatiq/dapper v0.5.3
 	github.com/dogmatiq/dogma v0.13.0
-	github.com/dogmatiq/primo v0.2.0
+	github.com/dogmatiq/primo v0.2.1
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0
 	pgregory.net/rapid v1.1.0

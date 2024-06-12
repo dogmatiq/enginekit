@@ -7,7 +7,7 @@ require (
 	github.com/dogmatiq/dogma v0.13.0
 	github.com/dogmatiq/primo v0.2.3
 	google.golang.org/grpc v1.64.0
-	google.golang.org/protobuf v1.34.1
+	google.golang.org/protobuf v1.34.2
 	pgregory.net/rapid v1.1.0
 )
 

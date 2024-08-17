@@ -10,7 +10,6 @@ import (
 
 // EventProjection tracks all events produced by the test application.
 type EventProjection struct {
-	dogma.NoTimeoutHintBehavior
 	dogma.NoCompactBehavior
 
 	m         sync.Mutex
@@ -62,9 +61,9 @@ func (h *EventProjection) Configure(c dogma.ProjectionConfigurer) {
 
 // HandleEvent updates the projection to reflect the occurrence of an event.
 func (h *EventProjection) HandleEvent(
-	ctx context.Context,
+	_ context.Context,
 	r, c, n []byte,
-	s dogma.ProjectionEventScope,
+	_ dogma.ProjectionEventScope,
 	e dogma.Event,
 ) (ok bool, err error) {
 	h.m.Lock()
@@ -90,7 +89,7 @@ func (h *EventProjection) HandleEvent(
 }
 
 // ResourceVersion returns the current version of a resource.
-func (h *EventProjection) ResourceVersion(ctx context.Context, r []byte) ([]byte, error) {
+func (h *EventProjection) ResourceVersion(_ context.Context, r []byte) ([]byte, error) {
 	h.m.Lock()
 	v := h.resources[string(r)]
 	h.m.Unlock()
@@ -100,7 +99,7 @@ func (h *EventProjection) ResourceVersion(ctx context.Context, r []byte) ([]byte
 
 // CloseResource informs the handler that the engine has no further use for a
 // resource.
-func (h *EventProjection) CloseResource(ctx context.Context, r []byte) error {
+func (h *EventProjection) CloseResource(_ context.Context, r []byte) error {
 	h.m.Lock()
 	delete(h.resources, string(r))
 	h.m.Unlock()

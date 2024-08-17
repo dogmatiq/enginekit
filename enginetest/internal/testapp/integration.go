@@ -9,9 +9,7 @@ import (
 	"github.com/dogmatiq/enginekit/enginetest/internal/action"
 )
 
-type integrationA struct {
-	dogma.NoTimeoutHintBehavior
-}
+type integrationA struct{}
 
 func (h *integrationA) Configure(c dogma.IntegrationConfigurer) {
 	c.Identity("integration-a", "e5a20886-23bc-4948-badd-0f6930b7130a")
@@ -22,7 +20,7 @@ func (h *integrationA) Configure(c dogma.IntegrationConfigurer) {
 }
 
 func (h *integrationA) HandleCommand(
-	ctx context.Context,
+	_ context.Context,
 	s dogma.IntegrationCommandScope,
 	c dogma.Command,
 ) error {
@@ -34,9 +32,7 @@ func (h *integrationA) HandleCommand(
 	}
 }
 
-type integrationB struct {
-	dogma.NoTimeoutHintBehavior
-}
+type integrationB struct{}
 
 func (h *integrationB) Configure(c dogma.IntegrationConfigurer) {
 	c.Identity("integration-b", "45794cc7-216b-4f15-9abc-dcac6a1eb3a5")
@@ -47,7 +43,7 @@ func (h *integrationB) Configure(c dogma.IntegrationConfigurer) {
 }
 
 func (h *integrationB) HandleCommand(
-	ctx context.Context,
+	_ context.Context,
 	s dogma.IntegrationCommandScope,
 	c dogma.Command,
 ) error {

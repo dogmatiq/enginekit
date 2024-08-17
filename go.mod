@@ -1,8 +1,6 @@
 module github.com/dogmatiq/enginekit
 
-go 1.23
-
-toolchain go1.23.0
+go 1.22
 
 require (
 	github.com/dogmatiq/dapper v0.5.3

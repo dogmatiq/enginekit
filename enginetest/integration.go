@@ -9,7 +9,7 @@ import (
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
-func testIntegration(ctx context.Context, t *testing.T, e *engine) {
+func testIntegration(_ context.Context, t *testing.T, e *engine) {
 	t.Run("integration message handlers", func(t *testing.T) {
 		t.Parallel()
 

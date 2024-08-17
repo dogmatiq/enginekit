@@ -7,13 +7,17 @@ import (
 	"testing"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/dogma/fixtures"
 	"github.com/dogmatiq/enginekit/enginetest/internal/testapp"
+	"github.com/dogmatiq/enginekit/enginetest/stubs"
 )
 
 func testCommandExecutor(ctx context.Context, t *testing.T, e *engine) {
 	t.Run("command executor", func(t *testing.T) {
 		t.Parallel()
+
+		type UnrecognizedCommand struct {
+			stubs.CommandStub[string]
+		}
 
 		cases := []struct {
 			Name    string
@@ -27,8 +31,8 @@ func testCommandExecutor(ctx context.Context, t *testing.T, e *engine) {
 			},
 			{
 				Name:    "panics if passed an unrecognized command",
-				Command: fixtures.MessageC1,
-				Expect:  "MessageC",
+				Command: UnrecognizedCommand{},
+				Expect:  "UnrecognizedCommand",
 			},
 			{
 				Name:    "panics if passed a nil command",

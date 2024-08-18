@@ -650,4 +650,74 @@ var (
 	TimeoutP2 = TimeoutStub[TypeP]{Content: "P2"}
 	// TimeoutP3 is a timeout message of type [TimeoutP] with content "P3".
 	TimeoutP3 = TimeoutStub[TypeP]{Content: "P3"}
+
+	// TimeoutQ1 is a timeout message of type [TimeoutQ] with content "Q1".
+	TimeoutQ1 = TimeoutStub[TypeQ]{Content: "Q1"}
+	// TimeoutQ2 is a timeout message of type [TimeoutQ] with content "Q2".
+	TimeoutQ2 = TimeoutStub[TypeQ]{Content: "Q2"}
+	// TimeoutQ3 is a timeout message of type [TimeoutQ] with content "Q3".
+	TimeoutQ3 = TimeoutStub[TypeQ]{Content: "Q3"}
+
+	// TimeoutR1 is a timeout message of type [TimeoutR] with content "R1".
+	TimeoutR1 = TimeoutStub[TypeR]{Content: "R1"}
+	// TimeoutR2 is a timeout message of type [TimeoutR] with content "R2".
+	TimeoutR2 = TimeoutStub[TypeR]{Content: "R2"}
+	// TimeoutR3 is a timeout message of type [TimeoutR] with content "R3".
+	TimeoutR3 = TimeoutStub[TypeR]{Content: "R3"}
+
+	// TimeoutS1 is a timeout message of type [TimeoutS] with content "S1".
+	TimeoutS1 = TimeoutStub[TypeS]{Content: "S1"}
+	// TimeoutS2 is a timeout message of type [TimeoutS] with content "S2".
+	TimeoutS2 = TimeoutStub[TypeS]{Content: "S2"}
+	// TimeoutS3 is a timeout message of type [TimeoutS] with content "S3".
+	TimeoutS3 = TimeoutStub[TypeS]{Content: "S3"}
+
+	// TimeoutT1 is a timeout message of type [TimeoutT] with content "T1".
+	TimeoutT1 = TimeoutStub[TypeT]{Content: "T1"}
+	// TimeoutT2 is a timeout message of type [TimeoutT] with content "T2".
+	TimeoutT2 = TimeoutStub[TypeT]{Content: "T2"}
+	// TimeoutT3 is a timeout message of type [TimeoutT] with content "T3".
+	TimeoutT3 = TimeoutStub[TypeT]{Content: "T3"}
+
+	// TimeoutU1 is a timeout message of type [TimeoutU] with content "U1".
+	TimeoutU1 = TimeoutStub[TypeU]{Content: "U1"}
+	// TimeoutU2 is a timeout message of type [TimeoutU] with content "U2".
+	TimeoutU2 = TimeoutStub[TypeU]{Content: "U2"}
+	// TimeoutU3 is a timeout message of type [TimeoutU] with content "U3".
+	TimeoutU3 = TimeoutStub[TypeU]{Content: "U3"}
+
+	// TimeoutV1 is a timeout message of type [TimeoutV] with content "V1".
+	TimeoutV1 = TimeoutStub[TypeV]{Content: "V1"}
+	// TimeoutV2 is a timeout message of type [TimeoutV] with content "V2".
+	TimeoutV2 = TimeoutStub[TypeV]{Content: "V2"}
+	// TimeoutV3 is a timeout message of type [TimeoutV] with content "V3".
+	TimeoutV3 = TimeoutStub[TypeV]{Content: "V3"}
+
+	// TimeoutW1 is a timeout message of type [TimeoutW] with content "W1".
+	TimeoutW1 = TimeoutStub[TypeW]{Content: "W1"}
+	// TimeoutW2 is a timeout message of type [TimeoutW] with content "W2".
+	TimeoutW2 = TimeoutStub[TypeW]{Content: "W2"}
+	// TimeoutW3 is a timeout message of type [TimeoutW] with content "W3".
+	TimeoutW3 = TimeoutStub[TypeW]{Content: "W3"}
+
+	// TimeoutX1 is a timeout message of type [TimeoutX] with content "X1".
+	TimeoutX1 = TimeoutStub[TypeX]{Content: "X1"}
+	// TimeoutX2 is a timeout message of type [TimeoutX] with content "X2".
+	TimeoutX2 = TimeoutStub[TypeX]{Content: "X2"}
+	// TimeoutX3 is a timeout message of type [TimeoutX] with content "X3".
+	TimeoutX3 = TimeoutStub[TypeX]{Content: "X3"}
+
+	// TimeoutY1 is a timeout message of type [TimeoutY] with content "Y1".
+	TimeoutY1 = TimeoutStub[TypeY]{Content: "Y1"}
+	// TimeoutY2 is a timeout message of type [TimeoutY] with content "Y2".
+	TimeoutY2 = TimeoutStub[TypeY]{Content: "Y2"}
+	// TimeoutY3 is a timeout message of type [TimeoutY] with content "Y3".
+	TimeoutY3 = TimeoutStub[TypeY]{Content: "Y3"}
+
+	// TimeoutZ1 is a timeout message of type [TimeoutZ] with content "Z1".
+	TimeoutZ1 = TimeoutStub[TypeZ]{Content: "Z1"}
+	// TimeoutZ2 is a timeout message of type [TimeoutZ] with content "Z2".
+	TimeoutZ2 = TimeoutStub[TypeZ]{Content: "Z2"}
+	// TimeoutZ3 is a timeout message of type [TimeoutZ] with content "Z3".
+	TimeoutZ3 = TimeoutStub[TypeZ]{Content: "Z3"}
 )

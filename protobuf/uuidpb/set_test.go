@@ -8,34 +8,34 @@ import (
 	"pgregory.net/rapid"
 )
 
-func TestSet(t *testing.T) {
+func TestOrderedSet(t *testing.T) {
 	t.Parallel()
 
 	rapid.Check(t, func(t *rapid.T) {
-		set := Set{}
-		members := Map[struct{}]{}
+		set := OrderedSet{}
+		var members Map[struct{}]
+
 		keys := func() []*UUID {
-			var keys []*UUID
-			for k := range members {
-				keys = append(keys, k.AsUUID())
-			}
-			return keys
+			return slices.Collect(members.Keys())
 		}
 
 		t.Repeat(
 			map[string]func(*rapid.T){
 				"": func(t *rapid.T) {
-					if len(set) != len(members) {
-						t.Fatalf("set cardinality is incorrect: got %d, want %d", len(set), len(members))
+					if set.Len() != members.Len() {
+						t.Fatalf("set cardinality is incorrect: got %d, want %d", set.Len(), members.Len())
 					}
 
 					sorted := keys()
 					slices.SortFunc(sorted, (*UUID).Compare)
 
-					for i, id := range sorted {
-						if !set[i].Equal(id) {
-							t.Fatalf("set members are out of order at index %d: got %v, want %v", i, set[i], id)
+					i := 0
+					for got := range set.All() {
+						want := sorted[i]
+						if !want.Equal(got) {
+							t.Fatalf("set members are out of order at index %d: got %v, want %v", i, got, want)
 						}
+						i++
 					}
 				},
 				"add a non-member": func(t *rapid.T) {
@@ -56,7 +56,7 @@ func TestSet(t *testing.T) {
 					members.Set(m, struct{}{})
 				},
 				"re-add an existing member": func(t *rapid.T) {
-					if len(members) == 0 {
+					if members.Len() == 0 {
 						t.Skip("set is empty")
 					}
 
@@ -67,7 +67,7 @@ func TestSet(t *testing.T) {
 					set.Add(m)
 				},
 				"delete an existing member": func(t *rapid.T) {
-					if len(members) == 0 {
+					if members.Len() == 0 {
 						t.Skip("set is empty")
 					}
 
@@ -95,7 +95,7 @@ func TestSet(t *testing.T) {
 					set.Delete(m)
 				},
 				"check membership of member": func(t *rapid.T) {
-					if len(members) == 0 {
+					if members.Len() == 0 {
 						t.Skip("set is empty")
 					}
 

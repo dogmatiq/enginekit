@@ -10,6 +10,31 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Added
+
+- Added `Map.All()`, which returns an iterator that ranges over all key/value
+  pairs in the map.
+- Added`Map.Keys()` and `Values()` methods, which return iterators that range
+  over the map's keys and values, respectively.
+- Added `OrderedSet.All()`, which returns an iterator that ranges over all
+  values in the set, in order.
+- Added `Map.Len()` and `OrderedSet.Len()`.
+
+### Changed
+
+- Bumped minimum Go version to v1.23.
+- **[BC]** `Map` is now a struct instead of an actual Go map. Iteration is
+  provided by a new `All()` method that returns an iterator.
+- **[BC]** `Set` has been renamed to `OrderedSet`, and is now a struct instead
+  of a slice. Iteration is provided by a new `All()` method that returns an
+  iterator.
+
+### Removed
+
+- **[BC]** Removed `MapKey` type.
+
 ## [0.10.3] - 2024-08-21
 
 ### Added

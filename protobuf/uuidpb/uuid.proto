@@ -3,7 +3,7 @@ package dogma.protobuf;
 
 option go_package = "github.com/dogmatiq/enginekit/protobuf/uuidpb";
 
-// UUID is a size-optimized representation of an RFC 4122 UUID.
+// UUID is a size-optimized representation of an RFC 9562 UUID.
 message UUID {
   uint64 upper = 1;
   uint64 lower = 2;

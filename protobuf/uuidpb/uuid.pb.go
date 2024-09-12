@@ -20,7 +20,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// UUID is a size-optimized representation of an RFC 4122 UUID.
+// UUID is a size-optimized representation of an RFC 9562 UUID.
 type UUID struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

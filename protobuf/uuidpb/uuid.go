@@ -14,12 +14,12 @@ func Generate() *UUID {
 	}
 
 	data[6] = (data[6] & 0x0f) | 0x40 // Version 4
-	data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 4122)
+	data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 9562)
 
 	return FromByteArray(data)
 }
 
-// FromString returns a UUID from an RFC 4122 string
+// FromString returns a UUID from an RFC 9562 "hex-and-dash" string.
 func FromString(str string) (*UUID, error) {
 	if len(str) != 36 {
 		return nil, errors.New("invalid UUID format, expected 36 characters")
@@ -110,7 +110,7 @@ func (x *UUID) AsBytes() []byte {
 	return data[:]
 }
 
-// AsString returns the UUID as an RFC 4122 string.
+// AsString returns the UUID as an RFC 9562 string.
 func (x *UUID) AsString() string {
 	return asString(x.GetUpper(), x.GetLower())
 }
@@ -128,7 +128,7 @@ func (x *UUID) DapperString() string {
 func (x *UUID) Format(f fmt.State, verb rune) {
 	format := fmt.FormatString(f, verb)
 
-	// If we're formatting as a string, use the RFC 4122 format.
+	// If we're formatting as a string, use the RFC 9562 format.
 	if verb == 's' {
 		fmt.Fprintf(f, format, x.AsString())
 		return
@@ -158,7 +158,7 @@ func (x *UUID) Validate() error {
 	}
 
 	if variant := (x.GetLower() >> 56) & 0xc0; variant != 0x80 {
-		return fmt.Errorf("UUID must use RFC 4122 variant")
+		return fmt.Errorf("UUID must use RFC 9562 variant")
 	}
 
 	return nil

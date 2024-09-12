@@ -302,7 +302,7 @@ func TestUUID_Validate(t *testing.T) {
 					Upper: 0xa967a8b93f9c4918,
 					Lower: 0xc0_4119577be5fec5,
 				},
-				"UUID must use RFC 4122 variant",
+				"UUID must use RFC 9562 variant",
 			},
 		}
 

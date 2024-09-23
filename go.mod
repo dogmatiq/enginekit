@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/dogmatiq/dapper v0.6.0
-	github.com/dogmatiq/dogma v0.14.3
+	github.com/dogmatiq/dogma v0.14.4-0.20240926234834-3c0cc27a2ca1
 	github.com/dogmatiq/primo v0.3.1
 	github.com/google/go-cmp v0.6.0
 	google.golang.org/grpc v1.67.1

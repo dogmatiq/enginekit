@@ -28,7 +28,7 @@ func Fail(message string) []*Action {
 	}
 }
 
-func (x *Action_Fail) do(s Scope) error {
+func (x *Action_Fail) do(Scope) error {
 	return errors.New(x.Fail)
 }
 
@@ -58,7 +58,7 @@ func ExecuteCommand(c dogma.Command) []*Action {
 }
 
 func (x *Action_ExecuteCommand) do(s Scope) error {
-	s.(executor).ExecuteCommand(fromAny(x.ExecuteCommand))
+	s.(executor).ExecuteCommand(fromAny[dogma.Command](x.ExecuteCommand))
 	return nil
 }
 
@@ -73,7 +73,7 @@ func RecordEvent(e dogma.Message) []*Action {
 }
 
 func (x *Action_RecordEvent) do(s Scope) error {
-	s.(recorder).RecordEvent(fromAny(x.RecordEvent))
+	s.(recorder).RecordEvent(fromAny[dogma.Event](x.RecordEvent))
 	return nil
 }
 
@@ -94,7 +94,7 @@ func ScheduleTimeout(t dogma.Timeout, at time.Time) []*Action {
 
 func (x *Action_ScheduleTimeout) do(s Scope) error {
 	s.(scheduler).ScheduleTimeout(
-		fromAny(x.ScheduleTimeout.Timeout),
+		fromAny[dogma.Timeout](x.ScheduleTimeout.Timeout),
 		x.ScheduleTimeout.At.AsTime(),
 	)
 	return nil
@@ -137,10 +137,10 @@ func toAny(m dogma.Message) *anypb.Any {
 	return x
 }
 
-func fromAny(m *anypb.Any) dogma.Message {
+func fromAny[T dogma.Message](m *anypb.Any) T {
 	x, err := m.UnmarshalNew()
 	if err != nil {
 		panic(err)
 	}
-	return x.(dogma.Message)
+	return x.(T)
 }

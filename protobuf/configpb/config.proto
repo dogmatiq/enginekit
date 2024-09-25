@@ -36,6 +36,10 @@ message Application {
 
   // Handlers is the set of handlers within the application.
   repeated Handler handlers = 3;
+
+  // MessageKinds is a map of each message type's fully-qualified Go type to its
+  // the kind of message it implemented by that type.
+  map<string, MessageKind> messages = 4;
 }
 
 // Handler is a message handler within an application.
@@ -50,18 +54,19 @@ message Handler {
   // Type is the handler's type.
   HandlerType type = 3;
 
-  // ProducedMessages is the set of messages produced by this handler.
+  // messages is the set of messages produced and consumed by this handler.
   //
-  // The keys are the fully-qualified names of the message's Go type and the
-  // value is the kind of message implemented by that type.
-  map<string, MessageKind> produced_messages = 4;
-
-  // ConsumedMessages is the set of messages consumed by this handler.
-  //
-  // The keys are the fully-qualified names of the message's Go type and the
-  // value is the kind of message implemented by that type.
-  map<string, MessageKind> consumed_messages = 5;
+  // The keys are the fully-qualified names of the message's Go type.
+  map<string, MessageUsage> messages = 4;
 
   // IsDisabled indicates whether the handler is disabled.
-  bool is_disabled = 6;
+  bool is_disabled = 5;
+}
+
+message MessageUsage {
+  // IsProduced indicates whether the message is produced by the handler.
+  bool is_produced = 2;
+
+  // IsConsumed indicates whether the message is consumed by the handler.
+  bool is_consumed = 3;
 }

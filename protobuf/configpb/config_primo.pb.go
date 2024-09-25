@@ -29,6 +29,7 @@ func (b *ApplicationBuilder) From(x *Application) *ApplicationBuilder {
 	b.prototype.Identity = x.Identity
 	b.prototype.GoType = x.GoType
 	b.prototype.Handlers = x.Handlers
+	b.prototype.Messages = x.Messages
 	return b
 }
 
@@ -41,6 +42,7 @@ func (b *ApplicationBuilder) Build() *Application {
 		Identity: b.prototype.Identity,
 		GoType:   b.prototype.GoType,
 		Handlers: b.prototype.Handlers,
+		Messages: b.prototype.Messages,
 	}
 }
 
@@ -65,6 +67,13 @@ func (b *ApplicationBuilder) WithHandlers(v []*Handler) *ApplicationBuilder {
 	return b
 }
 
+// WithMessages configures the builder to set the Messages field to v,
+// then returns b.
+func (b *ApplicationBuilder) WithMessages(v map[string]MessageKind) *ApplicationBuilder {
+	b.prototype.Messages = v
+	return b
+}
+
 type HandlerBuilder struct {
 	prototype Handler
 }
@@ -83,8 +92,7 @@ func (b *HandlerBuilder) From(x *Handler) *HandlerBuilder {
 	b.prototype.Identity = x.Identity
 	b.prototype.GoType = x.GoType
 	b.prototype.Type = x.Type
-	b.prototype.ProducedMessages = x.ProducedMessages
-	b.prototype.ConsumedMessages = x.ConsumedMessages
+	b.prototype.Messages = x.Messages
 	b.prototype.IsDisabled = x.IsDisabled
 	return b
 }
@@ -95,12 +103,11 @@ func (b *HandlerBuilder) From(x *Handler) *HandlerBuilder {
 // not modify previously constructed messages.
 func (b *HandlerBuilder) Build() *Handler {
 	return &Handler{
-		Identity:         b.prototype.Identity,
-		GoType:           b.prototype.GoType,
-		Type:             b.prototype.Type,
-		ProducedMessages: b.prototype.ProducedMessages,
-		ConsumedMessages: b.prototype.ConsumedMessages,
-		IsDisabled:       b.prototype.IsDisabled,
+		Identity:   b.prototype.Identity,
+		GoType:     b.prototype.GoType,
+		Type:       b.prototype.Type,
+		Messages:   b.prototype.Messages,
+		IsDisabled: b.prototype.IsDisabled,
 	}
 }
 
@@ -125,17 +132,10 @@ func (b *HandlerBuilder) WithType(v HandlerType) *HandlerBuilder {
 	return b
 }
 
-// WithProducedMessages configures the builder to set the ProducedMessages field to v,
+// WithMessages configures the builder to set the Messages field to v,
 // then returns b.
-func (b *HandlerBuilder) WithProducedMessages(v map[string]MessageKind) *HandlerBuilder {
-	b.prototype.ProducedMessages = v
-	return b
-}
-
-// WithConsumedMessages configures the builder to set the ConsumedMessages field to v,
-// then returns b.
-func (b *HandlerBuilder) WithConsumedMessages(v map[string]MessageKind) *HandlerBuilder {
-	b.prototype.ConsumedMessages = v
+func (b *HandlerBuilder) WithMessages(v map[string]*MessageUsage) *HandlerBuilder {
+	b.prototype.Messages = v
 	return b
 }
 
@@ -143,6 +143,51 @@ func (b *HandlerBuilder) WithConsumedMessages(v map[string]MessageKind) *Handler
 // then returns b.
 func (b *HandlerBuilder) WithIsDisabled(v bool) *HandlerBuilder {
 	b.prototype.IsDisabled = v
+	return b
+}
+
+type MessageUsageBuilder struct {
+	prototype MessageUsage
+}
+
+// NewMessageUsageBuilder returns a builder that constructs [MessageUsage] messages.
+func NewMessageUsageBuilder() *MessageUsageBuilder {
+	return &MessageUsageBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *MessageUsageBuilder) From(x *MessageUsage) *MessageUsageBuilder {
+	b.prototype.IsProduced = x.IsProduced
+	b.prototype.IsConsumed = x.IsConsumed
+	return b
+}
+
+// Build returns a new [MessageUsage] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *MessageUsageBuilder) Build() *MessageUsage {
+	return &MessageUsage{
+		IsProduced: b.prototype.IsProduced,
+		IsConsumed: b.prototype.IsConsumed,
+	}
+}
+
+// WithIsProduced configures the builder to set the IsProduced field to v,
+// then returns b.
+func (b *MessageUsageBuilder) WithIsProduced(v bool) *MessageUsageBuilder {
+	b.prototype.IsProduced = v
+	return b
+}
+
+// WithIsConsumed configures the builder to set the IsConsumed field to v,
+// then returns b.
+func (b *MessageUsageBuilder) WithIsConsumed(v bool) *MessageUsageBuilder {
+	b.prototype.IsConsumed = v
 	return b
 }
 
@@ -302,6 +347,11 @@ func (x *Application) SetHandlers(v []*Handler) {
 	x.Handlers = v
 }
 
+// SetMessages sets the x.Messages field to v, then returns x.
+func (x *Application) SetMessages(v map[string]MessageKind) {
+	x.Messages = v
+}
+
 // SetIdentity sets the x.Identity field to v, then returns x.
 func (x *Handler) SetIdentity(v *identitypb.Identity) {
 	x.Identity = v
@@ -317,17 +367,22 @@ func (x *Handler) SetType(v HandlerType) {
 	x.Type = v
 }
 
-// SetProducedMessages sets the x.ProducedMessages field to v, then returns x.
-func (x *Handler) SetProducedMessages(v map[string]MessageKind) {
-	x.ProducedMessages = v
-}
-
-// SetConsumedMessages sets the x.ConsumedMessages field to v, then returns x.
-func (x *Handler) SetConsumedMessages(v map[string]MessageKind) {
-	x.ConsumedMessages = v
+// SetMessages sets the x.Messages field to v, then returns x.
+func (x *Handler) SetMessages(v map[string]*MessageUsage) {
+	x.Messages = v
 }
 
 // SetIsDisabled sets the x.IsDisabled field to v, then returns x.
 func (x *Handler) SetIsDisabled(v bool) {
 	x.IsDisabled = v
+}
+
+// SetIsProduced sets the x.IsProduced field to v, then returns x.
+func (x *MessageUsage) SetIsProduced(v bool) {
+	x.IsProduced = v
+}
+
+// SetIsConsumed sets the x.IsConsumed field to v, then returns x.
+func (x *MessageUsage) SetIsConsumed(v bool) {
+	x.IsConsumed = v
 }

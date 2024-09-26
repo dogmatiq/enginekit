@@ -7,8 +7,8 @@ import (
 
 // CommandStub is a test implementation of [dogma.Command].
 type CommandStub[T any] struct {
-	Content         T
-	ValidationError string
+	Content         T      `json:"content,omitempty"`
+	ValidationError string `json:"validation_error,omitempty"`
 }
 
 // MessageDescription returns a description of the command.
@@ -35,8 +35,8 @@ func (s CommandStub[T]) Validate() error {
 
 // EventStub is a test implementation of [dogma.Event].
 type EventStub[T any] struct {
-	Content         T
-	ValidationError string
+	Content         T      `json:"content,omitempty"`
+	ValidationError string `json:"validation_error,omitempty"`
 }
 
 // MessageDescription returns a description of the command.
@@ -63,8 +63,8 @@ func (s EventStub[T]) Validate() error {
 
 // TimeoutStub is a test implementation of [dogma.Test].
 type TimeoutStub[T any] struct {
-	Content         T
-	ValidationError string
+	Content         T      `json:"content,omitempty"`
+	ValidationError string `json:"validation_error,omitempty"`
 }
 
 // MessageDescription returns a description of the command.

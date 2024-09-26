@@ -19,8 +19,8 @@ func Generate() *UUID {
 	return FromByteArray(data)
 }
 
-// FromString returns a UUID from an RFC 9562 "hex-and-dash" string.
-func FromString(str string) (*UUID, error) {
+// Parse parses an RFC 9562 "hex-and-dash" UUID string.
+func Parse(str string) (*UUID, error) {
 	if len(str) != 36 {
 		return nil, errors.New("invalid UUID format, expected 36 characters")
 	}
@@ -53,6 +53,16 @@ func FromString(str string) (*UUID, error) {
 	}
 
 	return uuid, nil
+}
+
+// MustParse parses an RFC 9562 "hex-and-dash" UUID string, or panics if unable
+// to do so.
+func MustParse(str string) *UUID {
+	uuid, err := Parse(str)
+	if err != nil {
+		panic(err)
+	}
+	return uuid
 }
 
 // FromByteArray returns a UUID from a byte array.

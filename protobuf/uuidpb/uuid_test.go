@@ -20,7 +20,7 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
-func TestFromString(t *testing.T) {
+func TestParse(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when the string is a valid UUID", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestFromString(t *testing.T) {
 					Upper: 0xa967a8b93f9c4918,
 					Lower: 0x9a4119577be5fec5,
 				}
-				actual, err := FromString(c.String)
+				actual, err := Parse(c.String)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -78,12 +78,40 @@ func TestFromString(t *testing.T) {
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 
-				_, err := FromString(c.String)
+				_, err := Parse(c.String)
 				if err == nil {
 					t.Fatal("expected an error")
 				}
 			})
 		}
+	})
+}
+
+func TestMustParse(t *testing.T) {
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		expect := &UUID{
+			Upper: 0xa967a8b93f9c4918,
+			Lower: 0x9a4119577be5fec5,
+		}
+		actual := MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+
+		if !proto.Equal(actual, expect) {
+			t.Fatalf("got %q, want %q", actual, expect)
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("expected a panic")
+			}
+		}()
+
+		MustParse("invalid")
 	})
 }
 
@@ -408,12 +436,12 @@ func TestUUID_Compare(t *testing.T) {
 	})
 
 	t.Run("subtraction overflow regression", func(t *testing.T) {
-		a, err := FromString("e6929f89-acb1-4994-8248-d097ad20da5f")
+		a, err := Parse("e6929f89-acb1-4994-8248-d097ad20da5f")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		b, err := FromString("46471d80-5b50-44a0-a8a8-261941336291")
+		b, err := Parse("46471d80-5b50-44a0-a8a8-261941336291")
 		if err != nil {
 			t.Fatal(err)
 		}

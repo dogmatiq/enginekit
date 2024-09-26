@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Changed
+
+- **[BC]** Renamed `uuidpb.FromString()` to `Parse()`.
+
+### Added
+
+- Added `uuidpb.MustParse()`.
+
 ## [0.11.1] - 2024-09-27
 
 ### Added

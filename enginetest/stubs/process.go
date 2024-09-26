@@ -8,7 +8,7 @@ import (
 
 // ProcessRootStub is a test implementation of [dogma.ProcessRoot].
 type ProcessRootStub struct {
-	Value any
+	Value any `json:"value,omitempty"`
 }
 
 var _ dogma.ProcessRoot = &ProcessRootStub{}

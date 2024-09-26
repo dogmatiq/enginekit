@@ -4,7 +4,7 @@ import "github.com/dogmatiq/dogma"
 
 // AggregateRootStub is a test implementation of [dogma.AggregateRoot].
 type AggregateRootStub struct {
-	AppliedEvents  []dogma.Event
+	AppliedEvents  []dogma.Event     `json:"applied_events,omitempty"`
 	ApplyEventFunc func(dogma.Event) `json:"-"`
 }
 

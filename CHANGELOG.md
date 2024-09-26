@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.11.1] - 2024-09-27
+
+### Added
+
+- Added JSON struct tags to stub types.
+
 ## [0.11.0] - 2024-09-25
 
 ### Added
@@ -77,6 +83,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.10.2]: https://github.com/dogmatiq/enginekit/releases/v0.10.2
 [0.10.3]: https://github.com/dogmatiq/enginekit/releases/v0.10.3
 [0.11.0]: https://github.com/dogmatiq/enginekit/releases/v0.11.0
+[0.11.1]: https://github.com/dogmatiq/enginekit/releases/v0.11.1
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

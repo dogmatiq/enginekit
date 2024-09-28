@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package dogmatiq.enginekit.marshaler.stubs2;
+
+option go_package = "github.com/dogmatiq/enginekit/marshaler/internal/stubs2";
+
+// ProtoMessage is a generic protocol buffers message.
+message ProtoMessage { string value = 1; }

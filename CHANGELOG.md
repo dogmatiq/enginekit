@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [Unreleased]
+## [0.12.0] - 2024-09-29
 
 ### Changed
 
@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### Added
 
 - Added `uuidpb.MustParse()`.
+- Added `marshaler` package as a replacement for `dogmatiq/marshalkit`.
 
 ## [0.11.1] - 2024-09-27
 
@@ -94,6 +95,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.10.3]: https://github.com/dogmatiq/enginekit/releases/v0.10.3
 [0.11.0]: https://github.com/dogmatiq/enginekit/releases/v0.11.0
 [0.11.1]: https://github.com/dogmatiq/enginekit/releases/v0.11.1
+[0.12.0]: https://github.com/dogmatiq/enginekit/releases/v0.12.0
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

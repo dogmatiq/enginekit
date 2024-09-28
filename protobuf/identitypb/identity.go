@@ -48,3 +48,8 @@ func (x *Identity) Format(f fmt.State, verb rune) {
 		fmt.Sprintf("%s/%s", x.GetName(), x.GetKey()),
 	)
 }
+
+// Equal returns true if x and id are equal.
+func (x *Identity) Equal(id *Identity) bool {
+	return x.GetName() == id.GetName() && x.GetKey() == id.GetKey()
+}

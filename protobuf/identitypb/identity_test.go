@@ -90,3 +90,25 @@ func TestIdentity_Format(t *testing.T) {
 		t.Fatalf("got %q, want %q", actual, expect)
 	}
 }
+
+func TestIdentity_Equal(t *testing.T) {
+	t.Parallel()
+
+	a := &Identity{
+		Name: "<a>",
+		Key:  uuidpb.Generate(),
+	}
+
+	b := &Identity{
+		Name: "<b>",
+		Key:  uuidpb.Generate(),
+	}
+
+	if a.Equal(b) {
+		t.Fatal("did not expect a == b")
+	}
+
+	if !a.Equal(a) {
+		t.Fatal("did not expect a != b")
+	}
+}

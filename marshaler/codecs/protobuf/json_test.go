@@ -1,7 +1,8 @@
 package protobuf_test
 
 import (
-	"regexp"
+	"encoding/json"
+	"reflect"
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/marshaler/codecs/protobuf"
@@ -22,18 +23,25 @@ func TestCodec_json(t *testing.T) {
 	t.Run("when marshaling", func(t *testing.T) {
 		t.Run("it marshals the value to JSON format", func(t *testing.T) {
 			id := uuidpb.MustParse("c3d830ff-bdb1-4042-8c6c-08f6b7739f3e")
-			got, err := DefaultJSONCodec.Marshal(id)
+			data, err := DefaultJSONCodec.Marshal(id)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			// Note that we need to use a regex to match an arbitrary amount of
-			// whitespace in between the key and value as a result of the behavior
-			// described in https://github.com/golang/protobuf/issues/1121.
-			p := regexp.MustCompile(`\{\"upper\":\s*\"14112083307322753090\",\s*\"lower\":\s*\"10118472318527446846\"\}`)
+			got := map[string]any{}
 
-			if !p.Match(got) {
-				t.Errorf("unexpected data: %q", string(got))
+			err = json.Unmarshal(data, &got)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			want := map[string]any{
+				"upper": "14112083307322753090",
+				"lower": "10118472318527446846",
+			}
+
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("unexpected value: got %v, want %v", got, want)
 			}
 		})
 

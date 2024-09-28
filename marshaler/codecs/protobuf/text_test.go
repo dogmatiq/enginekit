@@ -30,7 +30,7 @@ func TestCodec_text(t *testing.T) {
 			// Note that we need to use a regex to match an arbitrary amount of
 			// whitespace in between the key and value as a result of the behavior
 			// described in https://github.com/golang/protobuf/issues/1121.
-			p := regexp.MustCompile(`upper:\s+14112083307322753090\nlower:\s+10118472318527446846\n`)
+			p := regexp.MustCompile(`upper:\s*14112083307322753090\nlower:\s*10118472318527446846\n`)
 
 			if !p.Match(got) {
 				t.Errorf("unexpected data: %q", string(got))

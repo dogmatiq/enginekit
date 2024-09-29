@@ -4,22 +4,26 @@ import (
 	reflect "reflect"
 	"testing"
 
+	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	"github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/marshaler"
+	"github.com/dogmatiq/enginekit/marshaler/codecs/json"
 	"github.com/dogmatiq/enginekit/marshaler/codecs/protobuf"
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
-	"github.com/dogmatiq/enginekit/protobuf/envelopepb/internal/stubs"
+	. "github.com/dogmatiq/enginekit/protobuf/envelopepb/internal/stubs"
 	"google.golang.org/protobuf/proto"
 )
 
 func TestTranscoder(t *testing.T) {
 	m, err := marshaler.New(
 		[]reflect.Type{
-			reflect.TypeFor[*stubs.ProtoMessage](),
+			reflect.TypeFor[*ProtoMessage](),
+			reflect.TypeOf(CommandA1),
 		},
 		[]marshaler.Codec{
 			protobuf.DefaultJSONCodec,
 			protobuf.DefaultTextCodec,
+			json.DefaultCodec,
 		},
 	)
 	if err != nil {
@@ -27,8 +31,8 @@ func TestTranscoder(t *testing.T) {
 	}
 
 	transcoder := &Transcoder{
-		MediaTypes: map[string][]string{
-			`dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`: {
+		MediaTypes: map[reflect.Type][]string{
+			reflect.TypeFor[*ProtoMessage](): {
 				`application/vnd.google.protobuf+json; type=different`,
 				`application/vnd.google.protobuf+json; type=different; extra=true`,
 				`application/vnd.google.protobuf+json; no-type=true`,
@@ -96,10 +100,10 @@ func TestTranscoder(t *testing.T) {
 		)
 	})
 
-	t.Run("it returns an error if the recipient does not support any encodings", func(t *testing.T) {
+	t.Run("it returns false if the recipient does not support any encodings", func(t *testing.T) {
 		_, ok, err := transcoder.Transcode(
 			&Envelope{
-				MediaType: `text/plain; type=unrecognized`,
+				MediaType: `text/plain; type="CommandStub[TypeA]"`,
 			},
 		)
 		if err != nil {
@@ -111,13 +115,13 @@ func TestTranscoder(t *testing.T) {
 		}
 	})
 
-	t.Run("it returns an error if the marshaler does not support any of the encodings supported by the recipient", func(t *testing.T) {
+	t.Run("it returns false if the marshaler does not support any of the encodings supported by the recipient", func(t *testing.T) {
 		transcoder := &Transcoder{
-			MediaTypes: map[string][]string{
-				`dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`: {
+			MediaTypes: map[reflect.Type][]string{
+				reflect.TypeFor[*ProtoMessage](): {
 					`application/vnd.google.protobuf; type=different`,
 					`application/vnd.google.protobuf; type=different; extra=true`,
-					`application/vnd.google.protobuf`,
+					`application/vnd.google.protobuf; no-type=true`,
 				},
 			},
 			Marshaler: m,
@@ -135,6 +139,42 @@ func TestTranscoder(t *testing.T) {
 
 		if ok {
 			t.Error("expected ok to be false")
+		}
+	})
+
+	t.Run("it returns an error if the marshaler does not support the original encoding", func(t *testing.T) {
+		_, _, err := transcoder.Transcode(
+			&Envelope{
+				MediaType: `application/unsupported; type=irrelevant`,
+			},
+		)
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+
+		got := err.Error()
+		want := `the portable type name 'irrelevant' is not recognized`
+
+		if got != want {
+			t.Errorf("unexpected error: got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("it returns an error if the original encoding does not have a type", func(t *testing.T) {
+		_, _, err := transcoder.Transcode(
+			&Envelope{
+				MediaType: `application/unsupported`,
+			},
+		)
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+
+		got := err.Error()
+		want := `the media-type does not specify a 'type' parameter`
+
+		if got != want {
+			t.Errorf("unexpected error: got %q, want %q", got, want)
 		}
 	})
 }

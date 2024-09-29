@@ -12,14 +12,3 @@ type Packet struct {
 	// Data is the marshaled binary data.
 	Data []byte
 }
-
-// PortableName returns the portable name of the type represented by the data.
-//
-// It panics if the media-type does not have a value "type" parameter.
-func (p Packet) PortableName() string {
-	_, n, err := parseMediaType(p.MediaType)
-	if err != nil {
-		panic(err)
-	}
-	return n
-}

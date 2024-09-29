@@ -2,6 +2,7 @@ package envelopepb
 
 import (
 	"mime"
+	reflect "reflect"
 	"strings"
 
 	"github.com/dogmatiq/enginekit/marshaler"
@@ -10,9 +11,9 @@ import (
 
 // Transcoder re-encodes messages to different media-types on the fly.
 type Transcoder struct {
-	// MediaTypes is a map of the message's "portable name" to a list of
-	// supported media-types, in order of preference.
-	MediaTypes map[string][]string
+	// MediaTypes is a map of the message's type to a list of supported
+	// media-types, in order of preference.
+	MediaTypes map[reflect.Type][]string
 
 	// Marshaler is the marshaler to use to unmarshal and marshal messages.
 	Marshaler marshaler.Marshaler
@@ -20,13 +21,12 @@ type Transcoder struct {
 
 // Transcode re-encodes the message in env to one of the supported media-types.
 func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
-	packet := marshaler.Packet{
-		MediaType: env.MediaType,
-		Data:      env.Data,
+	rt, err := t.Marshaler.UnmarshalTypeFromMediaType(env.MediaType)
+	if err != nil {
+		return nil, false, err
 	}
 
-	name := packet.PortableName()
-	supported := t.MediaTypes[name]
+	supported := t.MediaTypes[rt]
 
 	if len(supported) == 0 {
 		return nil, false, nil
@@ -41,7 +41,12 @@ func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
 		}
 	}
 
-	m, err := t.Marshaler.Unmarshal(packet)
+	m, err := t.Marshaler.Unmarshal(
+		marshaler.Packet{
+			MediaType: env.MediaType,
+			Data:      env.Data,
+		},
+	)
 	if err != nil {
 		return nil, false, err
 	}

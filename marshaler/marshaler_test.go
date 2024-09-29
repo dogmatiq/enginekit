@@ -210,6 +210,20 @@ func TestMarshaler(t *testing.T) {
 		})
 	})
 
+	t.Run("func UnmarshalTypeFromMediaType()", func(t *testing.T) {
+		t.Run("it returns the reflection type", func(t *testing.T) {
+			got, err := marshaler.UnmarshalTypeFromMediaType("application/vnd.google.protobuf; type=dogmatiq.enginekit.marshaler.stubs1.ProtoMessage")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			want := reflect.TypeFor[*stubs1.ProtoMessage]()
+			if got != want {
+				t.Fatalf("unexpected type: got %v, want %v", got, want)
+			}
+		})
+	})
+
 	t.Run("func Marshal()", func(t *testing.T) {
 		t.Run("it marshals using the first suitable codec", func(t *testing.T) {
 			got, err := marshaler.Marshal(Value{"<value>"})

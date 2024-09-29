@@ -16,8 +16,8 @@ func formatMediaType(base string, portableName string) string {
 
 // parseMediaType returns the media-type and the portable type name encoded in
 // the packet's MIME media-type.
-func parseMediaType(mediatype string) (string, string, error) {
-	mt, params, err := mime.ParseMediaType(mediatype)
+func parseMediaType(mediaType string) (string, string, error) {
+	mt, params, err := mime.ParseMediaType(mediaType)
 	if err != nil {
 		return "", "", err
 	}

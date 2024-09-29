@@ -167,13 +167,6 @@ func TestEnvelope_Validate(t *testing.T) {
 				"invalid description: must not be empty",
 			},
 			{
-				"invalid portable name",
-				newEnvelope(func(e *Envelope) {
-					e.PortableName = ""
-				}),
-				"invalid portable name: must not be empty",
-			},
-			{
 				"invalid media-type",
 				newEnvelope(func(e *Envelope) {
 					e.MediaType = ""
@@ -217,7 +210,6 @@ func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
 		CreatedAt:         timestamppb.Now(),
 		ScheduledFor:      timestamppb.Now(),
 		Description:       "<description>",
-		PortableName:      "<portable name>",
 		MediaType:         "<media type>",
 		Attributes:        map[string]string{"<key>": "<value>"},
 		Data:              []byte("<data>"),

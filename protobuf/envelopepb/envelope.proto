@@ -61,12 +61,15 @@ message Envelope {
   // Description is a human-readable description of the message.
   string description = 10;
 
-  // PortableName is the unique name used to identify messages of this type.
-  string portable_name = 11;
-
   // MediaType is a MIME media-type describing the content and encoding of the
   // binary message data.
-  string media_type = 12;
+  string media_type = 11;
+
+  // Data is the binary message data.
+  //
+  // The data format is described by MediaType, the allowed values of both are
+  // outside the scope of this specification.
+  bytes data = 12;
 
   // Attributes is a set of arbitrary key/value pairs that provide additional
   // information about the message.
@@ -74,10 +77,4 @@ message Envelope {
   // Keys beginning with "_" are reserved for use by the enginekit module. All
   // other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
   map<string, string> attributes = 13;
-
-  // Data is the binary message data.
-  //
-  // The data format is described by MediaType, the allowed values of both are
-  // outside the scope of this specification.
-  bytes data = 14;
 }

@@ -37,10 +37,9 @@ func (b *EnvelopeBuilder) From(x *Envelope) *EnvelopeBuilder {
 	b.prototype.CreatedAt = x.CreatedAt
 	b.prototype.ScheduledFor = x.ScheduledFor
 	b.prototype.Description = x.Description
-	b.prototype.PortableName = x.PortableName
 	b.prototype.MediaType = x.MediaType
-	b.prototype.Attributes = x.Attributes
 	b.prototype.Data = x.Data
+	b.prototype.Attributes = x.Attributes
 	return b
 }
 
@@ -60,10 +59,9 @@ func (b *EnvelopeBuilder) Build() *Envelope {
 		CreatedAt:         b.prototype.CreatedAt,
 		ScheduledFor:      b.prototype.ScheduledFor,
 		Description:       b.prototype.Description,
-		PortableName:      b.prototype.PortableName,
 		MediaType:         b.prototype.MediaType,
-		Attributes:        b.prototype.Attributes,
 		Data:              b.prototype.Data,
+		Attributes:        b.prototype.Attributes,
 	}
 }
 
@@ -137,13 +135,6 @@ func (b *EnvelopeBuilder) WithDescription(v string) *EnvelopeBuilder {
 	return b
 }
 
-// WithPortableName configures the builder to set the PortableName field to v,
-// then returns b.
-func (b *EnvelopeBuilder) WithPortableName(v string) *EnvelopeBuilder {
-	b.prototype.PortableName = v
-	return b
-}
-
 // WithMediaType configures the builder to set the MediaType field to v,
 // then returns b.
 func (b *EnvelopeBuilder) WithMediaType(v string) *EnvelopeBuilder {
@@ -151,17 +142,17 @@ func (b *EnvelopeBuilder) WithMediaType(v string) *EnvelopeBuilder {
 	return b
 }
 
-// WithAttributes configures the builder to set the Attributes field to v,
-// then returns b.
-func (b *EnvelopeBuilder) WithAttributes(v map[string]string) *EnvelopeBuilder {
-	b.prototype.Attributes = v
-	return b
-}
-
 // WithData configures the builder to set the Data field to v,
 // then returns b.
 func (b *EnvelopeBuilder) WithData(v []byte) *EnvelopeBuilder {
 	b.prototype.Data = v
+	return b
+}
+
+// WithAttributes configures the builder to set the Attributes field to v,
+// then returns b.
+func (b *EnvelopeBuilder) WithAttributes(v map[string]string) *EnvelopeBuilder {
+	b.prototype.Attributes = v
 	return b
 }
 
@@ -215,22 +206,17 @@ func (x *Envelope) SetDescription(v string) {
 	x.Description = v
 }
 
-// SetPortableName sets the x.PortableName field to v, then returns x.
-func (x *Envelope) SetPortableName(v string) {
-	x.PortableName = v
-}
-
 // SetMediaType sets the x.MediaType field to v, then returns x.
 func (x *Envelope) SetMediaType(v string) {
 	x.MediaType = v
 }
 
-// SetAttributes sets the x.Attributes field to v, then returns x.
-func (x *Envelope) SetAttributes(v map[string]string) {
-	x.Attributes = v
-}
-
 // SetData sets the x.Data field to v, then returns x.
 func (x *Envelope) SetData(v []byte) {
 	x.Data = v
+}
+
+// SetAttributes sets the x.Attributes field to v, then returns x.
+func (x *Envelope) SetAttributes(v map[string]string) {
+	x.Attributes = v
 }

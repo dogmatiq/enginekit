@@ -53,7 +53,6 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 		SourceSite:        p.Site,
 		SourceApplication: p.Application,
 		Description:       m.MessageDescription(),
-		PortableName:      packet.PortableName(),
 		MediaType:         packet.MediaType,
 		Data:              packet.Data,
 	}

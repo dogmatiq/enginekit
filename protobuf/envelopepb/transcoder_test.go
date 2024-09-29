@@ -41,7 +41,6 @@ func TestTranscoder(t *testing.T) {
 
 	t.Run("it does not transcode envelopes that are supported by the recipient unchanged", func(t *testing.T) {
 		want := &Envelope{
-			PortableName: `dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
 			// note non-canonical capitalization & spacing in media-type
 			MediaType: `application/vnd.Google.protobuf+json;TYPE="dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage"`,
 			Data:      []byte(`{"value":"A1"}`),
@@ -63,9 +62,8 @@ func TestTranscoder(t *testing.T) {
 
 	t.Run("it transcodes using the recipients preferred encoding if necessary", func(t *testing.T) {
 		original := &Envelope{
-			PortableName: `dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-			MediaType:    `text/vnd.google.protobuf; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-			Data:         []byte(`value: "A1"`),
+			MediaType: `text/vnd.google.protobuf; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+			Data:      []byte(`value: "A1"`),
 		}
 		snapshot := proto.Clone(original).(*Envelope)
 
@@ -75,9 +73,8 @@ func TestTranscoder(t *testing.T) {
 		}
 
 		want := &Envelope{
-			PortableName: `dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-			MediaType:    `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-			Data:         []byte(`{"value":"A1"}`),
+			MediaType: `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+			Data:      []byte(`{"value":"A1"}`),
 		}
 
 		test.Expect(
@@ -102,8 +99,7 @@ func TestTranscoder(t *testing.T) {
 	t.Run("it returns an error if the recipient does not support any encodings", func(t *testing.T) {
 		_, ok, err := transcoder.Transcode(
 			&Envelope{
-				PortableName: `Unrecognized`,
-				MediaType:    `text/plain`,
+				MediaType: `text/plain; type=unrecognized`,
 			},
 		)
 		if err != nil {
@@ -129,9 +125,8 @@ func TestTranscoder(t *testing.T) {
 
 		_, ok, err := transcoder.Transcode(
 			&Envelope{
-				PortableName: `dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-				MediaType:    `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-				Data:         []byte(`{"value":"A1"}`),
+				MediaType: `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+				Data:      []byte(`{"value":"A1"}`),
 			},
 		)
 		if err != nil {

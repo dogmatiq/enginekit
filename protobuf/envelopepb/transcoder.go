@@ -20,7 +20,13 @@ type Transcoder struct {
 
 // Transcode re-encodes the message in env to one of the supported media-types.
 func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
-	supported := t.MediaTypes[env.PortableName]
+	packet := marshaler.Packet{
+		MediaType: env.MediaType,
+		Data:      env.Data,
+	}
+
+	name := packet.PortableName()
+	supported := t.MediaTypes[name]
 
 	if len(supported) == 0 {
 		return nil, false, nil
@@ -33,11 +39,6 @@ func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
 		if mediaTypeEqual(env.MediaType, mediaType) {
 			return env, true, nil
 		}
-	}
-
-	packet := marshaler.Packet{
-		MediaType: env.MediaType,
-		Data:      env.Data,
 	}
 
 	m, err := t.Marshaler.Unmarshal(packet)

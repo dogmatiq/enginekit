@@ -65,10 +65,6 @@ func (x *Envelope) Validate() error {
 		return errors.New("invalid description: must not be empty")
 	}
 
-	if x.GetPortableName() == "" {
-		return errors.New("invalid portable name: must not be empty")
-	}
-
 	if x.GetMediaType() == "" {
 		return errors.New("invalid media-type: must not be empty")
 	}

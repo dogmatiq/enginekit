@@ -50,7 +50,6 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		SourceInstanceId:  "",
 		CreatedAt:         timestamppb.New(now),
 		Description:       `command(stubs.TypeA:A1, valid)`,
-		PortableName:      `CommandStub[TypeA]`,
 		MediaType:         `application/json; type="CommandStub[TypeA]"`,
 		Data:              []byte(`{"content":"A1"}`),
 	}

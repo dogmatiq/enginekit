@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// Codec is an implementation of marshalkit.Codec that encodes Protocol Buffers
+// Codec is an implementation of [marshaler.Codec] that encodes Protocol Buffers
 // messages.
 //
 // It supports three common protocol buffers formats, that is, the native binary

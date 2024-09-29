@@ -5,11 +5,11 @@ import (
 	"reflect"
 )
 
-// Codec is an implementation of marshalkit.Codec that uses Go's standard JSON
+// Codec is an implementation of [marshaler.Codec] that uses Go's standard JSON
 // implementation.
 type Codec struct{}
 
-// DefaultCodec is a marshalkit.Codec that marshals values using Go's standard
+// DefaultCodec is a [marshaler.Codec] that marshals values using Go's standard
 // JSON implementation.
 var DefaultCodec = Codec{}
 

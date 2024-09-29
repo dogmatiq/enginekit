@@ -18,7 +18,7 @@ var DefaultJSONUnmarshaler = protojson.UnmarshalOptions{
 	DiscardUnknown: true,
 }
 
-// DefaultJSONCodec is a marshalkit.Codec that marshals protocol buffers
+// DefaultJSONCodec is a [marshaler.Codec] that marshals protocol buffers
 // messages in JSON format.
 //
 // See https://developers.google.com/protocol-buffers/docs/proto3#json.

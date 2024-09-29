@@ -8,12 +8,12 @@ import (
 	"github.com/dogmatiq/dogma"
 )
 
-// Codec is an implementation of [marshalkit.Codec] that marshals
+// Codec is an implementation of [marshaler.Codec] that marshals
 // [dogma.StatelessProcessRoot] values.
 type Codec struct{}
 
-// DefaultCodec is a marshalkit.Codec that marshals [dogma.StatelessProcessRoot]
-// values.
+// DefaultCodec is a [marshaler.Codec] that marshals
+// [dogma.StatelessProcessRoot] values.
 var DefaultCodec = Codec{}
 
 var processRootType = reflect.TypeOf(dogma.StatelessProcessRoot)

@@ -18,7 +18,7 @@ var DefaultTextUnmarshaler = prototext.UnmarshalOptions{
 	DiscardUnknown: true,
 }
 
-// DefaultTextCodec is a marshalkit.Codec that marshals protocol buffers
+// DefaultTextCodec is a [marshaler.Codec] that marshals protocol buffers
 // messages in text format.
 var DefaultTextCodec = Codec{
 	MediaType:   TextBasicMediaType,

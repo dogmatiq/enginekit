@@ -16,6 +16,6 @@ var DefaultNativeMarshaler = proto.MarshalOptions{}
 // by Codec if no unmarshaler is provided.
 var DefaultNativeUnmarshaler = proto.UnmarshalOptions{}
 
-// DefaultNativeCodec is a marshalkit.Codec that marshals protocol buffers
+// DefaultNativeCodec is a [marshaler.Codec] that marshals protocol buffers
 // messages using the native protocol buffers wire format.
 var DefaultNativeCodec = Codec{}

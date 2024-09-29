@@ -211,6 +211,9 @@ func (m *marshaler) MarshalAs(
 
 		basic, n, err := parseMediaType(mt)
 		if err != nil {
+			if err == errNoTypeParameter {
+				continue
+			}
 			return Packet{}, false, err
 		}
 

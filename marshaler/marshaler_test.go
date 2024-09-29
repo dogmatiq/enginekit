@@ -348,6 +348,7 @@ func TestMarshaler(t *testing.T) {
 			p, ok, err := marshaler.MarshalAs(
 				Value{"<value>"},
 				[]string{
+					"application/json; something=true",
 					"application/binary; type=Value",
 					"application/json; type=Value",
 				},
@@ -513,7 +514,7 @@ func TestMarshaler(t *testing.T) {
 			}
 
 			got := err.Error()
-			want := "the media-type 'application/json' does not specify a 'type' parameter"
+			want := "the media-type does not specify a 'type' parameter"
 
 			if got != want {
 				t.Fatalf("unexpected error: got %q, want %q", got, want)

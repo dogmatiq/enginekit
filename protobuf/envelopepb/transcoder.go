@@ -1,6 +1,7 @@
 package envelopepb
 
 import (
+	"mime"
 	"strings"
 
 	"github.com/dogmatiq/enginekit/marshaler"
@@ -19,12 +20,17 @@ type Transcoder struct {
 
 // Transcode re-encodes the message in env to one of the supported media-types.
 func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
-	candidates := t.MediaTypes[env.PortableName]
+	supported := t.MediaTypes[env.PortableName]
+
+	if len(supported) == 0 {
+		return nil, false, nil
+	}
 
 	// If the existing encoding is supported by the consumer use the envelope
-	// without any re-encoding.
-	for _, candidate := range candidates {
-		if mediaTypeEqual(env.MediaType, candidate) {
+	// without any re-encoding, even if the existing media-type is not the first
+	// preference.
+	for _, mediaType := range supported {
+		if mediaTypeEqual(env.MediaType, mediaType) {
 			return env, true, nil
 		}
 	}
@@ -39,9 +45,9 @@ func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
 		return nil, false, err
 	}
 
-	// Otherwise, attempt to marshal the message using the client's requested
+	// Otherwise, attempt to marshal the message using the recipient's requested
 	// media-types in order of preference.
-	packet, ok, err := t.Marshaler.MarshalAs(m, candidates)
+	packet, ok, err := t.Marshaler.MarshalAs(m, supported)
 	if !ok || err != nil {
 		return nil, ok, err
 	}
@@ -54,7 +60,35 @@ func (t *Transcoder) Transcode(env *Envelope) (*Envelope, bool, error) {
 }
 
 func mediaTypeEqual(a, b string) bool {
-	// TODO(jmalloc): We should use mime.ParseMediaType() here to compare the
-	// media-types semantically, rather than using a naive string comparison.
-	return strings.EqualFold(a, b)
+	baseA, paramsA, err := mime.ParseMediaType(a)
+	if err != nil {
+		panic(err)
+	}
+
+	baseB, paramsB, err := mime.ParseMediaType(b)
+	if err != nil {
+		panic(err)
+	}
+
+	if len(paramsA) != len(paramsB) {
+		return false
+	}
+
+	if !strings.EqualFold(baseA, baseB) {
+		return false
+	}
+
+	for k, va := range paramsA {
+		k = strings.ToLower(k)
+		vb, ok := paramsB[k]
+		if !ok {
+			return false
+		}
+
+		if va != vb {
+			return false
+		}
+	}
+
+	return true
 }

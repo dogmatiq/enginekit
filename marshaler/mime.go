@@ -26,8 +26,7 @@ func parseMediaType(mediatype string) (string, string, error) {
 		return mt, n, nil
 	}
 
-	return "", "", fmt.Errorf(
-		"the media-type '%s' does not specify a 'type' parameter",
-		mediatype,
-	)
+	return "", "", errNoTypeParameter
 }
+
+var errNoTypeParameter = fmt.Errorf("the media-type does not specify a 'type' parameter")

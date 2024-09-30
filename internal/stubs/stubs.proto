@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package dogmatiq.enginekit.stubs;
+
+option go_package = "github.com/dogmatiq/enginekit/internal/stubs";
+
+message ProtoStubA { string value = 1; }
+message ProtoStubB { string value = 1; }
+message ProtoStubC { string value = 1; }

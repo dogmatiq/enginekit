@@ -5,19 +5,19 @@ import (
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/internal/stubs"
 	"github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/marshaler"
 	"github.com/dogmatiq/enginekit/marshaler/codecs/json"
 	"github.com/dogmatiq/enginekit/marshaler/codecs/protobuf"
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
-	. "github.com/dogmatiq/enginekit/protobuf/envelopepb/internal/stubs"
 	"google.golang.org/protobuf/proto"
 )
 
 func TestTranscoder(t *testing.T) {
 	m, err := marshaler.New(
 		[]reflect.Type{
-			reflect.TypeFor[*ProtoMessage](),
+			reflect.TypeFor[*ProtoStubA](),
 			reflect.TypeOf(CommandA1),
 		},
 		[]marshaler.Codec{
@@ -32,12 +32,12 @@ func TestTranscoder(t *testing.T) {
 
 	transcoder := &Transcoder{
 		MediaTypes: map[reflect.Type][]string{
-			reflect.TypeFor[*ProtoMessage](): {
+			reflect.TypeFor[*ProtoStubA](): {
 				`application/vnd.google.protobuf+json; type=different`,
 				`application/vnd.google.protobuf+json; type=different; extra=true`,
 				`application/vnd.google.protobuf+json; no-type=true`,
-				`application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
-				`application/vnd.google.protobuf; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+				`application/vnd.google.protobuf+json; type=dogmatiq.enginekit.stubs.ProtoStubA`,
+				`application/vnd.google.protobuf; type=dogmatiq.enginekit.stubs.ProtoStubA`,
 			},
 		},
 		Marshaler: m,
@@ -46,7 +46,7 @@ func TestTranscoder(t *testing.T) {
 	t.Run("it does not transcode envelopes that are supported by the recipient unchanged", func(t *testing.T) {
 		want := &Envelope{
 			// note non-canonical capitalization & spacing in media-type
-			MediaType: `application/vnd.Google.protobuf+json;TYPE="dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage"`,
+			MediaType: `application/vnd.Google.protobuf+json;TYPE="dogmatiq.enginekit.stubs.ProtoStubA"`,
 			Data:      []byte(`{"value":"A1"}`),
 		}
 
@@ -66,7 +66,7 @@ func TestTranscoder(t *testing.T) {
 
 	t.Run("it transcodes using the recipients preferred encoding if necessary", func(t *testing.T) {
 		original := &Envelope{
-			MediaType: `text/vnd.google.protobuf; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+			MediaType: `text/vnd.google.protobuf; type=dogmatiq.enginekit.stubs.ProtoStubA`,
 			Data:      []byte(`value: "A1"`),
 		}
 		snapshot := proto.Clone(original).(*Envelope)
@@ -77,7 +77,7 @@ func TestTranscoder(t *testing.T) {
 		}
 
 		want := &Envelope{
-			MediaType: `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+			MediaType: `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.stubs.ProtoStubA`,
 			Data:      []byte(`{"value":"A1"}`),
 		}
 
@@ -118,7 +118,7 @@ func TestTranscoder(t *testing.T) {
 	t.Run("it returns false if the marshaler does not support any of the encodings supported by the recipient", func(t *testing.T) {
 		transcoder := &Transcoder{
 			MediaTypes: map[reflect.Type][]string{
-				reflect.TypeFor[*ProtoMessage](): {
+				reflect.TypeFor[*ProtoStubA](): {
 					`application/vnd.google.protobuf; type=different`,
 					`application/vnd.google.protobuf; type=different; extra=true`,
 					`application/vnd.google.protobuf; no-type=true`,
@@ -129,7 +129,7 @@ func TestTranscoder(t *testing.T) {
 
 		_, ok, err := transcoder.Transcode(
 			&Envelope{
-				MediaType: `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.protobuf.envelopepb.stubs.ProtoMessage`,
+				MediaType: `application/vnd.google.protobuf+json; type=dogmatiq.enginekit.stubs.ProtoStubA`,
 				Data:      []byte(`{"value":"A1"}`),
 			},
 		)

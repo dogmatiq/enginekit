@@ -7,9 +7,6 @@ import (
 )
 
 type set[E any] interface {
-	Add(...E)
-	Remove(...E)
-	Clear()
 	Has(...E) bool
 	Len() int
 	Elements() iter.Seq[E]
@@ -18,6 +15,7 @@ type set[E any] interface {
 type setptr[E, T any] interface {
 	*T
 	set[E]
+	Add(...E)
 }
 
 // IsEquivalentSet returns true if a and b contain the same elements.

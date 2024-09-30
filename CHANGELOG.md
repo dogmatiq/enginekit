@@ -10,6 +10,18 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Added
+
+- Added `collection.OrderedSet` and `UnorderedSet`.
+- Added `collection.OrderedMap`.
+
+### Removed
+
+- **[BC]** Removed `uuidpb.OrderedSet` and `Map`, use `collections.OrderedSet`
+  and `OrderedMap` instead.
+
 ## [0.13.0] - 2024-09-30
 
 ### Added

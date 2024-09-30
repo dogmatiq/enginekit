@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### Changed
 
 - **[BC]** Renamed `collection.UnorderedSet` to `Set`.
+- **[BC]** Renamed `Elements()` methods to `All()` as per Go conventions.
 
 ### Removed
 

@@ -73,9 +73,9 @@ func (m OrderedMap[K, V]) Len() int {
 	return len(m.elements)
 }
 
-// Elements returns an iterator that yields all the key/value pairs in the map,
-// in key order.
-func (m OrderedMap[K, V]) Elements() iter.Seq2[K, V] {
+// All returns an iterator that yields all the key/value pairs in the map, in
+// key order.
+func (m OrderedMap[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		for _, p := range m.elements {
 			if !yield(p.K, p.V) {

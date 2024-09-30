@@ -9,7 +9,7 @@ import (
 type set[E any] interface {
 	Has(...E) bool
 	Len() int
-	Elements() iter.Seq[E]
+	All() iter.Seq[E]
 }
 
 type setptr[E, T any] interface {
@@ -24,7 +24,7 @@ func IsEquivalentSet[E any, A, B set[E]](a A, b B) bool {
 		return false
 	}
 
-	for e := range a.Elements() {
+	for e := range a.All() {
 		if !b.Has(e) {
 			return false
 		}
@@ -42,11 +42,11 @@ func Union[
 ](a A, b B) A {
 	var union A = new(T)
 
-	for e := range a.Elements() {
+	for e := range a.All() {
 		union.Add(e)
 	}
 
-	for e := range b.Elements() {
+	for e := range b.All() {
 		union.Add(e)
 	}
 
@@ -61,7 +61,7 @@ func Subset[E any, S setptr[E, T], T any](
 ) S {
 	var subset S = new(T)
 
-	for e := range set.Elements() {
+	for e := range set.All() {
 		if pred(e) {
 			subset.Add(e)
 		}
@@ -120,8 +120,8 @@ func (s Set[E]) Len() int {
 	return len(s.elements)
 }
 
-// Elements returns an iterator that yields all elements in the set.
-func (s Set[E]) Elements() iter.Seq[E] {
+// All returns an iterator that yields all elements in the set.
+func (s Set[E]) All() iter.Seq[E] {
 	return maps.Keys(s.elements)
 }
 
@@ -181,8 +181,8 @@ func (s OrderedSet[E]) Len() int {
 	return len(s.elements)
 }
 
-// Elements returns an iterator that yields all elements in the set, in order.
-func (s OrderedSet[E]) Elements() iter.Seq[E] {
+// All returns an iterator that yields all elements in the set, in order.
+func (s OrderedSet[E]) All() iter.Seq[E] {
 	return slices.Values(s.elements)
 }
 

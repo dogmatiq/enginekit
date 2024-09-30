@@ -30,7 +30,7 @@ func TestOrderedMap(t *testing.T) {
 					expectedKeys := keysInOrder()
 
 					i := 0
-					for gotKey, gotValue := range omap.Elements() {
+					for gotKey, gotValue := range omap.All() {
 						wantKey := expectedKeys[i]
 						wantValue := expected[wantKey]
 

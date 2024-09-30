@@ -145,7 +145,7 @@ func TestSet(t *testing.T) {
 						t.Fatalf("set cardinality is incorrect: got %d, want %d", set.Len(), len(expected))
 					}
 
-					for e := range set.Elements() {
+					for e := range set.All() {
 						if _, ok := expected[e]; !ok {
 							t.Fatalf("unexpected element in set: %d", e)
 						}
@@ -264,7 +264,7 @@ func TestOrderedSet(t *testing.T) {
 					elements := expectedInOrder()
 
 					i := 0
-					for got := range set.Elements() {
+					for got := range set.All() {
 						want := elements[i]
 						if got != want {
 							t.Fatalf("set elements are out of order at index %d: got %d, want %d", i, got, want)

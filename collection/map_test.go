@@ -13,7 +13,7 @@ func TestOrderedMap(t *testing.T) {
 	t.Parallel()
 
 	rapid.Check(t, func(t *rapid.T) {
-		var omap OrderedMap[elem, string]
+		omap := &OrderedMap[elem, string]{}
 
 		expected := map[elem]string{}
 		keysInOrder := func() []elem {
@@ -197,6 +197,9 @@ func TestOrderedMap(t *testing.T) {
 				"clear the map": func(t *rapid.T) {
 					omap.Clear()
 					clear(expected)
+				},
+				"clone the map": func(t *rapid.T) {
+					omap = omap.Clone()
 				},
 			},
 		)

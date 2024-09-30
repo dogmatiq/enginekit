@@ -108,6 +108,11 @@ func (m OrderedMap[K, V]) Values() iter.Seq[V] {
 	}
 }
 
+// Clone returns a shallow copy of the map.
+func (m OrderedMap[K, V]) Clone() *OrderedMap[K, V] {
+	return &OrderedMap[K, V]{slices.Clone(m.elements)}
+}
+
 func (m OrderedMap[K, V]) search(k K) (int, bool) {
 	return slices.BinarySearchFunc(
 		m.elements,

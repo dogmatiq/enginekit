@@ -14,38 +14,32 @@ func TestEquivalentSet(t *testing.T) {
 
 	cases := []struct {
 		Name string
-		A, B Set[elem]
+		A, B *Set[elem]
 		Want bool
 	}{
 		{
 			"empty",
-			NewUnorderedSet[elem](),
-			NewUnorderedSet[elem](),
+			NewSet[elem](),
+			NewSet[elem](),
 			true,
 		},
 		{
 			"disjoint",
-			NewUnorderedSet[elem](1, 2, 3),
-			NewUnorderedSet[elem](4, 5, 6),
+			NewSet[elem](1, 2, 3),
+			NewSet[elem](4, 5, 6),
 			false,
 		},
 		{
 			"intersecting",
-			NewUnorderedSet[elem](1, 2, 3),
-			NewUnorderedSet[elem](3, 4, 5),
+			NewSet[elem](1, 2, 3),
+			NewSet[elem](3, 4, 5),
 			false,
 		},
 		{
 			"superset/subset",
-			NewUnorderedSet[elem](1, 2, 3),
-			NewUnorderedSet[elem](1, 2),
+			NewSet[elem](1, 2, 3),
+			NewSet[elem](1, 2),
 			false,
-		},
-		{
-			"different types",
-			NewUnorderedSet[elem](3, 1, 2),
-			NewOrderedSet[elem](2, 3, 1),
-			true,
 		},
 	}
 
@@ -67,32 +61,32 @@ func TestUnion(t *testing.T) {
 
 	cases := []struct {
 		Name string
-		A, B *UnorderedSet[elem]
-		Want *UnorderedSet[elem]
+		A, B *Set[elem]
+		Want *Set[elem]
 	}{
 		{
 			"empty",
-			NewUnorderedSet[elem](),
-			NewUnorderedSet[elem](),
-			NewUnorderedSet[elem](),
+			NewSet[elem](),
+			NewSet[elem](),
+			NewSet[elem](),
 		},
 		{
 			"disjoint",
-			NewUnorderedSet[elem](1, 2, 3),
-			NewUnorderedSet[elem](4, 5, 6),
-			NewUnorderedSet[elem](1, 2, 3, 4, 5, 6),
+			NewSet[elem](1, 2, 3),
+			NewSet[elem](4, 5, 6),
+			NewSet[elem](1, 2, 3, 4, 5, 6),
 		},
 		{
 			"intersecting",
-			NewUnorderedSet[elem](1, 2, 3),
-			NewUnorderedSet[elem](3, 4, 5),
-			NewUnorderedSet[elem](1, 2, 3, 4, 5),
+			NewSet[elem](1, 2, 3),
+			NewSet[elem](3, 4, 5),
+			NewSet[elem](1, 2, 3, 4, 5),
 		},
 		{
 			"superset/subset",
-			NewUnorderedSet[elem](1, 2, 3),
-			NewUnorderedSet[elem](1, 2),
-			NewUnorderedSet[elem](1, 2, 3),
+			NewSet[elem](1, 2, 3),
+			NewSet[elem](1, 2),
+			NewSet[elem](1, 2, 3),
 		},
 	}
 
@@ -105,10 +99,10 @@ func TestUnion(t *testing.T) {
 	}
 
 	t.Run("different types", func(t *testing.T) {
-		a := NewUnorderedSet[elem](1, 2, 3)
+		a := NewSet[elem](1, 2, 3)
 		b := NewOrderedSet[elem](3, 4, 5)
 
-		want := NewUnorderedSet[elem](1, 2, 3, 4, 5)
+		want := NewSet[elem](1, 2, 3, 4, 5)
 
 		if got := Union(a, b); !IsEquivalentSet(got, want) {
 			t.Fatalf("unexpected result: got %v, want %v", got, a)
@@ -119,9 +113,9 @@ func TestUnion(t *testing.T) {
 func TestSubset(t *testing.T) {
 	t.Parallel()
 
-	want := NewUnorderedSet(2, 4)
+	want := NewSet(2, 4)
 	got := Subset(
-		NewUnorderedSet(1, 2, 3, 4, 5),
+		NewSet(1, 2, 3, 4, 5),
 		func(e int) bool {
 			return e%2 == 0
 		},
@@ -132,11 +126,11 @@ func TestSubset(t *testing.T) {
 	}
 }
 
-func TestUnorderedSet(t *testing.T) {
+func TestSet(t *testing.T) {
 	t.Parallel()
 
 	rapid.Check(t, func(t *rapid.T) {
-		set := NewUnorderedSet(1, 50, 110)
+		set := NewSet(1, 50, 110)
 
 		expected := map[int]struct{}{
 			1:   {},
@@ -235,6 +229,9 @@ func TestUnorderedSet(t *testing.T) {
 				"clear the set": func(t *rapid.T) {
 					set.Clear()
 					clear(expected)
+				},
+				"clone the set": func(t *rapid.T) {
+					set = set.Clone()
 				},
 			},
 		)
@@ -359,6 +356,9 @@ func TestOrderedSet(t *testing.T) {
 				"clear the set": func(t *rapid.T) {
 					set.Clear()
 					clear(expected)
+				},
+				"clone the set": func(t *rapid.T) {
+					set = set.Clone()
 				},
 			},
 		)

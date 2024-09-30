@@ -6,8 +6,7 @@ import (
 	"slices"
 )
 
-// Set is a collection of unique elements.
-type Set[E any] interface {
+type set[E any] interface {
 	Add(...E)
 	Remove(...E)
 	Clear()
@@ -18,11 +17,11 @@ type Set[E any] interface {
 
 type setptr[E, T any] interface {
 	*T
-	Set[E]
+	set[E]
 }
 
 // IsEquivalentSet returns true if a and b contain the same elements.
-func IsEquivalentSet[E any](a, b Set[E]) bool {
+func IsEquivalentSet[E any, A, B set[E]](a A, b B) bool {
 	if a.Len() != b.Len() {
 		return false
 	}
@@ -36,12 +35,13 @@ func IsEquivalentSet[E any](a, b Set[E]) bool {
 	return true
 }
 
-// Union returns a new set containing all elements a and b.
+// Union returns a new set containing all elements from a and b.
 func Union[
 	E any,
 	A setptr[E, T],
+	B set[E],
 	T any,
-](a A, b Set[E]) A {
+](a A, b B) A {
 	var union A = new(T)
 
 	for e := range a.Elements() {
@@ -72,31 +72,20 @@ func Subset[E any, S setptr[E, T], T any](
 	return subset
 }
 
-// Clone returns a new set containing all elements of the given set.
-func Clone[E any, S setptr[E, T], T any](set S) S {
-	var clone S = new(T)
-
-	for e := range set.Elements() {
-		clone.Add(e)
-	}
-
-	return clone
-}
-
-// UnorderedSet is an unordered set of unique T values.
-type UnorderedSet[E comparable] struct {
+// Set is an unordered set of unique T values.
+type Set[E comparable] struct {
 	elements map[E]struct{}
 }
 
-// NewUnorderedSet returns a new [UnorderedSet] containing the given elements.
-func NewUnorderedSet[E comparable](elements ...E) *UnorderedSet[E] {
-	var s UnorderedSet[E]
+// NewSet returns a new [Set] containing the given elements.
+func NewSet[E comparable](elements ...E) *Set[E] {
+	var s Set[E]
 	s.Add(elements...)
 	return &s
 }
 
 // Add adds the given elements to the set.
-func (s *UnorderedSet[E]) Add(elements ...E) {
+func (s *Set[E]) Add(elements ...E) {
 	if s.elements == nil {
 		s.elements = make(map[E]struct{})
 	}
@@ -107,19 +96,19 @@ func (s *UnorderedSet[E]) Add(elements ...E) {
 }
 
 // Remove removes the given elements from the set.
-func (s *UnorderedSet[E]) Remove(elements ...E) {
+func (s *Set[E]) Remove(elements ...E) {
 	for _, e := range elements {
 		delete(s.elements, e)
 	}
 }
 
 // Clear removes all elements from the set.
-func (s *UnorderedSet[E]) Clear() {
+func (s *Set[E]) Clear() {
 	clear(s.elements)
 }
 
 // Has returns true if the set contains all of the given elements.
-func (s UnorderedSet[E]) Has(elements ...E) bool {
+func (s Set[E]) Has(elements ...E) bool {
 	for _, e := range elements {
 		if _, ok := s.elements[e]; !ok {
 			return false
@@ -129,13 +118,18 @@ func (s UnorderedSet[E]) Has(elements ...E) bool {
 }
 
 // Len returns the number of elements in the set.
-func (s UnorderedSet[E]) Len() int {
+func (s Set[E]) Len() int {
 	return len(s.elements)
 }
 
 // Elements returns an iterator that yields all elements in the set.
-func (s UnorderedSet[E]) Elements() iter.Seq[E] {
+func (s Set[E]) Elements() iter.Seq[E] {
 	return maps.Keys(s.elements)
+}
+
+// Clone returns a shallow copy of the set.
+func (s Set[E]) Clone() *Set[E] {
+	return &Set[E]{maps.Clone(s.elements)}
 }
 
 // OrderedSet is an ordered set of unique T values.
@@ -192,6 +186,11 @@ func (s OrderedSet[E]) Len() int {
 // Elements returns an iterator that yields all elements in the set, in order.
 func (s OrderedSet[E]) Elements() iter.Seq[E] {
 	return slices.Values(s.elements)
+}
+
+// Clone returns a shallow copy of the set.
+func (s OrderedSet[E]) Clone() *OrderedSet[E] {
+	return &OrderedSet[E]{slices.Clone(s.elements)}
 }
 
 func (s OrderedSet[E]) search(e E) (int, bool) {

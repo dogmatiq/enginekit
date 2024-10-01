@@ -12,18 +12,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
-### Added
-
-- Added `Clone()` method to all collection types.
-
 ### Changed
 
-- **[BC]** Renamed `collection.UnorderedSet` to `Set`.
-- **[BC]** Renamed `Elements()` methods to `All()` as per Go conventions.
-
-### Removed
-
-- **[BC]** Removed `collection.Clone()`.
+- **[BC]** Split `collection` package into separate `collections/maps` and
+  `collections/sets` packages.
 
 ## [0.14.0] - 2024-09-30
 

@@ -4,14 +4,14 @@ import (
 	"cmp"
 	"testing"
 
-	. "github.com/dogmatiq/enginekit/collection/sets"
+	. "github.com/dogmatiq/enginekit/collections/sets"
 	"pgregory.net/rapid"
 )
 
 type reverseStringComparator struct{}
 
-func (reverseStringComparator) Compare(a, b string) int {
-	return -cmp.Compare(a, b)
+func (reverseStringComparator) Compare(x, y string) int {
+	return -cmp.Compare(x, y)
 }
 
 func TestOrderedByComparator(t *testing.T) {
@@ -19,7 +19,7 @@ func TestOrderedByComparator(t *testing.T) {
 
 	testOrderedSet(
 		t,
-		func(members ...string) OrderedByComparator[string, reverseStringComparator] {
+		func(members ...string) *OrderedByComparator[string, reverseStringComparator] {
 			return NewOrderedByComparator(cmp, members...)
 		},
 		cmp.Compare,

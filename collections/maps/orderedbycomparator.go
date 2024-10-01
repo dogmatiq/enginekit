@@ -1,0 +1,144 @@
+package maps
+
+import (
+	"iter"
+
+	"github.com/dogmatiq/enginekit/collections/constraints"
+	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
+)
+
+// OrderedByComparator is an an ordered map of keys of type K to values of type
+// V with ordering defined by a separate comparitor.
+type OrderedByComparator[K, V any, C constraints.Comparator[K]] struct {
+	Comparator C
+
+	_     nocopy.NoCopy
+	pairs []Pair[K, V]
+}
+
+// NewOrderedByComparator returns an [OrderedByComparator] containing the
+// given key/value pairs.
+func NewOrderedByComparator[K, V any, C constraints.Comparator[K]](
+	cmp C,
+	pairs ...Pair[K, V],
+) *OrderedByComparator[K, V, C] {
+	n := OrderedByComparator[K, V, C]{
+		Comparator: cmp,
+	}
+
+	for _, p := range pairs {
+		n.Set(p.Key, p.Value)
+	}
+
+	return &n
+}
+
+// Set sets the value associated with the given key.
+func (m *OrderedByComparator[K, V, C]) Set(k K, v V) {
+	orderedSet(m, k, v)
+}
+
+// Remove removes the given keys from the map.
+func (m *OrderedByComparator[K, V, C]) Remove(keys ...K) {
+	orderedRemove[K, V](m, keys...)
+}
+
+// Clear removes all keys from the map.
+func (m *OrderedByComparator[K, V, C]) Clear() {
+	orderedClear[K, V](m)
+}
+
+// Len returns the number of elements in the map.
+func (m *OrderedByComparator[K, V, C]) Len() int {
+	return orderedLen[K, V](m)
+}
+
+// Has returns true if all of the given keys are in the map.
+func (m *OrderedByComparator[K, V, C]) Has(keys ...K) bool {
+	return orderedHas[K, V](m, keys...)
+}
+
+// Get returns the value associated with the given key. It returns the zero
+// value if the key is not in the map.
+func (m *OrderedByComparator[K, V, C]) Get(k K) V {
+	return orderedGet[K, V](m, k)
+}
+
+// TryGet returns the value associated with the given key, or false if the key
+// is not in the map.
+func (m *OrderedByComparator[K, V, C]) TryGet(k K) (V, bool) {
+	return orderedTryGet[K, V](m, k)
+}
+
+// Clone returns a shallow copy of the map.
+func (m *OrderedByComparator[K, V, C]) Clone() *OrderedByComparator[K, V, C] {
+	return orderedClone[K, V](m)
+}
+
+// Merge returns a new map containing all key/value pairs from s and x.
+//
+// If a key is present in both maps, the value from x is used.
+func (m *OrderedByComparator[K, V, C]) Merge(x *OrderedByComparator[K, V, C]) *OrderedByComparator[K, V, C] {
+	return orderedMerge[K, V](m, x)
+}
+
+// Select returns a new map containing all key/value pairs from m for which the
+// given predicate returns true.
+func (m *OrderedByComparator[K, V, C]) Select(pred func(K, V) bool) *OrderedByComparator[K, V, C] {
+	return orderedSelect(m, pred)
+}
+
+// Project constructs a new map by applying the given transform function to each
+// key/value pair in the map. If the transform function returns false, the key
+// is omitted from the resulting map.
+func (m *OrderedByComparator[K, V, C]) Project(transform func(K, V) (K, V, bool)) *OrderedByComparator[K, V, C] {
+	return orderedProject(m, transform)
+}
+
+// All returns an iterator that yields all key/value pairs in the map in order.
+func (m *OrderedByComparator[K, V, C]) All() iter.Seq2[K, V] {
+	return orderedAll[K, V](m)
+}
+
+// Keys returns an iterator that yields all keys in the map in order.
+func (m *OrderedByComparator[K, V, C]) Keys() iter.Seq[K] {
+	return orderedKeys[K, V](m)
+}
+
+// Values returns an iterator that yields all values in the map in order.
+func (m *OrderedByComparator[K, V, C]) Values() iter.Seq[V] {
+	return orderedValues[K, V](m)
+}
+
+// Reverse returns an iterator that yields all key/value pairs in the map in
+// reverse order.
+func (m *OrderedByComparator[K, V, C]) Reverse() iter.Seq2[K, V] {
+	return orderedReverse[K, V](m)
+}
+
+// ReverseKeys returns an iterator that yields all keys in the map in reverse
+// order.
+func (m *OrderedByComparator[K, V, C]) ReverseKeys() iter.Seq[K] {
+	return orderedReverseKeys[K, V](m)
+}
+
+// ReverseValues returns an iterator that yields all values in the map in reverse
+// order.
+func (m *OrderedByComparator[K, V, C]) ReverseValues() iter.Seq[V] {
+	return orderedReverseValues[K, V](m)
+}
+
+func (m *OrderedByComparator[K, V, C]) new(pairs []Pair[K, V]) *OrderedByComparator[K, V, C] {
+	return &OrderedByComparator[K, V, C]{
+		Comparator: m.Comparator,
+		pairs:      pairs,
+	}
+}
+
+func (m *OrderedByComparator[K, V, C]) ptr() *[]Pair[K, V] {
+	return &m.pairs
+}
+
+func (m *OrderedByComparator[K, V, C]) cmp(x, y K) int {
+	return m.Comparator.Compare(x, y)
+}

@@ -4,7 +4,7 @@ import (
 	"cmp"
 	"testing"
 
-	. "github.com/dogmatiq/enginekit/collection/maps"
+	. "github.com/dogmatiq/enginekit/collections/maps"
 	"pgregory.net/rapid"
 )
 

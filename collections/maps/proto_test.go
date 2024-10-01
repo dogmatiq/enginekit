@@ -1,20 +1,19 @@
-package sets_test
+package maps_test
 
 import (
 	"testing"
 
-	. "github.com/dogmatiq/enginekit/collection/sets"
+	. "github.com/dogmatiq/enginekit/collections/maps"
 	. "github.com/dogmatiq/enginekit/internal/stubs"
 	"google.golang.org/protobuf/proto"
 	"pgregory.net/rapid"
 )
 
-func TestProtoSet(t *testing.T) {
-	testSet(
+func TestProtoMap(t *testing.T) {
+	testMap(
 		t,
-		NewProto[*ProtoStubA],
-		func(a, b *ProtoStubA) bool { return proto.Equal(a, b) },
-		func(m *ProtoStubA) bool { return len(m.Value)%2 == 0 },
+		NewProto[*ProtoStubA, int],
+		func(x, y *ProtoStubA) bool { return proto.Equal(x, y) },
 		rapid.Custom(
 			func(t *rapid.T) *ProtoStubA {
 				return &ProtoStubA{

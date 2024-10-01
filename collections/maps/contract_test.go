@@ -5,46 +5,43 @@ import (
 	"slices"
 	"testing"
 
-	. "github.com/dogmatiq/enginekit/collection/maps"
+	. "github.com/dogmatiq/enginekit/collections/maps"
 	"pgregory.net/rapid"
 )
 
-type contract[K, V, M any] interface {
+type contract[K, V, I any] interface {
+	*I
+
+	Set(K, V)
+	Remove(...K)
+	Clear()
+
 	Len() int
 	Has(keys ...K) bool
 	Get(K) V
 	TryGet(K) (V, bool)
 
-	Clone() M
-	Merge(M) M
-	Select(func(K, V) bool) M
-	Project(func(K, V) (K, V, bool)) M
+	Clone() *I
+	Merge(*I) *I
+	Select(func(K, V) bool) *I
+	Project(func(K, V) (K, V, bool)) *I
 
 	All() iter.Seq2[K, V]
 	Keys() iter.Seq[K]
 	Values() iter.Seq[V]
 }
 
-type orderedContract[K, V, M any] interface {
-	contract[K, V, M]
+type orderedContract[K, V, I any] interface {
+	contract[K, V, I]
 
 	Reverse() iter.Seq2[K, V]
 	ReverseKeys() iter.Seq[K]
 	ReverseValues() iter.Seq[V]
 }
 
-type pointer[K, V, M any] interface {
-	*M
-
-	Set(K, V)
-	Remove(...K)
-	Clear()
-}
-
 func testMap[
-	P pointer[K, int, M],
-	M contract[K, int, M],
-	K any,
+	M contract[K, int, I],
+	K, I any,
 ](
 	t *testing.T,
 	newMap func(...Pair[K, int]) M,
@@ -113,6 +110,7 @@ func testMap[
 				if _, ok := get(k); !ok {
 					return k
 				}
+				t.Logf("[rapid] discard key %#v, already in the map", k)
 			}
 		}
 
@@ -120,35 +118,75 @@ func testMap[
 			return rapid.Int().Draw(t, "value")
 		}
 
-		for range 3 {
-			k := drawNewKey(t)
-			v := drawValue(t)
-			add(k, v)
-			subject = newMap(expected...)
-		}
-
 		t.Repeat(
 			map[string]func(*rapid.T){
+				"replace the subject with a new one": func(t *rapid.T) {
+					expected = nil
+
+					n := rapid.
+						IntRange(0, 10).
+						Draw(t, "number of elements")
+
+					for range n {
+						k := drawNewKey(t)
+						v := drawValue(t)
+						add(k, v)
+					}
+
+					subject = newMap(expected...)
+				},
+				"set the subject to nil": func(t *rapid.T) {
+					subject = nil
+					expected = nil
+				},
 				"add a new key": func(t *rapid.T) {
 					k := drawNewKey(t)
 					v := drawValue(t)
-					P(&subject).Set(k, v)
-					add(k, v)
+
+					if subject != nil {
+						add(k, v)
+					} else {
+						defer func() {
+							want := "Set() called on a nil map"
+							got := recover()
+							if got != want {
+								t.Fatalf("unexpected panic value: got %#v, want %#v", got, want)
+							}
+						}()
+					}
+
+					subject.Set(k, v)
 				},
 				"overwrite an existing key": func(t *rapid.T) {
 					k := drawExistingKey(t)
 					v := drawValue(t)
-					P(&subject).Set(k, v)
+					subject.Set(k, v)
 					replace(k, v)
 				},
 				"remove an existing key": func(t *rapid.T) {
 					k := drawExistingKey(t)
-					P(&subject).Remove(k)
+					subject.Remove(k)
 					remove(k)
 				},
 				"remove a key that is not in the map": func(t *rapid.T) {
 					k := drawNewKey(t)
-					P(&subject).Remove(k)
+					subject.Remove(k)
+				},
+				"remove multiple keys": func(t *rapid.T) {
+					if subject.Len() < 2 {
+						t.Skip("map has fewer than 2 elements")
+					}
+
+					k1 := drawExistingKey(t)
+					remove(k1)
+
+					k2 := drawExistingKey(t)
+					remove(k2)
+
+					subject.Remove(k1, k2)
+				},
+				"remove nothing": func(t *rapid.T) {
+					subject.Remove()
 				},
 				"check for presence of key": func(t *rapid.T) {
 					k := drawExistingKey(t)
@@ -162,6 +200,43 @@ func testMap[
 						t.Fatalf("did not expect %#v to be in the map", k)
 					}
 				},
+				"check for presence of multiple keys": func(t *rapid.T) {
+					if subject.Len() < 2 {
+						t.Skip("map has fewer than 2 elements")
+					}
+
+					k1 := drawExistingKey(t)
+					k2 := drawExistingKey(t)
+
+					if !subject.Has(k1, k2) {
+						t.Fatalf("expected %#v and %#v to be in the map", k1, k2)
+					}
+				},
+				"check for absence of multiple keys": func(t *rapid.T) {
+					k1 := drawNewKey(t)
+					k2 := drawNewKey(t)
+
+					if subject.Has(k1, k2) {
+						t.Fatalf("did not expect %#v and %#v to be in the map", k1, k2)
+					}
+				},
+				"check for absence of one of the given keys": func(t *rapid.T) {
+					k1 := drawExistingKey(t)
+					k2 := drawNewKey(t)
+
+					if subject.Has(k1, k2) {
+						t.Fatalf("did not expect both %#v and %#v to be in the map", k1, k2)
+					}
+
+					if subject.Has(k2, k1) {
+						t.Fatalf("did not expect both %#v and %#v to be in the map", k2, k1)
+					}
+				},
+				"check for presence of nothing": func(t *rapid.T) {
+					if !subject.Has() {
+						t.Fatal("expected Has() with no arguments to return true")
+					}
+				},
 				"get the value associated with a key": func(t *rapid.T) {
 					k := drawExistingKey(t)
 					v := subject.Get(k)
@@ -170,7 +245,7 @@ func testMap[
 						t.Fatalf("unexpected value for key %#v: got %#v, want %#v", k, v, x)
 					}
 				},
-				"get the value associated with a key that is not in the map": func(t *rapid.T) {
+				"get the value associated with a key that is not in %#v": func(t *rapid.T) {
 					k := drawNewKey(t)
 					v := subject.Get(k)
 
@@ -203,11 +278,25 @@ func testMap[
 					}
 				},
 				"clear the map": func(t *rapid.T) {
-					P(&subject).Clear()
+					subject.Clear()
 					expected = nil
 				},
 				"clone the map": func(t *rapid.T) {
+					snapshot := subject
 					subject = subject.Clone()
+
+					if snapshot != nil {
+						k := drawNewKey(t)
+						v := drawValue(t)
+						snapshot.Set(k, v)
+
+						if subject.Has(k) {
+							t.Fatalf("expected clone to be a shallow copy")
+						}
+
+					} else if subject != nil {
+						t.Fatal("cloning a nil map should return nil")
+					}
 				},
 				"merge with disjoint map": func(t *rapid.T) {
 					n := rapid.
@@ -219,16 +308,30 @@ func testMap[
 					for range n {
 						k := drawNewKey(t)
 						v := drawValue(t)
-						P(&other).Set(k, v)
+						other.Set(k, v)
 						add(k, v)
 					}
 
 					subject = subject.Merge(other)
 				},
 				"merge with itself": func(t *rapid.T) {
+					wasNil := subject == nil
 					subject = subject.Merge(subject)
+
+					if wasNil && subject != nil {
+						t.Fatal("merge of two nil maps should return nil")
+					}
+				},
+				"merge with a nil map": func(t *rapid.T) {
+					wasNil := subject == nil
+					subject = subject.Merge(nil)
+
+					if wasNil && subject != nil {
+						t.Fatal("merge of two nil maps should return nil")
+					}
 				},
 				"select a subset": func(t *rapid.T) {
+					wasNil := subject == nil
 					subject = subject.Select(
 						func(k K, v int) bool {
 							if v%2 == 0 {
@@ -239,8 +342,13 @@ func testMap[
 							}
 						},
 					)
+
+					if wasNil && subject != nil {
+						t.Fatal("selecting from a nil map should return nil")
+					}
 				},
 				"project a subset": func(t *rapid.T) {
+					wasNil := subject == nil
 					subject = subject.Project(
 						func(k K, v int) (K, int, bool) {
 							if v%2 == 0 {
@@ -252,8 +360,16 @@ func testMap[
 							}
 						},
 					)
+
+					if wasNil && subject != nil {
+						t.Fatal("projecting a nil map should return nil")
+					}
 				},
 				"project with key modifications": func(t *rapid.T) {
+					if subject.Len() == 0 {
+						t.Skip("map is empty")
+					}
+
 					subject = subject.Project(
 						func(k K, v int) (K, int, bool) {
 							remove(k)
@@ -309,9 +425,8 @@ func testMap[
 }
 
 func testOrderedMap[
-	P pointer[K, int, M],
-	M orderedContract[K, int, M],
-	K any,
+	M orderedContract[K, int, I],
+	K, I any,
 ](
 	t *testing.T,
 	newMap func(...Pair[K, int]) M,
@@ -320,10 +435,10 @@ func testOrderedMap[
 ) {
 	t.Helper()
 
-	testMap[P](
+	testMap(
 		t,
 		newMap,
-		func(a, b K) bool { return cmp(a, b) == 0 },
+		func(x, y K) bool { return cmp(x, y) == 0 },
 		gen,
 	)
 
@@ -340,7 +455,7 @@ func testOrderedMap[
 			for range n {
 				k := gen.Draw(t, "key")
 				v := rapid.Int().Draw(t, "value")
-				P(&subject).Set(k, v)
+				subject.Set(k, v)
 			}
 
 			var prev *K

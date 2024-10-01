@@ -1,10 +1,10 @@
-package maps_test
+package sets_test
 
 import (
 	"cmp"
 	"testing"
 
-	. "github.com/dogmatiq/enginekit/collection/maps"
+	. "github.com/dogmatiq/enginekit/collections/sets"
 	"pgregory.net/rapid"
 )
 
@@ -14,11 +14,12 @@ func (s reverseOrderedString) Compare(x reverseOrderedString) int {
 	return cmp.Compare(x, s)
 }
 
-func TestOrderedByKey(t *testing.T) {
-	testOrderedMap(
+func TestOrderedByMember(t *testing.T) {
+	testOrderedSet(
 		t,
-		NewOrderedByKey[reverseOrderedString, int],
+		NewOrderedByMember[reverseOrderedString],
 		reverseOrderedString.Compare,
+		func(m reverseOrderedString) bool { return len(m)%2 == 0 },
 		rapid.Custom(
 			func(t *rapid.T) reverseOrderedString {
 				return reverseOrderedString(rapid.String().Draw(t, "value"))

@@ -18,6 +18,9 @@ func TestOrderedByMember(t *testing.T) {
 	testOrderedSet(
 		t,
 		NewOrderedByMember[reverseOrderedString],
+		NewOrderedByMemberFromSeq[reverseOrderedString],
+		NewOrderedByMemberFromKeys[reverseOrderedString],
+		NewOrderedByMemberFromValues[reverseOrderedString],
 		reverseOrderedString.Compare,
 		func(m reverseOrderedString) bool { return len(m)%2 == 0 },
 		rapid.Custom(

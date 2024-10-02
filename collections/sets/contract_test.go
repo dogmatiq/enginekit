@@ -41,6 +41,9 @@ func testSet[
 ](
 	t *testing.T,
 	newSet func(...T) S,
+	fromSeq func(iter.Seq[T]) S,
+	fromKeys func(iter.Seq2[T, any]) S,
+	fromValues func(iter.Seq2[any, T]) S,
 	isEqual func(T, T) bool,
 	pred func(T) bool,
 	gen *rapid.Generator[T],
@@ -111,6 +114,69 @@ func testSet[
 					}
 
 					subject = newSet(expected...)
+				},
+				"replace the subject with a new one constructed from a sequence": func(t *rapid.T) {
+					expected = nil
+
+					n := rapid.
+						IntRange(0, 10).
+						Draw(t, "number of members")
+
+					for range n {
+						add(drawNonMember(t))
+					}
+
+					subject = fromSeq(
+						func(yield func(T) bool) {
+							for _, m := range expected {
+								if !yield(m) {
+									return
+								}
+							}
+						},
+					)
+				},
+				"replace the subject with a new one constructed from the keys of a sequence": func(t *rapid.T) {
+					expected = nil
+
+					n := rapid.
+						IntRange(0, 10).
+						Draw(t, "number of members")
+
+					for range n {
+						add(drawNonMember(t))
+					}
+
+					subject = fromKeys(
+						func(yield func(T, any) bool) {
+							for _, m := range expected {
+								if !yield(m, nil) {
+									return
+								}
+							}
+						},
+					)
+				},
+				"replace the subject with a new one constructed from the values of a sequence": func(t *rapid.T) {
+					expected = nil
+
+					n := rapid.
+						IntRange(0, 10).
+						Draw(t, "number of members")
+
+					for range n {
+						add(drawNonMember(t))
+					}
+
+					subject = fromValues(
+						func(yield func(any, T) bool) {
+							for _, m := range expected {
+								if !yield(nil, m) {
+									return
+								}
+							}
+						},
+					)
 				},
 				"set the subject to nil": func(t *rapid.T) {
 					subject = nil
@@ -395,6 +461,9 @@ func testOrderedSet[
 ](
 	t *testing.T,
 	newSet func(...T) S,
+	fromSeq func(iter.Seq[T]) S,
+	fromKeys func(iter.Seq2[T, any]) S,
+	fromValues func(iter.Seq2[any, T]) S,
 	cmp func(T, T) int,
 	pred func(T) bool,
 	gen *rapid.Generator[T],
@@ -404,6 +473,9 @@ func testOrderedSet[
 	testSet(
 		t,
 		newSet,
+		fromSeq,
+		fromKeys,
+		fromValues,
 		func(x, y T) bool { return cmp(x, y) == 0 },
 		pred,
 		gen,

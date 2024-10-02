@@ -12,17 +12,35 @@ type Ordered[T cmp.Ordered] struct {
 
 // NewOrdered returns an [Ordered] containing the given members.
 func NewOrdered[T cmp.Ordered](members ...T) *Ordered[T] {
-	return newOrdered[T, *Ordered[T]](members)
+	return orderedFromMembers[T, *Ordered[T]](members)
+}
+
+// NewOrderedFromSeq returns an [Ordered] containing the values yielded by the
+// given sequence.
+func NewOrderedFromSeq[T cmp.Ordered](seq iter.Seq[T]) *Ordered[T] {
+	return orderedFromSeq[T, *Ordered[T]](seq)
+}
+
+// NewOrderedFromKeys returns an [Ordered] containing the keys yielded by the
+// given sequence.
+func NewOrderedFromKeys[T cmp.Ordered, unused any](seq iter.Seq2[T, unused]) *Ordered[T] {
+	return orderedFromKeys[T, *Ordered[T]](seq)
+}
+
+// NewOrderedFromValues returns an [Ordered] containing the values yielded by
+// the given sequence.
+func NewOrderedFromValues[T cmp.Ordered, unused any](seq iter.Seq2[unused, T]) *Ordered[T] {
+	return orderedFromValues[T, *Ordered[T]](seq)
 }
 
 // Add adds the given members to the set.
 func (s *Ordered[T]) Add(members ...T) {
-	orderedAdd(s, members)
+	orderedAdd(s, members...)
 }
 
 // Remove removes the given members from the set.
 func (s *Ordered[T]) Remove(members ...T) {
-	orderedRemove(s, members)
+	orderedRemove(s, members...)
 }
 
 // Clear removes all members from the set.
@@ -83,12 +101,12 @@ func (s *Ordered[T]) Select(pred func(T) bool) *Ordered[T] {
 	return orderedSelect[T](s, pred)
 }
 
-// All returns an iterator that yeilds all members of the set in order.
+// All returns a sequence that yields all members of the set in order.
 func (s *Ordered[T]) All() iter.Seq[T] {
 	return orderedAll[T](s)
 }
 
-// Reverse returns an iterator that yields all members of the set in reverse
+// Reverse returns a sequence that yields all members of the set in reverse
 // order.
 func (s *Ordered[T]) Reverse() iter.Seq[T] {
 	return orderedReverse[T](s)

@@ -29,14 +29,65 @@ func NewOrderedByComparator[T any, C constraints.Comparator[T]](
 	return &s
 }
 
+// NewOrderedByComparatorFromSeq returns an [OrderedByComparator] containing the
+// values yielded by the given sequence.
+func NewOrderedByComparatorFromSeq[T any, C constraints.Comparator[T]](
+	cmp C,
+	seq iter.Seq[T],
+) *OrderedByComparator[T, C] {
+	s := OrderedByComparator[T, C]{
+		Comparator: cmp,
+	}
+
+	for m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
+// NewOrderedByComparatorFromKeys returns an [OrderedByComparator] containing the
+// keys yielded by the given sequence.
+func NewOrderedByComparatorFromKeys[T any, C constraints.Comparator[T], unused any](
+	cmp C,
+	seq iter.Seq2[T, unused],
+) *OrderedByComparator[T, C] {
+	s := OrderedByComparator[T, C]{
+		Comparator: cmp,
+	}
+
+	for m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
+// NewOrderedByComparatorFromValues returns an [OrderedByComparator] containing
+// the values yielded by the given sequence.
+func NewOrderedByComparatorFromValues[T any, C constraints.Comparator[T], unused any](
+	cmp C,
+	seq iter.Seq2[unused, T],
+) *OrderedByComparator[T, C] {
+	s := OrderedByComparator[T, C]{
+		Comparator: cmp,
+	}
+
+	for _, m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
 // Add adds the given members to the set.
 func (s *OrderedByComparator[T, C]) Add(members ...T) {
-	orderedAdd(s, members)
+	orderedAdd(s, members...)
 }
 
 // Remove removes the given members from the set.
 func (s *OrderedByComparator[T, C]) Remove(members ...T) {
-	orderedRemove(s, members)
+	orderedRemove(s, members...)
 }
 
 // Clear removes all members from the set.
@@ -97,12 +148,12 @@ func (s *OrderedByComparator[T, C]) Select(pred func(T) bool) *OrderedByComparat
 	return orderedSelect[T](s, pred)
 }
 
-// All returns an iterator that yeilds all members of the set in order.
+// All returns a sequence that yields all members of the set in order.
 func (s *OrderedByComparator[T, C]) All() iter.Seq[T] {
 	return orderedAll[T](s)
 }
 
-// Reverse returns an iterator that yields all members of the set in reverse
+// Reverse returns a sequence that yields all members of the set in reverse
 // order.
 func (s *OrderedByComparator[T, C]) Reverse() iter.Seq[T] {
 	return orderedReverse[T](s)

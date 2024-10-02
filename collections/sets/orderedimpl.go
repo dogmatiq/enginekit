@@ -18,11 +18,47 @@ type ordered[T, I any] interface {
 	cmp(T, T) int
 }
 
-func newOrdered[T any, S ordered[T, I], I any](
+func orderedFromMembers[T any, S ordered[T, I], I any](
 	members []T,
 ) S {
 	var s S = new(I)
-	orderedAdd[T](s, members)
+	orderedAdd(s, members...)
+	return s
+}
+
+func orderedFromSeq[T any, S ordered[T, I], I any](
+	seq iter.Seq[T],
+) S {
+	var s S = new(I)
+
+	for m := range seq {
+		orderedAdd(s, m)
+	}
+
+	return s
+}
+
+func orderedFromKeys[T any, S ordered[T, I], I, unused any](
+	seq iter.Seq2[T, unused],
+) S {
+	var s S = new(I)
+
+	for m := range seq {
+		orderedAdd(s, m)
+	}
+
+	return s
+}
+
+func orderedFromValues[T any, S ordered[T, I], I, unused any](
+	seq iter.Seq2[unused, T],
+) S {
+	var s S = new(I)
+
+	for _, m := range seq {
+		orderedAdd(s, m)
+	}
+
 	return s
 }
 
@@ -43,7 +79,7 @@ func orderedSearch[T any, S ordered[T, I], I any](
 
 func orderedAdd[T any, S ordered[T, I], I any](
 	s S,
-	members []T,
+	members ...T,
 ) {
 	if s == nil {
 		panic("Add() called on a nil set")
@@ -60,7 +96,7 @@ func orderedAdd[T any, S ordered[T, I], I any](
 
 func orderedRemove[T any, S ordered[T, I], I any](
 	s S,
-	members []T,
+	members ...T,
 ) {
 	if s == nil {
 		return

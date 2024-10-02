@@ -14,9 +14,14 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Added `maps.NewFromSeq()`, `NewProtoFromSeq()`, `NewOrderedFromSeq()`,
-  `NewOrderedByKeyFromSeq()` and `NewOrderedByComparatorFromSeq()` which
-  construct map types from `iter.Seq2` sequences.
+- Added `maps.NewFromSeq()` (and variants) which construct map types from
+  `iter.Seq2` sequences.
+- Added `sets.NewFromSeq()` (and variants) which construct set types from
+  `iter.Seq` sequences.
+- Added `sets.NewFromKeys()` (and variants) which construct set types from
+  the keys of `iter.Seq2` sequences.
+- Added `sets.NewFromValues()` (and variants) which construct set types from
+  the values of `iter.Seq2` sequences.
 
 ## [0.15.1] - 2024-10-02
 

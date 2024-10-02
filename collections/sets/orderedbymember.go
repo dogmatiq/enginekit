@@ -14,17 +14,35 @@ type OrderedByMember[T constraints.Ordered[T]] struct {
 
 // NewOrderedByMember returns an [OrderedByMember] containing the given members.
 func NewOrderedByMember[T constraints.Ordered[T]](members ...T) *OrderedByMember[T] {
-	return newOrdered[T, *OrderedByMember[T]](members)
+	return orderedFromMembers[T, *OrderedByMember[T]](members)
+}
+
+// NewOrderedByMemberFromSeq returns an [OrderedByMember] containing the values
+// yielded by the given sequence.
+func NewOrderedByMemberFromSeq[T constraints.Ordered[T]](seq iter.Seq[T]) *OrderedByMember[T] {
+	return orderedFromSeq[T, *OrderedByMember[T]](seq)
+}
+
+// NewOrderedByMemberFromKeys returns an [OrderedByMember] containing the keys
+// yielded by the given sequence.
+func NewOrderedByMemberFromKeys[T constraints.Ordered[T], unused any](seq iter.Seq2[T, unused]) *OrderedByMember[T] {
+	return orderedFromKeys[T, *OrderedByMember[T]](seq)
+}
+
+// NewOrderedByMemberFromValues returns an [OrderedByMember] containing the
+// values yielded by the given sequence.
+func NewOrderedByMemberFromValues[T constraints.Ordered[T], unused any](seq iter.Seq2[unused, T]) *OrderedByMember[T] {
+	return orderedFromValues[T, *OrderedByMember[T]](seq)
 }
 
 // Add adds the given members to the set.
 func (s *OrderedByMember[T]) Add(members ...T) {
-	orderedAdd(s, members)
+	orderedAdd(s, members...)
 }
 
 // Remove removes the given members from the set.
 func (s *OrderedByMember[T]) Remove(members ...T) {
-	orderedRemove(s, members)
+	orderedRemove(s, members...)
 }
 
 // Clear removes all members from the set.
@@ -85,12 +103,12 @@ func (s *OrderedByMember[T]) Select(pred func(T) bool) *OrderedByMember[T] {
 	return orderedSelect[T](s, pred)
 }
 
-// All returns an iterator that yeilds all members of the set in order.
+// All returns a sequence that yields all members of the set in order.
 func (s *OrderedByMember[T]) All() iter.Seq[T] {
 	return orderedAll[T](s)
 }
 
-// Reverse returns an iterator that yields all members of the set in reverse
+// Reverse returns a sequence that yields all members of the set in reverse
 // order.
 func (s *OrderedByMember[T]) Reverse() iter.Seq[T] {
 	return orderedReverse[T](s)

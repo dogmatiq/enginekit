@@ -19,6 +19,42 @@ func New[T comparable](members ...T) *Set[T] {
 	return &s
 }
 
+// NewFromSeq returns a [Set] containing the values yielded by the given
+// sequence.
+func NewFromSeq[T comparable](seq iter.Seq[T]) *Set[T] {
+	var s Set[T]
+
+	for m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
+// NewFromKeys returns a [Set] containing the keys yielded by the given
+// sequence.
+func NewFromKeys[K comparable, unused any](seq iter.Seq2[K, unused]) *Set[K] {
+	var s Set[K]
+
+	for m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
+// NewFromValues returns a [Set] containing the values yielded by the given
+// sequence.
+func NewFromValues[T comparable, unused any](seq iter.Seq2[unused, T]) *Set[T] {
+	var s Set[T]
+
+	for _, m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
 // Add adds the given members to the set.
 func (s *Set[T]) Add(members ...T) {
 	if s == nil {
@@ -186,7 +222,7 @@ func (s *Set[T]) Select(pred func(T) bool) *Set[T] {
 	return &subset
 }
 
-// All returns an iterator that yields all members of the set in no particular
+// All returns a sequence that yields all members of the set in no particular
 // order.
 func (s *Set[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {

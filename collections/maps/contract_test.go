@@ -44,7 +44,7 @@ func testMap[
 	K, I any,
 ](
 	t *testing.T,
-	fromPairs func(...Pair[K, int]) M,
+	newMap func(...Pair[K, int]) M,
 	fromSeq func(iter.Seq2[K, int]) M,
 	isEqual func(K, K) bool,
 	gen *rapid.Generator[K],
@@ -134,7 +134,7 @@ func testMap[
 						add(k, v)
 					}
 
-					subject = fromPairs(expected...)
+					subject = newMap(expected...)
 				},
 				"replace the subject with a new one constructed from a sequence": func(t *rapid.T) {
 					expected = nil
@@ -327,7 +327,7 @@ func testMap[
 						IntRange(0, 3).
 						Draw(t, "number of elements")
 
-					other := fromPairs()
+					other := newMap()
 
 					for range n {
 						k := drawNewKey(t)

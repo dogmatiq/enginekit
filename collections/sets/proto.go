@@ -31,6 +31,42 @@ func NewProto[T proto.Message](members ...T) *Proto[T] {
 	return &s
 }
 
+// NewProtoFromSeq returns a [Proto] containing the values yielded by the given
+// sequence.
+func NewProtoFromSeq[T proto.Message](seq iter.Seq[T]) *Proto[T] {
+	var s Proto[T]
+
+	for m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
+// NewProtoFromKeys returns a [Proto] containing the keys yielded by the given
+// sequence.
+func NewProtoFromKeys[T proto.Message, unused any](seq iter.Seq2[T, unused]) *Proto[T] {
+	var s Proto[T]
+
+	for m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
+// NewProtoFromValues returns a [Proto] containing the values yielded by the
+// given sequence.
+func NewProtoFromValues[T proto.Message, unused any](seq iter.Seq2[unused, T]) *Proto[T] {
+	var s Proto[T]
+
+	for _, m := range seq {
+		s.Add(m)
+	}
+
+	return &s
+}
+
 // Add adds the given members to the set.
 func (s *Proto[T]) Add(members ...T) {
 	if s == nil {
@@ -165,7 +201,7 @@ func (s *Proto[T]) Select(pred func(T) bool) *Proto[T] {
 	}
 }
 
-// All returns an iterator that yields all members of the set in no particular
+// All returns a sequence that yields all members of the set in no particular
 // order.
 func (s *Proto[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {

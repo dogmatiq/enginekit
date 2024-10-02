@@ -15,13 +15,13 @@ type OrderedByKey[K constraints.Ordered[K], V any] struct {
 // NewOrderedByKey returns an [OrderedByKey] containing the given key/value
 // pairs.
 func NewOrderedByKey[K constraints.Ordered[K], V any](pairs ...Pair[K, V]) *OrderedByKey[K, V] {
-	return newOrderedFromPairs[K, V, *OrderedByKey[K, V]](pairs)
+	return orderedFromPairs[K, V, *OrderedByKey[K, V]](pairs)
 }
 
-// NewOrderedByKeyFromIter returns an [OrderedByKey] containing the key/value
-// pairs from the given iterator.
-func NewOrderedByKeyFromIter[K constraints.Ordered[K], V any](pairs iter.Seq2[K, V]) *OrderedByKey[K, V] {
-	return newOrderedFromIter[K, V, *OrderedByKey[K, V]](pairs)
+// NewOrderedByKeyFromSeq returns an [OrderedByKey] containing the key/value
+// pairs yielded by the given sequence.
+func NewOrderedByKeyFromSeq[K constraints.Ordered[K], V any](seq iter.Seq2[K, V]) *OrderedByKey[K, V] {
+	return orderedFromSeq[K, V, *OrderedByKey[K, V]](seq)
 }
 
 // Set sets the value associated with the given key.
@@ -86,34 +86,34 @@ func (m *OrderedByKey[K, V]) Project(transform func(K, V) (K, V, bool)) *Ordered
 	return orderedProject(m, transform)
 }
 
-// All returns an iterator that yields all key/value pairs in the map in order.
+// All returns a sequence that yields all key/value pairs in the map in order.
 func (m *OrderedByKey[K, V]) All() iter.Seq2[K, V] {
 	return orderedAll[K, V](m)
 }
 
-// Keys returns an iterator that yields all keys in the map in order.
+// Keys returns a sequence that yields all keys in the map in order.
 func (m *OrderedByKey[K, V]) Keys() iter.Seq[K] {
 	return orderedKeys[K, V](m)
 }
 
-// Values returns an iterator that yields all values in the map in order.
+// Values returns a sequence that yields all values in the map in order.
 func (m *OrderedByKey[K, V]) Values() iter.Seq[V] {
 	return orderedValues[K, V](m)
 }
 
-// Reverse returns an iterator that yields all key/value pairs in the map in
+// Reverse returns a sequence that yields all key/value pairs in the map in
 // reverse order.
 func (m *OrderedByKey[K, V]) Reverse() iter.Seq2[K, V] {
 	return orderedReverse[K, V](m)
 }
 
-// ReverseKeys returns an iterator that yields all keys in the map in reverse
+// ReverseKeys returns a sequence that yields all keys in the map in reverse
 // order.
 func (m *OrderedByKey[K, V]) ReverseKeys() iter.Seq[K] {
 	return orderedReverseKeys[K, V](m)
 }
 
-// ReverseValues returns an iterator that yields all values in the map in reverse
+// ReverseValues returns a sequence that yields all values in the map in reverse
 // order.
 func (m *OrderedByKey[K, V]) ReverseValues() iter.Seq[V] {
 	return orderedReverseValues[K, V](m)

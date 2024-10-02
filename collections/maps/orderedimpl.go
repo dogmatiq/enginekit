@@ -19,7 +19,7 @@ type ordered[K, V, I any] interface {
 	cmp(K, K) int
 }
 
-func newOrderedFromPairs[K, V any, M ordered[K, V, I], I any](
+func orderedFromPairs[K, V any, M ordered[K, V, I], I any](
 	pairs []Pair[K, V],
 ) M {
 	var m M = new(I)
@@ -31,7 +31,7 @@ func newOrderedFromPairs[K, V any, M ordered[K, V, I], I any](
 	return m
 }
 
-func newOrderedFromIter[K, V any, M ordered[K, V, I], I any](
+func orderedFromSeq[K, V any, M ordered[K, V, I], I any](
 	pairs iter.Seq2[K, V],
 ) M {
 	var m M = new(I)

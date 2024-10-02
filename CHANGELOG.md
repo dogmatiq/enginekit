@@ -14,9 +14,9 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Added `maps.NewFromIter()`, `NewProtoFromIter()`, `NewOrderedFromIter()`,
-  `NewOrderedByKeyFromIter()` and `NewOrderedByComparatorFromIter()` which
-  construct map types from `iter.Seq2` iterators.
+- Added `maps.NewFromSeq()`, `NewProtoFromSeq()`, `NewOrderedFromSeq()`,
+  `NewOrderedByKeyFromSeq()` and `NewOrderedByComparatorFromSeq()` which
+  construct map types from `iter.Seq2` sequences.
 
 ## [0.15.1] - 2024-10-02
 

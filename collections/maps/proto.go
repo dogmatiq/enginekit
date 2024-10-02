@@ -33,12 +33,12 @@ func NewProto[K proto.Message, V any](pairs ...Pair[K, V]) *Proto[K, V] {
 	return &m
 }
 
-// NewProtoFromIter returns a [Proto] containing the key/value pairs from the
-// given iterator.
-func NewProtoFromIter[K proto.Message, V any](pairs iter.Seq2[K, V]) *Proto[K, V] {
+// NewProtoFromSeq returns a [Proto] containing the key/value pairs yielded by
+// the given sequence.
+func NewProtoFromSeq[K proto.Message, V any](seq iter.Seq2[K, V]) *Proto[K, V] {
 	var m Proto[K, V]
 
-	for k, v := range pairs {
+	for k, v := range seq {
 		m.Set(k, v)
 	}
 
@@ -176,7 +176,7 @@ func (m *Proto[K, V]) Project(transform func(K, V) (K, V, bool)) *Proto[K, V] {
 	}
 }
 
-// All returns an iterator that yields all key/value pairs in the map in no
+// All returns a sequence that yields all key/value pairs in the map in no
 // particular order.
 func (m *Proto[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
@@ -190,7 +190,7 @@ func (m *Proto[K, V]) All() iter.Seq2[K, V] {
 	}
 }
 
-// Keys returns an iterator that yields all keys in the map in no particular
+// Keys returns a sequence that yields all keys in the map in no particular
 // order.
 func (m *Proto[K, V]) Keys() iter.Seq[K] {
 	return func(yield func(K) bool) {
@@ -204,7 +204,7 @@ func (m *Proto[K, V]) Keys() iter.Seq[K] {
 	}
 }
 
-// Values returns an iterator that yields all values in the map in no particular
+// Values returns a sequence that yields all values in the map in no particular
 // order.
 func (m *Proto[K, V]) Values() iter.Seq[V] {
 	return func(yield func(V) bool) {

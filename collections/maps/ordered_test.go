@@ -12,7 +12,7 @@ func TestOrdered(t *testing.T) {
 	testOrderedMap(
 		t,
 		NewOrdered[string, int],
-		NewOrderedFromIter[string, int],
+		NewOrderedFromSeq[string, int],
 		cmp.Compare[string],
 		rapid.String(),
 	)

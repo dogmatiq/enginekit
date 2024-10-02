@@ -44,8 +44,8 @@ func testMap[
 	K, I any,
 ](
 	t *testing.T,
-	newMap func(...Pair[K, int]) M,
-	newMapFromIter func(iter.Seq2[K, int]) M,
+	fromPairs func(...Pair[K, int]) M,
+	fromSeq func(iter.Seq2[K, int]) M,
 	isEqual func(K, K) bool,
 	gen *rapid.Generator[K],
 ) {
@@ -134,9 +134,9 @@ func testMap[
 						add(k, v)
 					}
 
-					subject = newMap(expected...)
+					subject = fromPairs(expected...)
 				},
-				"replace the subject with a new one constructed from an iterator": func(t *rapid.T) {
+				"replace the subject with a new one constructed from a sequence": func(t *rapid.T) {
 					expected = nil
 
 					n := rapid.
@@ -149,7 +149,7 @@ func testMap[
 						add(k, v)
 					}
 
-					subject = newMapFromIter(
+					subject = fromSeq(
 						func(yield func(K, int) bool) {
 							for _, p := range expected {
 								if !yield(p.Key, p.Value) {
@@ -327,7 +327,7 @@ func testMap[
 						IntRange(0, 3).
 						Draw(t, "number of elements")
 
-					other := newMap()
+					other := fromPairs()
 
 					for range n {
 						k := drawNewKey(t)
@@ -453,8 +453,8 @@ func testOrderedMap[
 	K, I any,
 ](
 	t *testing.T,
-	newMap func(...Pair[K, int]) M,
-	newMapFromIter func(iter.Seq2[K, int]) M,
+	fromPairs func(...Pair[K, int]) M,
+	fromSeq func(iter.Seq2[K, int]) M,
 	cmp func(K, K) int,
 	gen *rapid.Generator[K],
 ) {
@@ -462,8 +462,8 @@ func testOrderedMap[
 
 	testMap(
 		t,
-		newMap,
-		newMapFromIter,
+		fromPairs,
+		fromSeq,
 		func(x, y K) bool { return cmp(x, y) == 0 },
 		gen,
 	)
@@ -472,7 +472,7 @@ func testOrderedMap[
 		t.Parallel()
 
 		rapid.Check(t, func(t *rapid.T) {
-			subject := newMap()
+			subject := fromPairs()
 
 			n := rapid.
 				IntRange(0, 10).

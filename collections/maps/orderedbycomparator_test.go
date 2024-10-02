@@ -27,7 +27,7 @@ func TestOrderedByComparator(t *testing.T) {
 			return NewOrderedByComparator(cmp, pairs...)
 		},
 		func(pairs iter.Seq2[string, int]) *OrderedByComparator[string, int, *reverseStringComparator] {
-			return NewOrderedByComparatorFromIter(cmp, pairs)
+			return NewOrderedByComparatorFromSeq(cmp, pairs)
 		},
 		cmp.Compare,
 		rapid.String(),

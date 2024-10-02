@@ -24,12 +24,12 @@ func New[K comparable, V any](pairs ...Pair[K, V]) *Map[K, V] {
 	return &m
 }
 
-// NewFromIter returns a [Map] containing the key/value pairs from the given
-// iterator.
-func NewFromIter[K comparable, V any](pairs iter.Seq2[K, V]) *Map[K, V] {
+// NewFromSeq returns a [Map] containing the key/value pairs from the given
+// sequence.
+func NewFromSeq[K comparable, V any](seq iter.Seq2[K, V]) *Map[K, V] {
 	var m Map[K, V]
 
-	for k, v := range pairs {
+	for k, v := range seq {
 		m.Set(k, v)
 	}
 
@@ -179,7 +179,7 @@ func (m *Map[K, V]) Project(transform func(K, V) (K, V, bool)) *Map[K, V] {
 	return &x
 }
 
-// All returns an iterator that yields all key/value pairs in the map in no
+// All returns a sequence that yields all key/value pairs in the map in no
 // particular order.
 func (m *Map[K, V]) All() iter.Seq2[K, V] {
 	var elements map[K]V
@@ -189,7 +189,7 @@ func (m *Map[K, V]) All() iter.Seq2[K, V] {
 	return maps.All(elements)
 }
 
-// Keys returns an iterator that yields all keys in the map in no particular
+// Keys returns a sequence that yields all keys in the map in no particular
 // order.
 func (m *Map[K, V]) Keys() iter.Seq[K] {
 	var elements map[K]V
@@ -199,7 +199,7 @@ func (m *Map[K, V]) Keys() iter.Seq[K] {
 	return maps.Keys(elements)
 }
 
-// Values returns an iterator that yields all values in the map in no particular
+// Values returns a sequence that yields all values in the map in no particular
 // order.
 func (m *Map[K, V]) Values() iter.Seq[V] {
 	var elements map[K]V

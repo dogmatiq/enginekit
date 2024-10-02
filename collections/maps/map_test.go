@@ -11,7 +11,7 @@ func TestMap(t *testing.T) {
 	testMap(
 		t,
 		New[string, int],
-		NewFromIter[string, int],
+		NewFromSeq[string, int],
 		func(x, y string) bool { return x == y },
 		rapid.String(),
 	)

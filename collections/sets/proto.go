@@ -4,7 +4,6 @@ import (
 	"iter"
 	"reflect"
 
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -20,7 +19,6 @@ import (
 // for the same input within the same binary/process, which is sufficient for
 // the purposes of this type.
 type Proto[T proto.Message] struct {
-	_       nocopy.NoCopy
 	members Set[string]
 }
 

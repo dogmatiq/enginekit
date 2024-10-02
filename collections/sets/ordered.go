@@ -3,13 +3,10 @@ package sets
 import (
 	"cmp"
 	"iter"
-
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // Ordered is an ordered set of unique T values.
 type Ordered[T cmp.Ordered] struct {
-	_       nocopy.NoCopy
 	members []T
 }
 

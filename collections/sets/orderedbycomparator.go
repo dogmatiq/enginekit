@@ -4,7 +4,6 @@ import (
 	"iter"
 
 	"github.com/dogmatiq/enginekit/collections/constraints"
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // OrderedByComparator is an ordered set of unique T values where the ordering
@@ -12,7 +11,6 @@ import (
 type OrderedByComparator[T any, C constraints.Comparator[T]] struct {
 	Comparator C
 
-	_       nocopy.NoCopy
 	members []T
 }
 

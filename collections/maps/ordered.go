@@ -3,13 +3,10 @@ package maps
 import (
 	"cmp"
 	"iter"
-
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // Ordered is an ordered map of keys of type K to values of type V.
 type Ordered[K cmp.Ordered, V any] struct {
-	_     nocopy.NoCopy
 	pairs []Pair[K, V]
 }
 

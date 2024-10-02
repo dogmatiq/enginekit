@@ -4,13 +4,11 @@ import (
 	"iter"
 
 	"github.com/dogmatiq/enginekit/collections/constraints"
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // OrderedByMember is an ordered set of unique T values with the order defined
 // by the T.Compare method.
 type OrderedByMember[T constraints.Ordered[T]] struct {
-	_       nocopy.NoCopy
 	members []T
 }
 

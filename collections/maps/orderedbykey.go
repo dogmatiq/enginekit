@@ -4,13 +4,11 @@ import (
 	"iter"
 
 	"github.com/dogmatiq/enginekit/collections/constraints"
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // OrderedByKey is an an ordered map of keys of type K to values of type V with
 // ordering defined by the K.Compare method.
 type OrderedByKey[K constraints.Ordered[K], V any] struct {
-	_     nocopy.NoCopy
 	pairs []Pair[K, V]
 }
 

@@ -3,13 +3,10 @@ package sets
 import (
 	"iter"
 	"maps"
-
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // Set is an unordered set of unique T values.
 type Set[T comparable] struct {
-	_       nocopy.NoCopy
 	members map[T]struct{}
 }
 

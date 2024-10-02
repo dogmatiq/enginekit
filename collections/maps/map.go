@@ -3,8 +3,6 @@ package maps
 import (
 	"iter"
 	"maps"
-
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // Map is an unordered map of keys of type K to values of type V.
@@ -12,7 +10,6 @@ import (
 // It provides the common interface implemented by all map types in this package
 // to Go's built-in map type.
 type Map[K comparable, V any] struct {
-	_        nocopy.NoCopy
 	elements map[K]V
 }
 

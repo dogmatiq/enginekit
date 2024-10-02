@@ -4,7 +4,6 @@ import (
 	"iter"
 
 	"github.com/dogmatiq/enginekit/collections/constraints"
-	"github.com/dogmatiq/enginekit/collections/internal/nocopy"
 )
 
 // OrderedByComparator is an an ordered map of keys of type K to values of type
@@ -12,7 +11,6 @@ import (
 type OrderedByComparator[K, V any, C constraints.Comparator[K]] struct {
 	Comparator C
 
-	_     nocopy.NoCopy
 	pairs []Pair[K, V]
 }
 

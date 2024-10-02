@@ -45,6 +45,7 @@ func testMap[
 ](
 	t *testing.T,
 	newMap func(...Pair[K, int]) M,
+	newMapFromIter func(iter.Seq2[K, int]) M,
 	isEqual func(K, K) bool,
 	gen *rapid.Generator[K],
 ) {
@@ -134,6 +135,29 @@ func testMap[
 					}
 
 					subject = newMap(expected...)
+				},
+				"replace the subject with a new one constructed from an iterator": func(t *rapid.T) {
+					expected = nil
+
+					n := rapid.
+						IntRange(0, 10).
+						Draw(t, "number of elements")
+
+					for range n {
+						k := drawNewKey(t)
+						v := drawValue(t)
+						add(k, v)
+					}
+
+					subject = newMapFromIter(
+						func(yield func(K, int) bool) {
+							for _, p := range expected {
+								if !yield(p.Key, p.Value) {
+									break
+								}
+							}
+						},
+					)
 				},
 				"set the subject to nil": func(t *rapid.T) {
 					subject = nil
@@ -430,6 +454,7 @@ func testOrderedMap[
 ](
 	t *testing.T,
 	newMap func(...Pair[K, int]) M,
+	newMapFromIter func(iter.Seq2[K, int]) M,
 	cmp func(K, K) int,
 	gen *rapid.Generator[K],
 ) {
@@ -438,6 +463,7 @@ func testOrderedMap[
 	testMap(
 		t,
 		newMap,
+		newMapFromIter,
 		func(x, y K) bool { return cmp(x, y) == 0 },
 		gen,
 	)

@@ -13,6 +13,7 @@ func TestProtoMap(t *testing.T) {
 	testMap(
 		t,
 		NewProto[*ProtoStubA, int],
+		NewProtoFromIter[*ProtoStubA, int],
 		func(x, y *ProtoStubA) bool { return proto.Equal(x, y) },
 		rapid.Custom(
 			func(t *rapid.T) *ProtoStubA {

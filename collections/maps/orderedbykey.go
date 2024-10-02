@@ -15,7 +15,13 @@ type OrderedByKey[K constraints.Ordered[K], V any] struct {
 // NewOrderedByKey returns an [OrderedByKey] containing the given key/value
 // pairs.
 func NewOrderedByKey[K constraints.Ordered[K], V any](pairs ...Pair[K, V]) *OrderedByKey[K, V] {
-	return newOrdered[K, V, *OrderedByKey[K, V]](pairs)
+	return newOrderedFromPairs[K, V, *OrderedByKey[K, V]](pairs)
+}
+
+// NewOrderedByKeyFromIter returns an [OrderedByKey] containing the key/value
+// pairs from the given iterator.
+func NewOrderedByKeyFromIter[K constraints.Ordered[K], V any](pairs iter.Seq2[K, V]) *OrderedByKey[K, V] {
+	return newOrderedFromIter[K, V, *OrderedByKey[K, V]](pairs)
 }
 
 // Set sets the value associated with the given key.

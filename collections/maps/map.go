@@ -24,6 +24,18 @@ func New[K comparable, V any](pairs ...Pair[K, V]) *Map[K, V] {
 	return &m
 }
 
+// NewFromIter returns a [Map] containing the key/value pairs from the given
+// iterator.
+func NewFromIter[K comparable, V any](pairs iter.Seq2[K, V]) *Map[K, V] {
+	var m Map[K, V]
+
+	for k, v := range pairs {
+		m.Set(k, v)
+	}
+
+	return &m
+}
+
 // Set sets the value associated with the given key.
 func (m *Map[K, V]) Set(k K, v V) {
 	if m == nil {

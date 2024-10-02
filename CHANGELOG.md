@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Added
+
+- Added `maps.NewFromIter()`, `NewProtoFromIter()`, `NewOrderedFromIter()`,
+  `NewOrderedByKeyFromIter()` and `NewOrderedByComparatorFromIter()` which
+  construct map types from `iter.Seq2` iterators.
+
 ## [0.15.1] - 2024-10-02
 
 ### Removed

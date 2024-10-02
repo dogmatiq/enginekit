@@ -12,7 +12,13 @@ type Ordered[K cmp.Ordered, V any] struct {
 
 // NewOrdered returns an [Ordered] containing the given key/value pairs.
 func NewOrdered[K cmp.Ordered, V any](pairs ...Pair[K, V]) *Ordered[K, V] {
-	return newOrdered[K, V, *Ordered[K, V]](pairs)
+	return newOrderedFromPairs[K, V, *Ordered[K, V]](pairs)
+}
+
+// NewOrderedFromIter returns an [Ordered] containing the key/value pairs from
+// the given iterator.
+func NewOrderedFromIter[K cmp.Ordered, V any](pairs iter.Seq2[K, V]) *Ordered[K, V] {
+	return newOrderedFromIter[K, V, *Ordered[K, V]](pairs)
 }
 
 // Set sets the value associated with the given key.

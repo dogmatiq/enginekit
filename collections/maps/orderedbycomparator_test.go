@@ -2,6 +2,7 @@ package maps_test
 
 import (
 	"cmp"
+	"iter"
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/collections/maps"
@@ -24,6 +25,9 @@ func TestOrderedByComparator(t *testing.T) {
 		t,
 		func(pairs ...Pair[string, int]) *OrderedByComparator[string, int, *reverseStringComparator] {
 			return NewOrderedByComparator(cmp, pairs...)
+		},
+		func(pairs iter.Seq2[string, int]) *OrderedByComparator[string, int, *reverseStringComparator] {
+			return NewOrderedByComparatorFromIter(cmp, pairs)
 		},
 		cmp.Compare,
 		rapid.String(),

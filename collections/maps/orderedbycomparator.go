@@ -31,6 +31,23 @@ func NewOrderedByComparator[K, V any, C constraints.Comparator[K]](
 	return &n
 }
 
+// NewOrderedByComparatorFromIter returns an [OrderedByComparator] containing
+// the key/value pairs from the given iterator.
+func NewOrderedByComparatorFromIter[K, V any, C constraints.Comparator[K]](
+	cmp C,
+	pairs iter.Seq2[K, V],
+) *OrderedByComparator[K, V, C] {
+	n := OrderedByComparator[K, V, C]{
+		Comparator: cmp,
+	}
+
+	for k, v := range pairs {
+		n.Set(k, v)
+	}
+
+	return &n
+}
+
 // Set sets the value associated with the given key.
 func (m *OrderedByComparator[K, V, C]) Set(k K, v V) {
 	orderedSet(m, k, v)

@@ -18,6 +18,7 @@ func TestOrderedByKey(t *testing.T) {
 	testOrderedMap(
 		t,
 		NewOrderedByKey[reverseOrderedString, int],
+		NewOrderedByKeyFromIter[reverseOrderedString, int],
 		reverseOrderedString.Compare,
 		rapid.Custom(
 			func(t *rapid.T) reverseOrderedString {

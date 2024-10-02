@@ -33,6 +33,18 @@ func NewProto[K proto.Message, V any](pairs ...Pair[K, V]) *Proto[K, V] {
 	return &m
 }
 
+// NewProtoFromIter returns a [Proto] containing the key/value pairs from the
+// given iterator.
+func NewProtoFromIter[K proto.Message, V any](pairs iter.Seq2[K, V]) *Proto[K, V] {
+	var m Proto[K, V]
+
+	for k, v := range pairs {
+		m.Set(k, v)
+	}
+
+	return &m
+}
+
 // Set sets the value associated with the given key.
 func (m *Proto[K, V]) Set(k K, v V) {
 	if m == nil {

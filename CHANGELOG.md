@@ -10,7 +10,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [Unreleased]
+## [0.15.0] - 2024-10-02
+
+### Added
+
+- Added `sets.Proto` which is an unordered set of [proto.Message] values.
+- Added `maps.Proto` which is an unordered map of [proto.Message] keys to
+  arbitrary values.
 
 ### Changed
 
@@ -146,6 +152,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.12.2]: https://github.com/dogmatiq/enginekit/releases/v0.12.2
 [0.13.0]: https://github.com/dogmatiq/enginekit/releases/v0.13.0
 [0.14.0]: https://github.com/dogmatiq/enginekit/releases/v0.14.0
+[0.15.0]: https://github.com/dogmatiq/enginekit/releases/v0.15.0
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

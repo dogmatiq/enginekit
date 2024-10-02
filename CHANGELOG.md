@@ -14,8 +14,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Added `sets.Proto` which is an unordered set of [proto.Message] values.
-- Added `maps.Proto` which is an unordered map of [proto.Message] keys to
+- Added `sets.Proto` which is an unordered set of `proto.Message` values.
+- Added `maps.Proto` which is an unordered map of `proto.Message` keys to
   arbitrary values.
 
 ### Changed

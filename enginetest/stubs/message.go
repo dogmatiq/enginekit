@@ -3,6 +3,8 @@ package stubs
 import (
 	"errors"
 	"fmt"
+
+	"github.com/dogmatiq/dogma"
 )
 
 // CommandStub is a test implementation of [dogma.Command].
@@ -26,7 +28,7 @@ func (s CommandStub[T]) MessageDescription() string {
 }
 
 // Validate returns a non-nil error if c.Invalid is not empty.
-func (s CommandStub[T]) Validate() error {
+func (s CommandStub[T]) Validate(dogma.CommandValidationScope) error {
 	if s.ValidationError != "" {
 		return errors.New(s.ValidationError)
 	}
@@ -54,7 +56,7 @@ func (s EventStub[T]) MessageDescription() string {
 }
 
 // Validate returns a non-nil error if c.Invalid is not empty.
-func (s EventStub[T]) Validate() error {
+func (s EventStub[T]) Validate(dogma.EventValidationScope) error {
 	if s.ValidationError != "" {
 		return errors.New(s.ValidationError)
 	}
@@ -82,7 +84,7 @@ func (s TimeoutStub[T]) MessageDescription() string {
 }
 
 // Validate returns a non-nil error if c.Invalid is not empty.
-func (s TimeoutStub[T]) Validate() error {
+func (s TimeoutStub[T]) Validate(dogma.TimeoutValidationScope) error {
 	if s.ValidationError != "" {
 		return errors.New(s.ValidationError)
 	}

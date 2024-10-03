@@ -110,13 +110,13 @@ func (m *Map[K, V]) TryGet(k K) (V, bool) {
 
 // Clone returns a shallow copy of the map.
 func (m *Map[K, V]) Clone() *Map[K, V] {
-	if m == nil {
-		return nil
+	var x Map[K, V]
+
+	if m != nil {
+		x.elements = maps.Clone(m.elements)
 	}
 
-	return &Map[K, V]{
-		elements: maps.Clone(m.elements),
-	}
+	return &x
 }
 
 // Merge returns a new map containing all key/value pairs from s and x.
@@ -145,15 +145,13 @@ func (m *Map[K, V]) Merge(x *Map[K, V]) *Map[K, V] {
 // Select returns a new map containing all key/value pairs from m for which the
 // given predicate returns true.
 func (m *Map[K, V]) Select(pred func(K, V) bool) *Map[K, V] {
-	if m == nil {
-		return nil
-	}
-
 	var x Map[K, V]
 
-	for k, v := range m.elements {
-		if pred(k, v) {
-			x.Set(k, v)
+	if m != nil {
+		for k, v := range m.elements {
+			if pred(k, v) {
+				x.Set(k, v)
+			}
 		}
 	}
 
@@ -164,15 +162,13 @@ func (m *Map[K, V]) Select(pred func(K, V) bool) *Map[K, V] {
 // key/value pair in the map. If the transform function returns false, the key
 // is omitted from the resulting map.
 func (m *Map[K, V]) Project(transform func(K, V) (K, V, bool)) *Map[K, V] {
-	if m == nil {
-		return nil
-	}
-
 	var x Map[K, V]
 
-	for k, v := range m.elements {
-		if k, v, ok := transform(k, v); ok {
-			x.Set(k, v)
+	if m != nil {
+		for k, v := range m.elements {
+			if k, v, ok := transform(k, v); ok {
+				x.Set(k, v)
+			}
 		}
 	}
 

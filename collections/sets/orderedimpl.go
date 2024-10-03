@@ -222,12 +222,13 @@ func orderedIsSuperset[T any, S ordered[T, I], I any](
 func orderedClone[T any, S ordered[T, I], I any](
 	s S,
 ) S {
-	if s == nil {
-		return nil
+	var members []T
+
+	if s != nil {
+		members = slices.Clone(*s.ptr())
 	}
 
-	members := *s.ptr()
-	return s.new(slices.Clone(members))
+	return s.new(members)
 }
 
 func orderedUnion[T any, S ordered[T, I], I any](
@@ -292,15 +293,13 @@ func orderedSelect[T any, S ordered[T, I], I any](
 	s S,
 	pred func(T) bool,
 ) S {
-	if s == nil {
-		return nil
-	}
-
 	var members []T
 
-	for _, m := range *s.ptr() {
-		if pred(m) {
-			members = append(members, m)
+	if s != nil {
+		for _, m := range *s.ptr() {
+			if pred(m) {
+				members = append(members, m)
+			}
 		}
 	}
 

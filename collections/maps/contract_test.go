@@ -309,6 +309,10 @@ func testMap[
 					snapshot := subject
 					subject = subject.Clone()
 
+					if subject == nil {
+						t.Fatal("the result of a clone should never be nil")
+					}
+
 					if snapshot != nil {
 						k := drawNewKey(t)
 						v := drawValue(t)
@@ -317,9 +321,6 @@ func testMap[
 						if subject.Has(k) {
 							t.Fatalf("expected clone to be a shallow copy")
 						}
-
-					} else if subject != nil {
-						t.Fatal("cloning a nil map should return nil")
 					}
 				},
 				"merge with disjoint map": func(t *rapid.T) {
@@ -337,25 +338,23 @@ func testMap[
 					}
 
 					subject = subject.Merge(other)
+					if subject == nil {
+						t.Fatal("the result of a merge should never be nil")
+					}
 				},
 				"merge with itself": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Merge(subject)
-
-					if wasNil && subject != nil {
-						t.Fatal("merge of two nil maps should return nil")
+					if subject == nil {
+						t.Fatal("the result of a merge should never be nil")
 					}
 				},
 				"merge with a nil map": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Merge(nil)
-
-					if wasNil && subject != nil {
-						t.Fatal("merge of two nil maps should return nil")
+					if subject == nil {
+						t.Fatal("the result of a merge should never be nil")
 					}
 				},
 				"select a subset": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Select(
 						func(k K, v int) bool {
 							if v%2 == 0 {
@@ -367,12 +366,11 @@ func testMap[
 						},
 					)
 
-					if wasNil && subject != nil {
-						t.Fatal("selecting from a nil map should return nil")
+					if subject == nil {
+						t.Fatal("the result of a selection should never be nil")
 					}
 				},
 				"project a subset": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Project(
 						func(k K, v int) (K, int, bool) {
 							if v%2 == 0 {
@@ -385,8 +383,8 @@ func testMap[
 						},
 					)
 
-					if wasNil && subject != nil {
-						t.Fatal("projecting a nil map should return nil")
+					if subject == nil {
+						t.Fatal("the result of a projection should never be nil")
 					}
 				},
 				"project with key modifications": func(t *rapid.T) {
@@ -402,6 +400,10 @@ func testMap[
 							return k, v, true
 						},
 					)
+
+					if subject == nil {
+						t.Fatal("the result of a projection should never be nil")
+					}
 				},
 				"": func(t *rapid.T) {
 					if subject.Len() != len(expected) {

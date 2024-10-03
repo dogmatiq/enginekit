@@ -144,8 +144,13 @@ func (m *OrderedByComparator[K, V, C]) ReverseValues() iter.Seq[V] {
 }
 
 func (m *OrderedByComparator[K, V, C]) new(pairs []Pair[K, V]) *OrderedByComparator[K, V, C] {
+	var cmp C
+	if m != nil {
+		cmp = m.Comparator
+	}
+
 	return &OrderedByComparator[K, V, C]{
-		Comparator: m.Comparator,
+		Comparator: cmp,
 		pairs:      pairs,
 	}
 }

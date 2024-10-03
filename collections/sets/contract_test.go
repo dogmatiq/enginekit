@@ -100,6 +100,20 @@ func testSet[
 			}
 		}
 
+		newDisjointSet := func(t *rapid.T, min, max int) S {
+			n := rapid.
+				IntRange(min, max).
+				Draw(t, "number of members")
+
+			s := newSet()
+
+			for range n {
+				s.Add(drawNonMember(t))
+			}
+
+			return s
+		}
+
 		t.Repeat(
 			map[string]func(*rapid.T){
 				"replace the subject with a new one": func(t *rapid.T) {
@@ -285,6 +299,10 @@ func testSet[
 					snapshot := subject
 					subject = subject.Clone()
 
+					if subject == nil {
+						t.Fatal("the result of a clone should never be nil")
+					}
+
 					if snapshot != nil {
 						m := drawNonMember(t)
 						snapshot.Add(m)
@@ -292,43 +310,31 @@ func testSet[
 						if subject.Has(m) {
 							t.Fatal("expected clone to be a shallow copy")
 						}
-					} else if subject != nil {
-						t.Fatal("cloning a nil set should return nil")
 					}
 				},
+
 				"union with disjoint set": func(t *rapid.T) {
-					n := rapid.
-						IntRange(0, 3).
-						Draw(t, "number of members")
+					s := newDisjointSet(t, 0, 3)
 
-					other := newSet()
-
-					for range n {
-						m := drawNonMember(t)
-						other.Add(m)
+					for m := range s.All() {
 						add(m)
 					}
 
-					subject = subject.Union(other)
+					subject = subject.Union(s)
 				},
 				"union with itself": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Union(subject)
-
-					if wasNil && subject != nil {
-						t.Fatal("union of two nil sets should return nil")
+					if subject == nil {
+						t.Fatal("the result of a union should never be nil")
 					}
 				},
 				"union with a nil set": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Union(nil)
-
-					if wasNil && subject != nil {
-						t.Fatal("union of two nil sets should return nil")
+					if subject == nil {
+						t.Fatal("the result of a union should never be nil")
 					}
 				},
 				"select a subset": func(t *rapid.T) {
-					wasNil := subject == nil
 					subject = subject.Select(
 						func(m T) bool {
 							if pred(m) {
@@ -340,8 +346,8 @@ func testSet[
 						},
 					)
 
-					if wasNil && subject != nil {
-						t.Fatal("selecting from a nil set should return nil")
+					if subject == nil {
+						t.Fatal("the result of a selection should never be nil")
 					}
 				},
 				"": func(t *rapid.T) {

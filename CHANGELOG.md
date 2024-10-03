@@ -23,6 +23,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Added `sets.NewFromValues()` (and variants) which construct set types from
   the values of `iter.Seq2` sequences.
 
+### Changed
+
+- The results of `Clone()`, `Merge()`, `Select()` and `Project()` on any map
+  type are now guaranteed to be non-nil.
+- The results of `Clone()`, `Union()` and `Project()` on any set type are now
+  guaranteed to be non-nil.
+
 ## [0.15.1] - 2024-10-02
 
 ### Removed

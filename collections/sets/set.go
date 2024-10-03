@@ -167,13 +167,13 @@ func (s *Set[T]) IsStrictSubset(x *Set[T]) bool {
 
 // Clone returns a shallow copy of the set.
 func (s *Set[T]) Clone() *Set[T] {
-	if s == nil {
-		return nil
+	var x Set[T]
+
+	if s != nil {
+		x.members = maps.Clone(s.members)
 	}
 
-	return &Set[T]{
-		members: maps.Clone(s.members),
-	}
+	return &x
 }
 
 // Union returns a set containing all members of s and x.
@@ -205,21 +205,17 @@ func (s *Set[T]) Union(x *Set[T]) *Set[T] {
 // Select returns the subset of s containing members for which the given
 // predicate function returns true.
 func (s *Set[T]) Select(pred func(T) bool) *Set[T] {
-	if s == nil {
-		return nil
-	}
+	var x Set[T]
 
-	subset := Set[T]{
-		members: map[T]struct{}{},
-	}
-
-	for m := range s.members {
-		if pred(m) {
-			subset.members[m] = struct{}{}
+	if s != nil {
+		for m := range s.members {
+			if pred(m) {
+				x.Add(m)
+			}
 		}
 	}
 
-	return &subset
+	return &x
 }
 
 // All returns a sequence that yields all members of the set in no particular

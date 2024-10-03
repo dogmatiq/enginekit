@@ -12,9 +12,6 @@ import (
 type reverseStringComparator struct{}
 
 func (c *reverseStringComparator) Compare(x, y string) int {
-	if c == nil {
-		panic("comparator value was not propagated")
-	}
 	return -cmp.Compare(x, y)
 }
 

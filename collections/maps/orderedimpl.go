@@ -89,6 +89,10 @@ func orderedRemove[K, V any, M ordered[K, V, I], I any](
 	pairs := m.ptr()
 
 	for _, k := range keys {
+		if len(*pairs) == 0 {
+			return
+		}
+
 		if i, ok := orderedSearch[K, V](m, k); ok {
 			*pairs = slices.Delete(*pairs, i, i+1)
 		}
@@ -154,13 +158,13 @@ func orderedTryGet[K, V any, M ordered[K, V, I], I any](
 func orderedClone[K, V any, M ordered[K, V, I], I any](
 	m M,
 ) M {
-	if m == nil {
-		return nil
+	var pairs []Pair[K, V]
+
+	if m != nil {
+		pairs = slices.Clone(*m.ptr())
 	}
 
-	return m.new(
-		slices.Clone(*m.ptr()),
-	)
+	return m.new(pairs)
 }
 
 func orderedMerge[K, V any, M ordered[K, V, I], I any](
@@ -217,15 +221,13 @@ func orderedSelect[K, V any, M ordered[K, V, I], I any](
 	m M,
 	pred func(K, V) bool,
 ) M {
-	if m == nil {
-		return nil
-	}
-
 	var pairs []Pair[K, V]
 
-	for _, pair := range *m.ptr() {
-		if pred(pair.Key, pair.Value) {
-			pairs = append(pairs, pair)
+	if m != nil {
+		for _, pair := range *m.ptr() {
+			if pred(pair.Key, pair.Value) {
+				pairs = append(pairs, pair)
+			}
 		}
 	}
 
@@ -236,15 +238,13 @@ func orderedProject[K, V any, M ordered[K, V, I], I any](
 	m M,
 	transform func(K, V) (K, V, bool),
 ) M {
-	if m == nil {
-		return nil
-	}
-
 	var x M = m.new(nil)
 
-	for _, pair := range *m.ptr() {
-		if k, v, ok := transform(pair.Key, pair.Value); ok {
-			orderedSet(x, k, v)
+	if m != nil {
+		for _, pair := range *m.ptr() {
+			if k, v, ok := transform(pair.Key, pair.Value); ok {
+				orderedSet(x, k, v)
+			}
 		}
 	}
 

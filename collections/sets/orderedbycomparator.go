@@ -160,8 +160,13 @@ func (s *OrderedByComparator[T, C]) Reverse() iter.Seq[T] {
 }
 
 func (s *OrderedByComparator[T, C]) new(members []T) *OrderedByComparator[T, C] {
+	var cmp C
+	if s != nil {
+		cmp = s.Comparator
+	}
+
 	return &OrderedByComparator[T, C]{
-		Comparator: s.Comparator,
+		Comparator: cmp,
 		members:    members,
 	}
 }

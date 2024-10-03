@@ -24,6 +24,7 @@ type contract[T, I any] interface {
 
 	Clone() *I
 	Union(*I) *I
+	Intersection(*I) *I
 	Select(func(T) bool) *I
 
 	All() iter.Seq[T]
@@ -332,6 +333,40 @@ func testSet[
 					subject = subject.Union(nil)
 					if subject == nil {
 						t.Fatal("the result of a union should never be nil")
+					}
+				},
+				"intersection with an overlapping set": func(t *rapid.T) {
+					s := newDisjointSet(t, 0, 3)
+
+					m := drawMember(t)
+					s.Add(m)
+
+					expected = []T{m}
+					subject = subject.Intersection(s)
+					if subject == nil {
+						t.Fatal("the result of an intersection should never be nil")
+					}
+				},
+				"intersection with disjoint set": func(t *rapid.T) {
+					s := newDisjointSet(t, 0, 3)
+
+					expected = nil
+					subject = subject.Intersection(s)
+					if subject == nil {
+						t.Fatal("the result of an intersection should never be nil")
+					}
+				},
+				"interesection with itself": func(t *rapid.T) {
+					subject = subject.Intersection(subject)
+					if subject == nil {
+						t.Fatal("the result of an intersection should never be nil")
+					}
+				},
+				"intersection with a nil set": func(t *rapid.T) {
+					expected = nil
+					subject = subject.Intersection(nil)
+					if subject == nil {
+						t.Fatal("the result of an intersection should never be nil")
 					}
 				},
 				"select a subset": func(t *rapid.T) {

@@ -142,6 +142,11 @@ func (s *OrderedByComparator[T, C]) Union(x *OrderedByComparator[T, C]) *Ordered
 	return orderedUnion[T](s, x)
 }
 
+// Intersection returns a set containing members that are in both s and x.
+func (s *OrderedByComparator[T, C]) Intersection(x *OrderedByComparator[T, C]) *OrderedByComparator[T, C] {
+	return orderedIntersection[T](s, x)
+}
+
 // Select returns the subset of s containing members for which the given
 // predicate function returns true.
 func (s *OrderedByComparator[T, C]) Select(pred func(T) bool) *OrderedByComparator[T, C] {

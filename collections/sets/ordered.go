@@ -95,6 +95,11 @@ func (s *Ordered[T]) Union(x *Ordered[T]) *Ordered[T] {
 	return orderedUnion[T](s, x)
 }
 
+// Intersection returns a set containing members that are in both s and x.
+func (s *Ordered[T]) Intersection(x *Ordered[T]) *Ordered[T] {
+	return orderedIntersection[T](s, x)
+}
+
 // Select returns the subset of s containing members for which the given
 // predicate function returns true.
 func (s *Ordered[T]) Select(pred func(T) bool) *Ordered[T] {

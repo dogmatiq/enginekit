@@ -163,13 +163,13 @@ func (s *Proto[T]) IsStrictSubset(x *Proto[T]) bool {
 
 // Clone returns a shallow copy of the set.
 func (s *Proto[T]) Clone() *Proto[T] {
-	var x Proto[T]
+	var out Proto[T]
 
 	if s != nil {
-		x.members = *s.members.Clone()
+		out.members = *s.members.Clone()
 	}
 
-	return &x
+	return &out
 }
 
 // Union returns a set containing all members of s and x.
@@ -187,18 +187,29 @@ func (s *Proto[T]) Union(x *Proto[T]) *Proto[T] {
 	}
 }
 
+// Intersection returns a set containing members that are in both s and x.
+func (s *Proto[T]) Intersection(x *Proto[T]) *Proto[T] {
+	var out Proto[T]
+
+	if s != nil && x != nil {
+		out.members = *s.members.Intersection(&x.members)
+	}
+
+	return &out
+}
+
 // Select returns the subset of s containing members for which the given
 // predicate function returns true.
 func (s *Proto[T]) Select(pred func(T) bool) *Proto[T] {
-	var x Proto[T]
+	var out Proto[T]
 
 	if s != nil {
-		x.members = *s.members.Select(func(m string) bool {
+		out.members = *s.members.Select(func(m string) bool {
 			return pred(s.unmarshal(m))
 		})
 	}
 
-	return &x
+	return &out
 }
 
 // All returns a sequence that yields all members of the set in no particular

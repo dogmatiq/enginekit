@@ -110,13 +110,13 @@ func (m *Map[K, V]) TryGet(k K) (V, bool) {
 
 // Clone returns a shallow copy of the map.
 func (m *Map[K, V]) Clone() *Map[K, V] {
-	var x Map[K, V]
+	var out Map[K, V]
 
 	if m != nil {
-		x.elements = maps.Clone(m.elements)
+		out.elements = maps.Clone(m.elements)
 	}
 
-	return &x
+	return &out
 }
 
 // Merge returns a new map containing all key/value pairs from s and x.
@@ -145,34 +145,34 @@ func (m *Map[K, V]) Merge(x *Map[K, V]) *Map[K, V] {
 // Select returns a new map containing all key/value pairs from m for which the
 // given predicate returns true.
 func (m *Map[K, V]) Select(pred func(K, V) bool) *Map[K, V] {
-	var x Map[K, V]
+	var out Map[K, V]
 
 	if m != nil {
 		for k, v := range m.elements {
 			if pred(k, v) {
-				x.Set(k, v)
+				out.Set(k, v)
 			}
 		}
 	}
 
-	return &x
+	return &out
 }
 
 // Project constructs a new map by applying the given transform function to each
 // key/value pair in the map. If the transform function returns false, the key
 // is omitted from the resulting map.
 func (m *Map[K, V]) Project(transform func(K, V) (K, V, bool)) *Map[K, V] {
-	var x Map[K, V]
+	var out Map[K, V]
 
 	if m != nil {
 		for k, v := range m.elements {
 			if k, v, ok := transform(k, v); ok {
-				x.Set(k, v)
+				out.Set(k, v)
 			}
 		}
 	}
 
-	return &x
+	return &out
 }
 
 // All returns a sequence that yields all key/value pairs in the map in no

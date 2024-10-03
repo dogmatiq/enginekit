@@ -114,13 +114,13 @@ func (m *Proto[K, V]) TryGet(k K) (V, bool) {
 
 // Clone returns a shallow copy of the map.
 func (m *Proto[K, V]) Clone() *Proto[K, V] {
-	var x Proto[K, V]
+	var out Proto[K, V]
 
 	if m != nil {
-		x.elements = *m.elements.Clone()
+		out.elements = *m.elements.Clone()
 	}
 
-	return &x
+	return &out
 }
 
 // Merge returns a new map containing all key/value pairs from s and x.
@@ -143,27 +143,27 @@ func (m *Proto[K, V]) Merge(x *Proto[K, V]) *Proto[K, V] {
 // Select returns a new map containing all key/value pairs from m for which the
 // given predicate returns true.
 func (m *Proto[K, V]) Select(pred func(K, V) bool) *Proto[K, V] {
-	var x Proto[K, V]
+	var out Proto[K, V]
 
 	if m != nil {
-		x.elements = *m.elements.Select(
+		out.elements = *m.elements.Select(
 			func(s string, v V) bool {
 				return pred(m.unmarshal(s), v)
 			},
 		)
 	}
 
-	return &x
+	return &out
 }
 
 // Project constructs a new map by applying the given transform function to each
 // key/value pair in the map. If the transform function returns false, the key
 // is omitted from the resulting map.
 func (m *Proto[K, V]) Project(transform func(K, V) (K, V, bool)) *Proto[K, V] {
-	var x Proto[K, V]
+	var out Proto[K, V]
 
 	if m != nil {
-		x.elements = *m.elements.Project(
+		out.elements = *m.elements.Project(
 			func(k string, v V) (string, V, bool) {
 				if k, v, ok := transform(m.unmarshal(k), v); ok {
 					return m.marshal(k), v, true
@@ -173,7 +173,7 @@ func (m *Proto[K, V]) Project(transform func(K, V) (K, V, bool)) *Proto[K, V] {
 		)
 	}
 
-	return &x
+	return &out
 }
 
 // All returns a sequence that yields all key/value pairs in the map in no

@@ -238,17 +238,17 @@ func orderedProject[K, V any, M ordered[K, V, I], I any](
 	m M,
 	transform func(K, V) (K, V, bool),
 ) M {
-	var x M = m.new(nil)
+	var out M = m.new(nil)
 
 	if m != nil {
 		for _, pair := range *m.ptr() {
 			if k, v, ok := transform(pair.Key, pair.Value); ok {
-				orderedSet(x, k, v)
+				orderedSet(out, k, v)
 			}
 		}
 	}
 
-	return x
+	return out
 }
 
 func orderedAll[K, V any, M ordered[K, V, I], I any](

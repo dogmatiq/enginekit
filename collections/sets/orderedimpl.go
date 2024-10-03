@@ -234,16 +234,15 @@ func orderedClone[T any, S ordered[T, I], I any](
 func orderedUnion[T any, S ordered[T, I], I any](
 	x, y S,
 ) S {
-	var membersX, membersY []T
-
-	if x != nil {
-		membersX = *x.ptr()
+	if x == nil {
+		return orderedClone[T](y)
 	}
 
-	if y != nil {
-		membersY = *y.ptr()
+	if y == nil {
+		return orderedClone[T](x)
 	}
 
+	membersX, membersY := *x.ptr(), *y.ptr()
 	indexX, indexY := 0, 0
 	lenX, lenY := len(membersX), len(membersY)
 
@@ -283,6 +282,41 @@ func orderedUnion[T any, S ordered[T, I], I any](
 			members = append(members, memberX)
 			indexX++
 			indexY++
+		}
+	}
+
+	return x.new(members)
+}
+
+func orderedIntersection[T any, S ordered[T, I], I any](
+	x, y S,
+) S {
+	if x == nil || y == nil {
+		return x.new(nil)
+	}
+
+	big, small := *x.ptr(), *y.ptr()
+	if len(small) > len(big) {
+		big, small = small, big
+	}
+
+	if len(small) == 0 {
+		return x.new(nil)
+	}
+
+	members := make([]T, 0, len(small))
+
+	for _, m := range small {
+		if len(big) == 0 {
+			break
+		}
+
+		i, ok := slices.BinarySearchFunc(big, m, x.cmp)
+		if ok {
+			members = append(members, m)
+			big = big[i+1:]
+		} else {
+			big = big[i:]
 		}
 	}
 

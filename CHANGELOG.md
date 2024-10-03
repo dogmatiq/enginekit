@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog], and this project adheres to
   the keys of `iter.Seq2` sequences.
 - Added `sets.NewFromValues()` (and variants) which construct set types from
   the values of `iter.Seq2` sequences.
+- Added `Intersection()` method to all set types.
 
 ### Changed
 

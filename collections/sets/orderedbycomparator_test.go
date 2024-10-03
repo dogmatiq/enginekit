@@ -2,7 +2,6 @@ package sets_test
 
 import (
 	"cmp"
-	"iter"
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/collections/sets"
@@ -20,18 +19,10 @@ func TestOrderedByComparator(t *testing.T) {
 
 	testOrderedSet(
 		t,
-		func(members ...string) *OrderedByComparator[string, reverseStringComparator] {
-			return NewOrderedByComparator(cmp, members...)
-		},
-		func(seq iter.Seq[string]) *OrderedByComparator[string, reverseStringComparator] {
-			return NewOrderedByComparatorFromSeq(cmp, seq)
-		},
-		func(seq iter.Seq2[string, any]) *OrderedByComparator[string, reverseStringComparator] {
-			return NewOrderedByComparatorFromKeys(cmp, seq)
-		},
-		func(seq iter.Seq2[any, string]) *OrderedByComparator[string, reverseStringComparator] {
-			return NewOrderedByComparatorFromValues(cmp, seq)
-		},
+		NewOrderedByComparator[string, reverseStringComparator],
+		NewOrderedByComparatorFromSeq,
+		NewOrderedByComparatorFromKeys,
+		NewOrderedByComparatorFromValues,
 		cmp.Compare,
 		func(m string) bool { return len(m)%2 == 0 },
 		rapid.String(),

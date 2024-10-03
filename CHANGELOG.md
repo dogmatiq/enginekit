@@ -31,6 +31,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 - The results of `Clone()`, `Union()` and `Project()` on any set type are now
   guaranteed to be non-nil.
 
+### Removed
+
+- **[BC]** Removed `cmp` parameter from `maps.NewOrderedByComparator()` and its
+  variants. The comparator logic must now be totally encapsulated by the
+  comparator type alone.
+
 ## [0.15.1] - 2024-10-02
 
 ### Removed

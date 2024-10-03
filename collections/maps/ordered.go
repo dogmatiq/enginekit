@@ -12,7 +12,7 @@ type Ordered[K cmp.Ordered, V any] struct {
 
 // NewOrdered returns an [Ordered] containing the given key/value pairs.
 func NewOrdered[K cmp.Ordered, V any](pairs ...Pair[K, V]) *Ordered[K, V] {
-	return orderedFromPairs[K, V, *Ordered[K, V]](pairs)
+	return orderedFromUnsortedPairs[K, V, *Ordered[K, V]](pairs)
 }
 
 // NewOrderedFromSeq returns an [Ordered] containing the key/value pairs yielded
@@ -114,12 +114,6 @@ func (m *Ordered[K, V]) ReverseKeys() iter.Seq[K] {
 // order.
 func (m *Ordered[K, V]) ReverseValues() iter.Seq[V] {
 	return orderedReverseValues[K, V](m)
-}
-
-func (m *Ordered[K, V]) new(pairs []Pair[K, V]) *Ordered[K, V] {
-	return &Ordered[K, V]{
-		pairs: pairs,
-	}
 }
 
 func (m *Ordered[K, V]) ptr() *[]Pair[K, V] {

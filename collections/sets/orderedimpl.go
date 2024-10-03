@@ -8,9 +8,6 @@ import (
 type ordered[T, I any] interface {
 	*I
 
-	// new returns a new set with the given members, which are already in order.
-	new([]T) *I
-
 	// ptr returns a pointer to the set's members.
 	ptr() *[]T
 
@@ -18,11 +15,19 @@ type ordered[T, I any] interface {
 	cmp(T, T) int
 }
 
-func orderedFromMembers[T any, S ordered[T, I], I any](
+func orderedFromUnsortedMembers[T any, S ordered[T, I], I any](
 	members []T,
 ) S {
 	var s S = new(I)
 	orderedAdd(s, members...)
+	return s
+}
+
+func orderedFromSortedMembers[T any, S ordered[T, I], I any](
+	members []T,
+) S {
+	var s S = new(I)
+	*s.ptr() = members
 	return s
 }
 
@@ -228,7 +233,7 @@ func orderedClone[T any, S ordered[T, I], I any](
 		members = slices.Clone(*s.ptr())
 	}
 
-	return s.new(members)
+	return orderedFromSortedMembers[T, S](members)
 }
 
 func orderedUnion[T any, S ordered[T, I], I any](
@@ -285,14 +290,14 @@ func orderedUnion[T any, S ordered[T, I], I any](
 		}
 	}
 
-	return x.new(members)
+	return orderedFromSortedMembers[T, S](members)
 }
 
 func orderedIntersection[T any, S ordered[T, I], I any](
 	x, y S,
 ) S {
 	if x == nil || y == nil {
-		return x.new(nil)
+		return new(I)
 	}
 
 	big, small := *x.ptr(), *y.ptr()
@@ -301,7 +306,7 @@ func orderedIntersection[T any, S ordered[T, I], I any](
 	}
 
 	if len(small) == 0 {
-		return x.new(nil)
+		return new(I)
 	}
 
 	members := make([]T, 0, len(small))
@@ -320,7 +325,7 @@ func orderedIntersection[T any, S ordered[T, I], I any](
 		}
 	}
 
-	return x.new(members)
+	return orderedFromSortedMembers[T, S](members)
 }
 
 func orderedSelect[T any, S ordered[T, I], I any](
@@ -337,7 +342,7 @@ func orderedSelect[T any, S ordered[T, I], I any](
 		}
 	}
 
-	return s.new(members)
+	return orderedFromSortedMembers[T, S](members)
 }
 
 func orderedAll[T any, S ordered[T, I], I any](

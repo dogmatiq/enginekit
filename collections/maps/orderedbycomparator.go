@@ -7,45 +7,21 @@ import (
 )
 
 // OrderedByComparator is an an ordered map of keys of type K to values of type
-// V with ordering defined by a separate comparitor.
+// V with ordering defined by a separate comparitor type.
 type OrderedByComparator[K, V any, C constraints.Comparator[K]] struct {
-	Comparator C
-
 	pairs []Pair[K, V]
 }
 
-// NewOrderedByComparator returns an [OrderedByComparator] containing the
-// given key/value pairs.
-func NewOrderedByComparator[K, V any, C constraints.Comparator[K]](
-	cmp C,
-	pairs ...Pair[K, V],
-) *OrderedByComparator[K, V, C] {
-	n := OrderedByComparator[K, V, C]{
-		Comparator: cmp,
-	}
-
-	for _, p := range pairs {
-		n.Set(p.Key, p.Value)
-	}
-
-	return &n
+// NewOrderedByComparator returns an [OrderedByComparator] containing the given key/value
+// pairs.
+func NewOrderedByComparator[K, V any, C constraints.Comparator[K]](pairs ...Pair[K, V]) *OrderedByComparator[K, V, C] {
+	return orderedFromUnsortedPairs[K, V, *OrderedByComparator[K, V, C]](pairs)
 }
 
-// NewOrderedByComparatorFromSeq returns an [OrderedByComparator] containing
-// the key/value pairs yielded by the given sequence.
-func NewOrderedByComparatorFromSeq[K, V any, C constraints.Comparator[K]](
-	cmp C,
-	seq iter.Seq2[K, V],
-) *OrderedByComparator[K, V, C] {
-	n := OrderedByComparator[K, V, C]{
-		Comparator: cmp,
-	}
-
-	for k, v := range seq {
-		n.Set(k, v)
-	}
-
-	return &n
+// NewOrderedByComparatorFromSeq returns an [OrderedByComparator] containing the key/value
+// pairs yielded by the given sequence.
+func NewOrderedByComparatorFromSeq[K, V any, C constraints.Comparator[K]](seq iter.Seq2[K, V]) *OrderedByComparator[K, V, C] {
+	return orderedFromSeq[K, V, *OrderedByComparator[K, V, C]](seq)
 }
 
 // Set sets the value associated with the given key.
@@ -143,22 +119,11 @@ func (m *OrderedByComparator[K, V, C]) ReverseValues() iter.Seq[V] {
 	return orderedReverseValues[K, V](m)
 }
 
-func (m *OrderedByComparator[K, V, C]) new(pairs []Pair[K, V]) *OrderedByComparator[K, V, C] {
-	var cmp C
-	if m != nil {
-		cmp = m.Comparator
-	}
-
-	return &OrderedByComparator[K, V, C]{
-		Comparator: cmp,
-		pairs:      pairs,
-	}
-}
-
 func (m *OrderedByComparator[K, V, C]) ptr() *[]Pair[K, V] {
 	return &m.pairs
 }
 
 func (m *OrderedByComparator[K, V, C]) cmp(x, y K) int {
-	return m.Comparator.Compare(x, y)
+	var c C
+	return c.Compare(x, y)
 }

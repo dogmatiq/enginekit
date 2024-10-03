@@ -14,7 +14,7 @@ type OrderedByMember[T constraints.Ordered[T]] struct {
 
 // NewOrderedByMember returns an [OrderedByMember] containing the given members.
 func NewOrderedByMember[T constraints.Ordered[T]](members ...T) *OrderedByMember[T] {
-	return orderedFromMembers[T, *OrderedByMember[T]](members)
+	return orderedFromUnsortedMembers[T, *OrderedByMember[T]](members)
 }
 
 // NewOrderedByMemberFromSeq returns an [OrderedByMember] containing the values
@@ -117,12 +117,6 @@ func (s *OrderedByMember[T]) All() iter.Seq[T] {
 // order.
 func (s *OrderedByMember[T]) Reverse() iter.Seq[T] {
 	return orderedReverse[T](s)
-}
-
-func (s *OrderedByMember[T]) new(members []T) *OrderedByMember[T] {
-	return &OrderedByMember[T]{
-		members: members,
-	}
 }
 
 func (s *OrderedByMember[T]) ptr() *[]T {

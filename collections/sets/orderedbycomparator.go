@@ -7,77 +7,33 @@ import (
 )
 
 // OrderedByComparator is an ordered set of unique T values where the ordering
-// is defined by a separate comparitor.
+// is defined by a separate comparitor type.
 type OrderedByComparator[T any, C constraints.Comparator[T]] struct {
-	Comparator C
-
 	members []T
 }
 
 // NewOrderedByComparator returns an [OrderedByComparator] containing the given
 // members.
-func NewOrderedByComparator[T any, C constraints.Comparator[T]](
-	cmp C,
-	members ...T,
-) *OrderedByComparator[T, C] {
-	s := OrderedByComparator[T, C]{
-		Comparator: cmp,
-	}
-
-	s.Add(members...)
-
-	return &s
+func NewOrderedByComparator[T any, C constraints.Comparator[T]](members ...T) *OrderedByComparator[T, C] {
+	return orderedFromUnsortedMembers[T, *OrderedByComparator[T, C]](members)
 }
 
-// NewOrderedByComparatorFromSeq returns an [OrderedByComparator] containing the
+// NewOrderedByComparatorFromSeq returns an [OrderedByComparator] containing the values
+// yielded by the given sequence.
+func NewOrderedByComparatorFromSeq[T any, C constraints.Comparator[T]](seq iter.Seq[T]) *OrderedByComparator[T, C] {
+	return orderedFromSeq[T, *OrderedByComparator[T, C]](seq)
+}
+
+// NewOrderedByComparatorFromKeys returns an [OrderedByComparator] containing the keys
+// yielded by the given sequence.
+func NewOrderedByComparatorFromKeys[T any, C constraints.Comparator[T], unused any](seq iter.Seq2[T, unused]) *OrderedByComparator[T, C] {
+	return orderedFromKeys[T, *OrderedByComparator[T, C]](seq)
+}
+
+// NewOrderedByComparatorFromValues returns an [OrderedByComparator] containing the
 // values yielded by the given sequence.
-func NewOrderedByComparatorFromSeq[T any, C constraints.Comparator[T]](
-	cmp C,
-	seq iter.Seq[T],
-) *OrderedByComparator[T, C] {
-	s := OrderedByComparator[T, C]{
-		Comparator: cmp,
-	}
-
-	for m := range seq {
-		s.Add(m)
-	}
-
-	return &s
-}
-
-// NewOrderedByComparatorFromKeys returns an [OrderedByComparator] containing the
-// keys yielded by the given sequence.
-func NewOrderedByComparatorFromKeys[T any, C constraints.Comparator[T], unused any](
-	cmp C,
-	seq iter.Seq2[T, unused],
-) *OrderedByComparator[T, C] {
-	s := OrderedByComparator[T, C]{
-		Comparator: cmp,
-	}
-
-	for m := range seq {
-		s.Add(m)
-	}
-
-	return &s
-}
-
-// NewOrderedByComparatorFromValues returns an [OrderedByComparator] containing
-// the values yielded by the given sequence.
-func NewOrderedByComparatorFromValues[T any, C constraints.Comparator[T], unused any](
-	cmp C,
-	seq iter.Seq2[unused, T],
-) *OrderedByComparator[T, C] {
-	s := OrderedByComparator[T, C]{
-		Comparator: cmp,
-	}
-
-	for _, m := range seq {
-		s.Add(m)
-	}
-
-	return &s
+func NewOrderedByComparatorFromValues[T any, C constraints.Comparator[T], unused any](seq iter.Seq2[unused, T]) *OrderedByComparator[T, C] {
+	return orderedFromValues[T, *OrderedByComparator[T, C]](seq)
 }
 
 // Add adds the given members to the set.
@@ -164,22 +120,11 @@ func (s *OrderedByComparator[T, C]) Reverse() iter.Seq[T] {
 	return orderedReverse[T](s)
 }
 
-func (s *OrderedByComparator[T, C]) new(members []T) *OrderedByComparator[T, C] {
-	var cmp C
-	if s != nil {
-		cmp = s.Comparator
-	}
-
-	return &OrderedByComparator[T, C]{
-		Comparator: cmp,
-		members:    members,
-	}
-}
-
 func (s *OrderedByComparator[T, C]) ptr() *[]T {
 	return &s.members
 }
 
 func (s *OrderedByComparator[T, C]) cmp(x, y T) int {
-	return s.Comparator.Compare(x, y)
+	var c C
+	return c.Compare(x, y)
 }

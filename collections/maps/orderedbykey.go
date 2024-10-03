@@ -15,7 +15,7 @@ type OrderedByKey[K constraints.Ordered[K], V any] struct {
 // NewOrderedByKey returns an [OrderedByKey] containing the given key/value
 // pairs.
 func NewOrderedByKey[K constraints.Ordered[K], V any](pairs ...Pair[K, V]) *OrderedByKey[K, V] {
-	return orderedFromPairs[K, V, *OrderedByKey[K, V]](pairs)
+	return orderedFromUnsortedPairs[K, V, *OrderedByKey[K, V]](pairs)
 }
 
 // NewOrderedByKeyFromSeq returns an [OrderedByKey] containing the key/value
@@ -117,10 +117,6 @@ func (m *OrderedByKey[K, V]) ReverseKeys() iter.Seq[K] {
 // order.
 func (m *OrderedByKey[K, V]) ReverseValues() iter.Seq[V] {
 	return orderedReverseValues[K, V](m)
-}
-
-func (m *OrderedByKey[K, V]) new(pairs []Pair[K, V]) *OrderedByKey[K, V] {
-	return &OrderedByKey[K, V]{pairs: pairs}
 }
 
 func (m *OrderedByKey[K, V]) ptr() *[]Pair[K, V] {

@@ -8,10 +8,6 @@ import (
 type ordered[K, V, I any] interface {
 	*I
 
-	// new returns a new map with the given key/value pairs, which are already
-	// in order.
-	new([]Pair[K, V]) *I
-
 	// ptr returns a pointer to the map's key/value pairs.
 	ptr() *[]Pair[K, V]
 
@@ -19,7 +15,7 @@ type ordered[K, V, I any] interface {
 	cmp(K, K) int
 }
 
-func orderedFromPairs[K, V any, M ordered[K, V, I], I any](
+func orderedFromUnsortedPairs[K, V any, M ordered[K, V, I], I any](
 	pairs []Pair[K, V],
 ) M {
 	var m M = new(I)
@@ -28,6 +24,14 @@ func orderedFromPairs[K, V any, M ordered[K, V, I], I any](
 		orderedSet(m, p.Key, p.Value)
 	}
 
+	return m
+}
+
+func orderedFromSortedPairs[K, V any, M ordered[K, V, I], I any](
+	pairs []Pair[K, V],
+) M {
+	var m M = new(I)
+	*m.ptr() = pairs
 	return m
 }
 
@@ -164,7 +168,7 @@ func orderedClone[K, V any, M ordered[K, V, I], I any](
 		pairs = slices.Clone(*m.ptr())
 	}
 
-	return m.new(pairs)
+	return orderedFromSortedPairs[K, V, M](pairs)
 }
 
 func orderedMerge[K, V any, M ordered[K, V, I], I any](
@@ -214,7 +218,7 @@ func orderedMerge[K, V any, M ordered[K, V, I], I any](
 		}
 	}
 
-	return x.new(pairs)
+	return orderedFromSortedPairs[K, V, M](pairs)
 }
 
 func orderedSelect[K, V any, M ordered[K, V, I], I any](
@@ -231,14 +235,14 @@ func orderedSelect[K, V any, M ordered[K, V, I], I any](
 		}
 	}
 
-	return m.new(pairs)
+	return orderedFromSortedPairs[K, V, M](pairs)
 }
 
 func orderedProject[K, V any, M ordered[K, V, I], I any](
 	m M,
 	transform func(K, V) (K, V, bool),
 ) M {
-	var out M = m.new(nil)
+	var out M = new(I)
 
 	if m != nil {
 		for _, pair := range *m.ptr() {

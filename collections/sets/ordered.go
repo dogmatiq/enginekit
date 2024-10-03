@@ -12,7 +12,7 @@ type Ordered[T cmp.Ordered] struct {
 
 // NewOrdered returns an [Ordered] containing the given members.
 func NewOrdered[T cmp.Ordered](members ...T) *Ordered[T] {
-	return orderedFromMembers[T, *Ordered[T]](members)
+	return orderedFromUnsortedMembers[T, *Ordered[T]](members)
 }
 
 // NewOrderedFromSeq returns an [Ordered] containing the values yielded by the
@@ -115,12 +115,6 @@ func (s *Ordered[T]) All() iter.Seq[T] {
 // order.
 func (s *Ordered[T]) Reverse() iter.Seq[T] {
 	return orderedReverse[T](s)
-}
-
-func (s *Ordered[T]) new(members []T) *Ordered[T] {
-	return &Ordered[T]{
-		members: members,
-	}
 }
 
 func (s *Ordered[T]) ptr() *[]T {

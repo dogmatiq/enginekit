@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.16.1] - 2024-10-05
+
+### Added
+
+- Added `message` package, which is a largely drop-in replacement for
+  `configkit/message`.
+
 ## [0.16.0] - 2024-10-03
 
 ### Added
@@ -189,6 +196,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.15.0]: https://github.com/dogmatiq/enginekit/releases/v0.15.0
 [0.15.1]: https://github.com/dogmatiq/enginekit/releases/v0.15.1
 [0.16.0]: https://github.com/dogmatiq/enginekit/releases/v0.16.0
+[0.16.1]: https://github.com/dogmatiq/enginekit/releases/v0.16.1
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

@@ -24,6 +24,12 @@ type Aggregate struct {
 
 	// IsDisabled is true if the handler was disabled via the configurer.
 	IsDisabled bool
+
+	// IsExhaustive indicates whether the complete configuration was loaded. It
+	// is false when it cannot be guaranteed that the configuration is complete,
+	// which is possible, for example, when attempting to load configuration by
+	// static analysis.
+	IsExhaustive bool
 }
 
 func (h Aggregate) String() string {

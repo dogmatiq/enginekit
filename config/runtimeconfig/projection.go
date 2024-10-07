@@ -18,6 +18,7 @@ func FromProjection(h dogma.ProjectionMessageHandler) config.Projection {
 
 	cfg.TypeName = optional.Some(typename.Of(h))
 	cfg.Implementation = optional.Some(h)
+	cfg.IsExhaustive = true
 
 	h.Configure(&projectionConfigurer{&cfg})
 

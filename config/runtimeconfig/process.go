@@ -18,6 +18,7 @@ func FromProcess(h dogma.ProcessMessageHandler) config.Process {
 
 	cfg.TypeName = optional.Some(typename.Of(h))
 	cfg.Implementation = optional.Some(h)
+	cfg.IsExhaustive = true
 
 	h.Configure(&processConfigurer{&cfg})
 

@@ -34,6 +34,12 @@ type Application struct {
 	// Projections is a list of [dogma.ProjectionMessageHandler] implementations
 	// that are registered with the application.
 	Projections []Projection
+
+	// IsExhaustive indicates whether the complete configuration was loaded. It
+	// is false when it cannot be guaranteed that the configuration is complete,
+	// which is possible, for example, when attempting to load configuration by
+	// static analysis.
+	IsExhaustive bool
 }
 
 func (a Application) String() string {

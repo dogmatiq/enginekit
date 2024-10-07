@@ -18,6 +18,7 @@ func FromIntegration(h dogma.IntegrationMessageHandler) config.Integration {
 
 	cfg.TypeName = optional.Some(typename.Of(h))
 	cfg.Implementation = optional.Some(h)
+	cfg.IsExhaustive = true
 
 	h.Configure(&integrationConfigurer{&cfg})
 

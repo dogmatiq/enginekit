@@ -25,3 +25,7 @@ type Integration struct {
 	// IsDisabled is true if the handler was disabled via the configurer.
 	IsDisabled bool
 }
+
+func (h Integration) String() string {
+	return stringify("integration", h.TypeName, h.Identities)
+}

@@ -25,3 +25,7 @@ type Process struct {
 	// IsDisabled is true if the handler was disabled via the configurer.
 	IsDisabled bool
 }
+
+func (h Process) String() string {
+	return stringify("process", h.TypeName, h.Identities)
+}

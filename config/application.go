@@ -35,3 +35,7 @@ type Application struct {
 	// that are registered with the application.
 	Projections []Projection
 }
+
+func (a Application) String() string {
+	return stringify("application", a.TypeName, a.Identities)
+}

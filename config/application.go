@@ -16,9 +16,8 @@ type Application struct {
 	// available.
 	Implementation optional.Optional[dogma.Application]
 
-	// Identity is the (potentially invalid) identity of the application, if
-	// configured.
-	Identity optional.Optional[Identity]
+	// Identity is the set of identities configured for the handler.
+	Identities []Identity
 
 	// Aggregates is a list of [dogma.AggregateMessageHandler] implementations
 	// that are registered with the application.

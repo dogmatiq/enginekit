@@ -16,9 +16,8 @@ type Aggregate struct {
 	// available.
 	Implementation optional.Optional[dogma.AggregateMessageHandler]
 
-	// Identity is the (potentially invalid) identity of the handler, if
-	// configured.
-	Identity optional.Optional[Identity]
+	// Identity is the set of identities configured for the handler.
+	Identities []Identity
 
 	// Routes is the set of message routes to and from the handler.
 	Routes []Route

@@ -10,9 +10,9 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// FromRoute returns a new [config.Route] that represents the configuration of
+// fromRoute returns a new [config.Route] that represents the configuration of
 // the given [dogma.Route].
-func FromRoute(r dogma.Route) config.Route {
+func fromRoute(r dogma.Route) config.Route {
 	cfg := config.Route{}
 
 	if r != nil {

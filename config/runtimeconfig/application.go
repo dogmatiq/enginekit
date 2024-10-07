@@ -29,7 +29,8 @@ type applicationConfigurer struct {
 }
 
 func (c *applicationConfigurer) Identity(name, key string) {
-	c.cfg.Identity = optional.Some(
+	c.cfg.Identities = append(
+		c.cfg.Identities,
 		config.Identity{
 			Name: name,
 			Key:  key,

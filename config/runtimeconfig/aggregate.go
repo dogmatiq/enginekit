@@ -29,7 +29,8 @@ type aggregateConfigurer struct {
 }
 
 func (c *aggregateConfigurer) Identity(name, key string) {
-	c.cfg.Identity = optional.Some(
+	c.cfg.Identities = append(
+		c.cfg.Identities,
 		config.Identity{
 			Name: name,
 			Key:  key,
@@ -39,7 +40,7 @@ func (c *aggregateConfigurer) Identity(name, key string) {
 
 func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {
 	for _, r := range routes {
-		c.cfg.Routes = append(c.cfg.Routes, FromRoute(r))
+		c.cfg.Routes = append(c.cfg.Routes, fromRoute(r))
 	}
 }
 

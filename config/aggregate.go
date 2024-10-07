@@ -8,13 +8,9 @@ import (
 // Aggregate represents the (potentially invalid) configuration of a
 // [dogma.AggregateMessageHandler] implementation.
 type Aggregate struct {
-	// TypeName is the fully-qualified name of the Go type that implements
-	// [dogma.AggregateMessageHandler], if available.
-	TypeName optional.Optional[string]
-
-	// Implementation is the value that produced the configuration, if
-	// available.
-	Implementation optional.Optional[dogma.AggregateMessageHandler]
+	// Implementation contains information about the type that produced the
+	// configuration, if available.
+	Implementation optional.Optional[Implementation[dogma.AggregateMessageHandler]]
 
 	// Identity is the set of identities configured for the handler.
 	Identities []Identity
@@ -33,5 +29,5 @@ type Aggregate struct {
 }
 
 func (h Aggregate) String() string {
-	return stringify("aggregate", h.TypeName, h.Identities)
+	return stringify("aggregate", h.Implementation, h.Identities)
 }

@@ -28,11 +28,15 @@ func TestFromProcess(t *testing.T) {
 		{
 			"unconfigured handler",
 			&ProcessMessageHandlerStub{},
-			func(app dogma.ProcessMessageHandler) config.Process {
+			func(h dogma.ProcessMessageHandler) config.Process {
 				return config.Process{
-					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-					Implementation: optional.Some(app),
-					IsExhaustive:   true,
+					Implementation: optional.Some(
+						config.Implementation[dogma.ProcessMessageHandler]{
+							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							Source:   optional.Some(h),
+						},
+					),
+					IsExhaustive: true,
 				}
 			},
 		},
@@ -49,10 +53,14 @@ func TestFromProcess(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(app dogma.ProcessMessageHandler) config.Process {
+			func(h dogma.ProcessMessageHandler) config.Process {
 				return config.Process{
-					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-					Implementation: optional.Some(app),
+					Implementation: optional.Some(
+						config.Implementation[dogma.ProcessMessageHandler]{
+							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							Source:   optional.Some(h),
+						},
+					),
 					Identities: []config.Identity{
 						{
 							Name: "projection",

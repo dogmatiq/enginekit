@@ -6,21 +6,23 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-func stringify(
+func stringify[T any](
 	label string,
-	typeName optional.Optional[string],
+	impl optional.Optional[Implementation[T]],
 	identities []Identity,
 ) string {
 	identifier := "?"
 
-	if n, ok := typeName.TryGet(); ok {
-		identifier = n
+	if i, ok := impl.TryGet(); ok {
+		identifier = i.TypeName
 	} else {
 		for _, id := range identities {
-			identifier = id.String()
-			if id.Validate() == nil {
+			if norm, err := Normalize(id); err == nil {
+				identifier = norm.String()
 				break
 			}
+
+			identifier = id.String()
 		}
 	}
 

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"unicode"
@@ -15,40 +14,21 @@ type Identity struct {
 	Key  string
 }
 
-// Validate returns an error if the identity is invalid.
-func (i Identity) Validate(options ...ValidationOption) error {
-	return i.validate(newValidationOptions(options))
-}
-
-func (i Identity) validate(validationOptions) error {
-	var problems error
-
+func (i Identity) validate(_ validationOptions, res *validationResult) {
 	if !isValidIdentityName(i.Name) {
-		problems = errors.Join(problems, InvalidIdentityNameError{i.Name})
+		res.appendErr(InvalidIdentityNameError{i.Name})
 	}
 
 	if _, err := uuidpb.Parse(i.Key); err != nil {
-		problems = errors.Join(problems, InvalidIdentityKeyError{i.Key, err})
+		res.appendErr(InvalidIdentityKeyError{i.Key, err})
 	}
-
-	return problems
 }
 
-// Normalize returns a normalized copy of the identity, or an error if the
-// identity is invalid.
-func (i Identity) Normalize(options ...ValidationOption) (Identity, error) {
-	return i.normalize(newValidationOptions(options))
-}
-
-func (i Identity) normalize(opts validationOptions) (Identity, error) {
-	if err := i.validate(opts); err != nil {
-		return Identity{}, err
-	}
-
+func (i Identity) normalize(validationOptions) Identity {
 	return Identity{
 		Name: i.Name,
 		Key:  uuidpb.MustParse(i.Key).AsString(),
-	}, nil
+	}
 }
 
 func (i Identity) String() string {

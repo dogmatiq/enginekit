@@ -8,13 +8,9 @@ import (
 // Process represents the (potentially invalid) configuration of a
 // [dogma.ProcessMessageHandler] implementation.
 type Process struct {
-	// TypeName is the fully-qualified name of the Go type that implements
-	// [dogma.ProcessMessageHandler], if available.
-	TypeName optional.Optional[string]
-
-	// Implementation is the value that produced the configuration, if
-	// available.
-	Implementation optional.Optional[dogma.ProcessMessageHandler]
+	// Implementation contains information about the type that produced the
+	// configuration, if available.
+	Implementation optional.Optional[Implementation[dogma.ProcessMessageHandler]]
 
 	// Identity is the set of identities configured for the handler.
 	Identities []Identity
@@ -33,5 +29,5 @@ type Process struct {
 }
 
 func (h Process) String() string {
-	return stringify("process", h.TypeName, h.Identities)
+	return stringify("process", h.Implementation, h.Identities)
 }

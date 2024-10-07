@@ -8,13 +8,9 @@ import (
 // Integration represents the (potentially invalid) configuration of a
 // [dogma.IntegrationMessageHandler] implementation.
 type Integration struct {
-	// TypeName is the fully-qualified name of the Go type that implements
-	// [dogma.IntegrationMessageHandler], if available.
-	TypeName optional.Optional[string]
-
-	// Implementation is the value that produced the configuration, if
-	// available.
-	Implementation optional.Optional[dogma.IntegrationMessageHandler]
+	// Implementation contains information about the type that produced the
+	// configuration, if available.
+	Implementation optional.Optional[Implementation[dogma.IntegrationMessageHandler]]
 
 	// Identity is the set of identities configured for the handler.
 	Identities []Identity
@@ -33,5 +29,5 @@ type Integration struct {
 }
 
 func (h Integration) String() string {
-	return stringify("integration", h.TypeName, h.Identities)
+	return stringify("integration", h.Implementation, h.Identities)
 }

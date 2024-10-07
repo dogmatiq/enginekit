@@ -16,9 +16,13 @@ func FromProjection(h dogma.ProjectionMessageHandler) config.Projection {
 		return cfg
 	}
 
-	cfg.TypeName = optional.Some(typename.Of(h))
-	cfg.Implementation = optional.Some(h)
 	cfg.IsExhaustive = true
+	cfg.Implementation = optional.Some(
+		config.Implementation[dogma.ProjectionMessageHandler]{
+			TypeName: typename.Of(h),
+			Source:   optional.Some(h),
+		},
+	)
 
 	h.Configure(&projectionConfigurer{&cfg})
 

@@ -12,34 +12,34 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-func TestFromAggregate(t *testing.T) {
+func TestFromIntegration(t *testing.T) {
 	cases := []struct {
 		Name    string
-		Handler dogma.AggregateMessageHandler
-		Want    func(h dogma.AggregateMessageHandler) config.Aggregate
+		Handler dogma.IntegrationMessageHandler
+		Want    func(h dogma.IntegrationMessageHandler) config.Integration
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.AggregateMessageHandler) config.Aggregate {
-				return config.Aggregate{}
+			func(dogma.IntegrationMessageHandler) config.Integration {
+				return config.Integration{}
 			},
 		},
 		{
 			"unconfigured handler",
-			&AggregateMessageHandlerStub{},
-			func(app dogma.AggregateMessageHandler) config.Aggregate {
-				return config.Aggregate{
-					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+			&IntegrationMessageHandlerStub{},
+			func(app dogma.IntegrationMessageHandler) config.Integration {
+				return config.Integration{
+					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 					Implementation: optional.Some(app),
 				}
 			},
 		},
 		{
 			"configured handler",
-			&AggregateMessageHandlerStub{
-				ConfigureFunc: func(c dogma.AggregateConfigurer) {
-					c.Identity("aggregate", "d9d75a75-7839-4b3e-a7e5-c8884b88ea57")
+			&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("integration", "51ffcb6f-171f-41a1-90e7-6fe1111649cd")
 					c.Routes(
 						dogma.HandlesCommand[CommandStub[TypeA]](),
 						dogma.RecordsEvent[EventStub[TypeA]](),
@@ -47,14 +47,14 @@ func TestFromAggregate(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(app dogma.AggregateMessageHandler) config.Aggregate {
-				return config.Aggregate{
-					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+			func(app dogma.IntegrationMessageHandler) config.Integration {
+				return config.Integration{
+					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 					Implementation: optional.Some(app),
 					Identities: []config.Identity{
 						{
-							Name: "aggregate",
-							Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
+							Name: "integration",
+							Key:  "51ffcb6f-171f-41a1-90e7-6fe1111649cd",
 						},
 					},
 					Routes: []config.Route{
@@ -90,7 +90,7 @@ func TestFromAggregate(t *testing.T) {
 			Expect(
 				t,
 				"unexpected config",
-				FromAggregate(c.Handler),
+				FromIntegration(c.Handler),
 				c.Want(c.Handler),
 			)
 		})

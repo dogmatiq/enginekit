@@ -56,10 +56,12 @@ func TestFromApplication(t *testing.T) {
 				return config.Application{
 					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
 					Implementation: optional.Some(app),
-					Identity: optional.Some(config.Identity{
-						Name: "app",
-						Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
-					}),
+					Identities: []config.Identity{
+						{
+							Name: "app",
+							Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
+						},
+					},
 					Aggregates: []config.Aggregate{
 						{
 							TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),

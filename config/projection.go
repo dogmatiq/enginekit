@@ -16,13 +16,27 @@ type Projection struct {
 	// available.
 	Implementation optional.Optional[dogma.ProjectionMessageHandler]
 
-	// Identity is the (potentially invalid) identity of the handler, if
-	// configured.
-	Identity optional.Optional[Identity]
+	// Identity is the set of identities configured for the handler.
+	Identities []Identity
 
 	// Routes is the set of message routes to and from the handler.
 	Routes []Route
 
+	// DeliveryPolicy is the delivery policy for the handler, if configured.
+	DeliveryPolicy optional.Optional[ProjectionDeliveryPolicy]
+
 	// IsDisabled is true if the handler was disabled via the configurer.
 	IsDisabled bool
+}
+
+// ProjectionDeliveryPolicy represents the (potentially invalid) configuration
+// of a [dogma.ProjectionDeliveryPolicy].
+type ProjectionDeliveryPolicy struct {
+	// TypeName is the fully-qualified name of the Go type that implements
+	// [dogma.DeliveryPolicy], if available.
+	TypeName optional.Optional[string]
+
+	// Implementation is the value that produced the configuration, if
+	// available.
+	Implementation optional.Optional[dogma.ProjectionDeliveryPolicy]
 }

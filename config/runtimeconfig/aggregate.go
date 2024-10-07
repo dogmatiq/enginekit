@@ -16,9 +16,13 @@ func FromAggregate(h dogma.AggregateMessageHandler) config.Aggregate {
 		return cfg
 	}
 
-	cfg.TypeName = optional.Some(typename.Of(h))
-	cfg.Implementation = optional.Some(h)
 	cfg.IsExhaustive = true
+	cfg.Implementation = optional.Some(
+		config.Implementation[dogma.AggregateMessageHandler]{
+			TypeName: typename.Of(h),
+			Source:   optional.Some(h),
+		},
+	)
 
 	h.Configure(&aggregateConfigurer{&cfg})
 

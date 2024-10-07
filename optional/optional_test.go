@@ -7,7 +7,7 @@ import (
 	. "github.com/dogmatiq/enginekit/optional"
 )
 
-func TestOptional_some(t *testing.T) {
+func TestSome(t *testing.T) {
 	v := Some(42)
 
 	if !v.IsPresent() {
@@ -25,7 +25,7 @@ func TestOptional_some(t *testing.T) {
 	}
 }
 
-func TestOptional_none(t *testing.T) {
+func TestNone(t *testing.T) {
 	v := None[int]()
 
 	if v.IsPresent() {

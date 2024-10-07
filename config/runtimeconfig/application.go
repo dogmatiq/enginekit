@@ -16,9 +16,13 @@ func FromApplication(app dogma.Application) config.Application {
 		return cfg
 	}
 
-	cfg.TypeName = optional.Some(typename.Of(app))
-	cfg.Implementation = optional.Some(app)
 	cfg.IsExhaustive = true
+	cfg.Implementation = optional.Some(
+		config.Implementation[dogma.Application]{
+			TypeName: typename.Of(app),
+			Source:   optional.Some(app),
+		},
+	)
 
 	app.Configure(&applicationConfigurer{&cfg})
 

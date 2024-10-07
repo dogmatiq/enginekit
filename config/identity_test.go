@@ -79,8 +79,7 @@ func TestIdentity_validate(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			got := ""
-
-			if err := c.Identity.Validate(); err != nil {
+			if err := Validate(c.Identity); err != nil {
 				got = err.Error()
 			}
 
@@ -97,7 +96,7 @@ func TestIdentity_normalize(t *testing.T) {
 		Key:  "0EB1E0A1-B067-4625-A7DC-D7D260B0AFAB",
 	}
 
-	got, err := id.Normalize()
+	got, err := Normalize(id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +115,7 @@ func TestIdentity_normalize(t *testing.T) {
 
 	id.Name = ""
 
-	if _, err = id.Normalize(); err == nil {
+	if _, err = Normalize(id); err == nil {
 		t.Fatal("expected an error")
 	}
 }

@@ -8,13 +8,9 @@ import (
 // Projection represents the (potentially invalid) configuration of a
 // [dogma.ProjectionMessageHandler] implementation.
 type Projection struct {
-	// TypeName is the fully-qualified name of the Go type that implements
-	// [dogma.ProjectionMessageHandler], if available.
-	TypeName optional.Optional[string]
-
-	// Implementation is the value that produced the configuration, if
-	// available.
-	Implementation optional.Optional[dogma.ProjectionMessageHandler]
+	// Implementation contains information about the type that produced the
+	// configuration, if available.
+	Implementation optional.Optional[Implementation[dogma.ProjectionMessageHandler]]
 
 	// Identity is the set of identities configured for the handler.
 	Identities []Identity
@@ -36,7 +32,7 @@ type Projection struct {
 }
 
 func (h Projection) String() string {
-	return stringify("projection", h.TypeName, h.Identities)
+	return stringify("projection", h.Implementation, h.Identities)
 }
 
 // ProjectionDeliveryPolicy represents the (potentially invalid) configuration

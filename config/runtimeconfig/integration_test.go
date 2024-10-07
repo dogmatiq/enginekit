@@ -28,11 +28,15 @@ func TestFromIntegration(t *testing.T) {
 		{
 			"unconfigured handler",
 			&IntegrationMessageHandlerStub{},
-			func(app dogma.IntegrationMessageHandler) config.Integration {
+			func(h dogma.IntegrationMessageHandler) config.Integration {
 				return config.Integration{
-					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-					Implementation: optional.Some(app),
-					IsExhaustive:   true,
+					Implementation: optional.Some(
+						config.Implementation[dogma.IntegrationMessageHandler]{
+							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+							Source:   optional.Some(h),
+						},
+					),
+					IsExhaustive: true,
 				}
 			},
 		},
@@ -48,10 +52,14 @@ func TestFromIntegration(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(app dogma.IntegrationMessageHandler) config.Integration {
+			func(h dogma.IntegrationMessageHandler) config.Integration {
 				return config.Integration{
-					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-					Implementation: optional.Some(app),
+					Implementation: optional.Some(
+						config.Implementation[dogma.IntegrationMessageHandler]{
+							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+							Source:   optional.Some(h),
+						},
+					),
 					Identities: []config.Identity{
 						{
 							Name: "integration",

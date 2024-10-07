@@ -29,6 +29,10 @@ type Projection struct {
 	IsDisabled bool
 }
 
+func (h Projection) String() string {
+	return stringify("projection", h.TypeName, h.Identities)
+}
+
 // ProjectionDeliveryPolicy represents the (potentially invalid) configuration
 // of a [dogma.ProjectionDeliveryPolicy].
 type ProjectionDeliveryPolicy struct {

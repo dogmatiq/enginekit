@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"unicode"
 
@@ -13,26 +14,37 @@ type Identity struct {
 	Key  string
 }
 
-// Errors returns a list of errors that were encountered while building the
-// identity.
-func (i Identity) Errors() []error {
-	var errors []error
+func (i Identity) String() string {
+	name := "?"
+	if i.Name != "" {
+		name = i.Name
+	}
+
+	key := "?"
+	if i.Key != "" {
+		if normalized, err := uuidpb.Parse(i.Key); err == nil {
+			key = normalized.String()
+		} else {
+			key = i.Key
+		}
+	}
+
+	return name + "/" + key
+}
+
+// Validate returns an error if the identity is invalid.
+func (i Identity) Validate() error {
+	var problems error
 
 	if !isValidIdentityName(i.Name) {
-		errors = append(
-			errors,
-			fmt.Errorf("invalid identity name %q: names must be non-empty, printable UTF-8 strings with no whitespace", i.Name),
-		)
+		problems = errors.Join(problems, InvalidIdentityNameError{i.Name})
 	}
 
 	if _, err := uuidpb.Parse(i.Key); err != nil {
-		errors = append(
-			errors,
-			fmt.Errorf("invalid identity key %q: keys must be RFC 4122/9562 UUIDs: %w", i.Key, err),
-		)
+		problems = errors.Join(problems, InvalidIdentityKeyError{i.Key, err})
 	}
 
-	return errors
+	return problems
 }
 
 // isValidIdentityName returns true if n is a valid application or handler name.
@@ -51,4 +63,29 @@ func isValidIdentityName(n string) bool {
 	}
 
 	return true
+}
+
+// InvalidIdentityNameError is an error that occurs when an identity name is
+// invalid.
+type InvalidIdentityNameError struct {
+	InvalidName string
+}
+
+func (e InvalidIdentityNameError) Error() string {
+	return fmt.Sprintf("invalid identity name (%q): names must be non-empty, printable UTF-8 strings with no whitespace", e.InvalidName)
+}
+
+// InvalidIdentityKeyError is an error that occurs when an identity key is
+// invalid.
+type InvalidIdentityKeyError struct {
+	InvalidKey string
+	ParseError error
+}
+
+func (e InvalidIdentityKeyError) Unwrap() error {
+	return e.ParseError
+}
+
+func (e InvalidIdentityKeyError) Error() string {
+	return fmt.Sprintf("invalid identity key (%q): keys must be RFC 4122/9562 UUIDs: %s", e.InvalidKey, e.ParseError)
 }

@@ -21,17 +21,17 @@ func (o Optional[T]) IsPresent() bool {
 	return o.ok
 }
 
-// Value returns the optional value, or panics if it is not present.
-func (o Optional[T]) Value() T {
+// Get returns the optional value, or panics if it is not present.
+func (o Optional[T]) Get() T {
 	if o.ok {
 		return o.value
 	}
 	panic("value is not present")
 }
 
-// TryValue returns the optional value and a boolean indicating whether it is
+// TryGet returns the optional value and a boolean indicating whether it is
 // present.
-func (o Optional[T]) TryValue() (T, bool) {
+func (o Optional[T]) TryGet() (T, bool) {
 	return o.value, o.ok
 }
 

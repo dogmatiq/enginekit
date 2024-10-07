@@ -25,3 +25,7 @@ type Aggregate struct {
 	// IsDisabled is true if the handler was disabled via the configurer.
 	IsDisabled bool
 }
+
+func (h Aggregate) String() string {
+	return stringify("aggregate", h.TypeName, h.Identities)
+}

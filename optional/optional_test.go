@@ -14,11 +14,11 @@ func TestOptional_some(t *testing.T) {
 		t.Fatal("expected value to be present")
 	}
 
-	if x := v.Value(); x != 42 {
+	if x := v.Get(); x != 42 {
 		t.Fatalf("unexpected value: got %v, want 42", x)
 	}
 
-	if x, ok := v.TryValue(); !ok {
+	if x, ok := v.TryGet(); !ok {
 		t.Fatal("expected value to be present")
 	} else if x != 42 {
 		t.Fatalf("unexpected value: got %v, want 42", x)
@@ -39,10 +39,10 @@ func TestOptional_none(t *testing.T) {
 			}
 		}()
 
-		v.Value()
+		v.Get()
 	}()
 
-	if x, ok := v.TryValue(); ok {
+	if x, ok := v.TryGet(); ok {
 		t.Fatal("expected value to be absent")
 	} else if x != 0 {
 		t.Fatalf("unexpected value: got %v, want 0", x)
@@ -57,7 +57,7 @@ func TestTransform(t *testing.T) {
 		t.Fatal("expected transformed value to be present")
 	}
 
-	if x := u.Value(); x != "42" {
+	if x := u.Get(); x != "42" {
 		t.Fatalf("unexpected transformed value: got %v, want 'x42'", x)
 	}
 

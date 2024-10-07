@@ -32,6 +32,7 @@ func TestFromAggregate(t *testing.T) {
 				return config.Aggregate{
 					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 					Implementation: optional.Some(app),
+					IsExhaustive:   true,
 				}
 			},
 		},
@@ -79,7 +80,8 @@ func TestFromAggregate(t *testing.T) {
 							),
 						},
 					},
-					IsDisabled: true,
+					IsDisabled:   true,
+					IsExhaustive: true,
 				}
 			},
 		},

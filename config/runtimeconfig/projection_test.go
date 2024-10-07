@@ -32,6 +32,7 @@ func TestFromProjection(t *testing.T) {
 				return config.Projection{
 					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 					Implementation: optional.Some(app),
+					IsExhaustive:   true,
 				}
 			},
 		},
@@ -77,7 +78,8 @@ func TestFromProjection(t *testing.T) {
 							Implementation: optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
 						},
 					),
-					IsDisabled: true,
+					IsDisabled:   true,
+					IsExhaustive: true,
 				}
 			},
 		},

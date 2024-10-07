@@ -38,6 +38,7 @@ func TestFromApplication(t *testing.T) {
 				return config.Application{
 					TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
 					Implementation: optional.Some(app),
+					IsExhaustive:   true,
 				}
 			},
 		},
@@ -66,26 +67,31 @@ func TestFromApplication(t *testing.T) {
 						{
 							TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 							Implementation: optional.Some(aggregate),
+							IsExhaustive:   true,
 						},
 					},
 					Processes: []config.Process{
 						{
 							TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 							Implementation: optional.Some(process),
+							IsExhaustive:   true,
 						},
 					},
 					Integrations: []config.Integration{
 						{
 							TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 							Implementation: optional.Some(integration),
+							IsExhaustive:   true,
 						},
 					},
 					Projections: []config.Projection{
 						{
 							TypeName:       optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 							Implementation: optional.Some(projection),
+							IsExhaustive:   true,
 						},
 					},
+					IsExhaustive: true,
 				}
 			},
 		},

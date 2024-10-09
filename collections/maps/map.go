@@ -37,7 +37,7 @@ func NewFromSeq[K comparable, V any](seq iter.Seq2[K, V]) *Map[K, V] {
 }
 
 // Set sets the value associated with the given key.
-func (m *Map[K, V]) Set(k K, v V) {
+func (m *Map[K, V]) Set(k K, v V) *Map[K, V] {
 	if m == nil {
 		panic("Set() called on a nil map")
 	}
@@ -47,6 +47,8 @@ func (m *Map[K, V]) Set(k K, v V) {
 	}
 
 	m.elements[k] = v
+
+	return m
 }
 
 // Update applies fn to the value associated with the given key.

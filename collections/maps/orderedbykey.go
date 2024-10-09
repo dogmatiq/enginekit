@@ -25,8 +25,8 @@ func NewOrderedByKeyFromSeq[K constraints.Ordered[K], V any](seq iter.Seq2[K, V]
 }
 
 // Set sets the value associated with the given key.
-func (m *OrderedByKey[K, V]) Set(k K, v V) {
-	orderedSet(m, k, v)
+func (m *OrderedByKey[K, V]) Set(k K, v V) *OrderedByKey[K, V] {
+	return orderedSet(m, k, v)
 }
 
 // Update applies fn to the value associated with the given key.

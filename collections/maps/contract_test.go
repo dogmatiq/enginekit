@@ -12,7 +12,7 @@ import (
 type contract[K, V, I any] interface {
 	*I
 
-	Set(K, V)
+	Set(K, V) *I
 	Update(K, func(*V))
 	Remove(...K)
 	Clear()
@@ -180,14 +180,25 @@ func testMap[
 						}()
 					}
 
-					subject.Set(k, v)
+					snapshot := subject
+					subject = subject.Set(k, v)
+
+					if subject != snapshot {
+						t.Fatal("Set() should return the same map")
+					}
 				},
 				"overwrite an existing key": func(t *rapid.T) {
 					k := drawExistingKey(t)
 					v := drawValue(t)
 
-					subject.Set(k, v)
 					replace(k, v)
+
+					snapshot := subject
+					subject = subject.Set(k, v)
+
+					if subject != snapshot {
+						t.Fatal("Set() should return the same map")
+					}
 				},
 				"update a new key": func(t *rapid.T) {
 					k := drawNewKey(t)

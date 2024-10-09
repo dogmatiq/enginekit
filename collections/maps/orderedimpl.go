@@ -68,7 +68,7 @@ func orderedSet[K, V any, M ordered[K, V, I], I any](
 	m M,
 	k K,
 	v V,
-) {
+) M {
 	if m == nil {
 		panic("Set() called on a nil map")
 	}
@@ -80,6 +80,8 @@ func orderedSet[K, V any, M ordered[K, V, I], I any](
 	} else {
 		*pairs = slices.Insert(*pairs, i, Pair[K, V]{k, v})
 	}
+
+	return m
 }
 
 func orderedUpdate[K, V any, M ordered[K, V, I], I any](

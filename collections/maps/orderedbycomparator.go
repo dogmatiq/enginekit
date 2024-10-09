@@ -25,8 +25,8 @@ func NewOrderedByComparatorFromSeq[K, V any, C constraints.Comparator[K]](seq it
 }
 
 // Set sets the value associated with the given key.
-func (m *OrderedByComparator[K, V, C]) Set(k K, v V) {
-	orderedSet(m, k, v)
+func (m *OrderedByComparator[K, V, C]) Set(k K, v V) *OrderedByComparator[K, V, C] {
+	return orderedSet(m, k, v)
 }
 
 // Update applies fn to the value associated with the given key.

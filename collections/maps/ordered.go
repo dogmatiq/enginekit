@@ -22,8 +22,8 @@ func NewOrderedFromSeq[K cmp.Ordered, V any](seq iter.Seq2[K, V]) *Ordered[K, V]
 }
 
 // Set sets the value associated with the given key.
-func (m *Ordered[K, V]) Set(k K, v V) {
-	orderedSet(m, k, v)
+func (m *Ordered[K, V]) Set(k K, v V) *Ordered[K, V] {
+	return orderedSet(m, k, v)
 }
 
 // Update applies fn to the value associated with the given key.

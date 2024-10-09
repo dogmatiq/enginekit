@@ -46,12 +46,13 @@ func NewProtoFromSeq[K proto.Message, V any](seq iter.Seq2[K, V]) *Proto[K, V] {
 }
 
 // Set sets the value associated with the given key.
-func (m *Proto[K, V]) Set(k K, v V) {
+func (m *Proto[K, V]) Set(k K, v V) *Proto[K, V] {
 	if m == nil {
 		panic("Set() called on a nil map")
 	}
 
 	m.elements.Set(m.marshal(k), v)
+	return m
 }
 
 // Update applies fn to the value associated with the given key.

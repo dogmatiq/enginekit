@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - Added `Update()` method to all map types.
 
+### Changed
+
+- The `Set()` method on all map types now returns the map, to allow for easier
+  in-line map building.
+
 ## [0.16.1] - 2024-10-05
 
 ### Added

@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"iter"
 	"maps"
 	"slices"
@@ -36,6 +35,13 @@ func (a Application) String() string {
 	return stringify("application", a.Impl, a.ConfiguredIdentities)
 }
 
+// Identity returns the entity's identity.
+//
+// It panics if no single valid identity is configured.
+func (a Application) Identity() Identity {
+	return normalizedIdentity(a)
+}
+
 // Aggregates returns a list of [dogma.AggregateMessageHandler] implementations
 // that are registered with the application.
 func (a Application) Aggregates() []Aggregate {
@@ -60,35 +66,12 @@ func (a Application) Projections() []Projection {
 	return normalizedHandlers[Projection](a.ConfiguredHandlers)
 }
 
-// Identity returns the entity's identity.
-//
-// It panics if no single valid identity is configured.
-func (a Application) Identity() Identity {
-	return normalizedIdentity(a)
-}
-
 func (a Application) configuredIdentities() []Identity { return a.ConfiguredIdentities }
 
 func (a Application) normalize(opts validationOptions) (_ Entity, errs error) {
 	normalizeIdentitiesInPlace(opts, a, &errs, &a.ConfiguredIdentities)
 	normalizeHandlersInPlace(opts, a, &errs, &a.ConfiguredHandlers)
 	return a, errs
-}
-
-// InvalidHandlerError is an error that occurs when an application contains an
-// invalid handler.
-type InvalidHandlerError struct {
-	Application Application
-	Handler     any
-	Cause       error
-}
-
-func (e InvalidHandlerError) Error() string {
-	return fmt.Sprintf("%s contains an invalid handler: %s", e.Application, e.Cause)
-}
-
-func (e InvalidHandlerError) Unwrap() error {
-	return e.Cause
 }
 
 func normalizeHandlersInPlace(
@@ -218,8 +201,6 @@ func normalizedHandlers[T Handler]([]Handler) []T {
 	panic("not implemented")
 }
 
-// conflicts keeps track of conflicting identity components across multiple
-// entities.
 type conflicts[K comparable, V any] struct {
 	m map[K]map[int]V
 }

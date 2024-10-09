@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -91,23 +89,6 @@ func (r RouteType) String() string {
 	default:
 		panic("unrecognized route type")
 	}
-}
-
-// RouteConflictError is an error that occurs when multiple handlers are
-// configured with conflicting routes.
-type RouteConflictError struct {
-	Handlers         []Handler
-	ConflictingRoute Route
-}
-
-func (e RouteConflictError) Error() string {
-	return fmt.Sprintf(
-		"%s have %q routes for the same %s type (%s), which is not allowed",
-		renderList(e.Handlers),
-		e.ConflictingRoute.RouteType.Get(),
-		e.ConflictingRoute.MessageType.Get().Kind,
-		e.ConflictingRoute.MessageType.Get().TypeName,
-	)
 }
 
 func normalizeRoutes(any) []Route {

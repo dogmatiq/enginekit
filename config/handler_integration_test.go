@@ -68,7 +68,7 @@ func TestIntegration_validation(t *testing.T) {
 			},
 		},
 		{
-			"integration must handle at least one command",
+			"integration must handle at least one command type",
 			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: expected at least one "HandlesCommand" route`,
 			&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {

@@ -73,7 +73,7 @@ func TestAggregate_validation(t *testing.T) {
 			},
 		},
 		{
-			"aggregate must handle at least one command",
+			"aggregate must handle at least one command type",
 			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "HandlesCommand" route`,
 			&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {

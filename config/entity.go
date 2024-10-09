@@ -32,7 +32,7 @@ type MultipleIdentitiesError struct {
 
 func (e MultipleIdentitiesError) Error() string {
 	return fmt.Sprintf(
-		"multiple identities are configured (%s)",
+		"multiple identities are configured: %s",
 		renderList(e.Identities),
 	)
 }

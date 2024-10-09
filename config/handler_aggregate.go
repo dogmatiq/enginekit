@@ -61,9 +61,9 @@ func (h Aggregate) routes() []Route {
 	return h.ConfiguredRoutes
 }
 
-func (h Aggregate) routeTypes() map[RouteType]bool {
-	return map[RouteType]bool{
-		HandlesCommandRoute: true,
-		RecordsEventRoute:   true,
+func (h Aggregate) routeSpec() routeSpec {
+	return routeSpec{
+		HandlesCommandRoute: required,
+		RecordsEventRoute:   required,
 	}
 }

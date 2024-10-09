@@ -63,9 +63,9 @@ type IdentityConflictError struct {
 
 func (e IdentityConflictError) Error() string {
 	return fmt.Sprintf(
-		"%s have the same identity (%s)",
-		renderList(e.Entities),
+		"entities have conflicting identities: %s is shared by %s",
 		e.ConflictingIdentity,
+		renderList(e.Entities),
 	)
 }
 
@@ -78,9 +78,9 @@ type IdentityNameConflictError struct {
 
 func (e IdentityNameConflictError) Error() string {
 	return fmt.Sprintf(
-		"%s have the same identity name (%s)",
-		renderList(e.Entities),
+		"entities have conflicting identities: the %q name is shared by %s",
 		e.ConflictingName,
+		renderList(e.Entities),
 	)
 }
 
@@ -93,27 +93,42 @@ type IdentityKeyConflictError struct {
 
 func (e IdentityKeyConflictError) Error() string {
 	return fmt.Sprintf(
-		"%s have the same identity key (%s)",
-		renderList(e.Entities),
+		"entities have conflicting identities: the %q key is shared by %s",
 		e.ConflictingKey,
+		renderList(e.Entities),
 	)
 }
 
-// RouteConflictError indicates that more than one [Handler] within the same
-// [Application] is configured with conflicting routes for the same
-// [MessageType].
-type RouteConflictError struct {
+// ConflictingRouteError indicates that more than one [Handler] within the same
+// [Application] is configured with routes for the same [MessageType] in a
+// manner that is not permitted.
+//
+// For example, no two handlers can handle commands of the same type, though any
+// number of handlers may handle events of the same type.
+type ConflictingRouteError struct {
 	Handlers         []Handler
 	ConflictingRoute Route
 }
 
-func (e RouteConflictError) Error() string {
+func (e ConflictingRouteError) Error() string {
+	rt := e.ConflictingRoute.RouteType.Get()
+
+	verb := "handled"
+	switch rt {
+	case ExecutesCommandRoute:
+		verb = "executed"
+	case RecordsEventRoute:
+		verb = "recorded"
+	case SchedulesTimeoutRoute:
+		verb = "scheduled"
+	}
+
 	return fmt.Sprintf(
-		"%s have %q routes for the same %s type (%s)",
+		"handlers have conflicting %q routes: %s is %s by %s",
+		rt,
+		e.ConflictingRoute.MessageType.Get(),
+		verb,
 		renderList(e.Handlers),
-		e.ConflictingRoute.RouteType.Get(),
-		e.ConflictingRoute.MessageType.Get().Kind,
-		e.ConflictingRoute.MessageType.Get().TypeName,
 	)
 }
 
@@ -215,6 +230,6 @@ func detectRouteConflicts(ctx *normalizationContext, app Application) {
 	}
 
 	for route, handlers := range conflictingRoutes.All() {
-		ctx.Fail(RouteConflictError{handlers, route})
+		ctx.Fail(ConflictingRouteError{handlers, route})
 	}
 }

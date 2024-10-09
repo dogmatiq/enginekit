@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"strings"
 
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -11,20 +11,23 @@ func stringify[T any](
 	impl optional.Optional[Implementation[T]],
 	identities []Identity,
 ) string {
-	identifier := "?"
+	identifier := ""
 
 	if i, ok := impl.TryGet(); ok {
-		identifier = i.TypeName
+		identifier = strings.TrimPrefix(i.TypeName, "*")
 	} else {
 		for _, id := range identities {
 			if norm, err := Normalize(id); err == nil {
 				identifier = norm.String()
 				break
 			}
-
 			identifier = id.String()
 		}
 	}
 
-	return fmt.Sprintf("%s(%s)", label, identifier)
+	if identifier == "" {
+		return label
+	}
+
+	return label + ":" + identifier
 }

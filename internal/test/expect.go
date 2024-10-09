@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -12,10 +13,10 @@ import (
 )
 
 // Expect compares two values and fails the test if they are different.
-func Expect[T any](
+func Expect(
 	t *testing.T,
 	failMessage string,
-	got, want T,
+	got, want any,
 	options ...cmp.Option,
 ) {
 	t.Helper()
@@ -48,4 +49,26 @@ func Expect[T any](
 		t.Log(failMessage)
 		t.Fatal(diff)
 	}
+}
+
+// ExpectPanic asserts that a function panics with a specific value.
+func ExpectPanic(
+	t *testing.T,
+	want string,
+	fn func(),
+) {
+	t.Helper()
+
+	defer func() {
+		got := recover()
+
+		Expect(
+			t,
+			"unexpected panic",
+			fmt.Sprint(got),
+			want,
+		)
+	}()
+
+	fn()
 }

@@ -6,7 +6,7 @@ import (
 
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/stubs"
-	"github.com/dogmatiq/enginekit/internal/test"
+	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/marshaler"
 	"github.com/dogmatiq/enginekit/marshaler/codecs/json"
 	"github.com/dogmatiq/enginekit/marshaler/codecs/protobuf"
@@ -81,7 +81,7 @@ func TestTranscoder(t *testing.T) {
 			Data:      []byte(`{"value":"A1"}`),
 		}
 
-		test.Expect(
+		Expect(
 			t,
 			"unexpected envelope",
 			got,
@@ -92,7 +92,7 @@ func TestTranscoder(t *testing.T) {
 			t.Error("expected ok to be true")
 		}
 
-		test.Expect(
+		Expect(
 			t,
 			"original envelope was modified",
 			original,

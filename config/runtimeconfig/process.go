@@ -17,7 +17,7 @@ func FromProcess(h dogma.ProcessMessageHandler) config.Process {
 	}
 
 	cfg.IsExhaustive = true
-	cfg.Implementation = optional.Some(
+	cfg.Impl = optional.Some(
 		config.Implementation[dogma.ProcessMessageHandler]{
 			TypeName: typename.Of(h),
 			Source:   optional.Some(h),
@@ -34,8 +34,8 @@ type processConfigurer struct {
 }
 
 func (c *processConfigurer) Identity(name, key string) {
-	c.cfg.Identities = append(
-		c.cfg.Identities,
+	c.cfg.ConfiguredIdentities = append(
+		c.cfg.ConfiguredIdentities,
 		config.Identity{
 			Name: name,
 			Key:  key,
@@ -45,7 +45,7 @@ func (c *processConfigurer) Identity(name, key string) {
 
 func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {
 	for _, r := range routes {
-		c.cfg.Routes = append(c.cfg.Routes, fromRoute(r))
+		c.cfg.ConfiguredRoutes = append(c.cfg.ConfiguredRoutes, fromRoute(r))
 	}
 }
 

@@ -36,7 +36,7 @@ func TestFromApplication(t *testing.T) {
 			&ApplicationStub{},
 			func(app dogma.Application) config.Application {
 				return config.Application{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.Application]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
 							Source:   optional.Some(app),
@@ -59,21 +59,21 @@ func TestFromApplication(t *testing.T) {
 			},
 			func(app dogma.Application) config.Application {
 				return config.Application{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.Application]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
 							Source:   optional.Some(app),
 						},
 					),
-					Identities: []config.Identity{
+					ConfiguredIdentities: []config.Identity{
 						{
 							Name: "app",
 							Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
 						},
 					},
-					Aggregates: []config.Aggregate{
-						{
-							Implementation: optional.Some(
+					ConfiguredHandlers: []config.Handler{
+						config.Aggregate{
+							Impl: optional.Some(
 								config.Implementation[dogma.AggregateMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
 									Source:   optional.Some(aggregate),
@@ -81,10 +81,8 @@ func TestFromApplication(t *testing.T) {
 							),
 							IsExhaustive: true,
 						},
-					},
-					Processes: []config.Process{
-						{
-							Implementation: optional.Some(
+						config.Process{
+							Impl: optional.Some(
 								config.Implementation[dogma.ProcessMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
 									Source:   optional.Some(process),
@@ -92,10 +90,8 @@ func TestFromApplication(t *testing.T) {
 							),
 							IsExhaustive: true,
 						},
-					},
-					Integrations: []config.Integration{
-						{
-							Implementation: optional.Some(
+						config.Integration{
+							Impl: optional.Some(
 								config.Implementation[dogma.IntegrationMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
 									Source:   optional.Some(integration),
@@ -103,10 +99,8 @@ func TestFromApplication(t *testing.T) {
 							),
 							IsExhaustive: true,
 						},
-					},
-					Projections: []config.Projection{
-						{
-							Implementation: optional.Some(
+						config.Projection{
+							Impl: optional.Some(
 								config.Implementation[dogma.ProjectionMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
 									Source:   optional.Some(projection),

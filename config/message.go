@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -21,7 +23,7 @@ type MessageType struct {
 // Route represents a message route to or from a handler.
 type Route struct {
 	// RouteType is the type of route, if available.
-	Type optional.Optional[RouteType]
+	RouteType optional.Optional[RouteType]
 
 	// MessageType is the type of message being routed, if available.
 	MessageType optional.Optional[MessageType]
@@ -72,4 +74,42 @@ func (r RouteType) IsProduce() bool {
 	default:
 		return false
 	}
+}
+
+func (r RouteType) String() string {
+	switch r {
+	case HandlesCommandRoute:
+		return "HandlesCommand"
+	case HandlesEventRoute:
+		return "HandlesEvent"
+	case ExecutesCommandRoute:
+		return "ExecutesCommand"
+	case RecordsEventRoute:
+		return "RecordsEvent"
+	case SchedulesTimeoutRoute:
+		return "SchedulesTimeout"
+	default:
+		panic("unrecognized route type")
+	}
+}
+
+// RouteConflictError is an error that occurs when multiple handlers are
+// configured with conflicting routes.
+type RouteConflictError struct {
+	Handlers         []Handler
+	ConflictingRoute Route
+}
+
+func (e RouteConflictError) Error() string {
+	return fmt.Sprintf(
+		"%s have %q routes for the same %s type (%s), which is not allowed",
+		renderList(e.Handlers),
+		e.ConflictingRoute.RouteType.Get(),
+		e.ConflictingRoute.MessageType.Get().Kind,
+		e.ConflictingRoute.MessageType.Get().TypeName,
+	)
+}
+
+func normalizeRoutes(any) []Route {
+	panic("not implemented")
 }

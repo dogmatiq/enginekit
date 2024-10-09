@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/internal/test"
+	. "github.com/dogmatiq/enginekit/internal/test"
 )
 
 func TestIdentity_validate(t *testing.T) {
@@ -79,7 +79,7 @@ func TestIdentity_validate(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			got := ""
-			if err := Validate(c.Identity); err != nil {
+			if _, err := Normalize(c.Identity); err != nil {
 				got = err.Error()
 			}
 
@@ -106,7 +106,7 @@ func TestIdentity_normalize(t *testing.T) {
 		Key:  "0eb1e0a1-b067-4625-a7dc-d7d260b0afab",
 	}
 
-	test.Expect(
+	Expect(
 		t,
 		"unexpected identity",
 		got,

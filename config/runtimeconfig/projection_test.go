@@ -30,7 +30,7 @@ func TestFromProjection(t *testing.T) {
 			&ProjectionMessageHandlerStub{},
 			func(h dogma.ProjectionMessageHandler) config.Projection {
 				return config.Projection{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.ProjectionMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
 							Source:   optional.Some(h),
@@ -56,21 +56,21 @@ func TestFromProjection(t *testing.T) {
 			},
 			func(h dogma.ProjectionMessageHandler) config.Projection {
 				return config.Projection{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.ProjectionMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
 							Source:   optional.Some(h),
 						},
 					),
-					Identities: []config.Identity{
+					ConfiguredIdentities: []config.Identity{
 						{
 							Name: "projection",
 							Key:  "050415ad-ce90-496f-8987-40467e5415e0",
 						},
 					},
-					Routes: []config.Route{
+					ConfiguredRoutes: []config.Route{
 						{
-							Type: optional.Some(config.HandlesEventRoute),
+							RouteType: optional.Some(config.HandlesEventRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",

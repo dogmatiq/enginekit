@@ -30,7 +30,7 @@ func TestFromProcess(t *testing.T) {
 			&ProcessMessageHandlerStub{},
 			func(h dogma.ProcessMessageHandler) config.Process {
 				return config.Process{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.ProcessMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
 							Source:   optional.Some(h),
@@ -55,21 +55,21 @@ func TestFromProcess(t *testing.T) {
 			},
 			func(h dogma.ProcessMessageHandler) config.Process {
 				return config.Process{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.ProcessMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
 							Source:   optional.Some(h),
 						},
 					),
-					Identities: []config.Identity{
+					ConfiguredIdentities: []config.Identity{
 						{
 							Name: "projection",
 							Key:  "050415ad-ce90-496f-8987-40467e5415e0",
 						},
 					},
-					Routes: []config.Route{
+					ConfiguredRoutes: []config.Route{
 						{
-							Type: optional.Some(config.HandlesEventRoute),
+							RouteType: optional.Some(config.HandlesEventRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",
@@ -79,7 +79,7 @@ func TestFromProcess(t *testing.T) {
 							),
 						},
 						{
-							Type: optional.Some(config.ExecutesCommandRoute),
+							RouteType: optional.Some(config.ExecutesCommandRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",
@@ -89,7 +89,7 @@ func TestFromProcess(t *testing.T) {
 							),
 						},
 						{
-							Type: optional.Some(config.SchedulesTimeoutRoute),
+							RouteType: optional.Some(config.SchedulesTimeoutRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",

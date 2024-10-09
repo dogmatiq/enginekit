@@ -18,19 +18,19 @@ func fromRoute(r dogma.Route) config.Route {
 	if r != nil {
 		switch r := r.(type) {
 		case dogma.HandlesCommandRoute:
-			cfg.Type = optional.Some(config.HandlesCommandRoute)
+			cfg.RouteType = optional.Some(config.HandlesCommandRoute)
 			cfg.MessageType = messageType(r.Type)
 		case dogma.RecordsEventRoute:
-			cfg.Type = optional.Some(config.RecordsEventRoute)
+			cfg.RouteType = optional.Some(config.RecordsEventRoute)
 			cfg.MessageType = messageType(r.Type)
 		case dogma.HandlesEventRoute:
-			cfg.Type = optional.Some(config.HandlesEventRoute)
+			cfg.RouteType = optional.Some(config.HandlesEventRoute)
 			cfg.MessageType = messageType(r.Type)
 		case dogma.ExecutesCommandRoute:
-			cfg.Type = optional.Some(config.ExecutesCommandRoute)
+			cfg.RouteType = optional.Some(config.ExecutesCommandRoute)
 			cfg.MessageType = messageType(r.Type)
 		case dogma.SchedulesTimeoutRoute:
-			cfg.Type = optional.Some(config.SchedulesTimeoutRoute)
+			cfg.RouteType = optional.Some(config.SchedulesTimeoutRoute)
 			cfg.MessageType = messageType(r.Type)
 		}
 	}

@@ -1,9 +1,7 @@
 package config
 
 import (
-	"errors"
-	"iter"
-	"maps"
+	"fmt"
 	"slices"
 
 	"github.com/dogmatiq/dogma"
@@ -42,84 +40,111 @@ func (a Application) Identity() Identity {
 	return normalizedIdentity(a)
 }
 
-// Aggregates returns a list of [dogma.AggregateMessageHandler] implementations
-// that are registered with the application.
-func (a Application) Aggregates() []Aggregate {
-	return normalizedHandlers[Aggregate](a.ConfiguredHandlers)
+func (a Application) identities() []Identity {
+	return a.ConfiguredIdentities
 }
 
-// Processes returns a list of [dogma.ProcessMessageHandler] implementations
-// that are registered with the application.
-func (a Application) Processes() []Process {
-	return normalizedHandlers[Process](a.ConfiguredHandlers)
+func (a Application) normalize(ctx *normalizationContext) Component {
+	a.ConfiguredIdentities = normalizeIdentities(ctx, a)
+	a.ConfiguredHandlers = normalizeHandlers(ctx, a)
+
+	detectIdentityConflicts(ctx, a)
+	detectRouteConflicts(ctx, a)
+
+	return a
 }
 
-// Integrations returns a list of [dogma.IntegrationMessageHandler]
-// implementations that are registered with the application.
-func (a Application) Integrations() []Integration {
-	return normalizedHandlers[Integration](a.ConfiguredHandlers)
+// IdentityConflictError indicates that more than one [Entity] within the same
+// [Application] shares the same [Identity].
+type IdentityConflictError struct {
+	Entities            []Entity
+	ConflictingIdentity Identity
 }
 
-// Projections returns a list of [dogma.ProjectionMessageHandler]
-// implementations that are registered with the application.
-func (a Application) Projections() []Projection {
-	return normalizedHandlers[Projection](a.ConfiguredHandlers)
+func (e IdentityConflictError) Error() string {
+	return fmt.Sprintf(
+		"%s have the same identity (%s)",
+		renderList(e.Entities),
+		e.ConflictingIdentity,
+	)
 }
 
-func (a Application) configuredIdentities() []Identity { return a.ConfiguredIdentities }
-
-func (a Application) normalize(opts validationOptions) (_ Entity, errs error) {
-	normalizeIdentitiesInPlace(opts, a, &errs, &a.ConfiguredIdentities)
-	normalizeHandlersInPlace(opts, a, &errs, &a.ConfiguredHandlers)
-	return a, errs
+// IdentityNameConflictError indicates that more than one [Entity] within the
+// same [Application] is shares the same "name" component of an [Identity].
+type IdentityNameConflictError struct {
+	Entities        []Entity
+	ConflictingName string
 }
 
-func normalizeHandlersInPlace(
-	opts validationOptions,
-	app Application,
-	errs *error,
-	handlers *[]Handler,
-) {
-	*handlers = slices.Clone(*handlers)
+func (e IdentityNameConflictError) Error() string {
+	return fmt.Sprintf(
+		"%s have the same identity name (%s)",
+		renderList(e.Entities),
+		e.ConflictingName,
+	)
+}
 
-	for i, h := range *handlers {
-		norm, err := normalize(opts, h)
-		(*handlers)[i] = norm
+// IdentityKeyConflictError indicates that more than one [Entity] within the
+// same [Application] is shares the same "key" component of an [Identity].
+type IdentityKeyConflictError struct {
+	Entities       []Entity
+	ConflictingKey string
+}
 
-		if err != nil {
-			*errs = errors.Join(
-				*errs,
-				InvalidHandlerError{app, h, err},
-			)
-		}
+func (e IdentityKeyConflictError) Error() string {
+	return fmt.Sprintf(
+		"%s have the same identity key (%s)",
+		renderList(e.Entities),
+		e.ConflictingKey,
+	)
+}
+
+// RouteConflictError indicates that more than one [Handler] within the same
+// [Application] is configured with conflicting routes for the same
+// [MessageType].
+type RouteConflictError struct {
+	Handlers         []Handler
+	ConflictingRoute Route
+}
+
+func (e RouteConflictError) Error() string {
+	return fmt.Sprintf(
+		"%s have %q routes for the same %s type (%s)",
+		renderList(e.Handlers),
+		e.ConflictingRoute.RouteType.Get(),
+		e.ConflictingRoute.MessageType.Get().Kind,
+		e.ConflictingRoute.MessageType.Get().TypeName,
+	)
+}
+
+func normalizeHandlers(ctx *normalizationContext, a Application) []Handler {
+	handlers := slices.Clone(a.ConfiguredHandlers)
+
+	for i, h := range handlers {
+		handlers[i] = normalize(ctx, h)
 	}
 
-	reportIdentityConflicts(app, errs, *handlers)
-	reportRouteConflicts(errs, *handlers)
+	return handlers
 }
 
-// reportIdentityConflicts appends errors related to handlers that have
+// detectIdentityConflicts appends errors related to handlers that have
 // identities that conflict with other handlers or the application itself.
-func reportIdentityConflicts(
-	app Application,
-	errs *error,
-	handlers []Handler,
-) {
+func detectIdentityConflicts(ctx *normalizationContext, app Application) {
 	var (
-		conflictingIDs   conflicts[Identity, Entity]
-		conflictingNames conflicts[string, Entity]
-		conflictingKeys  conflicts[string, Entity]
+		conflictingIDs   conflictDetector[Identity, Entity]
+		conflictingNames conflictDetector[string, Entity]
+		conflictingKeys  conflictDetector[string, Entity]
 	)
 
 	entities := []Entity{app}
-	for _, h := range handlers {
+	for _, h := range app.ConfiguredHandlers {
 		entities = append(entities, h)
 	}
 
 	for i, ent1 := range entities {
-		for _, id1 := range ent1.configuredIdentities() {
+		for _, id1 := range ent1.identities() {
 			for j, ent2 := range entities[i+1:] {
-				for _, id2 := range ent2.configuredIdentities() {
+				for _, id2 := range ent2.identities() {
 					if conflictingIDs.Add(
 						id1, i, ent1,
 						id2, j, ent2,
@@ -148,26 +173,23 @@ func reportIdentityConflicts(
 	}
 
 	for id, entities := range conflictingIDs.All() {
-		*errs = errors.Join(*errs, IdentityConflictError{entities, id})
+		ctx.Fail(IdentityConflictError{entities, id})
 	}
 
 	for name, entities := range conflictingNames.All() {
-		*errs = errors.Join(*errs, IdentityNameConflictError{entities, name})
+		ctx.Fail(IdentityNameConflictError{entities, name})
 	}
 
 	for key, entities := range conflictingKeys.All() {
-		*errs = errors.Join(*errs, IdentityKeyConflictError{entities, key})
+		ctx.Fail(IdentityKeyConflictError{entities, key})
 	}
 }
 
-func reportRouteConflicts(
-	errs *error,
-	handlers []Handler,
-) {
-	var conflictingRoutes conflicts[Route, Handler]
+func detectRouteConflicts(ctx *normalizationContext, app Application) {
+	var conflictingRoutes conflictDetector[Route, Handler]
 
-	for i, h1 := range handlers {
-		for _, r1 := range h1.configuredRoutes() {
+	for i, h1 := range app.ConfiguredHandlers {
+		for _, r1 := range h1.routes() {
 			t, ok := r1.RouteType.TryGet()
 			if !ok {
 				continue
@@ -181,8 +203,8 @@ func reportRouteConflicts(
 				continue
 			}
 
-			for j, h2 := range handlers[i+1:] {
-				for _, r2 := range h2.configuredRoutes() {
+			for j, h2 := range app.ConfiguredHandlers[i+1:] {
+				for _, r2 := range h2.routes() {
 					conflictingRoutes.Add(
 						r1, i, h1,
 						r2, j, h2,
@@ -193,53 +215,6 @@ func reportRouteConflicts(
 	}
 
 	for route, handlers := range conflictingRoutes.All() {
-		*errs = errors.Join(*errs, RouteConflictError{handlers, route})
-	}
-}
-
-func normalizedHandlers[T Handler]([]Handler) []T {
-	panic("not implemented")
-}
-
-type conflicts[K comparable, V any] struct {
-	m map[K]map[int]V
-}
-
-func (t *conflicts[K, V]) Add(
-	k1 K, i int, e1 V,
-	k2 K, j int, e2 V,
-) bool {
-	if k1 != k2 {
-		return false
-	}
-
-	if t.m == nil {
-		t.m = map[K]map[int]V{}
-	}
-
-	if t.m[k1] == nil {
-		t.m[k2] = map[int]V{}
-	}
-
-	t.m[k1][i] = e1
-	t.m[k1][i+1+j] = e2
-
-	return true
-}
-
-func (t *conflicts[K, V]) All() iter.Seq2[K, []V] {
-	return func(yield func(K, []V) bool) {
-		for k, indices := range t.m {
-			sortedIndices := slices.Sorted(maps.Keys(indices))
-			sortedValues := make([]V, len(sortedIndices))
-
-			for i, j := range sortedIndices {
-				sortedValues[i] = indices[j]
-			}
-
-			if !yield(k, sortedValues) {
-				return
-			}
-		}
+		ctx.Fail(RouteConflictError{handlers, route})
 	}
 }

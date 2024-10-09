@@ -1,44 +1,38 @@
 package config
 
-import "github.com/dogmatiq/enginekit/optional"
+import "fmt"
 
-// Entity represents the configuration of some [Configurable] Dogma entity.
+// An Entity is a [Component] that represents the configuration of some
+// configurable Dogma entity; that is, any type with a Configure() method that
+// accepts one of the Dogma "configurer" interfaces.
 type Entity interface {
+	Component
+
 	// Identity returns the entity's identity.
 	//
 	// It panics if no single valid identity is configured.
 	Identity() Identity
 
-	normalize(validationOptions) (Entity, error)
-	configuredIdentities() []Identity
+	identities() []Identity
 }
 
-// Handler is an interface for configuration of a Dogma message handler.
-type Handler interface {
-	Entity
+// NoIdentityError indicates that an [Entity] has been configured without an
+// [Identity].
+type NoIdentityError struct{}
 
-	// Routes returns the routes configured for the handler.
-	//
-	// It panics if the routes are incomplete or invalid.
-	Routes() []Route
-
-	configuredRoutes() []Route
+func (e NoIdentityError) Error() string {
+	return "no identity is configured"
 }
 
-// Implementation contains information about the implementation of the T
-// interface.
-type Implementation[T any] struct {
-	// TypeName is the fully-qualified name of the Go type that implements T.
-	TypeName string
-
-	// Source is the value that produced the configuration, if available.
-	Source optional.Optional[T]
+// MultipleIdentitiesError indicates that an [Entity] has been configured with
+// more than one [Identity].
+type MultipleIdentitiesError struct {
+	Identities []Identity
 }
 
-var (
-	_ Entity  = Application{}
-	_ Handler = Aggregate{}
-	_ Handler = Integration{}
-	_ Handler = Process{}
-	_ Handler = Projection{}
-)
+func (e MultipleIdentitiesError) Error() string {
+	return fmt.Sprintf(
+		"multiple identities are configured (%s)",
+		renderList(e.Identities),
+	)
+}

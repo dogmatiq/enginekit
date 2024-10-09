@@ -43,26 +43,28 @@ func (h Process) Identity() Identity {
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Process) Routes() []Route {
-	return normalizedRoutes(h)
+func (h Process) Routes(filter ...RouteType) []Route {
+	return normalizedRoutes(h, filter...)
 }
 
-func (h Process) configuredIdentities() []Identity { return h.ConfiguredIdentities }
-func (h Process) configuredRoutes() []Route        { return h.ConfiguredRoutes }
+func (h Process) normalize(ctx *normalizationContext) Component {
+	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
+	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
+	return h
+}
 
-func (h Process) normalize(opts validationOptions) (_ Entity, errs error) {
-	normalizeIdentitiesInPlace(opts, h, &errs, &h.ConfiguredIdentities)
+func (h Process) identities() []Identity {
+	return h.ConfiguredIdentities
+}
 
-	normalizeRoutesInPlace(
-		h,
-		&errs,
-		&h.ConfiguredRoutes,
-		map[RouteType]bool{
-			HandlesEventRoute:     true,
-			ExecutesCommandRoute:  true,
-			SchedulesTimeoutRoute: false,
-		},
-	)
+func (h Process) routes() []Route {
+	return h.ConfiguredRoutes
+}
 
-	return h, errs
+func (h Process) routeTypes() map[RouteType]bool {
+	return map[RouteType]bool{
+		HandlesEventRoute:     true,
+		ExecutesCommandRoute:  true,
+		SchedulesTimeoutRoute: false,
+	}
 }

@@ -43,25 +43,27 @@ func (h Aggregate) Identity() Identity {
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Aggregate) Routes() []Route {
-	return normalizedRoutes(h)
+func (h Aggregate) Routes(filter ...RouteType) []Route {
+	return normalizedRoutes(h, filter...)
 }
 
-func (h Aggregate) configuredIdentities() []Identity { return h.ConfiguredIdentities }
-func (h Aggregate) configuredRoutes() []Route        { return h.ConfiguredRoutes }
+func (h Aggregate) normalize(ctx *normalizationContext) Component {
+	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
+	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
+	return h
+}
 
-func (h Aggregate) normalize(opts validationOptions) (_ Entity, errs error) {
-	normalizeIdentitiesInPlace(opts, h, &errs, &h.ConfiguredIdentities)
+func (h Aggregate) identities() []Identity {
+	return h.ConfiguredIdentities
+}
 
-	normalizeRoutesInPlace(
-		h,
-		&errs,
-		&h.ConfiguredRoutes,
-		map[RouteType]bool{
-			HandlesCommandRoute: true,
-			RecordsEventRoute:   true,
-		},
-	)
+func (h Aggregate) routes() []Route {
+	return h.ConfiguredRoutes
+}
 
-	return h, errs
+func (h Aggregate) routeTypes() map[RouteType]bool {
+	return map[RouteType]bool{
+		HandlesCommandRoute: true,
+		RecordsEventRoute:   true,
+	}
 }

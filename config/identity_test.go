@@ -10,69 +10,70 @@ import (
 func TestIdentity_validation(t *testing.T) {
 	cases := []struct {
 		Name     string
-		Identity Identity
 		Want     string
+		Identity Identity
 	}{
 
 		{
 			"valid",
+			``, // no error
 			Identity{
 				Name: "name",
 				Key:  "2da5eec5-374e-4716-b1c7-f24abd8df57f",
 			},
-			"",
 		},
 		{
 			"valid with name containing non-ASCII characters",
+			``, // no error
 			Identity{
 				Name: "😀",
 				Key:  "79f63053-1ca6-4537-974f-dd0121eb5195",
 			},
-			"",
 		},
 		{
 			"empty",
+			`identity(""/"") is invalid:` +
+				"\n" + `  - invalid name (""), expected a non-empty, printable UTF-8 string with no whitespace` +
+				"\n" + `  - invalid key (""), expected an RFC 4122/9562 UUID`,
 			Identity{},
-			`invalid identity name (""): names must be non-empty, printable UTF-8 strings with no whitespace` + "\n" +
-				`invalid identity key (""): keys must be RFC 4122/9562 UUIDs: invalid UUID format, expected 36 characters`,
 		},
 		{
 			"empty name",
+			`identity(""/c79d01bb-b289-4e5d-b2fd-9779f33b3a19) is invalid: invalid name (""), expected a non-empty, printable UTF-8 string with no whitespace`,
 			Identity{
 				Key: "c79d01bb-b289-4e5d-b2fd-9779f33b3a19",
 			},
-			`invalid identity name (""): names must be non-empty, printable UTF-8 strings with no whitespace`,
 		},
 		{
 			"name containing spaces",
+			`identity("the name"/c405f1e2-b309-4a43-84bf-5a1f8e7656b8) is invalid: invalid name ("the name"), expected a non-empty, printable UTF-8 string with no whitespace`,
 			Identity{
 				Name: "the name",
 				Key:  "c405f1e2-b309-4a43-84bf-5a1f8e7656b8",
 			},
-			`invalid identity name ("the name"): names must be non-empty, printable UTF-8 strings with no whitespace`,
 		},
 		{
 			"name containing non-printable characters",
+			`identity("name\n"/79f63053-1ca6-4537-974f-dd0121eb5195) is invalid: invalid name ("name\n"), expected a non-empty, printable UTF-8 string with no whitespace`,
 			Identity{
 				Name: "name\n",
 				Key:  "79f63053-1ca6-4537-974f-dd0121eb5195",
 			},
-			`invalid identity name ("name\n"): names must be non-empty, printable UTF-8 strings with no whitespace`,
 		},
 		{
 			"empty key",
+			`identity(name/"") is invalid: invalid key (""), expected an RFC 4122/9562 UUID`,
 			Identity{
 				Name: "name",
 			},
-			`invalid identity key (""): keys must be RFC 4122/9562 UUIDs: invalid UUID format, expected 36 characters`,
 		},
 		{
 			"non-UUID key",
+			`identity(name/"_b4ac052-68b1-4877-974e-c437aceb7f3f") is invalid: invalid key ("_b4ac052-68b1-4877-974e-c437aceb7f3f"), expected an RFC 4122/9562 UUID`,
 			Identity{
 				Name: "name",
 				Key:  "_b4ac052-68b1-4877-974e-c437aceb7f3f",
 			},
-			`invalid identity key ("_b4ac052-68b1-4877-974e-c437aceb7f3f"): keys must be RFC 4122/9562 UUIDs: invalid UUID format, expected hex digit`,
 		},
 	}
 
@@ -87,7 +88,7 @@ func TestIdentity_validation(t *testing.T) {
 				t.Log("unexpected error:")
 				t.Log("  got:  ", got)
 				t.Log("  want: ", c.Want)
-				t.Fatal()
+				t.FailNow()
 			}
 		})
 	}
@@ -126,75 +127,75 @@ func TestIdentity_normalize(t *testing.T) {
 func TestIdentity_String(t *testing.T) {
 	cases := []struct {
 		Name     string
-		Identity Identity
 		Want     string
+		Identity Identity
 	}{
 		{
 			"valid, canonical",
+			`name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
 			Identity{
 				Name: "name",
 				Key:  "2da5eec5-374e-4716-b1c7-f24abd8df57f",
 			},
-			"name/2da5eec5-374e-4716-b1c7-f24abd8df57f",
 		},
 		{
 			"valid, non-canonical",
+			`name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
 			Identity{
 				Name: "name",
 				Key:  "2DA5EEC5-374E-4716-B1C7-F24ABD8DF57F",
 			},
-			"name/2da5eec5-374e-4716-b1c7-f24abd8df57f",
 		},
 		{
 			"valid with name containing non-ASCII characters",
+			`😀/79f63053-1ca6-4537-974f-dd0121eb5195`,
 			Identity{
 				Name: "😀",
 				Key:  "79f63053-1ca6-4537-974f-dd0121eb5195",
 			},
-			"😀/79f63053-1ca6-4537-974f-dd0121eb5195",
 		},
 		{
 			"empty",
+			`identity(""/"")`,
 			Identity{},
-			`?/?`,
 		},
 		{
 			"empty name",
+			`identity(""/c79d01bb-b289-4e5d-b2fd-9779f33b3a19)`,
 			Identity{
 				Key: "c79d01bb-b289-4e5d-b2fd-9779f33b3a19",
 			},
-			`?/c79d01bb-b289-4e5d-b2fd-9779f33b3a19`,
 		},
 		{
 			"name containing spaces",
+			`identity("the name"/c405f1e2-b309-4a43-84bf-5a1f8e7656b8)`,
 			Identity{
 				Name: "the name",
 				Key:  "c405f1e2-b309-4a43-84bf-5a1f8e7656b8",
 			},
-			`"the name"/c405f1e2-b309-4a43-84bf-5a1f8e7656b8`,
 		},
 		{
 			"name containing non-printable characters",
+			`identity("name\n"/79f63053-1ca6-4537-974f-dd0121eb5195)`,
 			Identity{
 				Name: "name\n",
 				Key:  "79f63053-1ca6-4537-974f-dd0121eb5195",
 			},
-			`"name\n"/79f63053-1ca6-4537-974f-dd0121eb5195`,
 		},
 		{
 			"empty key",
+			`identity(name/"")`,
 			Identity{
 				Name: "name",
 			},
-			`name/?`,
 		},
 		{
 			"non-UUID key",
+			`identity(name/"_b4ac052-68b1-4877-974e-c437aceb7f3f")`,
 			Identity{
 				Name: "name",
 				Key:  "_b4ac052-68b1-4877-974e-c437aceb7f3f",
 			},
-			`name/"_b4ac052-68b1-4877-974e-c437aceb7f3f"`,
 		},
 	}
 

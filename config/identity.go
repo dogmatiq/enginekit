@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -16,40 +15,62 @@ type Identity struct {
 	Key  string
 }
 
-func (i Identity) normalize(validationOptions) (_ Identity, errs error) {
+func (i Identity) String() string {
+	ok := true
+	name := i.Name
+	key := i.Key
+
+	if !isValidIdentityName(name) {
+		ok = false
+		name = strconv.Quote(name)
+	}
+
+	if norm, err := uuidpb.Parse(key); err == nil {
+		key = norm.AsString()
+	} else {
+		ok = false
+		key = strconv.Quote(key)
+	}
+
+	if ok {
+		return name + "/" + key
+	}
+
+	return "identity(" + name + "/" + key + ")"
+}
+
+func (i Identity) normalize(ctx *normalizationContext) Component {
 	if !isValidIdentityName(i.Name) {
-		errs = errors.Join(errs, InvalidIdentityNameError{i.Name})
+		ctx.Fail(InvalidIdentityNameError{i.Name})
 	}
 
 	if k, err := uuidpb.Parse(i.Key); err != nil {
-		errs = errors.Join(errs, InvalidIdentityKeyError{i.Key, err})
+		ctx.Fail(InvalidIdentityKeyError{i.Key})
 	} else {
 		i.Key = k.AsString()
 	}
 
-	return i, errs
+	return i
 }
 
-func (i Identity) String() string {
-	name := "?"
-	if i.Name != "" {
-		if isValidIdentityName(i.Name) {
-			name = i.Name
-		} else {
-			name = strconv.Quote(i.Name)
-		}
-	}
+// InvalidIdentityNameError indicates that the "name" component of an [Identity]
+// is invalid.
+type InvalidIdentityNameError struct {
+	InvalidName string
+}
 
-	key := "?"
-	if i.Key != "" {
-		if normalized, err := uuidpb.Parse(i.Key); err == nil {
-			key = normalized.AsString()
-		} else {
-			key = strconv.Quote(i.Key)
-		}
-	}
+func (e InvalidIdentityNameError) Error() string {
+	return fmt.Sprintf("invalid name (%q), expected a non-empty, printable UTF-8 string with no whitespace", e.InvalidName)
+}
 
-	return name + "/" + key
+// InvalidIdentityKeyError indicates that the "key" component of an [Identity]
+// is invalid.
+type InvalidIdentityKeyError struct {
+	InvalidKey string
+}
+
+func (e InvalidIdentityKeyError) Error() string {
+	return fmt.Sprintf("invalid key (%q), expected an RFC 4122/9562 UUID", e.InvalidKey)
 }
 
 // isValidIdentityName returns true if n is a valid application or handler name.
@@ -70,58 +91,30 @@ func isValidIdentityName(n string) bool {
 	return true
 }
 
-func renderList[T any](items []T) string {
-	var s string
-
-	for i, item := range items {
-		if i == len(items)-1 {
-			s += " and "
-		} else if i > 0 {
-			s += ", "
-		}
-		s += fmt.Sprint(item)
-	}
-
-	return s
-}
-
 func normalizedIdentity(ent Entity) Identity {
-	identities := ent.configuredIdentities()
+	identities := ent.identities()
 
 	if len(identities) == 0 {
-		panic(NoIdentityError{Entity: ent})
+		panic(NoIdentityError{})
 	} else if len(identities) > 1 {
-		panic(MultipleIdentitiesError{ent, identities})
+		panic(MultipleIdentitiesError{identities})
 	}
 
-	id, err := identities[0].normalize(validationOptions{})
-	if err != nil {
-		panic(InvalidIdentityError{ent, id, err})
-	}
-
-	return id
+	return MustNormalize(identities[0])
 }
 
-func normalizeIdentitiesInPlace(
-	opts validationOptions,
-	ent Entity,
-	errs *error,
-	identities *[]Identity,
-) {
-	*identities = slices.Clone(*identities)
+func normalizeIdentities(ctx *normalizationContext, ent Entity) []Identity {
+	identities := slices.Clone(ent.identities())
 
-	if len(*identities) == 0 {
-		*errs = errors.Join(*errs, NoIdentityError{Entity: ent})
-	} else if len(*identities) > 1 {
-		*errs = errors.Join(*errs, MultipleIdentitiesError{ent, *identities})
+	if len(identities) == 0 {
+		ctx.Fail(NoIdentityError{})
+	} else if len(identities) > 1 {
+		ctx.Fail(MultipleIdentitiesError{identities})
 	}
 
-	for i, id := range *identities {
-		norm, err := id.normalize(opts)
-		(*identities)[i] = norm
-
-		if err != nil {
-			*errs = errors.Join(*errs, InvalidIdentityError{ent, id, err})
-		}
+	for i, id := range identities {
+		identities[i] = normalize(ctx, id)
 	}
+
+	return identities
 }

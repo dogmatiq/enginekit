@@ -1,9 +1,6 @@
 package config
 
 import (
-	"errors"
-	"slices"
-
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -91,44 +88,5 @@ func (r RouteType) String() string {
 		return "SchedulesTimeout"
 	default:
 		panic("unrecognized route type")
-	}
-}
-
-func normalizedRoutes(any) []Route {
-	panic("not implemented")
-}
-
-func normalizeRoutesInPlace(
-	h Handler,
-	errs *error,
-	routes *[]Route,
-	types map[RouteType]bool,
-) {
-	*routes = slices.Clone(*routes)
-
-	has := map[RouteType]struct{}{}
-
-	for _, r := range *routes {
-		t, ok := r.RouteType.TryGet()
-		if !ok {
-			// TODO: invalid route
-			continue
-		}
-
-		has[t] = struct{}{}
-
-		if _, ok := types[t]; !ok {
-			*errs = errors.Join(*errs, UnexpectedRouteTypeError{h, r})
-		}
-	}
-
-	for t, mandatory := range types {
-		if _, ok := has[t]; ok {
-			continue
-		}
-
-		if mandatory {
-			*errs = errors.Join(*errs, MissingRouteError{h, t})
-		}
 	}
 }

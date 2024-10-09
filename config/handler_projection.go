@@ -46,26 +46,28 @@ func (h Projection) Identity() Identity {
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Projection) Routes() []Route {
-	return normalizedRoutes(h)
+func (h Projection) Routes(filter ...RouteType) []Route {
+	return normalizedRoutes(h, filter...)
 }
 
-func (h Projection) configuredIdentities() []Identity { return h.ConfiguredIdentities }
-func (h Projection) configuredRoutes() []Route        { return h.ConfiguredRoutes }
+func (h Projection) normalize(ctx *normalizationContext) Component {
+	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
+	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
+	return h
+}
 
-func (h Projection) normalize(opts validationOptions) (_ Entity, errs error) {
-	normalizeIdentitiesInPlace(opts, h, &errs, &h.ConfiguredIdentities)
+func (h Projection) identities() []Identity {
+	return h.ConfiguredIdentities
+}
 
-	normalizeRoutesInPlace(
-		h,
-		&errs,
-		&h.ConfiguredRoutes,
-		map[RouteType]bool{
-			HandlesEventRoute: true,
-		},
-	)
+func (h Projection) routes() []Route {
+	return h.ConfiguredRoutes
+}
 
-	return h, errs
+func (h Projection) routeTypes() map[RouteType]bool {
+	return map[RouteType]bool{
+		HandlesEventRoute: true,
+	}
 }
 
 // ProjectionDeliveryPolicy represents the (potentially invalid) configuration

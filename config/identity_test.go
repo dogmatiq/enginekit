@@ -7,7 +7,7 @@ import (
 	. "github.com/dogmatiq/enginekit/internal/test"
 )
 
-func TestIdentity_validate(t *testing.T) {
+func TestIdentity_validation(t *testing.T) {
 	cases := []struct {
 		Name     string
 		Identity Identity
@@ -83,8 +83,11 @@ func TestIdentity_validate(t *testing.T) {
 				got = err.Error()
 			}
 
-			if got != c.Want {
-				t.Fatalf("unexpected error: got %q, want %q", got, c.Want)
+			if c.Want != got {
+				t.Log("unexpected error:")
+				t.Log("  got:  ", got)
+				t.Log("  want: ", c.Want)
+				t.Fatal()
 			}
 		})
 	}

@@ -44,7 +44,7 @@ func (h Integration) Identity() Identity {
 //
 // It panics if the routes are incomplete or invalid.
 func (h Integration) Routes() []Route {
-	return normalizeRoutes(h)
+	return normalizedRoutes(h)
 }
 
 func (h Integration) configuredIdentities() []Identity { return h.ConfiguredIdentities }
@@ -52,6 +52,16 @@ func (h Integration) configuredRoutes() []Route        { return h.ConfiguredRout
 
 func (h Integration) normalize(opts validationOptions) (_ Entity, errs error) {
 	normalizeIdentitiesInPlace(opts, h, &errs, &h.ConfiguredIdentities)
+
+	normalizeRoutesInPlace(
+		h,
+		&errs,
+		&h.ConfiguredRoutes,
+		map[RouteType]bool{
+			HandlesCommandRoute: true,
+			RecordsEventRoute:   true,
+		},
+	)
 
 	return h, errs
 }

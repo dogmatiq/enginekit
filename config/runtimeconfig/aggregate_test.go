@@ -30,7 +30,7 @@ func TestFromAggregate(t *testing.T) {
 			&AggregateMessageHandlerStub{},
 			func(h dogma.AggregateMessageHandler) config.Aggregate {
 				return config.Aggregate{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.AggregateMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
 							Source:   optional.Some(h),
@@ -54,21 +54,21 @@ func TestFromAggregate(t *testing.T) {
 			},
 			func(app dogma.AggregateMessageHandler) config.Aggregate {
 				return config.Aggregate{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.AggregateMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
 							Source:   optional.Some(app),
 						},
 					),
-					Identities: []config.Identity{
+					ConfiguredIdentities: []config.Identity{
 						{
 							Name: "aggregate",
 							Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
 						},
 					},
-					Routes: []config.Route{
+					ConfiguredRoutes: []config.Route{
 						{
-							Type: optional.Some(config.HandlesCommandRoute),
+							RouteType: optional.Some(config.HandlesCommandRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",
@@ -78,7 +78,7 @@ func TestFromAggregate(t *testing.T) {
 							),
 						},
 						{
-							Type: optional.Some(config.RecordsEventRoute),
+							RouteType: optional.Some(config.RecordsEventRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",

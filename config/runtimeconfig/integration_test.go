@@ -30,7 +30,7 @@ func TestFromIntegration(t *testing.T) {
 			&IntegrationMessageHandlerStub{},
 			func(h dogma.IntegrationMessageHandler) config.Integration {
 				return config.Integration{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.IntegrationMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
 							Source:   optional.Some(h),
@@ -54,21 +54,21 @@ func TestFromIntegration(t *testing.T) {
 			},
 			func(h dogma.IntegrationMessageHandler) config.Integration {
 				return config.Integration{
-					Implementation: optional.Some(
+					Impl: optional.Some(
 						config.Implementation[dogma.IntegrationMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
 							Source:   optional.Some(h),
 						},
 					),
-					Identities: []config.Identity{
+					ConfiguredIdentities: []config.Identity{
 						{
 							Name: "integration",
 							Key:  "51ffcb6f-171f-41a1-90e7-6fe1111649cd",
 						},
 					},
-					Routes: []config.Route{
+					ConfiguredRoutes: []config.Route{
 						{
-							Type: optional.Some(config.HandlesCommandRoute),
+							RouteType: optional.Some(config.HandlesCommandRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",
@@ -78,7 +78,7 @@ func TestFromIntegration(t *testing.T) {
 							),
 						},
 						{
-							Type: optional.Some(config.RecordsEventRoute),
+							RouteType: optional.Some(config.RecordsEventRoute),
 							MessageType: optional.Some(
 								config.MessageType{
 									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",

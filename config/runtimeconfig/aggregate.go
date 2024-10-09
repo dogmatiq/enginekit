@@ -17,7 +17,7 @@ func FromAggregate(h dogma.AggregateMessageHandler) config.Aggregate {
 	}
 
 	cfg.IsExhaustive = true
-	cfg.Implementation = optional.Some(
+	cfg.Impl = optional.Some(
 		config.Implementation[dogma.AggregateMessageHandler]{
 			TypeName: typename.Of(h),
 			Source:   optional.Some(h),
@@ -34,8 +34,8 @@ type aggregateConfigurer struct {
 }
 
 func (c *aggregateConfigurer) Identity(name, key string) {
-	c.cfg.Identities = append(
-		c.cfg.Identities,
+	c.cfg.ConfiguredIdentities = append(
+		c.cfg.ConfiguredIdentities,
 		config.Identity{
 			Name: name,
 			Key:  key,
@@ -45,7 +45,7 @@ func (c *aggregateConfigurer) Identity(name, key string) {
 
 func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {
 	for _, r := range routes {
-		c.cfg.Routes = append(c.cfg.Routes, fromRoute(r))
+		c.cfg.ConfiguredRoutes = append(c.cfg.ConfiguredRoutes, fromRoute(r))
 	}
 }
 

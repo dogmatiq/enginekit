@@ -29,7 +29,7 @@ func TestAggregate_validation(t *testing.T) {
 			},
 		},
 		{
-			"nil handler",
+			"nil aggregate",
 			`aggregate is invalid:` +
 				"\n" + `  - no identity is configured` +
 				"\n" + `  - expected at least one "HandlesCommand" route` +

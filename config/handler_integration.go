@@ -64,6 +64,6 @@ func (h Integration) routes() []Route {
 func (h Integration) routeSpec() routeSpec {
 	return routeSpec{
 		HandlesCommandRoute: required,
-		RecordsEventRoute:   required,
+		RecordsEventRoute:   allowed,
 	}
 }

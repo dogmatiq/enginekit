@@ -47,7 +47,7 @@ func (h Projection) Identity() Identity {
 //
 // It panics if the routes are incomplete or invalid.
 func (h Projection) Routes() []Route {
-	return normalizeRoutes(h)
+	return normalizedRoutes(h)
 }
 
 func (h Projection) configuredIdentities() []Identity { return h.ConfiguredIdentities }
@@ -55,6 +55,15 @@ func (h Projection) configuredRoutes() []Route        { return h.ConfiguredRoute
 
 func (h Projection) normalize(opts validationOptions) (_ Entity, errs error) {
 	normalizeIdentitiesInPlace(opts, h, &errs, &h.ConfiguredIdentities)
+
+	normalizeRoutesInPlace(
+		h,
+		&errs,
+		&h.ConfiguredRoutes,
+		map[RouteType]bool{
+			HandlesEventRoute: true,
+		},
+	)
 
 	return h, errs
 }

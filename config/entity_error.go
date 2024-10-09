@@ -50,3 +50,40 @@ func (e InvalidIdentityError) Error() string {
 func (e InvalidIdentityError) Unwrap() error {
 	return e.Cause
 }
+
+// MissingRouteError indicates that a [Handler] is missing one of its mandatory
+// route types.
+type MissingRouteError struct {
+	Handler   Handler
+	RouteType RouteType
+}
+
+func (e MissingRouteError) Error() string {
+	return fmt.Sprintf(
+		"%s must have at least one %q route",
+		e.Handler,
+		e.RouteType,
+	)
+}
+
+// UnexpectedRouteTypeError indicates that a [Handler] is configured with a
+// [Route] with a [RouteType] that is not allowed for that handler type.
+type UnexpectedRouteTypeError struct {
+	Handler         Handler
+	UnexpectedRoute Route
+}
+
+func (e UnexpectedRouteTypeError) Error() string {
+	t := e.UnexpectedRoute.RouteType.Get()
+	article := "a"
+	if t == ExecutesCommandRoute {
+		article = "an"
+	}
+
+	return fmt.Sprintf(
+		"%s is configured with %s %q route, which is not allowed for that handler type",
+		e.Handler,
+		article,
+		t,
+	)
+}

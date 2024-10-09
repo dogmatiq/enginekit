@@ -61,9 +61,9 @@ func (h Integration) routes() []Route {
 	return h.ConfiguredRoutes
 }
 
-func (h Integration) routeTypes() map[RouteType]bool {
-	return map[RouteType]bool{
-		HandlesCommandRoute: true,
-		RecordsEventRoute:   true,
+func (h Integration) routeSpec() routeSpec {
+	return routeSpec{
+		HandlesCommandRoute: required,
+		RecordsEventRoute:   required,
 	}
 }

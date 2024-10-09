@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"slices"
+
+	"github.com/dogmatiq/enginekit/collections/maps"
 )
 
 // A Handler is a specialization of [Entity] that represents configuration of a
@@ -16,7 +18,7 @@ type Handler interface {
 	Routes(filter ...RouteType) []Route
 
 	routes() []Route
-	routeTypes() map[RouteType]bool
+	routeSpec() routeSpec
 }
 
 // MissingRouteTypeError indicates that a [Handler] is missing one of its mandatory
@@ -39,6 +41,22 @@ func (e UnexpectedRouteTypeError) Error() string {
 	return fmt.Sprintf("%q routes are not allowed for this handler type", e.UnexpectedRoute.RouteType.Get())
 }
 
+// DuplicateRouteError indicates that a [Handler] is configured with multiple
+// routes for the same [MessageType].
+type DuplicateRouteError struct {
+	MessageType     MessageType
+	RouteType       RouteType
+	DuplicateRoutes []Route
+}
+
+func (e DuplicateRouteError) Error() string {
+	return fmt.Sprintf(
+		"multiple %q routes are configured for %s",
+		e.RouteType,
+		e.MessageType,
+	)
+}
+
 func normalizedRoutes(h Handler, filter ...RouteType) []Route {
 	ctx := &normalizationContext{
 		Component: h,
@@ -54,43 +72,61 @@ func normalizedRoutes(h Handler, filter ...RouteType) []Route {
 }
 
 func normalizeRoutes(ctx *normalizationContext, h Handler, filter ...RouteType) []Route {
-	allowed := h.routeTypes()
-	present := map[RouteType]struct{}{}
-	var routes []Route
+	var (
+		spec      = h.routeSpec()
+		missing   maps.Ordered[RouteType, MissingRouteTypeError]
+		duplicate maps.Ordered[string, DuplicateRouteError]
+		filtered  []Route
+	)
+
+	for rt, req := range spec {
+		if req == required {
+			missing.Set(rt, MissingRouteTypeError{rt})
+		}
+	}
 
 	for _, r := range slices.Clone(h.routes()) {
-		t, ok := r.RouteType.TryGet()
+		rt, ok := r.RouteType.TryGet()
 		if !ok {
 			// TODO: invalid route
 			continue
 		}
 
-		present[t] = struct{}{}
+		if len(filter) == 0 || slices.Contains(filter, rt) {
+			filtered = append(filtered, r)
+		}
 
-		if _, ok := allowed[t]; !ok {
+		if spec[rt] == disallowed {
 			ctx.Fail(UnexpectedRouteTypeError{r})
+		} else {
+			missing.Remove(rt)
 		}
 
-		if len(filter) == 0 || slices.Contains(filter, t) {
-			routes = append(routes, r)
-		}
-	}
-
-	for _, t := range []RouteType{
-		HandlesCommandRoute,
-		HandlesEventRoute,
-		ExecutesCommandRoute,
-		RecordsEventRoute,
-		SchedulesTimeoutRoute,
-	} {
-		if _, ok := present[t]; ok {
+		mt, ok := r.MessageType.TryGet()
+		if !ok {
+			// TODO: invalid route
 			continue
 		}
 
-		if allowed[t] {
-			ctx.Fail(MissingRouteTypeError{t})
+		duplicate.Update(
+			mt.TypeName,
+			func(err *DuplicateRouteError) {
+				err.MessageType = mt
+				err.RouteType = rt
+				err.DuplicateRoutes = append(err.DuplicateRoutes, r)
+			},
+		)
+	}
+
+	for err := range missing.Values() {
+		ctx.Fail(err)
+	}
+
+	for err := range duplicate.Values() {
+		if len(err.DuplicateRoutes) > 1 {
+			ctx.Fail(err)
 		}
 	}
 
-	return routes
+	return filtered
 }

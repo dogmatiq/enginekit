@@ -61,10 +61,10 @@ func (h Process) routes() []Route {
 	return h.ConfiguredRoutes
 }
 
-func (h Process) routeTypes() map[RouteType]bool {
-	return map[RouteType]bool{
-		HandlesEventRoute:     true,
-		ExecutesCommandRoute:  true,
-		SchedulesTimeoutRoute: false,
+func (h Process) routeSpec() routeSpec {
+	return routeSpec{
+		HandlesEventRoute:     required,
+		ExecutesCommandRoute:  required,
+		SchedulesTimeoutRoute: allowed,
 	}
 }

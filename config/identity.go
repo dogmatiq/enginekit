@@ -16,31 +16,30 @@ type Identity struct {
 }
 
 func (i Identity) String() string {
-	ok := true
+	if i.Name == "" && i.Key == "" {
+		return "identity"
+	}
+
 	name := i.Name
 	key := i.Key
 
-	if !isValidIdentityName(name) {
-		ok = false
+	if !isPrintableIdentifier(name) {
 		name = strconv.Quote(name)
 	}
 
 	if norm, err := uuidpb.Parse(key); err == nil {
 		key = norm.AsString()
 	} else {
-		ok = false
-		key = strconv.Quote(key)
+		if !isPrintableIdentifier(key) {
+			key = strconv.Quote(key)
+		}
 	}
 
-	if ok {
-		return name + "/" + key
-	}
-
-	return "identity(" + name + "/" + key + ")"
+	return "identity:" + name + "/" + key
 }
 
 func (i Identity) normalize(ctx *normalizationContext) Component {
-	if !isValidIdentityName(i.Name) {
+	if !isPrintableIdentifier(i.Name) {
 		ctx.Fail(InvalidIdentityNameError{i.Name})
 	}
 
@@ -73,11 +72,9 @@ func (e InvalidIdentityKeyError) Error() string {
 	return fmt.Sprintf("invalid key (%q), expected an RFC 4122/9562 UUID", e.InvalidKey)
 }
 
-// isValidIdentityName returns true if n is a valid application or handler name.
-//
-// A valid name is a non-empty string consisting of Unicode printable
-// characters, except whitespace.
-func isValidIdentityName(n string) bool {
+// isPrintableIdentifier returns true if n contains only non-whitespace printable
+// Unicode characters.
+func isPrintableIdentifier(n string) bool {
 	if len(n) == 0 {
 		return false
 	}

@@ -64,9 +64,9 @@ func (h Projection) routes() []Route {
 	return h.ConfiguredRoutes
 }
 
-func (h Projection) routeTypes() map[RouteType]bool {
-	return map[RouteType]bool{
-		HandlesEventRoute: true,
+func (h Projection) routeSpec() routeSpec {
+	return routeSpec{
+		HandlesEventRoute: required,
 	}
 }
 

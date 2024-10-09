@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -16,6 +18,10 @@ type MessageType struct {
 
 	// Type is the equivalent [message.Type], if available.
 	Type optional.Optional[message.Type]
+}
+
+func (m MessageType) String() string {
+	return fmt.Sprintf("%s:%s", m.Kind, m.TypeName)
 }
 
 // Route represents a message route to or from a handler.
@@ -52,9 +58,9 @@ const (
 	SchedulesTimeoutRoute
 )
 
-// IsConsume returns true if the route indicates that the handler consumes
+// IsInbound returns true if the route indicates that the handler consumes
 // a message type.
-func (r RouteType) IsConsume() bool {
+func (r RouteType) IsInbound() bool {
 	switch r {
 	case HandlesCommandRoute, HandlesEventRoute, SchedulesTimeoutRoute:
 		return true
@@ -63,9 +69,9 @@ func (r RouteType) IsConsume() bool {
 	}
 }
 
-// IsProduce returns true if the route indicates that the handler produces
-// a message type.
-func (r RouteType) IsProduce() bool {
+// IsOutbound returns true if the route indicates that the handler produces a
+// message type.
+func (r RouteType) IsOutbound() bool {
 	switch r {
 	case ExecutesCommandRoute, RecordsEventRoute, SchedulesTimeoutRoute:
 		return true
@@ -90,3 +96,16 @@ func (r RouteType) String() string {
 		panic("unrecognized route type")
 	}
 }
+
+// routeSpec is a specification of the types of routes that can (and must) be
+// configured for a specific handler type.
+type routeSpec map[RouteType]requirement
+
+// requirement is an enumeration of the "requirement level" of some value.
+type requirement int
+
+const (
+	disallowed requirement = iota
+	allowed
+	required
+)

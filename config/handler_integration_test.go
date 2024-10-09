@@ -7,7 +7,92 @@ import (
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/internal/test"
 )
+
+func TestIntegration_Identity(t *testing.T) {
+	t.Run("it returns the normalized identity", func(t *testing.T) {
+		h := &IntegrationMessageHandlerStub{
+			ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Routes(
+					dogma.HandlesCommand[CommandStub[TypeA]](),
+				)
+			},
+		}
+
+		cfg := runtimeconfig.FromIntegration(h)
+
+		Expect(
+			t,
+			"unexpected identity",
+			cfg.Identity(),
+			Identity{
+				Name: "name",
+				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+			},
+		)
+	})
+
+	t.Run("it panics if there is no singular valid identity", func(t *testing.T) {
+		cases := []struct {
+			Name    string
+			Want    string
+			Handler dogma.IntegrationMessageHandler
+		}{
+			{
+				"no identity",
+				`no identity is configured`,
+				&IntegrationMessageHandlerStub{
+					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+						)
+					},
+				},
+			},
+			{
+				"invalid identity",
+				`identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				&IntegrationMessageHandlerStub{
+					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+						c.Identity("name", "non-uuid")
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+						)
+					},
+				},
+			},
+			{
+				"multiple identities",
+				`multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
+				&IntegrationMessageHandlerStub{
+					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
+						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+						)
+					},
+				},
+			},
+		}
+
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				cfg := runtimeconfig.FromIntegration(c.Handler)
+
+				ExpectPanic(
+					t,
+					c.Want,
+					func() {
+						cfg.Identity()
+					},
+				)
+			})
+		}
+	})
+}
 
 func TestIntegration_validation(t *testing.T) {
 	cases := []struct {

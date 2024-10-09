@@ -7,7 +7,96 @@ import (
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/internal/test"
 )
+
+func TestProcess_Identity(t *testing.T) {
+	t.Run("it returns the normalized identity", func(t *testing.T) {
+		h := &ProcessMessageHandlerStub{
+			ConfigureFunc: func(c dogma.ProcessConfigurer) {
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Routes(
+					dogma.HandlesEvent[EventStub[TypeA]](),
+					dogma.ExecutesCommand[CommandStub[TypeA]](),
+				)
+			},
+		}
+
+		cfg := runtimeconfig.FromProcess(h)
+
+		Expect(
+			t,
+			"unexpected identity",
+			cfg.Identity(),
+			Identity{
+				Name: "name",
+				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+			},
+		)
+	})
+
+	t.Run("it panics if there is no singular valid identity", func(t *testing.T) {
+		cases := []struct {
+			Name    string
+			Want    string
+			Handler dogma.ProcessMessageHandler
+		}{
+			{
+				"no identity",
+				`no identity is configured`,
+				&ProcessMessageHandlerStub{
+					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+						c.Routes(
+							dogma.HandlesEvent[EventStub[TypeA]](),
+							dogma.ExecutesCommand[CommandStub[TypeA]](),
+						)
+					},
+				},
+			},
+			{
+				"invalid identity",
+				`identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				&ProcessMessageHandlerStub{
+					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+						c.Identity("name", "non-uuid")
+						c.Routes(
+							dogma.HandlesEvent[EventStub[TypeA]](),
+							dogma.ExecutesCommand[CommandStub[TypeA]](),
+						)
+					},
+				},
+			},
+			{
+				"multiple identities",
+				`multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
+				&ProcessMessageHandlerStub{
+					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
+						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
+						c.Routes(
+							dogma.HandlesEvent[EventStub[TypeA]](),
+							dogma.ExecutesCommand[CommandStub[TypeA]](),
+						)
+					},
+				},
+			},
+		}
+
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				cfg := runtimeconfig.FromProcess(c.Handler)
+
+				ExpectPanic(
+					t,
+					c.Want,
+					func() {
+						cfg.Identity()
+					},
+				)
+			})
+		}
+	})
+}
 
 func TestProcess_validation(t *testing.T) {
 	cases := []struct {

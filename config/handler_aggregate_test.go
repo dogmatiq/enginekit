@@ -7,7 +7,96 @@ import (
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/internal/test"
 )
+
+func TestAggregate_Identity(t *testing.T) {
+	t.Run("it returns the normalized identity", func(t *testing.T) {
+		h := &AggregateMessageHandlerStub{
+			ConfigureFunc: func(c dogma.AggregateConfigurer) {
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Routes(
+					dogma.HandlesCommand[CommandStub[TypeA]](),
+					dogma.RecordsEvent[EventStub[TypeA]](),
+				)
+			},
+		}
+
+		cfg := runtimeconfig.FromAggregate(h)
+
+		Expect(
+			t,
+			"unexpected identity",
+			cfg.Identity(),
+			Identity{
+				Name: "name",
+				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+			},
+		)
+	})
+
+	t.Run("it panics if there is no singular valid identity", func(t *testing.T) {
+		cases := []struct {
+			Name    string
+			Want    string
+			Handler dogma.AggregateMessageHandler
+		}{
+			{
+				"no identity",
+				`no identity is configured`,
+				&AggregateMessageHandlerStub{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.RecordsEvent[EventStub[TypeA]](),
+						)
+					},
+				},
+			},
+			{
+				"invalid identity",
+				`identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				&AggregateMessageHandlerStub{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("name", "non-uuid")
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.RecordsEvent[EventStub[TypeA]](),
+						)
+					},
+				},
+			},
+			{
+				"multiple identities",
+				`multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
+				&AggregateMessageHandlerStub{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
+						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.RecordsEvent[EventStub[TypeA]](),
+						)
+					},
+				},
+			},
+		}
+
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				cfg := runtimeconfig.FromAggregate(c.Handler)
+
+				ExpectPanic(
+					t,
+					c.Want,
+					func() {
+						cfg.Identity()
+					},
+				)
+			})
+		}
+	})
+}
 
 func TestAggregate_validation(t *testing.T) {
 	cases := []struct {

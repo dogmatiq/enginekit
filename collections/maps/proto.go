@@ -54,6 +54,18 @@ func (m *Proto[K, V]) Set(k K, v V) {
 	m.elements.Set(m.marshal(k), v)
 }
 
+// Update applies fn to the value associated with the given key.
+//
+// If k is not in the map it is added, an fn is called with a pointer to a new
+// zero-value.
+func (m *Proto[K, V]) Update(k K, fn func(*V)) {
+	if m == nil {
+		panic("Update() called on a nil map")
+	}
+
+	m.elements.Update(m.marshal(k), fn)
+}
+
 // Remove removes the given keys from the map.
 func (m *Proto[K, V]) Remove(keys ...K) {
 	if m != nil {

@@ -49,6 +49,24 @@ func (m *Map[K, V]) Set(k K, v V) {
 	m.elements[k] = v
 }
 
+// Update applies fn to the value associated with the given key.
+//
+// If k is not in the map it is added, an fn is called with a pointer to a new
+// zero-value.
+func (m *Map[K, V]) Update(k K, fn func(*V)) {
+	if m == nil {
+		panic("Update() called on a nil map")
+	}
+
+	if m.elements == nil {
+		m.elements = map[K]V{}
+	}
+
+	v := m.elements[k]
+	fn(&v)
+	m.elements[k] = v
+}
+
 // Remove removes the given keys from the map.
 func (m *Map[K, V]) Remove(keys ...K) {
 	if m != nil {

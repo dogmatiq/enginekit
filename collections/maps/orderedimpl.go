@@ -82,6 +82,26 @@ func orderedSet[K, V any, M ordered[K, V, I], I any](
 	}
 }
 
+func orderedUpdate[K, V any, M ordered[K, V, I], I any](
+	m M,
+	k K,
+	fn func(*V),
+) {
+	if m == nil {
+		panic("Update() called on a nil map")
+	}
+
+	pairs := m.ptr()
+
+	if i, ok := orderedSearch[K, V](m, k); ok {
+		fn(&(*pairs)[i].Value)
+	} else {
+		var v V
+		fn(&v)
+		*pairs = slices.Insert(*pairs, i, Pair[K, V]{k, v})
+	}
+}
+
 func orderedRemove[K, V any, M ordered[K, V, I], I any](
 	m M,
 	keys ...K,

@@ -13,6 +13,7 @@ type contract[K, V, I any] interface {
 	*I
 
 	Set(K, V)
+	Update(K, func(*V))
 	Remove(...K)
 	Clear()
 
@@ -184,7 +185,33 @@ func testMap[
 				"overwrite an existing key": func(t *rapid.T) {
 					k := drawExistingKey(t)
 					v := drawValue(t)
+
 					subject.Set(k, v)
+					replace(k, v)
+				},
+				"update a new key": func(t *rapid.T) {
+					k := drawNewKey(t)
+					v := drawValue(t)
+
+					if subject != nil {
+						add(k, v)
+					} else {
+						defer func() {
+							want := "Update() called on a nil map"
+							got := recover()
+							if got != want {
+								t.Fatalf("unexpected panic value: got %#v, want %#v", got, want)
+							}
+						}()
+					}
+
+					subject.Update(k, func(x *int) { *x = v })
+				},
+				"update an existing key": func(t *rapid.T) {
+					k := drawExistingKey(t)
+					v := drawValue(t)
+
+					subject.Update(k, func(x *int) { *x = v })
 					replace(k, v)
 				},
 				"remove an existing key": func(t *rapid.T) {

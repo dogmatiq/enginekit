@@ -29,6 +29,14 @@ func (m *OrderedByKey[K, V]) Set(k K, v V) {
 	orderedSet(m, k, v)
 }
 
+// Update applies fn to the value associated with the given key.
+//
+// If k is not in the map it is added, an fn is called with a pointer to a new
+// zero-value.
+func (m *OrderedByKey[K, V]) Update(k K, fn func(*V)) {
+	orderedUpdate(m, k, fn)
+}
+
 // Remove removes the given keys from the map.
 func (m *OrderedByKey[K, V]) Remove(keys ...K) {
 	orderedRemove[K, V](m, keys...)

@@ -16,7 +16,7 @@ func FromProjection(h dogma.ProjectionMessageHandler) config.Projection {
 		return cfg
 	}
 
-	cfg.IsExhaustive = true
+	cfg.ConfigurationIsExhaustive = true
 	cfg.Impl = optional.Some(
 		config.Implementation[dogma.ProjectionMessageHandler]{
 			TypeName: typename.Of(h),
@@ -57,9 +57,9 @@ func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) 
 		cfg.Implementation = optional.Some(p)
 	}
 
-	c.cfg.DeliveryPolicy = optional.Some(cfg)
+	c.cfg.ConfiguredDeliveryPolicy = optional.Some(cfg)
 }
 
 func (c *projectionConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.IsDisabled = true
+	c.cfg.ConfiguredAsDisabled = true
 }

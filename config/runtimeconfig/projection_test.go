@@ -36,7 +36,7 @@ func TestFromProjection(t *testing.T) {
 							Source:   optional.Some(h),
 						},
 					),
-					IsExhaustive: true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},
@@ -75,14 +75,14 @@ func TestFromProjection(t *testing.T) {
 							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 						},
 					},
-					DeliveryPolicy: optional.Some(
+					ConfiguredDeliveryPolicy: optional.Some(
 						config.ProjectionDeliveryPolicy{
 							TypeName:       optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
 							Implementation: optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
 						},
 					),
-					IsDisabled:   true,
-					IsExhaustive: true,
+					ConfiguredAsDisabled:      true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},

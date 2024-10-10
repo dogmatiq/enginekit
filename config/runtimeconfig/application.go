@@ -16,7 +16,7 @@ func FromApplication(app dogma.Application) config.Application {
 		return cfg
 	}
 
-	cfg.IsExhaustive = true
+	cfg.ConfigurationIsExhaustive = true
 	cfg.Impl = optional.Some(
 		config.Implementation[dogma.Application]{
 			TypeName: typename.Of(app),

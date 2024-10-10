@@ -13,6 +13,11 @@ type Entity interface {
 	// It panics if no single valid identity is configured.
 	Identity() Identity
 
+	// IsExhaustive returns true if the complete configuration was loaded. It
+	// may be false, for example, when attempting to load configuration using
+	// static analysis, but the code depends on runtime type information.
+	IsExhaustive() bool
+
 	identities() []Identity
 }
 

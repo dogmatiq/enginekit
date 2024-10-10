@@ -20,16 +20,16 @@ type Projection struct {
 	// duplicated) message routes configured for the handler.
 	ConfiguredRoutes []Route
 
-	// DeliveryPolicy is the delivery policy for the handler, if configured.
-	DeliveryPolicy optional.Optional[ProjectionDeliveryPolicy]
+	// ConfiguredDeliveryPolicy is the delivery policy for the handler, if
+	// configured.
+	ConfiguredDeliveryPolicy optional.Optional[ProjectionDeliveryPolicy]
 
-	// IsDisabled is true if the handler was disabled via the configurer.
-	IsDisabled bool
+	// ConfiguredAsDisabled is true if the handler was disabled via the
+	// configurer.
+	ConfiguredAsDisabled bool
 
-	// IsExhaustive is true if the complete configuration was loaded. It may be
-	// false, for example, when attempting to load configuration using static
-	// analysis, but the code depends on runtime type information.
-	IsExhaustive bool
+	// ConfigurationIsExhaustive is true if the entire configuration was loaded.
+	ConfigurationIsExhaustive bool
 }
 
 func (h Projection) String() string {
@@ -43,6 +43,16 @@ func (h Projection) Identity() Identity {
 	return normalizedIdentity(h)
 }
 
+// IsExhaustive returns true if the entire configuration was loaded.
+func (h Projection) IsExhaustive() bool {
+	return h.ConfigurationIsExhaustive
+}
+
+// HandlerType returns [HandlerType] of the handler.
+func (h Projection) HandlerType() HandlerType {
+	return ProjectionHandlerType
+}
+
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
@@ -50,9 +60,17 @@ func (h Projection) Routes(filter ...RouteType) []Route {
 	return normalizedRoutes(h, filter...)
 }
 
-// HandlerType returns [HandlerType] of the handler.
-func (h Projection) HandlerType() HandlerType {
-	return ProjectionHandlerType
+// IsDisabled returns true if the handler was disabled via the configurer.
+func (h Projection) IsDisabled() bool {
+	return h.ConfiguredAsDisabled
+}
+
+// DeliveryPolicy returns the delivery policy for the handler.
+func (h Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
+	if p, ok := h.ConfiguredDeliveryPolicy.TryGet(); ok {
+		return p.Implementation.Get()
+	}
+	return dogma.UnicastProjectionDeliveryPolicy{}
 }
 
 func (h Projection) normalize(ctx *normalizationContext) Component {

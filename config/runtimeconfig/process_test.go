@@ -36,7 +36,7 @@ func TestFromProcess(t *testing.T) {
 							Source:   optional.Some(h),
 						},
 					),
-					IsExhaustive: true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},
@@ -84,8 +84,8 @@ func TestFromProcess(t *testing.T) {
 							MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
 						},
 					},
-					IsDisabled:   true,
-					IsExhaustive: true,
+					ConfiguredAsDisabled:      true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},

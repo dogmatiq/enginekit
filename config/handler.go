@@ -20,6 +20,9 @@ type Handler interface {
 	// HandlerType returns [HandlerType] of the handler.
 	HandlerType() HandlerType
 
+	// IsDisabled returns true if the handler was disabled via the configurer.
+	IsDisabled() bool
+
 	routes() []Route
 }
 

@@ -16,7 +16,7 @@ func FromProcess(h dogma.ProcessMessageHandler) config.Process {
 		return cfg
 	}
 
-	cfg.IsExhaustive = true
+	cfg.ConfigurationIsExhaustive = true
 	cfg.Impl = optional.Some(
 		config.Implementation[dogma.ProcessMessageHandler]{
 			TypeName: typename.Of(h),
@@ -50,5 +50,5 @@ func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {
 }
 
 func (c *processConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.IsDisabled = true
+	c.cfg.ConfiguredAsDisabled = true
 }

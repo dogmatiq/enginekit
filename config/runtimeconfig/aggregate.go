@@ -16,7 +16,7 @@ func FromAggregate(h dogma.AggregateMessageHandler) config.Aggregate {
 		return cfg
 	}
 
-	cfg.IsExhaustive = true
+	cfg.ConfigurationIsExhaustive = true
 	cfg.Impl = optional.Some(
 		config.Implementation[dogma.AggregateMessageHandler]{
 			TypeName: typename.Of(h),
@@ -50,5 +50,5 @@ func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {
 }
 
 func (c *aggregateConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.IsDisabled = true
+	c.cfg.ConfiguredAsDisabled = true
 }

@@ -52,8 +52,8 @@ func (h Process) HandlerType() HandlerType {
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Process) Routes(filter ...RouteType) []Route {
-	return normalizedRoutes(h, filter...)
+func (h Process) Routes() RouteSet {
+	return normalizedRouteSet(h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.

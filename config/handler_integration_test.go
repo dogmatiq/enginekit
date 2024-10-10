@@ -114,7 +114,7 @@ func TestIntegration_Routes(t *testing.T) {
 			t,
 			"unexpected routes",
 			cfg.Routes(),
-			[]Route{
+			RouteSet{
 				{
 					RouteType:       optional.Some(HandlesCommandRouteType),
 					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),

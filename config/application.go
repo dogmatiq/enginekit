@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
 
@@ -53,16 +54,13 @@ func (a Application) Interface() dogma.Application {
 
 // Handlers returns the list of handlers configured for the application.
 //
-// If one or more [HandlerType] values are provided, only handlers of those
-// types are returned.
-//
 // It panics if the handlers are incomplete or invalid.
-func (a Application) Handlers(filter ...HandlerType) []Handler {
+func (a Application) Handlers() []Handler {
 	ctx := &normalizationContext{
 		Component: a,
 	}
 
-	handlers := normalizeHandlers(ctx, a, filter...)
+	handlers := normalizeHandlers(ctx, a)
 
 	if err := ctx.Err(); err != nil {
 		panic(err)
@@ -75,14 +73,40 @@ func (a Application) Handlers(filter ...HandlerType) []Handler {
 // handler has been configured.
 //
 // It panics if the handlers are incomplete or invalid.
-func (a Application) HandlerByName(name string, filter ...HandlerType) (Handler, bool) {
-	for _, h := range a.Handlers(filter...) {
+func (a Application) HandlerByName(name string) (Handler, bool) {
+	for _, h := range a.Handlers() {
 		if h.Identity().Name == name {
 			return h, true
 		}
 	}
 
 	return nil, false
+}
+
+// MessageTypes yields all message types used by the application.
+func (a Application) MessageTypes() iter.Seq[message.Type] {
+	return func(yield func(message.Type) bool) {
+		seen := map[message.Type]struct{}{}
+
+		for _, h := range a.Handlers() {
+			for _, r := range h.routes() {
+				mt, ok := r.MessageType.TryGet()
+				if !ok {
+					continue
+				}
+
+				if _, ok := seen[mt]; ok {
+					continue
+				}
+
+				seen[mt] = struct{}{}
+
+				if !yield(mt) {
+					return
+				}
+			}
+		}
+	}
 }
 
 func (a Application) identities() []Identity {
@@ -176,18 +200,14 @@ func (e ConflictingRouteError) Error() string {
 	)
 }
 
-func normalizeHandlers(ctx *normalizationContext, a Application, filter ...HandlerType) []Handler {
-	var filtered []Handler
+func normalizeHandlers(ctx *normalizationContext, a Application) []Handler {
+	handlers := slices.Clone(a.ConfiguredHandlers)
 
-	for _, h := range slices.Clone(a.ConfiguredHandlers) {
-		h = normalize(ctx, h)
-
-		if len(filter) == 0 || slices.Contains(filter, h.HandlerType()) {
-			filtered = append(filtered, h)
-		}
+	for i, h := range handlers {
+		handlers[i] = normalize(ctx, h)
 	}
 
-	return filtered
+	return handlers
 }
 
 // detectIdentityConflicts appends errors related to handlers that have

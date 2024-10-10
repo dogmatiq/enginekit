@@ -56,8 +56,8 @@ func (h Projection) HandlerType() HandlerType {
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Projection) Routes(filter ...RouteType) []Route {
-	return normalizedRoutes(h, filter...)
+func (h Projection) Routes() RouteSet {
+	return normalizedRouteSet(h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.

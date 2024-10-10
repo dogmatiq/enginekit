@@ -14,11 +14,8 @@ type Handler interface {
 
 	// Routes returns the routes configured for the handler.
 	//
-	// If one or more [RouteType] values are provided, only routes of those
-	// types are returned.
-	//
 	// It panics if the routes are incomplete or invalid.
-	Routes(filter ...RouteType) []Route
+	Routes() RouteSet
 
 	// HandlerType returns [HandlerType] of the handler.
 	HandlerType() HandlerType
@@ -100,47 +97,37 @@ func SwitchByHandlerTypeOf(
 	}
 }
 
-// RouteSpec is describes how a [HandlerType] makes use of a particular
-// [RouteType].
-type RouteSpec int
-
-const (
-	// RouteTypeDisallowed indicates that the [HandlerType] does not support the
-	// [RouteType].
-	RouteTypeDisallowed RouteSpec = iota
-
-	// RouteTypeAllowed indicates that the [HandlerType] supports the [RouteType],
-	// but it is not required.
-	RouteTypeAllowed
-
-	// RouteTypeRequired indicates that the [HandlerType] requires at least one
-	// route of the [RouteType].
-	RouteTypeRequired
-)
-
-// RoutingSpec returns a map that describes how the [HandlerType] makes use of
-// each [RouteType].
-func (t HandlerType) RoutingSpec() map[RouteType]RouteSpec {
+// RouteCapabilities returns a value that describes the routing capabilities of
+// the handler type.
+func (t HandlerType) RouteCapabilities() RouteCapabilities {
 	switch t {
 	case AggregateHandlerType:
-		return map[RouteType]RouteSpec{
-			HandlesCommandRouteType: RouteTypeRequired,
-			RecordsEventRouteType:   RouteTypeRequired,
+		return RouteCapabilities{
+			map[RouteType]RouteTypeCapability{
+				HandlesCommandRouteType: RouteTypeRequired,
+				RecordsEventRouteType:   RouteTypeRequired,
+			},
 		}
 	case IntegrationHandlerType:
-		return map[RouteType]RouteSpec{
-			HandlesCommandRouteType: RouteTypeRequired,
-			RecordsEventRouteType:   RouteTypeAllowed,
+		return RouteCapabilities{
+			map[RouteType]RouteTypeCapability{
+				HandlesCommandRouteType: RouteTypeRequired,
+				RecordsEventRouteType:   RouteTypeAllowed,
+			},
 		}
 	case ProcessHandlerType:
-		return map[RouteType]RouteSpec{
-			HandlesEventRouteType:     RouteTypeRequired,
-			ExecutesCommandRouteType:  RouteTypeRequired,
-			SchedulesTimeoutRouteType: RouteTypeAllowed,
+		return RouteCapabilities{
+			map[RouteType]RouteTypeCapability{
+				HandlesEventRouteType:     RouteTypeRequired,
+				ExecutesCommandRouteType:  RouteTypeRequired,
+				SchedulesTimeoutRouteType: RouteTypeAllowed,
+			},
 		}
 	case ProjectionHandlerType:
-		return map[RouteType]RouteSpec{
-			HandlesEventRouteType: RouteTypeRequired,
+		return RouteCapabilities{
+			map[RouteType]RouteTypeCapability{
+				HandlesEventRouteType: RouteTypeRequired,
+			},
 		}
 	default:
 		panic("invalid handler type")
@@ -183,12 +170,12 @@ func (e DuplicateRouteError) Error() string {
 	)
 }
 
-func normalizedRoutes(h Handler, filter ...RouteType) []Route {
+func normalizedRouteSet(h Handler) RouteSet {
 	ctx := &normalizationContext{
 		Component: h,
 	}
 
-	routes := normalizeRoutes(ctx, h, filter...)
+	routes := normalizeRoutes(ctx, h)
 
 	if err := ctx.Err(); err != nil {
 		panic(err)
@@ -197,36 +184,31 @@ func normalizedRoutes(h Handler, filter ...RouteType) []Route {
 	return routes
 }
 
-func normalizeRoutes(ctx *normalizationContext, h Handler, filter ...RouteType) []Route {
+func normalizeRoutes(ctx *normalizationContext, h Handler) []Route {
 	var (
-		spec      = h.HandlerType().RoutingSpec()
-		missing   maps.Ordered[RouteType, MissingRequiredRouteError]
-		duplicate maps.OrderedByKey[routeKey, DuplicateRouteError]
-		filtered  []Route
+		capabilities = h.HandlerType().RouteCapabilities()
+		missing      maps.Ordered[RouteType, MissingRequiredRouteError]
+		duplicate    maps.OrderedByKey[routeKey, DuplicateRouteError]
 	)
 
-	for rt, req := range spec {
+	for rt, req := range capabilities.RouteTypes {
 		if req == RouteTypeRequired {
 			missing.Set(rt, MissingRequiredRouteError{rt})
 		}
 	}
 
-	for _, r := range slices.Clone(h.routes()) {
+	routes := slices.Clone(h.routes())
+
+	for i, r := range routes {
 		r = normalize(ctx, r)
+		routes[i] = r
 
-		rt, ok := r.RouteType.TryGet()
-		if len(filter) == 0 || (ok && slices.Contains(filter, rt)) {
-			filtered = append(filtered, r)
-		}
-
-		if !ok {
-			continue
-		}
-
-		if spec[rt] == RouteTypeDisallowed {
-			ctx.Fail(UnexpectedRouteError{r})
-		} else {
-			missing.Remove(rt)
+		if rt, ok := r.RouteType.TryGet(); ok {
+			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
+				ctx.Fail(UnexpectedRouteError{r})
+			} else {
+				missing.Remove(rt)
+			}
 		}
 
 		if k, ok := r.key(); ok {
@@ -251,5 +233,5 @@ func normalizeRoutes(ctx *normalizationContext, h Handler, filter ...RouteType) 
 		}
 	}
 
-	return filtered
+	return routes
 }

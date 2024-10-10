@@ -47,6 +47,16 @@ const (
 	ProjectionHandlerType
 )
 
+// HandlerTypes returns a list of all [HandlerType] values.
+func HandlerTypes() []HandlerType {
+	return []HandlerType{
+		AggregateHandlerType,
+		ProcessHandlerType,
+		IntegrationHandlerType,
+		ProjectionHandlerType,
+	}
+}
+
 func (t HandlerType) String() string {
 	switch t {
 	case AggregateHandlerType:

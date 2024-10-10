@@ -67,112 +67,42 @@ func (r Route) normalize(ctx *normalizationContext) Component {
 	return r
 }
 
+// routeKey is the components of a [Route] that uniquely identify it.
+type routeKey struct {
+	RouteType       RouteType
+	MessageTypeName string
+}
+
+func (k routeKey) Compare(x routeKey) int {
+	if c := cmp.Compare(k.RouteType, x.RouteType); c != 0 {
+		return c
+	}
+	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
+}
+
 func (r Route) key() (routeKey, bool) {
 	rt, rtOK := r.RouteType.TryGet()
 	mt, mtOK := r.MessageTypeName.TryGet()
 	return routeKey{rt, mt}, rtOK && mtOK
 }
 
-// RouteType is an enumeration of the types of message routes.
-type RouteType int
+// MissingRouteTypeError indicates that a [Route] is missing its [RouteType].
+type MissingRouteTypeError struct{}
 
-const (
-	// HandlesCommandRouteType is the [RouteType] associated with
-	// [dogma.HandlesCommandRouteType].
-	HandlesCommandRouteType RouteType = iota
-
-	// HandlesEventRouteType is the [RouteType] associated with
-	// [dogma.HandlesEventRouteType].
-	HandlesEventRouteType
-
-	// ExecutesCommandRouteType is the [RouteType] associated with
-	// [dogma.ExecutesCommandRouteType].
-	ExecutesCommandRouteType
-
-	// RecordsEventRouteType is the [RouteType] associated with
-	// [dogma.RecordsEventRouteType].
-	RecordsEventRouteType
-
-	// SchedulesTimeoutRouteType is the [RouteType] associated with
-	// [dogma.SchedulesTimeoutRouteType].
-	SchedulesTimeoutRouteType
-)
-
-// InboundRouteTypes is a list of all [RouteTypes] that represent a message
-// inbound to the handler.
-var InboundRouteTypes = []RouteType{
-	HandlesCommandRouteType,
-	HandlesEventRouteType,
-	SchedulesTimeoutRouteType,
+func (e MissingRouteTypeError) Error() string {
+	return "missing route type"
 }
 
-// OutboundRouteTypes is a list of all [RouteTypes] that represent a message
-// outbound from the handler.
-var OutboundRouteTypes = []RouteType{
-	ExecutesCommandRouteType,
-	RecordsEventRouteType,
-	SchedulesTimeoutRouteType,
+// MissingMessageTypeError indicates that a [Route] is missing information about
+// the message type.
+type MissingMessageTypeError struct{}
+
+func (e MissingMessageTypeError) Error() string {
+	return "missing message type"
 }
 
-// IsInbound returns true if the route indicates that the handler consumes
-// a message type.
-func (r RouteType) IsInbound() bool {
-	switch r {
-	case HandlesCommandRouteType,
-		HandlesEventRouteType,
-		SchedulesTimeoutRouteType:
-		return true
-	default:
-		return false
-	}
-}
-
-// IsOutbound returns true if the route indicates that the handler produces a
-// message type.
-func (r RouteType) IsOutbound() bool {
-	switch r {
-	case ExecutesCommandRouteType,
-		RecordsEventRouteType,
-		SchedulesTimeoutRouteType:
-		return true
-	default:
-		return false
-	}
-}
-
-// Kind returns the kind of message that the route type is associated with.
-func (r RouteType) Kind() message.Kind {
-	switch r {
-	case HandlesCommandRouteType, ExecutesCommandRouteType:
-		return message.CommandKind
-	case HandlesEventRouteType, RecordsEventRouteType:
-		return message.EventKind
-	case SchedulesTimeoutRouteType:
-		return message.TimeoutKind
-	default:
-		panic("unrecognized route type")
-	}
-}
-
-func (r RouteType) String() string {
-	switch r {
-	case HandlesCommandRouteType:
-		return "HandlesCommand"
-	case HandlesEventRouteType:
-		return "HandlesEvent"
-	case ExecutesCommandRouteType:
-		return "ExecutesCommand"
-	case RecordsEventRouteType:
-		return "RecordsEvent"
-	case SchedulesTimeoutRouteType:
-		return "SchedulesTimeout"
-	default:
-		panic("unrecognized route type")
-	}
-}
-
-// MessageKindMismatchError indicates that two components that refer to the same
-// message type disagree on the kind of message they are referring to.
+// MessageKindMismatchError indicates that a [Route] refers to a [message.Type]
+// that has a different [message.Kind] than the route's [RouteType].
 type MessageKindMismatchError struct {
 	RouteType   RouteType
 	MessageType message.Type
@@ -186,31 +116,4 @@ func (e MessageKindMismatchError) Error() string {
 		typename.Get(e.MessageType.ReflectType()),
 		e.MessageType.Kind(),
 	)
-}
-
-// MissingRouteTypeError indicates that a [Route] is missing the route type.
-type MissingRouteTypeError struct{}
-
-func (e MissingRouteTypeError) Error() string {
-	return "missing route type"
-}
-
-// MissingMessageTypeError indicates that a [Route] is missing the message type.
-type MissingMessageTypeError struct{}
-
-func (e MissingMessageTypeError) Error() string {
-	return "missing message type"
-}
-
-// routeKey is the components of a [Route] that uniquely identify it.
-type routeKey struct {
-	RouteType       RouteType
-	MessageTypeName string
-}
-
-func (k routeKey) Compare(x routeKey) int {
-	if c := cmp.Compare(k.RouteType, x.RouteType); c != 0 {
-		return c
-	}
-	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
 }

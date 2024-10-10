@@ -113,7 +113,7 @@ func TestProjection_Routes(t *testing.T) {
 			t,
 			"unexpected routes",
 			cfg.Routes(),
-			[]Route{
+			RouteSet{
 				{
 					RouteType:       optional.Some(HandlesEventRouteType),
 					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),

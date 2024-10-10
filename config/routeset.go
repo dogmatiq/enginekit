@@ -9,12 +9,14 @@ type RouteSet []Route
 
 // MessageTypes returns a map all of the message types in the [RouteSet] and
 // their respective [RouteDirection].
-func (s RouteSet) MessageTypes() map[message.Type]RouteDirection {
+func (s RouteSet) MessageTypes(filter ...RouteDirection) map[message.Type]RouteDirection {
 	types := map[message.Type]RouteDirection{}
 
 	for _, r := range s {
 		types[r.MessageType.Get()] |= r.RouteType.Get().Direction()
 	}
+
+	filterByDirection(types, filter)
 
 	return types
 }
@@ -31,4 +33,25 @@ func (s RouteSet) DirectionOf(t message.Type) RouteDirection {
 	}
 
 	return dir
+}
+
+func filterByDirection(types map[message.Type]RouteDirection, filter []RouteDirection) {
+	if len(filter) == 0 {
+		return
+	}
+
+	match := func(d RouteDirection) bool {
+		for _, f := range filter {
+			if d.Is(f) {
+				return true
+			}
+		}
+		return false
+	}
+
+	for t, d := range types {
+		if !match(d) {
+			delete(types, t)
+		}
+	}
 }

@@ -47,6 +47,21 @@ const (
 	ProjectionHandlerType
 )
 
+func (t HandlerType) String() string {
+	switch t {
+	case AggregateHandlerType:
+		return "aggregate"
+	case ProcessHandlerType:
+		return "process"
+	case IntegrationHandlerType:
+		return "integration"
+	case ProjectionHandlerType:
+		return "projection"
+	default:
+		panic("invalid handler type")
+	}
+}
+
 // SwitchByHandlerTypeOf invokes one of the provided functions based on the
 // [HandlerType] of h.
 func SwitchByHandlerTypeOf(

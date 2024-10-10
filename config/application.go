@@ -51,20 +51,32 @@ func (a Application) Interface() dogma.Application {
 	return a.ConfigurationSource.Get().Value.Get()
 }
 
-// HandlerByName returns the [Handler] with the given name, or false if no such
-// handler has been configured.
-func (a Application) HandlerByName(name string) (Handler, bool) {
+// Handlers returns the list of handlers configured for the application.
+//
+// If one or more [HandlerType] values are provided, only handlers of those
+// types are returned.
+//
+// It panics if the handlers are incomplete or invalid.
+func (a Application) Handlers(filter ...HandlerType) []Handler {
 	ctx := &normalizationContext{
 		Component: a,
 	}
 
-	handlers := normalizeHandlers(ctx, a)
+	handlers := normalizeHandlers(ctx, a, filter...)
 
 	if err := ctx.Err(); err != nil {
 		panic(err)
 	}
 
-	for _, h := range handlers {
+	return handlers
+}
+
+// HandlerByName returns the [Handler] with the given name, or false if no such
+// handler has been configured.
+//
+// It panics if the handlers are incomplete or invalid.
+func (a Application) HandlerByName(name string, filter ...HandlerType) (Handler, bool) {
+	for _, h := range a.Handlers(filter...) {
 		if h.Identity().Name == name {
 			return h, true
 		}
@@ -164,14 +176,18 @@ func (e ConflictingRouteError) Error() string {
 	)
 }
 
-func normalizeHandlers(ctx *normalizationContext, a Application) []Handler {
-	handlers := slices.Clone(a.ConfiguredHandlers)
+func normalizeHandlers(ctx *normalizationContext, a Application, filter ...HandlerType) []Handler {
+	var filtered []Handler
 
-	for i, h := range handlers {
-		handlers[i] = normalize(ctx, h)
+	for _, h := range slices.Clone(a.ConfiguredHandlers) {
+		h = normalize(ctx, h)
+
+		if len(filter) == 0 || slices.Contains(filter, h.HandlerType()) {
+			filtered = append(filtered, h)
+		}
 	}
 
-	return handlers
+	return filtered
 }
 
 // detectIdentityConflicts appends errors related to handlers that have

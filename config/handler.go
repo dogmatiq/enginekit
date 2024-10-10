@@ -14,6 +14,9 @@ type Handler interface {
 
 	// Routes returns the routes configured for the handler.
 	//
+	// If one or more [RouteType] values are provided, only routes of those
+	// types are returned.
+	//
 	// It panics if the routes are incomplete or invalid.
 	Routes(filter ...RouteType) []Route
 

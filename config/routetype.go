@@ -9,17 +9,17 @@ import (
 type RouteDirection int
 
 const (
-	// Inbound is a [RouteDirection] that indicates a message flowing into a
-	// handler.
-	Inbound RouteDirection = 1 << iota
+	// InboundDirection is a [RouteDirection] that indicates a message flowing
+	// into a handler.
+	InboundDirection RouteDirection = 1 << iota
 
-	// Outbound is a [RouteDirection] that indicates a message flowing out of a
-	// handler.
-	Outbound
+	// OutboundDirection is a [RouteDirection] that indicates a message flowing
+	// out of a handler.
+	OutboundDirection
 )
 
-// Is returns true if d includes dir.
-func (d RouteDirection) Is(dir RouteDirection) bool {
+// Has returns true if d is a superset of dir.
+func (d RouteDirection) Has(dir RouteDirection) bool {
 	return d&dir != 0
 }
 
@@ -63,11 +63,11 @@ const (
 func (r RouteType) Direction() RouteDirection {
 	switch r {
 	case HandlesCommandRouteType, HandlesEventRouteType:
-		return Inbound
+		return InboundDirection
 	case ExecutesCommandRouteType, RecordsEventRouteType:
-		return Outbound
+		return OutboundDirection
 	case SchedulesTimeoutRouteType:
-		return Inbound | Outbound
+		return InboundDirection | OutboundDirection
 	default:
 		panic("unrecognized route type")
 	}

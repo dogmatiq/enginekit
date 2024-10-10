@@ -42,7 +42,7 @@ func filterByDirection(types map[message.Type]RouteDirection, filter []RouteDire
 
 	match := func(d RouteDirection) bool {
 		for _, f := range filter {
-			if d.Is(f) {
+			if d.Has(f) {
 				return true
 			}
 		}

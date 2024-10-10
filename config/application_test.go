@@ -80,20 +80,58 @@ func TestApplication_Identity(t *testing.T) {
 }
 
 func TestApplication_Interface(t *testing.T) {
-	h := &ApplicationStub{
+	app := &ApplicationStub{
 		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 		},
 	}
 
-	cfg := runtimeconfig.FromApplication(h)
+	cfg := runtimeconfig.FromApplication(app)
 
 	Expect(
 		t,
 		"unexpected result",
 		cfg.Interface(),
-		h,
+		app,
 	)
+}
+
+func TestApplication_HandlerByName(t *testing.T) {
+	h := &AggregateMessageHandlerStub{
+		ConfigureFunc: func(c dogma.AggregateConfigurer) {
+			c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf")
+			c.Routes(
+				dogma.HandlesCommand[CommandStub[TypeA]](),
+				dogma.RecordsEvent[EventStub[TypeA]](),
+			)
+		},
+	}
+
+	app := &ApplicationStub{
+		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+			c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
+			c.RegisterAggregate(h)
+		},
+	}
+
+	cfg := runtimeconfig.FromApplication(app)
+
+	if got, ok := cfg.HandlerByName("name"); ok {
+		want := runtimeconfig.FromAggregate(h)
+
+		Expect(
+			t,
+			"unexpected handler",
+			got,
+			want,
+		)
+	} else {
+		t.Fatal("expected handler to be found")
+	}
+
+	if _, ok := cfg.HandlerByName("unknown"); ok {
+		t.Fatal("did not expect handler to be found")
+	}
 }
 
 func TestApplication_validation(t *testing.T) {

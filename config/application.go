@@ -51,6 +51,28 @@ func (a Application) Interface() dogma.Application {
 	return a.ConfigurationSource.Get().Value.Get()
 }
 
+// HandlerByName returns the [Handler] with the given name, or false if no such
+// handler has been configured.
+func (a Application) HandlerByName(name string) (Handler, bool) {
+	ctx := &normalizationContext{
+		Component: a,
+	}
+
+	handlers := normalizeHandlers(ctx, a)
+
+	if err := ctx.Err(); err != nil {
+		panic(err)
+	}
+
+	for _, h := range handlers {
+		if h.Identity().Name == name {
+			return h, true
+		}
+	}
+
+	return nil, false
+}
+
 func (a Application) identities() []Identity {
 	return a.ConfiguredIdentities
 }

@@ -17,8 +17,78 @@ type Handler interface {
 	// It panics if the routes are incomplete or invalid.
 	Routes(filter ...RouteType) []Route
 
+	// HandlerType returns [HandlerType] of the handler.
+	HandlerType() HandlerType
+
 	routes() []Route
-	routeSpec() routeSpec
+}
+
+// HandlerType is an enumeration of the types of message handlers.
+type HandlerType int
+
+const (
+	// AggregateHandlerType is the [HandlerType] for implementations of
+	// [dogma.AggregateMessageHandler].
+	AggregateHandlerType HandlerType = iota
+
+	// IntegrationHandlerType is the [HandlerType] for implementations of
+	// [dogma.IntegrationMessageHandler].
+	IntegrationHandlerType
+
+	// ProcessHandlerType is the [HandlerType] for implementations of
+	// [dogma.ProcessMessageHandler].
+	ProcessHandlerType
+
+	// ProjectionHandlerType is the [HandlerType] for implementations of
+	// [dogma.ProjectionMessageHandler].
+	ProjectionHandlerType
+)
+
+// RouteSpec is describes how a [HandlerType] makes use of a particular
+// [RouteType].
+type RouteSpec int
+
+const (
+	// RouteTypeDisallowed indicates that the [HandlerType] does not support the
+	// [RouteType].
+	RouteTypeDisallowed RouteSpec = iota
+
+	// RouteTypeAllowed indicates that the [HandlerType] supports the [RouteType],
+	// but it is not required.
+	RouteTypeAllowed
+
+	// RouteTypeRequired indicates that the [HandlerType] requires at least one
+	// route of the [RouteType].
+	RouteTypeRequired
+)
+
+// RoutingSpec returns a map that describes how the [HandlerType] makes use of
+// each [RouteType].
+func (t HandlerType) RoutingSpec() map[RouteType]RouteSpec {
+	switch t {
+	case AggregateHandlerType:
+		return map[RouteType]RouteSpec{
+			HandlesCommandRouteType: RouteTypeRequired,
+			RecordsEventRouteType:   RouteTypeRequired,
+		}
+	case IntegrationHandlerType:
+		return map[RouteType]RouteSpec{
+			HandlesCommandRouteType: RouteTypeRequired,
+			RecordsEventRouteType:   RouteTypeAllowed,
+		}
+	case ProcessHandlerType:
+		return map[RouteType]RouteSpec{
+			HandlesEventRouteType:     RouteTypeRequired,
+			ExecutesCommandRouteType:  RouteTypeRequired,
+			SchedulesTimeoutRouteType: RouteTypeAllowed,
+		}
+	case ProjectionHandlerType:
+		return map[RouteType]RouteSpec{
+			HandlesEventRouteType: RouteTypeRequired,
+		}
+	default:
+		panic("invalid handler type")
+	}
 }
 
 // MissingRequiredRouteError indicates that a [Handler] is missing one of its
@@ -73,14 +143,14 @@ func normalizedRoutes(h Handler, filter ...RouteType) []Route {
 
 func normalizeRoutes(ctx *normalizationContext, h Handler, filter ...RouteType) []Route {
 	var (
-		spec      = h.routeSpec()
+		spec      = h.HandlerType().RoutingSpec()
 		missing   maps.Ordered[RouteType, MissingRequiredRouteError]
 		duplicate maps.OrderedByKey[routeKey, DuplicateRouteError]
 		filtered  []Route
 	)
 
 	for rt, req := range spec {
-		if req == required {
+		if req == RouteTypeRequired {
 			missing.Set(rt, MissingRequiredRouteError{rt})
 		}
 	}
@@ -97,7 +167,7 @@ func normalizeRoutes(ctx *normalizationContext, h Handler, filter ...RouteType) 
 			continue
 		}
 
-		if spec[rt] == disallowed {
+		if spec[rt] == RouteTypeDisallowed {
 			ctx.Fail(UnexpectedRouteError{r})
 		} else {
 			missing.Remove(rt)

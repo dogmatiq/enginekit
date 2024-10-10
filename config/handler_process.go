@@ -47,6 +47,11 @@ func (h Process) Routes(filter ...RouteType) []Route {
 	return normalizedRoutes(h, filter...)
 }
 
+// HandlerType returns [HandlerType] of the handler.
+func (h Process) HandlerType() HandlerType {
+	return ProcessHandlerType
+}
+
 func (h Process) normalize(ctx *normalizationContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
@@ -59,12 +64,4 @@ func (h Process) identities() []Identity {
 
 func (h Process) routes() []Route {
 	return h.ConfiguredRoutes
-}
-
-func (h Process) routeSpec() routeSpec {
-	return routeSpec{
-		HandlesEventRoute:     required,
-		ExecutesCommandRoute:  required,
-		SchedulesTimeoutRoute: allowed,
-	}
 }

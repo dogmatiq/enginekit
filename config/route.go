@@ -77,32 +77,34 @@ func (r Route) key() (routeKey, bool) {
 type RouteType int
 
 const (
-	// HandlesCommandRoute is the route type associated with
-	// [dogma.HandlesCommandRoute].
-	HandlesCommandRoute RouteType = iota
+	// HandlesCommandRouteType is the [RouteType] associated with
+	// [dogma.HandlesCommandRouteType].
+	HandlesCommandRouteType RouteType = iota
 
-	// HandlesEventRoute is the route type associated with
-	// [dogma.HandlesEventRoute].
-	HandlesEventRoute
+	// HandlesEventRouteType is the [RouteType] associated with
+	// [dogma.HandlesEventRouteType].
+	HandlesEventRouteType
 
-	// ExecutesCommandRoute is the route type associated with
-	// [dogma.ExecutesCommandRoute].
-	ExecutesCommandRoute
+	// ExecutesCommandRouteType is the [RouteType] associated with
+	// [dogma.ExecutesCommandRouteType].
+	ExecutesCommandRouteType
 
-	// RecordsEventRoute is the route type associated with
-	// [dogma.RecordsEventRoute].
-	RecordsEventRoute
+	// RecordsEventRouteType is the [RouteType] associated with
+	// [dogma.RecordsEventRouteType].
+	RecordsEventRouteType
 
-	// SchedulesTimeoutRoute is the route type associated with
-	// [dogma.SchedulesTimeoutRoute].
-	SchedulesTimeoutRoute
+	// SchedulesTimeoutRouteType is the [RouteType] associated with
+	// [dogma.SchedulesTimeoutRouteType].
+	SchedulesTimeoutRouteType
 )
 
 // IsInbound returns true if the route indicates that the handler consumes
 // a message type.
 func (r RouteType) IsInbound() bool {
 	switch r {
-	case HandlesCommandRoute, HandlesEventRoute, SchedulesTimeoutRoute:
+	case HandlesCommandRouteType,
+		HandlesEventRouteType,
+		SchedulesTimeoutRouteType:
 		return true
 	default:
 		return false
@@ -113,7 +115,9 @@ func (r RouteType) IsInbound() bool {
 // message type.
 func (r RouteType) IsOutbound() bool {
 	switch r {
-	case ExecutesCommandRoute, RecordsEventRoute, SchedulesTimeoutRoute:
+	case ExecutesCommandRouteType,
+		RecordsEventRouteType,
+		SchedulesTimeoutRouteType:
 		return true
 	default:
 		return false
@@ -123,11 +127,11 @@ func (r RouteType) IsOutbound() bool {
 // Kind returns the kind of message that the route type is associated with.
 func (r RouteType) Kind() message.Kind {
 	switch r {
-	case HandlesCommandRoute, ExecutesCommandRoute:
+	case HandlesCommandRouteType, ExecutesCommandRouteType:
 		return message.CommandKind
-	case HandlesEventRoute, RecordsEventRoute:
+	case HandlesEventRouteType, RecordsEventRouteType:
 		return message.EventKind
-	case SchedulesTimeoutRoute:
+	case SchedulesTimeoutRouteType:
 		return message.TimeoutKind
 	default:
 		panic("unrecognized route type")
@@ -136,15 +140,15 @@ func (r RouteType) Kind() message.Kind {
 
 func (r RouteType) String() string {
 	switch r {
-	case HandlesCommandRoute:
+	case HandlesCommandRouteType:
 		return "HandlesCommand"
-	case HandlesEventRoute:
+	case HandlesEventRouteType:
 		return "HandlesEvent"
-	case ExecutesCommandRoute:
+	case ExecutesCommandRouteType:
 		return "ExecutesCommand"
-	case RecordsEventRoute:
+	case RecordsEventRouteType:
 		return "RecordsEvent"
-	case SchedulesTimeoutRoute:
+	case SchedulesTimeoutRouteType:
 		return "SchedulesTimeout"
 	default:
 		panic("unrecognized route type")
@@ -181,19 +185,6 @@ type MissingMessageTypeError struct{}
 func (e MissingMessageTypeError) Error() string {
 	return "missing message type"
 }
-
-// routeSpec is a specification of the types of routes that can (and must) be
-// configured for a specific handler type.
-type routeSpec map[RouteType]requirement
-
-// requirement is an enumeration of the "requirement level" of some value.
-type requirement int
-
-const (
-	disallowed requirement = iota
-	allowed
-	required
-)
 
 // routeKey is the components of a [Route] that uniquely identify it.
 type routeKey struct {

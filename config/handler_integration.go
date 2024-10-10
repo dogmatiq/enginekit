@@ -47,6 +47,11 @@ func (h Integration) Routes(filter ...RouteType) []Route {
 	return normalizedRoutes(h, filter...)
 }
 
+// HandlerType returns [HandlerType] of the handler.
+func (h Integration) HandlerType() HandlerType {
+	return IntegrationHandlerType
+}
+
 func (h Integration) normalize(ctx *normalizationContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
@@ -59,11 +64,4 @@ func (h Integration) identities() []Identity {
 
 func (h Integration) routes() []Route {
 	return h.ConfiguredRoutes
-}
-
-func (h Integration) routeSpec() routeSpec {
-	return routeSpec{
-		HandlesCommandRoute: required,
-		RecordsEventRoute:   allowed,
-	}
 }

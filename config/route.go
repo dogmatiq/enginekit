@@ -98,6 +98,22 @@ const (
 	SchedulesTimeoutRouteType
 )
 
+// InboundRouteTypes is a list of all [RouteTypes] that represent a message
+// inbound to the handler.
+var InboundRouteTypes = []RouteType{
+	HandlesCommandRouteType,
+	HandlesEventRouteType,
+	SchedulesTimeoutRouteType,
+}
+
+// OutboundRouteTypes is a list of all [RouteTypes] that represent a message
+// outbound from the handler.
+var OutboundRouteTypes = []RouteType{
+	ExecutesCommandRouteType,
+	RecordsEventRouteType,
+	SchedulesTimeoutRouteType,
+}
+
 // IsInbound returns true if the route indicates that the handler consumes
 // a message type.
 func (r RouteType) IsInbound() bool {

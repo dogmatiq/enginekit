@@ -18,6 +18,11 @@ const (
 	Outbound
 )
 
+// Is returns true if d includes dir.
+func (d RouteDirection) Is(dir RouteDirection) bool {
+	return d&dir != 0
+}
+
 // RouteType is an enumeration of the types of message routes that can be
 // configured on a [Handler].
 type RouteType int

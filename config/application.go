@@ -30,7 +30,7 @@ type Application struct {
 }
 
 func (a Application) String() string {
-	return stringify("application", a.Impl, a.ConfiguredIdentities)
+	return stringify("application", a, a.Impl)
 }
 
 // Identity returns the entity's identity.

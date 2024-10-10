@@ -34,18 +34,53 @@ const (
 	// [dogma.AggregateMessageHandler].
 	AggregateHandlerType HandlerType = iota
 
-	// IntegrationHandlerType is the [HandlerType] for implementations of
-	// [dogma.IntegrationMessageHandler].
-	IntegrationHandlerType
-
 	// ProcessHandlerType is the [HandlerType] for implementations of
 	// [dogma.ProcessMessageHandler].
 	ProcessHandlerType
+
+	// IntegrationHandlerType is the [HandlerType] for implementations of
+	// [dogma.IntegrationMessageHandler].
+	IntegrationHandlerType
 
 	// ProjectionHandlerType is the [HandlerType] for implementations of
 	// [dogma.ProjectionMessageHandler].
 	ProjectionHandlerType
 )
+
+// SwitchByHandlerTypeOf invokes one of the provided functions based on the
+// [HandlerType] of h.
+func SwitchByHandlerTypeOf(
+	h Handler,
+	aggregate func(Aggregate),
+	process func(Process),
+	integration func(Integration),
+	projection func(Projection),
+) {
+	switch h := h.(type) {
+	case Aggregate:
+		if aggregate == nil {
+			panic("no case function was provided for aggregate handlers")
+		}
+		aggregate(h)
+	case Process:
+		if process == nil {
+			panic("no case function was provided for process handlers")
+		}
+		process(h)
+	case Integration:
+		if integration == nil {
+			panic("no case function was provided for integration handlers")
+		}
+		integration(h)
+	case Projection:
+		if projection == nil {
+			panic("no case function was provided for projection handlers")
+		}
+		projection(h)
+	default:
+		panic("invalid handler type")
+	}
+}
 
 // RouteSpec is describes how a [HandlerType] makes use of a particular
 // [RouteType].

@@ -154,7 +154,7 @@ func TestAggregate_Routes(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`aggregate is invalid:`+
+			`partial aggregate is invalid:`+
 				"\n"+`- route is invalid:`+
 				"\n"+`  - missing route type`+
 				"\n"+`  - missing message type`+
@@ -191,7 +191,7 @@ func TestAggregate_validation(t *testing.T) {
 		},
 		{
 			"nil aggregate",
-			`aggregate is invalid:` +
+			`partial aggregate is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesCommand" route` +
 				"\n" + `- expected at least one "RecordsEvent" route`,

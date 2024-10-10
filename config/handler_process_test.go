@@ -156,7 +156,7 @@ func TestProcess_Routes(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`process is invalid:`+
+			`partial process is invalid:`+
 				"\n"+`- route is invalid:`+
 				"\n"+`  - missing route type`+
 				"\n"+`  - missing message type`+
@@ -193,7 +193,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			"nil process",
-			`process is invalid:` +
+			`partial process is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesEvent" route` +
 				"\n" + `- expected at least one "ExecutesCommand" route`,

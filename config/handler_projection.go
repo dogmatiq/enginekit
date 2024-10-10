@@ -33,7 +33,7 @@ type Projection struct {
 }
 
 func (h Projection) String() string {
-	return stringify("projection", h.Impl, h.ConfiguredIdentities)
+	return stringify("projection", h, h.Impl)
 }
 
 // Identity returns the entity's identity.

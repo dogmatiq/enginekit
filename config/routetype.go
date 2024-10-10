@@ -4,7 +4,7 @@ import (
 	"github.com/dogmatiq/enginekit/message"
 )
 
-// RouteDirection is an enumeration of the "directions" in which a message flows
+// RouteDirection is an bit-field of the "directions" in which a message flows
 // for a specific [RouteType].
 type RouteDirection int
 
@@ -58,6 +58,17 @@ const (
 	// It is associated with routes configured by [dogma.SchedulesTimeout].
 	SchedulesTimeoutRouteType
 )
+
+// RouteTypes returns a list of all [HandlerType] values.
+func RouteTypes() []RouteType {
+	return []RouteType{
+		HandlesCommandRouteType,
+		HandlesEventRouteType,
+		ExecutesCommandRouteType,
+		RecordsEventRouteType,
+		SchedulesTimeoutRouteType,
+	}
+}
 
 // Direction returns the direction in which messages flow for the route type.
 func (r RouteType) Direction() RouteDirection {

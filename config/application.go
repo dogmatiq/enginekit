@@ -116,11 +116,11 @@ type ConflictingRouteError struct {
 func (e ConflictingRouteError) Error() string {
 	verb := "handled"
 	switch e.ConflictingRouteType {
-	case ExecutesCommandRoute:
+	case ExecutesCommandRouteType:
 		verb = "executed"
-	case RecordsEventRoute:
+	case RecordsEventRouteType:
 		verb = "recorded"
-	case SchedulesTimeoutRoute:
+	case SchedulesTimeoutRouteType:
 		verb = "scheduled"
 	}
 
@@ -211,7 +211,7 @@ func detectRouteConflicts(ctx *normalizationContext, app Application) {
 				continue
 			}
 
-			if k1.RouteType != HandlesCommandRoute && k1.RouteType != RecordsEventRoute {
+			if k1.RouteType != HandlesCommandRouteType && k1.RouteType != RecordsEventRouteType {
 				continue
 			}
 

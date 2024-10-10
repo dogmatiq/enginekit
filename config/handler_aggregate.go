@@ -47,6 +47,11 @@ func (h Aggregate) Routes(filter ...RouteType) []Route {
 	return normalizedRoutes(h, filter...)
 }
 
+// HandlerType returns [HandlerType] of the handler.
+func (h Aggregate) HandlerType() HandlerType {
+	return AggregateHandlerType
+}
+
 func (h Aggregate) normalize(ctx *normalizationContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
@@ -59,11 +64,4 @@ func (h Aggregate) identities() []Identity {
 
 func (h Aggregate) routes() []Route {
 	return h.ConfiguredRoutes
-}
-
-func (h Aggregate) routeSpec() routeSpec {
-	return routeSpec{
-		HandlesCommandRoute: required,
-		RecordsEventRoute:   required,
-	}
 }

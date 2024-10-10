@@ -115,7 +115,7 @@ func TestProjection_Routes(t *testing.T) {
 			cfg.Routes(),
 			[]Route{
 				{
-					RouteType:       optional.Some(HandlesEventRoute),
+					RouteType:       optional.Some(HandlesEventRouteType),
 					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 				},
@@ -128,19 +128,19 @@ func TestProjection_Routes(t *testing.T) {
 			ConfiguredRoutes: []Route{
 				{},
 				{
-					RouteType:       optional.Some(HandlesCommandRoute),
+					RouteType:       optional.Some(HandlesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
 				{
-					RouteType:       optional.Some(ExecutesCommandRoute),
+					RouteType:       optional.Some(ExecutesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
 				{
-					RouteType:       optional.Some(RecordsEventRoute),
+					RouteType:       optional.Some(RecordsEventRouteType),
 					MessageTypeName: optional.Some("pkg.SomeEventType"),
 				},
 				{
-					RouteType:       optional.Some(SchedulesTimeoutRoute),
+					RouteType:       optional.Some(SchedulesTimeoutRouteType),
 					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
 				},
 			},

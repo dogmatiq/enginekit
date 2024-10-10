@@ -50,6 +50,11 @@ func (h Projection) Routes(filter ...RouteType) []Route {
 	return normalizedRoutes(h, filter...)
 }
 
+// HandlerType returns [HandlerType] of the handler.
+func (h Projection) HandlerType() HandlerType {
+	return ProjectionHandlerType
+}
+
 func (h Projection) normalize(ctx *normalizationContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
@@ -62,12 +67,6 @@ func (h Projection) identities() []Identity {
 
 func (h Projection) routes() []Route {
 	return h.ConfiguredRoutes
-}
-
-func (h Projection) routeSpec() routeSpec {
-	return routeSpec{
-		HandlesEventRoute: required,
-	}
 }
 
 // ProjectionDeliveryPolicy represents the (potentially invalid) configuration

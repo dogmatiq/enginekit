@@ -165,6 +165,26 @@ func TestIntegration_Routes(t *testing.T) {
 	})
 }
 
+func TestIntegration_Interface(t *testing.T) {
+	h := &IntegrationMessageHandlerStub{
+		ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesCommand[CommandStub[TypeA]](),
+			)
+		},
+	}
+
+	cfg := runtimeconfig.FromIntegration(h)
+
+	Expect(
+		t,
+		"unexpected result",
+		cfg.Interface(),
+		h,
+	)
+}
+
 func TestIntegration_validation(t *testing.T) {
 	cases := []struct {
 		Name    string

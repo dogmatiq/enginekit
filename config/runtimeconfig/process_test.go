@@ -30,10 +30,10 @@ func TestFromProcess(t *testing.T) {
 			&ProcessMessageHandlerStub{},
 			func(h dogma.ProcessMessageHandler) config.Process {
 				return config.Process{
-					Impl: optional.Some(
-						config.Implementation[dogma.ProcessMessageHandler]{
+					ConfigurationSource: optional.Some(
+						config.Source[dogma.ProcessMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-							Source:   optional.Some(h),
+							Value:    optional.Some(h),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -55,10 +55,10 @@ func TestFromProcess(t *testing.T) {
 			},
 			func(h dogma.ProcessMessageHandler) config.Process {
 				return config.Process{
-					Impl: optional.Some(
-						config.Implementation[dogma.ProcessMessageHandler]{
+					ConfigurationSource: optional.Some(
+						config.Source[dogma.ProcessMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-							Source:   optional.Some(h),
+							Value:    optional.Some(h),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{

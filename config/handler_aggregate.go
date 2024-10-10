@@ -8,9 +8,9 @@ import (
 // Aggregate represents the (potentially invalid) configuration of a
 // [dogma.AggregateMessageHandler] implementation.
 type Aggregate struct {
-	// Impl contains information about the type that produced the configuration,
-	// if available.
-	Impl optional.Optional[Implementation[dogma.AggregateMessageHandler]]
+	// ConfigurationSource contains information about the type and value that
+	// produced the configuration, if available.
+	ConfigurationSource optional.Optional[Source[dogma.AggregateMessageHandler]]
 
 	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
 	// identities configured for the handler.
@@ -29,7 +29,7 @@ type Aggregate struct {
 }
 
 func (h Aggregate) String() string {
-	return stringify("aggregate", h, h.Impl)
+	return stringify("aggregate", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
@@ -59,6 +59,12 @@ func (h Aggregate) Routes(filter ...RouteType) []Route {
 // IsDisabled returns true if the handler was disabled via the configurer.
 func (h Aggregate) IsDisabled() bool {
 	return h.ConfiguredAsDisabled
+}
+
+// Interface returns the [dogma.AggregateMessageHandler] instance that the
+// configuration represents, or panics if it is not available.
+func (h Aggregate) Interface() dogma.AggregateMessageHandler {
+	return h.ConfigurationSource.Get().Value.Get()
 }
 
 func (h Aggregate) normalize(ctx *normalizationContext) Component {

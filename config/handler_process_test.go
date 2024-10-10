@@ -171,6 +171,27 @@ func TestProcess_Routes(t *testing.T) {
 	})
 }
 
+func TestProcess_Interface(t *testing.T) {
+	h := &ProcessMessageHandlerStub{
+		ConfigureFunc: func(c dogma.ProcessConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesEvent[EventStub[TypeA]](),
+				dogma.ExecutesCommand[CommandStub[TypeA]](),
+			)
+		},
+	}
+
+	cfg := runtimeconfig.FromProcess(h)
+
+	Expect(
+		t,
+		"unexpected result",
+		cfg.Interface(),
+		h,
+	)
+}
+
 func TestProcess_validation(t *testing.T) {
 	cases := []struct {
 		Name    string

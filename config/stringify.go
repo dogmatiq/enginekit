@@ -9,7 +9,7 @@ import (
 func stringify[T any](
 	label string,
 	ent Entity,
-	impl optional.Optional[Implementation[T]],
+	impl optional.Optional[Source[T]],
 ) string {
 	if !ent.IsExhaustive() {
 		label = "partial " + label

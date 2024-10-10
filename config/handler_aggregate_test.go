@@ -170,6 +170,27 @@ func TestAggregate_Routes(t *testing.T) {
 	})
 }
 
+func TestAggregate_Interface(t *testing.T) {
+	h := &AggregateMessageHandlerStub{
+		ConfigureFunc: func(c dogma.AggregateConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesCommand[CommandStub[TypeA]](),
+				dogma.RecordsEvent[EventStub[TypeA]](),
+			)
+		},
+	}
+
+	cfg := runtimeconfig.FromAggregate(h)
+
+	Expect(
+		t,
+		"unexpected result",
+		cfg.Interface(),
+		h,
+	)
+}
+
 func TestAggregate_validation(t *testing.T) {
 	cases := []struct {
 		Name    string

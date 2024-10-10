@@ -14,14 +14,15 @@ type Component interface {
 	normalize(*normalizationContext) Component
 }
 
-// Implementation contains information about the type and value that implements
+// Source contains information about the type and value that implements
 // a [Component] of type T.
-type Implementation[T any] struct {
+type Source[T any] struct {
 	// TypeName is the fully-qualified name of the Go type that implements T.
 	TypeName string
 
-	// Source is the value that produced the configuration, if available.
-	Source optional.Optional[T]
+	// Value is the value of type T that produced the configuration, if
+	// available.
+	Value optional.Optional[T]
 }
 
 // ComponentError indicates that a [Component] is invalid.

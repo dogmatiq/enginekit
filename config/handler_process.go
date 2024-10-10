@@ -8,9 +8,9 @@ import (
 // Process represents the (potentially invalid) configuration of a
 // [dogma.ProcessMessageHandler] implementation.
 type Process struct {
-	// Impl contains information about the type that produced the configuration,
-	// if available.
-	Impl optional.Optional[Implementation[dogma.ProcessMessageHandler]]
+	// ConfigurationSource contains information about the type and value that
+	// produced the configuration, if available.
+	ConfigurationSource optional.Optional[Source[dogma.ProcessMessageHandler]]
 
 	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
 	// identities configured for the handler.
@@ -29,7 +29,7 @@ type Process struct {
 }
 
 func (h Process) String() string {
-	return stringify("process", h, h.Impl)
+	return stringify("process", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
@@ -59,6 +59,12 @@ func (h Process) Routes(filter ...RouteType) []Route {
 // IsDisabled returns true if the handler was disabled via the configurer.
 func (h Process) IsDisabled() bool {
 	return h.ConfiguredAsDisabled
+}
+
+// Interface returns the [dogma.ProcessMessageHandler] instance that the
+// configuration represents, or panics if it is not available.
+func (h Process) Interface() dogma.ProcessMessageHandler {
+	return h.ConfigurationSource.Get().Value.Get()
 }
 
 func (h Process) normalize(ctx *normalizationContext) Component {

@@ -8,9 +8,9 @@ import (
 // Projection represents the (potentially invalid) configuration of a
 // [dogma.ProjectionMessageHandler] implementation.
 type Projection struct {
-	// Impl contains information about the type that produced the configuration,
-	// if available.
-	Impl optional.Optional[Implementation[dogma.ProjectionMessageHandler]]
+	// ConfigurationSource contains information about the type and value that
+	// produced the configuration, if available.
+	ConfigurationSource optional.Optional[Source[dogma.ProjectionMessageHandler]]
 
 	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
 	// identities configured for the handler.
@@ -33,7 +33,7 @@ type Projection struct {
 }
 
 func (h Projection) String() string {
-	return stringify("projection", h, h.Impl)
+	return stringify("projection", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
@@ -71,6 +71,12 @@ func (h Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 		return p.Implementation.Get()
 	}
 	return dogma.UnicastProjectionDeliveryPolicy{}
+}
+
+// Interface returns the [dogma.ProjectionMessageHandler] instance that the
+// configuration represents, or panics if it is not available.
+func (h Projection) Interface() dogma.ProjectionMessageHandler {
+	return h.ConfigurationSource.Get().Value.Get()
 }
 
 func (h Projection) normalize(ctx *normalizationContext) Component {

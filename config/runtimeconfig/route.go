@@ -18,34 +18,27 @@ func fromRoute(r dogma.Route) config.Route {
 	if r != nil {
 		switch r := r.(type) {
 		case dogma.HandlesCommandRoute:
-			cfg.RouteType = optional.Some(config.HandlesCommandRoute)
-			cfg.MessageType = messageType(r.Type)
+			setupRoute(&cfg, config.HandlesCommandRoute, r.Type)
 		case dogma.RecordsEventRoute:
-			cfg.RouteType = optional.Some(config.RecordsEventRoute)
-			cfg.MessageType = messageType(r.Type)
+			setupRoute(&cfg, config.RecordsEventRoute, r.Type)
 		case dogma.HandlesEventRoute:
-			cfg.RouteType = optional.Some(config.HandlesEventRoute)
-			cfg.MessageType = messageType(r.Type)
+			setupRoute(&cfg, config.HandlesEventRoute, r.Type)
 		case dogma.ExecutesCommandRoute:
-			cfg.RouteType = optional.Some(config.ExecutesCommandRoute)
-			cfg.MessageType = messageType(r.Type)
+			setupRoute(&cfg, config.ExecutesCommandRoute, r.Type)
 		case dogma.SchedulesTimeoutRoute:
-			cfg.RouteType = optional.Some(config.SchedulesTimeoutRoute)
-			cfg.MessageType = messageType(r.Type)
+			setupRoute(&cfg, config.SchedulesTimeoutRoute, r.Type)
 		}
 	}
 
 	return cfg
 }
 
-func messageType(r reflect.Type) optional.Optional[config.MessageType] {
-	t := message.TypeFromReflect(r)
-
-	return optional.Some(
-		config.MessageType{
-			TypeName: typename.Get(r),
-			Kind:     t.Kind(),
-			Type:     optional.Some(t),
-		},
-	)
+func setupRoute(
+	cfg *config.Route,
+	rt config.RouteType,
+	t reflect.Type,
+) {
+	cfg.RouteType = optional.Some(rt)
+	cfg.MessageTypeName = optional.Some(typename.Get(t))
+	cfg.MessageType = optional.Some(message.TypeFromReflect(t))
 }

@@ -16,11 +16,11 @@ type Entity interface {
 	identities() []Identity
 }
 
-// NoIdentityError indicates that an [Entity] has been configured without an
-// [Identity].
-type NoIdentityError struct{}
+// MissingIdentityError indicates that an [Entity] has been configured without
+// an [Identity].
+type MissingIdentityError struct{}
 
-func (e NoIdentityError) Error() string {
+func (e MissingIdentityError) Error() string {
 	return "no identity is configured"
 }
 

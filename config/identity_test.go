@@ -33,8 +33,8 @@ func TestIdentity_validation(t *testing.T) {
 		{
 			"empty",
 			`identity is invalid:` +
-				"\n" + `  - invalid name (""), expected a non-empty, printable UTF-8 string with no whitespace` +
-				"\n" + `  - invalid key (""), expected an RFC 4122/9562 UUID`,
+				"\n" + `- invalid name (""), expected a non-empty, printable UTF-8 string with no whitespace` +
+				"\n" + `- invalid key (""), expected an RFC 4122/9562 UUID`,
 			Identity{},
 		},
 		{

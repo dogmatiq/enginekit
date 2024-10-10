@@ -68,24 +68,14 @@ func TestFromAggregate(t *testing.T) {
 					},
 					ConfiguredRoutes: []config.Route{
 						{
-							RouteType: optional.Some(config.HandlesCommandRoute),
-							MessageType: optional.Some(
-								config.MessageType{
-									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",
-									Kind:     message.CommandKind,
-									Type:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
-								},
-							),
+							RouteType:       optional.Some(config.HandlesCommandRoute),
+							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+							MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 						},
 						{
-							RouteType: optional.Some(config.RecordsEventRoute),
-							MessageType: optional.Some(
-								config.MessageType{
-									TypeName: "github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]",
-									Kind:     message.EventKind,
-									Type:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-								},
-							),
+							RouteType:       optional.Some(config.RecordsEventRoute),
+							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 						},
 					},
 					IsDisabled:   true,

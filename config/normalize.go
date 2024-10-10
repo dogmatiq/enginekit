@@ -4,7 +4,18 @@ package config
 // validation.
 type ValidationOption func(*validationOptions)
 
-type validationOptions struct{}
+// WithImplementations is a [ValidationOption] that requires all application,
+// handler and message implementations to be available in order to consider the
+// configuration valid.
+func WithImplementations() ValidationOption {
+	return func(o *validationOptions) {
+		o.RequireImplementations = true
+	}
+}
+
+type validationOptions struct {
+	RequireImplementations bool
+}
 
 func newValidationOptions(options []ValidationOption) validationOptions {
 	opts := validationOptions{}

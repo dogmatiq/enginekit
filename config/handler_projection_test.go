@@ -8,6 +8,8 @@ import (
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/test"
+	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/enginekit/optional"
 )
 
 func TestProjection_Identity(t *testing.T) {
@@ -42,7 +44,7 @@ func TestProjection_Identity(t *testing.T) {
 		}{
 			{
 				"no identity",
-				`no identity is configured`,
+				`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: no identity is configured`,
 				&ProjectionMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 						c.Routes(
@@ -53,7 +55,7 @@ func TestProjection_Identity(t *testing.T) {
 			},
 			{
 				"invalid identity",
-				`identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
 				&ProjectionMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 						c.Identity("name", "non-uuid")
@@ -65,7 +67,7 @@ func TestProjection_Identity(t *testing.T) {
 			},
 			{
 				"multiple identities",
-				`multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
+				`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
 				&ProjectionMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -94,6 +96,74 @@ func TestProjection_Identity(t *testing.T) {
 	})
 }
 
+func TestProjection_Routes(t *testing.T) {
+	t.Run("it returns the normalized routes", func(t *testing.T) {
+		h := &ProjectionMessageHandlerStub{
+			ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+				c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				c.Routes(
+					dogma.HandlesEvent[EventStub[TypeA]](),
+				)
+			},
+		}
+
+		cfg := runtimeconfig.FromProjection(h)
+
+		Expect(
+			t,
+			"unexpected routes",
+			cfg.Routes(),
+			[]Route{
+				{
+					RouteType:       optional.Some(HandlesEventRoute),
+					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+				},
+			},
+		)
+	})
+
+	t.Run("it panics if the routes are invalid", func(t *testing.T) {
+		cfg := Projection{
+			ConfiguredRoutes: []Route{
+				{},
+				{
+					RouteType:       optional.Some(HandlesCommandRoute),
+					MessageTypeName: optional.Some("pkg.SomeCommandType"),
+				},
+				{
+					RouteType:       optional.Some(ExecutesCommandRoute),
+					MessageTypeName: optional.Some("pkg.SomeCommandType"),
+				},
+				{
+					RouteType:       optional.Some(RecordsEventRoute),
+					MessageTypeName: optional.Some("pkg.SomeEventType"),
+				},
+				{
+					RouteType:       optional.Some(SchedulesTimeoutRoute),
+					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
+				},
+			},
+		}
+
+		ExpectPanic(
+			t,
+			`projection is invalid:`+
+				"\n"+`- route is invalid:`+
+				"\n"+`  - missing route type`+
+				"\n"+`  - missing message type`+
+				"\n"+`- unexpected route: HandlesCommand:pkg.SomeCommandType`+
+				"\n"+`- unexpected route: ExecutesCommand:pkg.SomeCommandType`+
+				"\n"+`- unexpected route: RecordsEvent:pkg.SomeEventType`+
+				"\n"+`- unexpected route: SchedulesTimeout:pkg.SomeTimeoutType`+
+				"\n"+`- expected at least one "HandlesEvent" route`,
+			func() {
+				cfg.Routes()
+			},
+		)
+	})
+}
+
 func TestProjection_validation(t *testing.T) {
 	cases := []struct {
 		Name    string
@@ -115,15 +185,15 @@ func TestProjection_validation(t *testing.T) {
 		{
 			"nil projection",
 			`projection is invalid:` +
-				"\n" + `  - no identity is configured` +
-				"\n" + `  - expected at least one "HandlesEvent" route`,
+				"\n" + `- no identity is configured` +
+				"\n" + `- expected at least one "HandlesEvent" route`,
 			nil,
 		},
 		{
 			"unconfigured projection",
 			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid:` +
-				"\n" + `  - no identity is configured` +
-				"\n" + `  - expected at least one "HandlesEvent" route`,
+				"\n" + `- no identity is configured` +
+				"\n" + `- expected at least one "HandlesEvent" route`,
 			&ProjectionMessageHandlerStub{},
 		},
 		{
@@ -164,7 +234,7 @@ func TestProjection_validation(t *testing.T) {
 		},
 		{
 			"projection must not have multiple routes for the same event type",
-			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: multiple "HandlesEvent" routes are configured for event:github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: multiple "HandlesEvent" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			&ProjectionMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

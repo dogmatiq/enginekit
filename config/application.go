@@ -13,9 +13,9 @@ import (
 // Application represents the (potentially invalid) configuration of a
 // [dogma.Application] implementation.
 type Application struct {
-	// Impl contains information about the type that produced the
-	// configuration, if available.
-	Impl optional.Optional[Implementation[dogma.Application]]
+	// ConfigurationSource contains information about the type and value that
+	// produced the configuration, if available.
+	ConfigurationSource optional.Optional[Source[dogma.Application]]
 
 	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
 	// identities configured for the application.
@@ -30,7 +30,7 @@ type Application struct {
 }
 
 func (a Application) String() string {
-	return stringify("application", a, a.Impl)
+	return stringify("application", a, a.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
@@ -43,6 +43,12 @@ func (a Application) Identity() Identity {
 // IsExhaustive returns true if the entire configuration was loaded.
 func (a Application) IsExhaustive() bool {
 	return a.ConfigurationIsExhaustive
+}
+
+// Interface returns the [dogma.Application] instance that the configuration
+// represents, or panics if it is not available.
+func (a Application) Interface() dogma.Application {
+	return a.ConfigurationSource.Get().Value.Get()
 }
 
 func (a Application) identities() []Identity {

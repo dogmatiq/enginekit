@@ -17,10 +17,10 @@ func FromProcess(h dogma.ProcessMessageHandler) config.Process {
 	}
 
 	cfg.ConfigurationIsExhaustive = true
-	cfg.Impl = optional.Some(
-		config.Implementation[dogma.ProcessMessageHandler]{
+	cfg.ConfigurationSource = optional.Some(
+		config.Source[dogma.ProcessMessageHandler]{
 			TypeName: typename.Of(h),
-			Source:   optional.Some(h),
+			Value:    optional.Some(h),
 		},
 	)
 

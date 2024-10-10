@@ -17,10 +17,10 @@ func FromIntegration(h dogma.IntegrationMessageHandler) config.Integration {
 	}
 
 	cfg.ConfigurationIsExhaustive = true
-	cfg.Impl = optional.Some(
-		config.Implementation[dogma.IntegrationMessageHandler]{
+	cfg.ConfigurationSource = optional.Some(
+		config.Source[dogma.IntegrationMessageHandler]{
 			TypeName: typename.Of(h),
-			Source:   optional.Some(h),
+			Value:    optional.Some(h),
 		},
 	)
 

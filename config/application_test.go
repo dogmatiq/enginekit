@@ -79,6 +79,23 @@ func TestApplication_Identity(t *testing.T) {
 	})
 }
 
+func TestApplication_Interface(t *testing.T) {
+	h := &ApplicationStub{
+		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+		},
+	}
+
+	cfg := runtimeconfig.FromApplication(h)
+
+	Expect(
+		t,
+		"unexpected result",
+		cfg.Interface(),
+		h,
+	)
+}
+
 func TestApplication_validation(t *testing.T) {
 	cases := []struct {
 		Name string

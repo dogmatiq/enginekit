@@ -36,10 +36,10 @@ func TestFromApplication(t *testing.T) {
 			&ApplicationStub{},
 			func(app dogma.Application) config.Application {
 				return config.Application{
-					Impl: optional.Some(
-						config.Implementation[dogma.Application]{
+					ConfigurationSource: optional.Some(
+						config.Source[dogma.Application]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
-							Source:   optional.Some(app),
+							Value:    optional.Some(app),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -59,10 +59,10 @@ func TestFromApplication(t *testing.T) {
 			},
 			func(app dogma.Application) config.Application {
 				return config.Application{
-					Impl: optional.Some(
-						config.Implementation[dogma.Application]{
+					ConfigurationSource: optional.Some(
+						config.Source[dogma.Application]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
-							Source:   optional.Some(app),
+							Value:    optional.Some(app),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{
@@ -73,37 +73,37 @@ func TestFromApplication(t *testing.T) {
 					},
 					ConfiguredHandlers: []config.Handler{
 						config.Aggregate{
-							Impl: optional.Some(
-								config.Implementation[dogma.AggregateMessageHandler]{
+							ConfigurationSource: optional.Some(
+								config.Source[dogma.AggregateMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-									Source:   optional.Some(aggregate),
+									Value:    optional.Some(aggregate),
 								},
 							),
 							ConfigurationIsExhaustive: true,
 						},
 						config.Process{
-							Impl: optional.Some(
-								config.Implementation[dogma.ProcessMessageHandler]{
+							ConfigurationSource: optional.Some(
+								config.Source[dogma.ProcessMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-									Source:   optional.Some(process),
+									Value:    optional.Some(process),
 								},
 							),
 							ConfigurationIsExhaustive: true,
 						},
 						config.Integration{
-							Impl: optional.Some(
-								config.Implementation[dogma.IntegrationMessageHandler]{
+							ConfigurationSource: optional.Some(
+								config.Source[dogma.IntegrationMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-									Source:   optional.Some(integration),
+									Value:    optional.Some(integration),
 								},
 							),
 							ConfigurationIsExhaustive: true,
 						},
 						config.Projection{
-							Impl: optional.Some(
-								config.Implementation[dogma.ProjectionMessageHandler]{
+							ConfigurationSource: optional.Some(
+								config.Source[dogma.ProjectionMessageHandler]{
 									TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-									Source:   optional.Some(projection),
+									Value:    optional.Some(projection),
 								},
 							),
 							ConfigurationIsExhaustive: true,

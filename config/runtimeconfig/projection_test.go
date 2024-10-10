@@ -30,10 +30,10 @@ func TestFromProjection(t *testing.T) {
 			&ProjectionMessageHandlerStub{},
 			func(h dogma.ProjectionMessageHandler) config.Projection {
 				return config.Projection{
-					Impl: optional.Some(
-						config.Implementation[dogma.ProjectionMessageHandler]{
+					ConfigurationSource: optional.Some(
+						config.Source[dogma.ProjectionMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Source:   optional.Some(h),
+							Value:    optional.Some(h),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -56,10 +56,10 @@ func TestFromProjection(t *testing.T) {
 			},
 			func(h dogma.ProjectionMessageHandler) config.Projection {
 				return config.Projection{
-					Impl: optional.Some(
-						config.Implementation[dogma.ProjectionMessageHandler]{
+					ConfigurationSource: optional.Some(
+						config.Source[dogma.ProjectionMessageHandler]{
 							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Source:   optional.Some(h),
+							Value:    optional.Some(h),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{

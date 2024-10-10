@@ -164,6 +164,26 @@ func TestProjection_Routes(t *testing.T) {
 	})
 }
 
+func TestProjection_Interface(t *testing.T) {
+	h := &ProjectionMessageHandlerStub{
+		ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesEvent[EventStub[TypeA]](),
+			)
+		},
+	}
+
+	cfg := runtimeconfig.FromProjection(h)
+
+	Expect(
+		t,
+		"unexpected result",
+		cfg.Interface(),
+		h,
+	)
+}
+
 func TestProjection_validation(t *testing.T) {
 	cases := []struct {
 		Name    string

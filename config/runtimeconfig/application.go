@@ -17,10 +17,10 @@ func FromApplication(app dogma.Application) config.Application {
 	}
 
 	cfg.ConfigurationIsExhaustive = true
-	cfg.Impl = optional.Some(
-		config.Implementation[dogma.Application]{
+	cfg.ConfigurationSource = optional.Some(
+		config.Source[dogma.Application]{
 			TypeName: typename.Of(app),
-			Source:   optional.Some(app),
+			Value:    optional.Some(app),
 		},
 	)
 

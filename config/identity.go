@@ -89,22 +89,24 @@ func isPrintableIdentifier(n string) bool {
 }
 
 func normalizedIdentity(ent Entity) Identity {
-	identities := ent.identities()
-
-	if len(identities) == 0 {
-		panic(NoIdentityError{})
-	} else if len(identities) > 1 {
-		panic(MultipleIdentitiesError{identities})
+	ctx := &normalizationContext{
+		Component: ent,
 	}
 
-	return MustNormalize(identities[0])
+	identities := normalizeIdentities(ctx, ent)
+
+	if err := ctx.Err(); err != nil {
+		panic(err)
+	}
+
+	return identities[0]
 }
 
 func normalizeIdentities(ctx *normalizationContext, ent Entity) []Identity {
 	identities := slices.Clone(ent.identities())
 
 	if len(identities) == 0 {
-		ctx.Fail(NoIdentityError{})
+		ctx.Fail(MissingIdentityError{})
 	} else if len(identities) > 1 {
 		ctx.Fail(MultipleIdentitiesError{identities})
 	}

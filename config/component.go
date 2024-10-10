@@ -43,18 +43,14 @@ func (e ComponentError) Error() string {
 		w.WriteString(":")
 
 		for _, cause := range e.Causes {
-			// if i > 0 {
-			// 	w.WriteByte('\n')
-			// }
-
 			lines := strings.Split(cause.Error(), "\n")
 
 			for i, line := range lines {
 				w.WriteByte('\n')
 				if i == 0 {
-					w.WriteString("  - ")
+					w.WriteString("- ")
 				} else {
-					w.WriteString("    ")
+					w.WriteString("  ")
 				}
 				w.WriteString(line)
 			}
@@ -66,4 +62,36 @@ func (e ComponentError) Error() string {
 
 func (e ComponentError) Unwrap() []error {
 	return e.Causes
+}
+
+// MissingTypeNameError indicates that a component that refers to a Go type is
+// missing the type name.
+type MissingTypeNameError struct{}
+
+func (e MissingTypeNameError) Error() string {
+	return "missing type name"
+}
+
+// MissingImplementationError indicates that a component is invalid because it
+// does not contain an implementation and the [WithImplementations] option was
+// specified during normalization.
+type MissingImplementationError struct{}
+
+func (e MissingImplementationError) Error() string {
+	return "missing implementation"
+}
+
+// ImplementationTypeNameMismatchError indicates that the type name of an
+// implementation does not match the type name of the source value.
+type ImplementationTypeNameMismatchError struct {
+	ExpectedTypeName   string
+	UnexpectedTypeName string
+}
+
+func (e ImplementationTypeNameMismatchError) Error() string {
+	return fmt.Sprintf(
+		"type name mismatch: implementation is %q, but the type was reported as %q",
+		e.ExpectedTypeName,
+		e.UnexpectedTypeName,
+	)
 }

@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"iter"
+	"maps"
 	"slices"
 
 	"github.com/dogmatiq/dogma"
@@ -106,15 +108,14 @@ func (e IdentityKeyConflictError) Error() string {
 // For example, no two handlers can handle commands of the same type, though any
 // number of handlers may handle events of the same type.
 type ConflictingRouteError struct {
-	Handlers         []Handler
-	ConflictingRoute Route
+	Handlers                   []Handler
+	ConflictingRouteType       RouteType
+	ConflictingMessageTypeName string
 }
 
 func (e ConflictingRouteError) Error() string {
-	rt := e.ConflictingRoute.RouteType.Get()
-
 	verb := "handled"
-	switch rt {
+	switch e.ConflictingRouteType {
 	case ExecutesCommandRoute:
 		verb = "executed"
 	case RecordsEventRoute:
@@ -125,8 +126,8 @@ func (e ConflictingRouteError) Error() string {
 
 	return fmt.Sprintf(
 		"handlers have conflicting %q routes: %s is %s by %s",
-		rt,
-		e.ConflictingRoute.MessageType.Get(),
+		e.ConflictingRouteType,
+		e.ConflictingMessageTypeName,
 		verb,
 		renderList(e.Handlers),
 	)
@@ -201,35 +202,79 @@ func detectIdentityConflicts(ctx *normalizationContext, app Application) {
 }
 
 func detectRouteConflicts(ctx *normalizationContext, app Application) {
-	var conflictingRoutes conflictDetector[Route, Handler]
+	var conflictingRoutes conflictDetector[routeKey, Handler]
 
 	for i, h1 := range app.ConfiguredHandlers {
 		for _, r1 := range h1.routes() {
-			t, ok := r1.RouteType.TryGet()
+			k1, ok := r1.key()
 			if !ok {
 				continue
 			}
 
-			if t != HandlesCommandRoute && t != RecordsEventRoute {
-				continue
-			}
-
-			if !r1.MessageType.IsPresent() {
+			if k1.RouteType != HandlesCommandRoute && k1.RouteType != RecordsEventRoute {
 				continue
 			}
 
 			for j, h2 := range app.ConfiguredHandlers[i+1:] {
 				for _, r2 := range h2.routes() {
+					k2, ok := r2.key()
+					if !ok {
+						continue
+					}
+
 					conflictingRoutes.Add(
-						r1, i, h1,
-						r2, j, h2,
+						k1, i, h1,
+						k2, j, h2,
 					)
 				}
 			}
 		}
 	}
 
-	for route, handlers := range conflictingRoutes.All() {
-		ctx.Fail(ConflictingRouteError{handlers, route})
+	for key, handlers := range conflictingRoutes.All() {
+		ctx.Fail(ConflictingRouteError{handlers, key.RouteType, key.MessageTypeName})
+	}
+}
+
+type conflictDetector[T comparable, S any] struct {
+	m map[T]map[int]S
+}
+
+func (t *conflictDetector[T, S]) Add(
+	v1 T, i int, src1 S,
+	v2 T, j int, src2 S,
+) bool {
+	if v1 != v2 {
+		return false
+	}
+
+	if t.m == nil {
+		t.m = map[T]map[int]S{}
+	}
+
+	if t.m[v1] == nil {
+		t.m[v2] = map[int]S{}
+	}
+
+	t.m[v1][i] = src1
+	t.m[v1][i+1+j] = src2
+
+	return true
+}
+
+func (t *conflictDetector[T, S]) All() iter.Seq2[T, []S] {
+	return func(yield func(T, []S) bool) {
+		for v, indices := range t.m {
+			sortedIndices := slices.Sorted(maps.Keys(indices))
+			sortedComponents := make([]S, len(sortedIndices))
+
+			for i, j := range sortedIndices {
+				sortedComponents[i] = indices[j]
+			}
+
+			if !yield(v, sortedComponents) {
+				return
+			}
+		}
 	}
 }

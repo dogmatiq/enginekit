@@ -83,30 +83,22 @@ func (a Application) HandlerByName(name string) (Handler, bool) {
 	return nil, false
 }
 
-// MessageTypes yields all message types used by the application.
-func (a Application) MessageTypes() iter.Seq[message.Type] {
-	return func(yield func(message.Type) bool) {
-		seen := map[message.Type]struct{}{}
+// MessageTypes returns a map all of the message types used by the application
+// and their respective [RouteDirection].
+func (a Application) MessageTypes() map[message.Type]RouteDirection {
+	types := map[message.Type]RouteDirection{}
 
-		for _, h := range a.Handlers() {
-			for _, r := range h.routes() {
-				mt, ok := r.MessageType.TryGet()
-				if !ok {
-					continue
-				}
-
-				if _, ok := seen[mt]; ok {
-					continue
-				}
-
-				seen[mt] = struct{}{}
-
-				if !yield(mt) {
-					return
+	for _, h := range a.Handlers() {
+		for _, r := range h.Routes() {
+			if rt, ok := r.RouteType.TryGet(); ok {
+				if mt, ok := r.MessageType.TryGet(); ok {
+					types[mt] |= rt.Direction()
 				}
 			}
 		}
 	}
+
+	return types
 }
 
 func (a Application) identities() []Identity {

@@ -148,7 +148,7 @@ func TestProjection_Routes(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`projection is invalid:`+
+			`partial projection is invalid:`+
 				"\n"+`- route is invalid:`+
 				"\n"+`  - missing route type`+
 				"\n"+`  - missing message type`+
@@ -184,7 +184,7 @@ func TestProjection_validation(t *testing.T) {
 		},
 		{
 			"nil projection",
-			`projection is invalid:` +
+			`partial projection is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesEvent" route`,
 			nil,

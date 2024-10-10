@@ -150,7 +150,7 @@ func TestIntegration_Routes(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`integration is invalid:`+
+			`partial integration is invalid:`+
 				"\n"+`- route is invalid:`+
 				"\n"+`  - missing route type`+
 				"\n"+`  - missing message type`+
@@ -185,7 +185,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			"nil integration",
-			`integration is invalid:` +
+			`partial integration is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesCommand" route`,
 			nil,

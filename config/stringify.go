@@ -8,15 +8,19 @@ import (
 
 func stringify[T any](
 	label string,
+	ent Entity,
 	impl optional.Optional[Implementation[T]],
-	identities []Identity,
 ) string {
+	if !ent.IsExhaustive() {
+		label = "partial " + label
+	}
+
 	identifier := ""
 
 	if i, ok := impl.TryGet(); ok {
 		identifier = strings.TrimPrefix(i.TypeName, "*")
 	} else {
-		for _, id := range identities {
+		for _, id := range ent.identities() {
 			if norm, err := Normalize(id); err == nil {
 				identifier = norm.String()
 				break

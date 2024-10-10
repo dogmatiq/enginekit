@@ -29,7 +29,7 @@ type Aggregate struct {
 }
 
 func (h Aggregate) String() string {
-	return stringify("aggregate", h.Impl, h.ConfiguredIdentities)
+	return stringify("aggregate", h, h.Impl)
 }
 
 // Identity returns the entity's identity.

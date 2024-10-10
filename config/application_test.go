@@ -134,7 +134,7 @@ func TestApplication_validation(t *testing.T) {
 		},
 		{
 			"nil application",
-			`application is invalid: no identity is configured`,
+			`partial application is invalid: no identity is configured`,
 			nil,
 		},
 		{

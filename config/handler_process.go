@@ -29,7 +29,7 @@ type Process struct {
 }
 
 func (h Process) String() string {
-	return stringify("process", h.Impl, h.ConfiguredIdentities)
+	return stringify("process", h, h.Impl)
 }
 
 // Identity returns the entity's identity.

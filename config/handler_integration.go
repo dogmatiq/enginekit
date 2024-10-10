@@ -29,7 +29,7 @@ type Integration struct {
 }
 
 func (h Integration) String() string {
-	return stringify("integration", h.Impl, h.ConfiguredIdentities)
+	return stringify("integration", h, h.Impl)
 }
 
 // Identity returns the entity's identity.

@@ -85,7 +85,7 @@ func (a Application) HandlerByName(name string) (Handler, bool) {
 
 // MessageTypes returns a map all of the message types used by the application
 // and their respective [RouteDirection].
-func (a Application) MessageTypes() map[message.Type]RouteDirection {
+func (a Application) MessageTypes(filter ...RouteDirection) map[message.Type]RouteDirection {
 	types := map[message.Type]RouteDirection{}
 
 	for _, h := range a.Handlers() {
@@ -97,6 +97,8 @@ func (a Application) MessageTypes() map[message.Type]RouteDirection {
 			}
 		}
 	}
+
+	filterByDirection(types, filter)
 
 	return types
 }

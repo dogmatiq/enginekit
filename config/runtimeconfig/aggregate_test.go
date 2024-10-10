@@ -36,7 +36,7 @@ func TestFromAggregate(t *testing.T) {
 							Source:   optional.Some(h),
 						},
 					),
-					IsExhaustive: true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},
@@ -78,8 +78,8 @@ func TestFromAggregate(t *testing.T) {
 							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 						},
 					},
-					IsDisabled:   true,
-					IsExhaustive: true,
+					ConfiguredAsDisabled:      true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},

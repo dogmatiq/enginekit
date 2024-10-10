@@ -16,7 +16,7 @@ func FromIntegration(h dogma.IntegrationMessageHandler) config.Integration {
 		return cfg
 	}
 
-	cfg.IsExhaustive = true
+	cfg.ConfigurationIsExhaustive = true
 	cfg.Impl = optional.Some(
 		config.Implementation[dogma.IntegrationMessageHandler]{
 			TypeName: typename.Of(h),
@@ -50,5 +50,5 @@ func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {
 }
 
 func (c *integrationConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.IsDisabled = true
+	c.cfg.ConfiguredAsDisabled = true
 }

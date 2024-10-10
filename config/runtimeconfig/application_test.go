@@ -42,7 +42,7 @@ func TestFromApplication(t *testing.T) {
 							Source:   optional.Some(app),
 						},
 					),
-					IsExhaustive: true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},
@@ -79,7 +79,7 @@ func TestFromApplication(t *testing.T) {
 									Source:   optional.Some(aggregate),
 								},
 							),
-							IsExhaustive: true,
+							ConfigurationIsExhaustive: true,
 						},
 						config.Process{
 							Impl: optional.Some(
@@ -88,7 +88,7 @@ func TestFromApplication(t *testing.T) {
 									Source:   optional.Some(process),
 								},
 							),
-							IsExhaustive: true,
+							ConfigurationIsExhaustive: true,
 						},
 						config.Integration{
 							Impl: optional.Some(
@@ -97,7 +97,7 @@ func TestFromApplication(t *testing.T) {
 									Source:   optional.Some(integration),
 								},
 							),
-							IsExhaustive: true,
+							ConfigurationIsExhaustive: true,
 						},
 						config.Projection{
 							Impl: optional.Some(
@@ -106,10 +106,10 @@ func TestFromApplication(t *testing.T) {
 									Source:   optional.Some(projection),
 								},
 							),
-							IsExhaustive: true,
+							ConfigurationIsExhaustive: true,
 						},
 					},
-					IsExhaustive: true,
+					ConfigurationIsExhaustive: true,
 				}
 			},
 		},

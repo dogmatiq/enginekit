@@ -20,13 +20,12 @@ type Integration struct {
 	// duplicated) message routes configured for the handler.
 	ConfiguredRoutes []Route
 
-	// IsDisabled is true if the handler was disabled via the configurer.
-	IsDisabled bool
+	// ConfiguredAsDisabled is true if the handler was disabled via the
+	// configurer.
+	ConfiguredAsDisabled bool
 
-	// IsExhaustive is true if the complete configuration was loaded. It may be
-	// false, for example, when attempting to load configuration using static
-	// analysis, but the code depends on runtime type information.
-	IsExhaustive bool
+	// ConfigurationIsExhaustive is true if the entire configuration was loaded.
+	ConfigurationIsExhaustive bool
 }
 
 func (h Integration) String() string {
@@ -40,6 +39,16 @@ func (h Integration) Identity() Identity {
 	return normalizedIdentity(h)
 }
 
+// IsExhaustive returns true if the entire configuration was loaded.
+func (h Integration) IsExhaustive() bool {
+	return h.ConfigurationIsExhaustive
+}
+
+// HandlerType returns [HandlerType] of the handler.
+func (h Integration) HandlerType() HandlerType {
+	return IntegrationHandlerType
+}
+
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
@@ -47,9 +56,9 @@ func (h Integration) Routes(filter ...RouteType) []Route {
 	return normalizedRoutes(h, filter...)
 }
 
-// HandlerType returns [HandlerType] of the handler.
-func (h Integration) HandlerType() HandlerType {
-	return IntegrationHandlerType
+// IsDisabled returns true if the handler was disabled via the configurer.
+func (h Integration) IsDisabled() bool {
+	return h.ConfiguredAsDisabled
 }
 
 func (h Integration) normalize(ctx *normalizationContext) Component {

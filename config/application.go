@@ -25,10 +25,8 @@ type Application struct {
 	// conflicting) handlers configured for the application.
 	ConfiguredHandlers []Handler
 
-	// IsExhaustive is true if the complete configuration was loaded. It may be
-	// false, for example, when attempting to load configuration using static
-	// analysis, but the code depends on runtime type information.
-	IsExhaustive bool
+	// ConfigurationIsExhaustive is true if the entire configuration was loaded.
+	ConfigurationIsExhaustive bool
 }
 
 func (a Application) String() string {
@@ -40,6 +38,11 @@ func (a Application) String() string {
 // It panics if no single valid identity is configured.
 func (a Application) Identity() Identity {
 	return normalizedIdentity(a)
+}
+
+// IsExhaustive returns true if the entire configuration was loaded.
+func (a Application) IsExhaustive() bool {
+	return a.ConfigurationIsExhaustive
 }
 
 func (a Application) identities() []Identity {

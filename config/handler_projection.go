@@ -54,10 +54,10 @@ func (h *Projection) HandlerType() HandlerType {
 	return ProjectionHandlerType
 }
 
-// Routes returns the routes configured for the handler.
+// RouteSet returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h *Projection) Routes() RouteSet {
+func (h *Projection) RouteSet() RouteSet {
 	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 

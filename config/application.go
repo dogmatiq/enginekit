@@ -72,10 +72,10 @@ func (a *Application) HandlerByName(name string) (Handler, bool) {
 	return nil, false
 }
 
-// Routes returns the routes configured for the entity.
+// RouteSet returns the routes configured for the entity.
 //
 // It panics if the route configuration is incomplete or invalid.
-func (a *Application) Routes() RouteSet {
+func (a *Application) RouteSet() RouteSet {
 	ctx := newFinalizeContext(a)
 	var set RouteSet
 

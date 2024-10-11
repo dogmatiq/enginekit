@@ -115,7 +115,7 @@ func TestApplication_Routes(t *testing.T) {
 		Expect(
 			t,
 			"unexpected routes",
-			cfg.Routes().MessageTypes(),
+			cfg.RouteSet().MessageTypes(),
 			map[message.Type]RouteDirection{
 				message.TypeFor[CommandStub[TypeA]](): InboundDirection,
 				message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
@@ -141,7 +141,7 @@ func TestApplication_Routes(t *testing.T) {
 			t,
 			`partial application is invalid: partial projection is invalid: route is invalid: missing route type`,
 			func() {
-				cfg.Routes()
+				cfg.RouteSet()
 			},
 		)
 	})

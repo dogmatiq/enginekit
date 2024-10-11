@@ -50,10 +50,10 @@ func (h *Aggregate) HandlerType() HandlerType {
 	return AggregateHandlerType
 }
 
-// Routes returns the routes configured for the handler.
+// RouteSet returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h *Aggregate) Routes() RouteSet {
+func (h *Aggregate) RouteSet() RouteSet {
 	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 

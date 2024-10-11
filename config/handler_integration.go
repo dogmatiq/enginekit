@@ -50,10 +50,10 @@ func (h *Integration) HandlerType() HandlerType {
 	return IntegrationHandlerType
 }
 
-// Routes returns the routes configured for the handler.
+// RouteSet returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h *Integration) Routes() RouteSet {
+func (h *Integration) RouteSet() RouteSet {
 	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 

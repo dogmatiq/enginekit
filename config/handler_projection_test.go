@@ -114,7 +114,7 @@ func TestProjection_Routes(t *testing.T) {
 		Expect(
 			t,
 			"unexpected routes",
-			cfg.Routes().MessageTypes(),
+			cfg.RouteSet().MessageTypes(),
 			map[message.Type]RouteDirection{
 				message.TypeFor[EventStub[TypeA]](): InboundDirection,
 			},
@@ -176,7 +176,7 @@ func TestProjection_Routes(t *testing.T) {
 					t,
 					c.Want,
 					func() {
-						cfg.Routes()
+						cfg.RouteSet()
 					},
 				)
 			})

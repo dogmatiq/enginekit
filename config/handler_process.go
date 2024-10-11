@@ -50,10 +50,10 @@ func (h *Process) HandlerType() HandlerType {
 	return ProcessHandlerType
 }
 
-// Routes returns the routes configured for the handler.
+// RouteSet returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h *Process) Routes() RouteSet {
+func (h *Process) RouteSet() RouteSet {
 	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 

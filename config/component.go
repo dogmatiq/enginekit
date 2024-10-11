@@ -24,10 +24,10 @@ type Entity interface {
 	// It panics if no single valid identity is configured.
 	Identity() *identitypb.Identity
 
-	// Routes returns the routes configured for the entity.
+	// RouteSet returns the routes configured for the entity.
 	//
 	// It panics if the route configuration is incomplete or invalid.
-	Routes() RouteSet
+	RouteSet() RouteSet
 
 	// IsExhaustive returns true if the complete configuration was loaded. It
 	// may be false, for example, when attempting to load configuration using

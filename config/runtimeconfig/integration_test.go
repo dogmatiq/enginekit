@@ -16,24 +16,24 @@ func TestFromIntegration(t *testing.T) {
 	cases := []struct {
 		Name    string
 		Handler dogma.IntegrationMessageHandler
-		Want    func(h dogma.IntegrationMessageHandler) config.Integration
+		Want    func(h dogma.IntegrationMessageHandler) *config.Integration
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.IntegrationMessageHandler) config.Integration {
-				return config.Integration{}
+			func(dogma.IntegrationMessageHandler) *config.Integration {
+				return &config.Integration{}
 			},
 		},
 		{
 			"unconfigured handler",
 			&IntegrationMessageHandlerStub{},
-			func(h dogma.IntegrationMessageHandler) config.Integration {
-				return config.Integration{
+			func(h dogma.IntegrationMessageHandler) *config.Integration {
+				return &config.Integration{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.IntegrationMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -52,12 +52,12 @@ func TestFromIntegration(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(h dogma.IntegrationMessageHandler) config.Integration {
-				return config.Integration{
+			func(h dogma.IntegrationMessageHandler) *config.Integration {
+				return &config.Integration{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.IntegrationMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{

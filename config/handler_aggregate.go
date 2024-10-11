@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // Aggregate represents the (potentially invalid) configuration of a
@@ -28,55 +29,55 @@ type Aggregate struct {
 	ConfigurationIsExhaustive bool
 }
 
-func (h Aggregate) String() string {
-	return stringify("aggregate", h, h.ConfigurationSource)
+func (h *Aggregate) String() string {
+	return renderEntity("aggregate", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
-func (h Aggregate) Identity() Identity {
-	return normalizedIdentity(h)
+func (h *Aggregate) Identity() *identitypb.Identity {
+	return finalizeIdentity(newFinalizeContext(h), h)
 }
 
 // IsExhaustive returns true if the entire configuration was loaded.
-func (h Aggregate) IsExhaustive() bool {
+func (h *Aggregate) IsExhaustive() bool {
 	return h.ConfigurationIsExhaustive
 }
 
 // HandlerType returns [HandlerType] of the handler.
-func (h Aggregate) HandlerType() HandlerType {
+func (h *Aggregate) HandlerType() HandlerType {
 	return AggregateHandlerType
 }
 
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Aggregate) Routes() RouteSet {
-	return normalizedRouteSet(h)
+func (h *Aggregate) Routes() RouteSet {
+	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.
-func (h Aggregate) IsDisabled() bool {
+func (h *Aggregate) IsDisabled() bool {
 	return h.ConfiguredAsDisabled
 }
 
 // Interface returns the [dogma.AggregateMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
-func (h Aggregate) Interface() dogma.AggregateMessageHandler {
-	return h.ConfigurationSource.Get().Value.Get()
+func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
+	return h.ConfigurationSource.Get().Interface.Get()
 }
 
-func (h Aggregate) normalize(ctx *normalizationContext) Component {
+func (h *Aggregate) normalize(ctx *normalizeContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
 	return h
 }
 
-func (h Aggregate) identities() []Identity {
+func (h *Aggregate) identities() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h Aggregate) routes() []Route {
+func (h *Aggregate) routes() []Route {
 	return h.ConfiguredRoutes
 }

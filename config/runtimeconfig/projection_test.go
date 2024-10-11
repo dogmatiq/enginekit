@@ -16,24 +16,24 @@ func TestFromProjection(t *testing.T) {
 	cases := []struct {
 		Name    string
 		Handler dogma.ProjectionMessageHandler
-		Want    func(h dogma.ProjectionMessageHandler) config.Projection
+		Want    func(h dogma.ProjectionMessageHandler) *config.Projection
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.ProjectionMessageHandler) config.Projection {
-				return config.Projection{}
+			func(dogma.ProjectionMessageHandler) *config.Projection {
+				return &config.Projection{}
 			},
 		},
 		{
 			"unconfigured handler",
 			&ProjectionMessageHandlerStub{},
-			func(h dogma.ProjectionMessageHandler) config.Projection {
-				return config.Projection{
+			func(h dogma.ProjectionMessageHandler) *config.Projection {
+				return &config.Projection{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.ProjectionMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -54,12 +54,12 @@ func TestFromProjection(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(h dogma.ProjectionMessageHandler) config.Projection {
-				return config.Projection{
+			func(h dogma.ProjectionMessageHandler) *config.Projection {
+				return &config.Projection{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.ProjectionMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{

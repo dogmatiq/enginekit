@@ -1,14 +1,13 @@
 package config
 
 import (
-	"fmt"
 	"iter"
 	"maps"
 	"slices"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // Application represents the (potentially invalid) configuration of a
@@ -30,50 +29,40 @@ type Application struct {
 	ConfigurationIsExhaustive bool
 }
 
-func (a Application) String() string {
-	return stringify("application", a, a.ConfigurationSource)
+func (a *Application) String() string {
+	return renderEntity("application", a, a.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
-func (a Application) Identity() Identity {
-	return normalizedIdentity(a)
+func (a *Application) Identity() *identitypb.Identity {
+	return finalizeIdentity(newFinalizeContext(a), a)
 }
 
 // IsExhaustive returns true if the entire configuration was loaded.
-func (a Application) IsExhaustive() bool {
+func (a *Application) IsExhaustive() bool {
 	return a.ConfigurationIsExhaustive
 }
 
 // Interface returns the [dogma.Application] instance that the configuration
 // represents, or panics if it is not available.
-func (a Application) Interface() dogma.Application {
-	return a.ConfigurationSource.Get().Value.Get()
+func (a *Application) Interface() dogma.Application {
+	return a.ConfigurationSource.Get().Interface.Get()
 }
 
 // Handlers returns the list of handlers configured for the application.
 //
 // It panics if the handlers are incomplete or invalid.
-func (a Application) Handlers() []Handler {
-	ctx := &normalizationContext{
-		Component: a,
-	}
-
-	handlers := normalizeHandlers(ctx, a)
-
-	if err := ctx.Err(); err != nil {
-		panic(err)
-	}
-
-	return handlers
+func (a *Application) Handlers() []Handler {
+	return normalizeHandlers(newFinalizeContext(a), a)
 }
 
 // HandlerByName returns the [Handler] with the given name, or false if no such
 // handler has been configured.
 //
 // It panics if the handlers are incomplete or invalid.
-func (a Application) HandlerByName(name string) (Handler, bool) {
+func (a *Application) HandlerByName(name string) (Handler, bool) {
 	for _, h := range a.Handlers() {
 		if h.Identity().Name == name {
 			return h, true
@@ -83,31 +72,25 @@ func (a Application) HandlerByName(name string) (Handler, bool) {
 	return nil, false
 }
 
-// MessageTypes returns a map all of the message types used by the application
-// and their respective [RouteDirection].
-func (a Application) MessageTypes(filter ...RouteDirection) map[message.Type]RouteDirection {
-	types := map[message.Type]RouteDirection{}
+// Routes returns the routes configured for the entity.
+//
+// It panics if the route configuration is incomplete or invalid.
+func (a *Application) Routes() RouteSet {
+	ctx := newFinalizeContext(a)
+	var set RouteSet
 
-	for _, h := range a.Handlers() {
-		for _, r := range h.Routes() {
-			if rt, ok := r.RouteType.TryGet(); ok {
-				if mt, ok := r.MessageType.TryGet(); ok {
-					types[mt] |= rt.Direction()
-				}
-			}
-		}
+	for _, h := range a.ConfiguredHandlers {
+		set.merge(finalizeRouteSet(ctx.NewChild(h), h))
 	}
 
-	filterByDirection(types, filter)
-
-	return types
+	return set
 }
 
-func (a Application) identities() []Identity {
+func (a *Application) identities() []Identity {
 	return a.ConfiguredIdentities
 }
 
-func (a Application) normalize(ctx *normalizationContext) Component {
+func (a *Application) normalize(ctx *normalizeContext) Component {
 	a.ConfiguredIdentities = normalizeIdentities(ctx, a)
 	a.ConfiguredHandlers = normalizeHandlers(ctx, a)
 
@@ -117,85 +100,8 @@ func (a Application) normalize(ctx *normalizationContext) Component {
 	return a
 }
 
-// IdentityConflictError indicates that more than one [Entity] within the same
-// [Application] shares the same [Identity].
-type IdentityConflictError struct {
-	Entities            []Entity
-	ConflictingIdentity Identity
-}
-
-func (e IdentityConflictError) Error() string {
-	return fmt.Sprintf(
-		"entities have conflicting identities: %s is shared by %s",
-		e.ConflictingIdentity,
-		renderList(e.Entities),
-	)
-}
-
-// IdentityNameConflictError indicates that more than one [Entity] within the
-// same [Application] is shares the same "name" component of an [Identity].
-type IdentityNameConflictError struct {
-	Entities        []Entity
-	ConflictingName string
-}
-
-func (e IdentityNameConflictError) Error() string {
-	return fmt.Sprintf(
-		"entities have conflicting identities: the %q name is shared by %s",
-		e.ConflictingName,
-		renderList(e.Entities),
-	)
-}
-
-// IdentityKeyConflictError indicates that more than one [Entity] within the
-// same [Application] is shares the same "key" component of an [Identity].
-type IdentityKeyConflictError struct {
-	Entities       []Entity
-	ConflictingKey string
-}
-
-func (e IdentityKeyConflictError) Error() string {
-	return fmt.Sprintf(
-		"entities have conflicting identities: the %q key is shared by %s",
-		e.ConflictingKey,
-		renderList(e.Entities),
-	)
-}
-
-// ConflictingRouteError indicates that more than one [Handler] within the same
-// [Application] is configured with routes for the same [MessageType] in a
-// manner that is not permitted.
-//
-// For example, no two handlers can handle commands of the same type, though any
-// number of handlers may handle events of the same type.
-type ConflictingRouteError struct {
-	Handlers                   []Handler
-	ConflictingRouteType       RouteType
-	ConflictingMessageTypeName string
-}
-
-func (e ConflictingRouteError) Error() string {
-	verb := "handled"
-	switch e.ConflictingRouteType {
-	case ExecutesCommandRouteType:
-		verb = "executed"
-	case RecordsEventRouteType:
-		verb = "recorded"
-	case SchedulesTimeoutRouteType:
-		verb = "scheduled"
-	}
-
-	return fmt.Sprintf(
-		"handlers have conflicting %q routes: %s is %s by %s",
-		e.ConflictingRouteType,
-		e.ConflictingMessageTypeName,
-		verb,
-		renderList(e.Handlers),
-	)
-}
-
-func normalizeHandlers(ctx *normalizationContext, a Application) []Handler {
-	handlers := slices.Clone(a.ConfiguredHandlers)
+func normalizeHandlers(ctx *normalizeContext, app *Application) []Handler {
+	handlers := slices.Clone(app.ConfiguredHandlers)
 
 	for i, h := range handlers {
 		handlers[i] = normalize(ctx, h)
@@ -206,7 +112,7 @@ func normalizeHandlers(ctx *normalizationContext, a Application) []Handler {
 
 // detectIdentityConflicts appends errors related to handlers that have
 // identities that conflict with other handlers or the application itself.
-func detectIdentityConflicts(ctx *normalizationContext, app Application) {
+func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 	var (
 		conflictingIDs   conflictDetector[Identity, Entity]
 		conflictingNames conflictDetector[string, Entity]
@@ -262,7 +168,7 @@ func detectIdentityConflicts(ctx *normalizationContext, app Application) {
 	}
 }
 
-func detectRouteConflicts(ctx *normalizationContext, app Application) {
+func detectRouteConflicts(ctx *normalizeContext, app *Application) {
 	var conflictingRoutes conflictDetector[routeKey, Handler]
 
 	for i, h1 := range app.ConfiguredHandlers {

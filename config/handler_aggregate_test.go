@@ -10,13 +10,15 @@ import (
 	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 func TestAggregate_Identity(t *testing.T) {
 	t.Run("it returns the normalized identity", func(t *testing.T) {
 		h := &AggregateMessageHandlerStub{
 			ConfigureFunc: func(c dogma.AggregateConfigurer) {
-				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A")
 				c.Routes(
 					dogma.HandlesCommand[CommandStub[TypeA]](),
 					dogma.RecordsEvent[EventStub[TypeA]](),
@@ -30,9 +32,9 @@ func TestAggregate_Identity(t *testing.T) {
 			t,
 			"unexpected identity",
 			cfg.Identity(),
-			Identity{
+			&identitypb.Identity{
 				Name: "name",
-				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+				Key:  uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a"),
 			},
 		)
 	})
@@ -117,56 +119,66 @@ func TestAggregate_Routes(t *testing.T) {
 		Expect(
 			t,
 			"unexpected routes",
-			cfg.Routes(),
-			RouteSet{
-				{
-					RouteType:       optional.Some(HandlesCommandRouteType),
-					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
-				},
-				{
-					RouteType:       optional.Some(RecordsEventRouteType),
-					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-				},
+			cfg.Routes().MessageTypes(),
+			map[message.Type]RouteDirection{
+				message.TypeFor[CommandStub[TypeA]](): InboundDirection,
+				message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
 			},
 		)
 	})
 
 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
-		cfg := Aggregate{
-			ConfiguredRoutes: []Route{
-				{},
-				{
+		cases := []struct {
+			Name  string
+			Want  string
+			Route Route
+		}{
+			{
+				"empty route",
+				`partial aggregate is invalid: route is invalid: missing route type`,
+				Route{},
+			},
+			{
+				"unexpected ExecutesCommand route",
+				`partial aggregate is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
+				Route{
 					RouteType:       optional.Some(ExecutesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
-				{
+			},
+			{
+				"unexpected HandlesEvent route",
+				`partial aggregate is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
+				Route{
 					RouteType:       optional.Some(HandlesEventRouteType),
 					MessageTypeName: optional.Some("pkg.SomeEventType"),
 				},
-				{
+			},
+			{
+				"unexpected SchedulesTimeout route",
+				`partial aggregate is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
+				Route{
 					RouteType:       optional.Some(SchedulesTimeoutRouteType),
 					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
 				},
 			},
 		}
 
-		ExpectPanic(
-			t,
-			`partial aggregate is invalid:`+
-				"\n"+`- route is invalid:`+
-				"\n"+`  - missing route type`+
-				"\n"+`  - missing message type`+
-				"\n"+`- unexpected route: ExecutesCommand:pkg.SomeCommandType`+
-				"\n"+`- unexpected route: HandlesEvent:pkg.SomeEventType`+
-				"\n"+`- unexpected route: SchedulesTimeout:pkg.SomeTimeoutType`+
-				"\n"+`- expected at least one "HandlesCommand" route`+
-				"\n"+`- expected at least one "RecordsEvent" route`,
-			func() {
-				cfg.Routes()
-			},
-		)
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				cfg := &Aggregate{
+					ConfiguredRoutes: []Route{c.Route},
+				}
+
+				ExpectPanic(
+					t,
+					c.Want,
+					func() {
+						cfg.Routes()
+					},
+				)
+			})
+		}
 	})
 }
 

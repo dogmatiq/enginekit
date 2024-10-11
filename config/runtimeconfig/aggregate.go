@@ -9,8 +9,8 @@ import (
 
 // FromAggregate returns a new [config.Aggregate] that represents the
 // configuration of the given [dogma.AggregateMessageHandler].
-func FromAggregate(h dogma.AggregateMessageHandler) config.Aggregate {
-	var cfg config.Aggregate
+func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
+	cfg := &config.Aggregate{}
 
 	if h == nil {
 		return cfg
@@ -19,12 +19,12 @@ func FromAggregate(h dogma.AggregateMessageHandler) config.Aggregate {
 	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.AggregateMessageHandler]{
-			TypeName: typename.Of(h),
-			Value:    optional.Some(h),
+			TypeName:  typename.Of(h),
+			Interface: optional.Some(h),
 		},
 	)
 
-	h.Configure(&aggregateConfigurer{&cfg})
+	h.Configure(&aggregateConfigurer{cfg})
 
 	return cfg
 }

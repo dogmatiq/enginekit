@@ -10,13 +10,15 @@ import (
 	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 func TestProcess_Identity(t *testing.T) {
 	t.Run("it returns the normalized identity", func(t *testing.T) {
 		h := &ProcessMessageHandlerStub{
 			ConfigureFunc: func(c dogma.ProcessConfigurer) {
-				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A")
 				c.Routes(
 					dogma.HandlesEvent[EventStub[TypeA]](),
 					dogma.ExecutesCommand[CommandStub[TypeA]](),
@@ -30,9 +32,9 @@ func TestProcess_Identity(t *testing.T) {
 			t,
 			"unexpected identity",
 			cfg.Identity(),
-			Identity{
+			&identitypb.Identity{
 				Name: "name",
-				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+				Key:  uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a"),
 			},
 		)
 	})
@@ -118,56 +120,59 @@ func TestProcess_Routes(t *testing.T) {
 		Expect(
 			t,
 			"unexpected routes",
-			cfg.Routes(),
-			RouteSet{
-				{
-					RouteType:       optional.Some(HandlesEventRouteType),
-					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-				},
-				{
-					RouteType:       optional.Some(ExecutesCommandRouteType),
-					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
-				},
-				{
-					RouteType:       optional.Some(SchedulesTimeoutRouteType),
-					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-					MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
-				},
+			cfg.Routes().MessageTypes(),
+			map[message.Type]RouteDirection{
+				message.TypeFor[EventStub[TypeA]]():   InboundDirection,
+				message.TypeFor[CommandStub[TypeA]](): OutboundDirection,
+				message.TypeFor[TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
 			},
 		)
 	})
 
 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
-		cfg := Process{
-			ConfiguredRoutes: []Route{
-				{},
-				{
+		cases := []struct {
+			Name  string
+			Want  string
+			Route Route
+		}{
+			{
+				"empty route",
+				`partial process is invalid: route is invalid: missing route type`,
+				Route{},
+			},
+			{
+				"unexpected HandlesCommand route",
+				`partial process is invalid: unexpected route: HandlesCommand[pkg.SomeCommandType]`,
+				Route{
 					RouteType:       optional.Some(HandlesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
-				{
+			},
+			{
+				"unexpected RecordsEvent route",
+				`partial process is invalid: unexpected route: RecordsEvent[pkg.SomeEventType]`,
+				Route{
 					RouteType:       optional.Some(RecordsEventRouteType),
 					MessageTypeName: optional.Some("pkg.SomeEventType"),
 				},
 			},
 		}
 
-		ExpectPanic(
-			t,
-			`partial process is invalid:`+
-				"\n"+`- route is invalid:`+
-				"\n"+`  - missing route type`+
-				"\n"+`  - missing message type`+
-				"\n"+`- unexpected route: HandlesCommand:pkg.SomeCommandType`+
-				"\n"+`- unexpected route: RecordsEvent:pkg.SomeEventType`+
-				"\n"+`- expected at least one "HandlesEvent" route`+
-				"\n"+`- expected at least one "ExecutesCommand" route`,
-			func() {
-				cfg.Routes()
-			},
-		)
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				cfg := &Process{
+					ConfiguredRoutes: []Route{c.Route},
+				}
+
+				ExpectPanic(
+					t,
+					c.Want,
+					func() {
+						cfg.Routes()
+					},
+				)
+			})
+		}
 	})
 }
 

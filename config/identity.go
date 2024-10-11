@@ -1,11 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"slices"
 	"strconv"
 	"unicode"
 
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
@@ -38,7 +38,7 @@ func (i Identity) String() string {
 	return "identity:" + name + "/" + key
 }
 
-func (i Identity) normalize(ctx *normalizationContext) Component {
+func (i Identity) normalize(ctx *normalizeContext) Component {
 	if !isPrintableIdentifier(i.Name) {
 		ctx.Fail(InvalidIdentityNameError{i.Name})
 	}
@@ -50,26 +50,6 @@ func (i Identity) normalize(ctx *normalizationContext) Component {
 	}
 
 	return i
-}
-
-// InvalidIdentityNameError indicates that the "name" component of an [Identity]
-// is invalid.
-type InvalidIdentityNameError struct {
-	InvalidName string
-}
-
-func (e InvalidIdentityNameError) Error() string {
-	return fmt.Sprintf("invalid name (%q), expected a non-empty, printable UTF-8 string with no whitespace", e.InvalidName)
-}
-
-// InvalidIdentityKeyError indicates that the "key" component of an [Identity]
-// is invalid.
-type InvalidIdentityKeyError struct {
-	InvalidKey string
-}
-
-func (e InvalidIdentityKeyError) Error() string {
-	return fmt.Sprintf("invalid key (%q), expected an RFC 4122/9562 UUID", e.InvalidKey)
 }
 
 // isPrintableIdentifier returns true if n contains only non-whitespace printable
@@ -88,21 +68,16 @@ func isPrintableIdentifier(n string) bool {
 	return true
 }
 
-func normalizedIdentity(ent Entity) Identity {
-	ctx := &normalizationContext{
-		Component: ent,
-	}
-
+func finalizeIdentity(ctx *normalizeContext, ent Entity) *identitypb.Identity {
 	identities := normalizeIdentities(ctx, ent)
 
-	if err := ctx.Err(); err != nil {
-		panic(err)
+	return &identitypb.Identity{
+		Name: identities[0].Name,
+		Key:  uuidpb.MustParse(identities[0].Key),
 	}
-
-	return identities[0]
 }
 
-func normalizeIdentities(ctx *normalizationContext, ent Entity) []Identity {
+func normalizeIdentities(ctx *normalizeContext, ent Entity) []Identity {
 	identities := slices.Clone(ent.identities())
 
 	if len(identities) == 0 {

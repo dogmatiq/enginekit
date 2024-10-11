@@ -8,19 +8,19 @@ func TestSwitchByHandlerTypeOf(t *testing.T) {
 		Want    string
 	}{
 		{
-			Aggregate{},
+			&Aggregate{},
 			"aggregate",
 		},
 		{
-			Process{},
+			&Process{},
 			"process",
 		},
 		{
-			Integration{},
+			&Integration{},
 			"integration",
 		},
 		{
-			Projection{},
+			&Projection{},
 			"projection",
 		},
 	}
@@ -30,10 +30,10 @@ func TestSwitchByHandlerTypeOf(t *testing.T) {
 
 		SwitchByHandlerTypeOf(
 			c.Handler,
-			func(Aggregate) { got = "aggregate" },
-			func(Process) { got = "process" },
-			func(Integration) { got = "integration" },
-			func(Projection) { got = "projection" },
+			func(*Aggregate) { got = "aggregate" },
+			func(*Process) { got = "process" },
+			func(*Integration) { got = "integration" },
+			func(*Projection) { got = "projection" },
 		)
 
 		if got != c.Want {

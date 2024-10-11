@@ -4,25 +4,6 @@ import (
 	"github.com/dogmatiq/enginekit/message"
 )
 
-// RouteDirection is an bit-field of the "directions" in which a message flows
-// for a specific [RouteType].
-type RouteDirection int
-
-const (
-	// InboundDirection is a [RouteDirection] that indicates a message flowing
-	// into a handler.
-	InboundDirection RouteDirection = 1 << iota
-
-	// OutboundDirection is a [RouteDirection] that indicates a message flowing
-	// out of a handler.
-	OutboundDirection
-)
-
-// Has returns true if d is a superset of dir.
-func (d RouteDirection) Has(dir RouteDirection) bool {
-	return d&dir != 0
-}
-
 // RouteType is an enumeration of the types of message routes that can be
 // configured on a [Handler].
 type RouteType int
@@ -84,8 +65,8 @@ func (r RouteType) Direction() RouteDirection {
 	}
 }
 
-// Kind returns the kind of message that the route type is associated with.
-func (r RouteType) Kind() message.Kind {
+// MessageKind returns the kind of message that the route type is associated with.
+func (r RouteType) MessageKind() message.Kind {
 	switch r {
 	case HandlesCommandRouteType, ExecutesCommandRouteType:
 		return message.CommandKind

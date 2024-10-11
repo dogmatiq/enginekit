@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // Process represents the (potentially invalid) configuration of a
@@ -28,55 +29,55 @@ type Process struct {
 	ConfigurationIsExhaustive bool
 }
 
-func (h Process) String() string {
-	return stringify("process", h, h.ConfigurationSource)
+func (h *Process) String() string {
+	return renderEntity("process", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
-func (h Process) Identity() Identity {
-	return normalizedIdentity(h)
+func (h *Process) Identity() *identitypb.Identity {
+	return finalizeIdentity(newFinalizeContext(h), h)
 }
 
 // IsExhaustive returns true if the entire configuration was loaded.
-func (h Process) IsExhaustive() bool {
+func (h *Process) IsExhaustive() bool {
 	return h.ConfigurationIsExhaustive
 }
 
 // HandlerType returns [HandlerType] of the handler.
-func (h Process) HandlerType() HandlerType {
+func (h *Process) HandlerType() HandlerType {
 	return ProcessHandlerType
 }
 
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Process) Routes() RouteSet {
-	return normalizedRouteSet(h)
+func (h *Process) Routes() RouteSet {
+	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.
-func (h Process) IsDisabled() bool {
+func (h *Process) IsDisabled() bool {
 	return h.ConfiguredAsDisabled
 }
 
 // Interface returns the [dogma.ProcessMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
-func (h Process) Interface() dogma.ProcessMessageHandler {
-	return h.ConfigurationSource.Get().Value.Get()
+func (h *Process) Interface() dogma.ProcessMessageHandler {
+	return h.ConfigurationSource.Get().Interface.Get()
 }
 
-func (h Process) normalize(ctx *normalizationContext) Component {
+func (h *Process) normalize(ctx *normalizeContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
 	return h
 }
 
-func (h Process) identities() []Identity {
+func (h *Process) identities() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h Process) routes() []Route {
+func (h *Process) routes() []Route {
 	return h.ConfiguredRoutes
 }

@@ -9,8 +9,8 @@ import (
 
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
-func FromIntegration(h dogma.IntegrationMessageHandler) config.Integration {
-	var cfg config.Integration
+func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
+	cfg := &config.Integration{}
 
 	if h == nil {
 		return cfg
@@ -19,12 +19,12 @@ func FromIntegration(h dogma.IntegrationMessageHandler) config.Integration {
 	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.IntegrationMessageHandler]{
-			TypeName: typename.Of(h),
-			Value:    optional.Some(h),
+			TypeName:  typename.Of(h),
+			Interface: optional.Some(h),
 		},
 	)
 
-	h.Configure(&integrationConfigurer{&cfg})
+	h.Configure(&integrationConfigurer{cfg})
 
 	return cfg
 }

@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // Integration represents the (potentially invalid) configuration of a
@@ -28,55 +29,55 @@ type Integration struct {
 	ConfigurationIsExhaustive bool
 }
 
-func (h Integration) String() string {
-	return stringify("integration", h, h.ConfigurationSource)
+func (h *Integration) String() string {
+	return renderEntity("integration", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
-func (h Integration) Identity() Identity {
-	return normalizedIdentity(h)
+func (h *Integration) Identity() *identitypb.Identity {
+	return finalizeIdentity(newFinalizeContext(h), h)
 }
 
 // IsExhaustive returns true if the entire configuration was loaded.
-func (h Integration) IsExhaustive() bool {
+func (h *Integration) IsExhaustive() bool {
 	return h.ConfigurationIsExhaustive
 }
 
 // HandlerType returns [HandlerType] of the handler.
-func (h Integration) HandlerType() HandlerType {
+func (h *Integration) HandlerType() HandlerType {
 	return IntegrationHandlerType
 }
 
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Integration) Routes() RouteSet {
-	return normalizedRouteSet(h)
+func (h *Integration) Routes() RouteSet {
+	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.
-func (h Integration) IsDisabled() bool {
+func (h *Integration) IsDisabled() bool {
 	return h.ConfiguredAsDisabled
 }
 
 // Interface returns the [dogma.IntegrationMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
-func (h Integration) Interface() dogma.IntegrationMessageHandler {
-	return h.ConfigurationSource.Get().Value.Get()
+func (h *Integration) Interface() dogma.IntegrationMessageHandler {
+	return h.ConfigurationSource.Get().Interface.Get()
 }
 
-func (h Integration) normalize(ctx *normalizationContext) Component {
+func (h *Integration) normalize(ctx *normalizeContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
 	return h
 }
 
-func (h Integration) identities() []Identity {
+func (h *Integration) identities() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h Integration) routes() []Route {
+func (h *Integration) routes() []Route {
 	return h.ConfiguredRoutes
 }

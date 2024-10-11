@@ -16,24 +16,24 @@ func TestFromAggregate(t *testing.T) {
 	cases := []struct {
 		Name    string
 		Handler dogma.AggregateMessageHandler
-		Want    func(h dogma.AggregateMessageHandler) config.Aggregate
+		Want    func(h dogma.AggregateMessageHandler) *config.Aggregate
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.AggregateMessageHandler) config.Aggregate {
-				return config.Aggregate{}
+			func(dogma.AggregateMessageHandler) *config.Aggregate {
+				return &config.Aggregate{}
 			},
 		},
 		{
 			"unconfigured handler",
 			&AggregateMessageHandlerStub{},
-			func(h dogma.AggregateMessageHandler) config.Aggregate {
-				return config.Aggregate{
+			func(h dogma.AggregateMessageHandler) *config.Aggregate {
+				return &config.Aggregate{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.AggregateMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -52,12 +52,12 @@ func TestFromAggregate(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(app dogma.AggregateMessageHandler) config.Aggregate {
-				return config.Aggregate{
+			func(app dogma.AggregateMessageHandler) *config.Aggregate {
+				return &config.Aggregate{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.AggregateMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-							Value:    optional.Some(app),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+							Interface: optional.Some(app),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{

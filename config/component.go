@@ -2,97 +2,51 @@ package config
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // A Component is some element of the configuration of a Dogma application.
 type Component interface {
 	fmt.Stringer
 
-	normalize(*normalizationContext) Component
+	normalize(*normalizeContext) Component
 }
 
-// Source contains information about the type and value that implements
-// a [Component] of type T.
-type Source[T any] struct {
-	// TypeName is the fully-qualified name of the Go type that implements T.
-	TypeName string
+// An Entity is a [Component] that represents the configuration of some
+// configurable Dogma entity; that is, any type with a Configure() method that
+// accepts one of the Dogma "configurer" interfaces.
+type Entity interface {
+	Component
 
-	// Value is the value of type T that produced the configuration, if
-	// available.
-	Value optional.Optional[T]
+	// Identity returns the entity's identity.
+	//
+	// It panics if no single valid identity is configured.
+	Identity() *identitypb.Identity
+
+	// Routes returns the routes configured for the entity.
+	//
+	// It panics if the route configuration is incomplete or invalid.
+	Routes() RouteSet
+
+	// IsExhaustive returns true if the complete configuration was loaded. It
+	// may be false, for example, when attempting to load configuration using
+	// static analysis, but the code depends on runtime type information.
+	IsExhaustive() bool
+
+	identities() []Identity
 }
 
-// ComponentError indicates that a [Component] is invalid.
-type ComponentError struct {
-	Component Component
-	Causes    []error
-}
+// A Handler is a specialization of [Entity] that represents configuration of a
+// Dogma message handler.
+type Handler interface {
+	Entity
 
-func (e ComponentError) Error() string {
-	var w strings.Builder
+	// HandlerType returns [HandlerType] of the handler.
+	HandlerType() HandlerType
 
-	w.WriteString(e.Component.String())
-	w.WriteString(" is invalid")
+	// IsDisabled returns true if the handler was disabled via the configurer.
+	IsDisabled() bool
 
-	if len(e.Causes) == 1 {
-		w.WriteString(": ")
-		w.WriteString(e.Causes[0].Error())
-	} else if len(e.Causes) > 1 {
-		w.WriteString(":")
-
-		for _, cause := range e.Causes {
-			lines := strings.Split(cause.Error(), "\n")
-
-			for i, line := range lines {
-				w.WriteByte('\n')
-				if i == 0 {
-					w.WriteString("- ")
-				} else {
-					w.WriteString("  ")
-				}
-				w.WriteString(line)
-			}
-		}
-	}
-
-	return w.String()
-}
-
-func (e ComponentError) Unwrap() []error {
-	return e.Causes
-}
-
-// MissingTypeNameError indicates that a component that refers to a Go type is
-// missing the type name.
-type MissingTypeNameError struct{}
-
-func (e MissingTypeNameError) Error() string {
-	return "missing type name"
-}
-
-// MissingImplementationError indicates that a component is invalid because it
-// does not contain an implementation and the [WithImplementations] option was
-// specified during normalization.
-type MissingImplementationError struct{}
-
-func (e MissingImplementationError) Error() string {
-	return "missing implementation"
-}
-
-// ImplementationTypeNameMismatchError indicates that the type name of an
-// implementation does not match the type name of the source value.
-type ImplementationTypeNameMismatchError struct {
-	ExpectedTypeName   string
-	UnexpectedTypeName string
-}
-
-func (e ImplementationTypeNameMismatchError) Error() string {
-	return fmt.Sprintf(
-		"type name mismatch: implementation is %q, but the type was reported as %q",
-		e.ExpectedTypeName,
-		e.UnexpectedTypeName,
-	)
+	routes() []Route
 }

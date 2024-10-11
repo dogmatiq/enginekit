@@ -2,8 +2,10 @@ package config
 
 import (
 	"cmp"
-	"fmt"
+	"reflect"
+	"slices"
 
+	"github.com/dogmatiq/enginekit/collections/maps"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
@@ -30,13 +32,13 @@ func (r Route) String() string {
 	}
 
 	if mt, ok := r.MessageTypeName.TryGet(); ok {
-		s += ":" + mt
+		s += "[" + mt + "]"
 	}
 
 	return s
 }
 
-func (r Route) normalize(ctx *normalizationContext) Component {
+func (r Route) normalize(ctx *normalizeContext) Component {
 	routeType, hasRouteType := r.RouteType.TryGet()
 	typeName, hasTypeName := r.MessageTypeName.TryGet()
 	messageType, hasMessageType := r.MessageType.TryGet()
@@ -46,22 +48,22 @@ func (r Route) normalize(ctx *normalizationContext) Component {
 	}
 
 	if !hasTypeName {
-		ctx.Fail(MissingMessageTypeError{})
+		ctx.Fail(MissingTypeNameError{})
 	}
 
 	if hasMessageType {
-		if hasRouteType && routeType.Kind() != messageType.Kind() {
+		if hasRouteType && routeType.MessageKind() != messageType.Kind() {
 			ctx.Fail(MessageKindMismatchError{routeType, messageType})
 		}
 
 		actualTypeName := typename.Get(messageType.ReflectType())
 		if hasTypeName && typeName != actualTypeName {
-			ctx.Fail(ImplementationTypeNameMismatchError{actualTypeName, typeName})
+			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
 		}
 
 		r.MessageTypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireImplementations {
-		ctx.Fail(MissingImplementationError{})
+		ctx.Fail(MissingImplementationError{reflect.TypeFor[message.Type]()})
 	}
 
 	return r
@@ -86,34 +88,54 @@ func (r Route) key() (routeKey, bool) {
 	return routeKey{rt, mt}, rtOK && mtOK
 }
 
-// MissingRouteTypeError indicates that a [Route] is missing its [RouteType].
-type MissingRouteTypeError struct{}
-
-func (e MissingRouteTypeError) Error() string {
-	return "missing route type"
-}
-
-// MissingMessageTypeError indicates that a [Route] is missing information about
-// the message type.
-type MissingMessageTypeError struct{}
-
-func (e MissingMessageTypeError) Error() string {
-	return "missing message type"
-}
-
-// MessageKindMismatchError indicates that a [Route] refers to a [message.Type]
-// that has a different [message.Kind] than the route's [RouteType].
-type MessageKindMismatchError struct {
-	RouteType   RouteType
-	MessageType message.Type
-}
-
-func (e MessageKindMismatchError) Error() string {
-	return fmt.Sprintf(
-		"message kind mismatch: %s expects %q, but %s is %q",
-		e.RouteType,
-		e.RouteType.Kind(),
-		typename.Get(e.MessageType.ReflectType()),
-		e.MessageType.Kind(),
+func normalizeRoutes(ctx *normalizeContext, h Handler) []Route {
+	var (
+		capabilities = h.HandlerType().RouteCapabilities()
+		missing      maps.Ordered[RouteType, MissingRequiredRouteError]
+		duplicate    maps.OrderedByKey[routeKey, DuplicateRouteError]
 	)
+
+	for rt, req := range capabilities.RouteTypes {
+		if req == RouteTypeRequired {
+			missing.Set(rt, MissingRequiredRouteError{rt})
+		}
+	}
+
+	routes := slices.Clone(h.routes())
+
+	for i, r := range routes {
+		r = normalize(ctx, r)
+		routes[i] = r
+
+		if rt, ok := r.RouteType.TryGet(); ok {
+			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
+				ctx.Fail(UnexpectedRouteError{r})
+			} else {
+				missing.Remove(rt)
+			}
+		}
+
+		if k, ok := r.key(); ok {
+			duplicate.Update(
+				k,
+				func(err *DuplicateRouteError) {
+					err.RouteType = k.RouteType
+					err.MessageTypeName = k.MessageTypeName
+					err.DuplicateRoutes = append(err.DuplicateRoutes, r)
+				},
+			)
+		}
+	}
+
+	for err := range missing.Values() {
+		ctx.Fail(err)
+	}
+
+	for err := range duplicate.Values() {
+		if len(err.DuplicateRoutes) > 1 {
+			ctx.Fail(err)
+		}
+	}
+
+	return routes
 }

@@ -16,24 +16,24 @@ func TestFromProcess(t *testing.T) {
 	cases := []struct {
 		Name    string
 		Handler dogma.ProcessMessageHandler
-		Want    func(h dogma.ProcessMessageHandler) config.Process
+		Want    func(h dogma.ProcessMessageHandler) *config.Process
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.ProcessMessageHandler) config.Process {
-				return config.Process{}
+			func(dogma.ProcessMessageHandler) *config.Process {
+				return &config.Process{}
 			},
 		},
 		{
 			"unconfigured handler",
 			&ProcessMessageHandlerStub{},
-			func(h dogma.ProcessMessageHandler) config.Process {
-				return config.Process{
+			func(h dogma.ProcessMessageHandler) *config.Process {
+				return &config.Process{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.ProcessMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfigurationIsExhaustive: true,
@@ -53,12 +53,12 @@ func TestFromProcess(t *testing.T) {
 					c.Disable()
 				},
 			},
-			func(h dogma.ProcessMessageHandler) config.Process {
-				return config.Process{
+			func(h dogma.ProcessMessageHandler) *config.Process {
+				return &config.Process{
 					ConfigurationSource: optional.Some(
 						config.Source[dogma.ProcessMessageHandler]{
-							TypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-							Value:    optional.Some(h),
+							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							Interface: optional.Some(h),
 						},
 					),
 					ConfiguredIdentities: []config.Identity{

@@ -10,13 +10,15 @@ import (
 	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 func TestProjection_Identity(t *testing.T) {
 	t.Run("it returns the normalized identity", func(t *testing.T) {
 		h := &ProjectionMessageHandlerStub{
 			ConfigureFunc: func(c dogma.ProjectionConfigurer) {
-				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A")
 				c.Routes(
 					dogma.HandlesEvent[EventStub[TypeA]](),
 				)
@@ -29,9 +31,9 @@ func TestProjection_Identity(t *testing.T) {
 			t,
 			"unexpected identity",
 			cfg.Identity(),
-			Identity{
+			&identitypb.Identity{
 				Name: "name",
-				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+				Key:  uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a"),
 			},
 		)
 	})
@@ -112,55 +114,73 @@ func TestProjection_Routes(t *testing.T) {
 		Expect(
 			t,
 			"unexpected routes",
-			cfg.Routes(),
-			RouteSet{
-				{
-					RouteType:       optional.Some(HandlesEventRouteType),
-					MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-				},
+			cfg.Routes().MessageTypes(),
+			map[message.Type]RouteDirection{
+				message.TypeFor[EventStub[TypeA]](): InboundDirection,
 			},
 		)
 	})
 
 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
-		cfg := Projection{
-			ConfiguredRoutes: []Route{
-				{},
-				{
+		cases := []struct {
+			Name  string
+			Want  string
+			Route Route
+		}{
+			{
+				"empty route",
+				`partial projection is invalid: route is invalid: missing route type`,
+				Route{},
+			},
+			{
+				"",
+				`partial projection is invalid: unexpected route: HandlesCommand[pkg.SomeCommandType]`,
+				Route{
 					RouteType:       optional.Some(HandlesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
-				{
+			},
+			{
+				"",
+				`partial projection is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
+				Route{
 					RouteType:       optional.Some(ExecutesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
-				{
+			},
+			{
+				"",
+				`partial projection is invalid: unexpected route: RecordsEvent[pkg.SomeEventType]`,
+				Route{
 					RouteType:       optional.Some(RecordsEventRouteType),
 					MessageTypeName: optional.Some("pkg.SomeEventType"),
 				},
-				{
+			},
+			{
+				"",
+				`partial projection is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
+				Route{
 					RouteType:       optional.Some(SchedulesTimeoutRouteType),
 					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
 				},
 			},
 		}
 
-		ExpectPanic(
-			t,
-			`partial projection is invalid:`+
-				"\n"+`- route is invalid:`+
-				"\n"+`  - missing route type`+
-				"\n"+`  - missing message type`+
-				"\n"+`- unexpected route: HandlesCommand:pkg.SomeCommandType`+
-				"\n"+`- unexpected route: ExecutesCommand:pkg.SomeCommandType`+
-				"\n"+`- unexpected route: RecordsEvent:pkg.SomeEventType`+
-				"\n"+`- unexpected route: SchedulesTimeout:pkg.SomeTimeoutType`+
-				"\n"+`- expected at least one "HandlesEvent" route`,
-			func() {
-				cfg.Routes()
-			},
-		)
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				cfg := &Projection{
+					ConfiguredRoutes: []Route{c.Route},
+				}
+
+				ExpectPanic(
+					t,
+					c.Want,
+					func() {
+						cfg.Routes()
+					},
+				)
+			})
+		}
 	})
 }
 

@@ -9,8 +9,8 @@ import (
 
 // FromProjection returns a new [config.Projection] that represents the
 // configuration of the given [dogma.ProjectionMessageHandler].
-func FromProjection(h dogma.ProjectionMessageHandler) config.Projection {
-	var cfg config.Projection
+func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
+	cfg := &config.Projection{}
 
 	if h == nil {
 		return cfg
@@ -19,12 +19,12 @@ func FromProjection(h dogma.ProjectionMessageHandler) config.Projection {
 	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.ProjectionMessageHandler]{
-			TypeName: typename.Of(h),
-			Value:    optional.Some(h),
+			TypeName:  typename.Of(h),
+			Interface: optional.Some(h),
 		},
 	)
 
-	h.Configure(&projectionConfigurer{&cfg})
+	h.Configure(&projectionConfigurer{cfg})
 
 	return cfg
 }

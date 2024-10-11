@@ -8,13 +8,16 @@ import (
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/test"
+	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 func TestApplication_Identity(t *testing.T) {
 	t.Run("it returns the normalized identity", func(t *testing.T) {
 		app := &ApplicationStub{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A") // note: non-canonical UUID
+				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A")
 			},
 		}
 
@@ -24,9 +27,9 @@ func TestApplication_Identity(t *testing.T) {
 			t,
 			"unexpected identity",
 			cfg.Identity(),
-			Identity{
+			&identitypb.Identity{
 				Name: "name",
-				Key:  "19cb98d5-dd17-4daf-ae00-1b413b7b899a", // note: canonicalized
+				Key:  uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a"),
 			},
 		)
 	})
@@ -76,6 +79,71 @@ func TestApplication_Identity(t *testing.T) {
 				)
 			})
 		}
+	})
+}
+
+func TestApplication_Routes(t *testing.T) {
+	t.Run("it returns the normalized routes", func(t *testing.T) {
+		app := &ApplicationStub{
+			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+				c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
+				c.RegisterAggregate(&AggregateMessageHandlerStub{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.RecordsEvent[EventStub[TypeA]](),
+							dogma.RecordsEvent[EventStub[TypeB]](),
+						)
+					},
+				})
+				c.RegisterProcess(&ProcessMessageHandlerStub{
+					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+						c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
+						c.Routes(
+							dogma.HandlesEvent[EventStub[TypeB]](),
+							dogma.ExecutesCommand[CommandStub[TypeB]](),
+							dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+						)
+					},
+				})
+			},
+		}
+
+		cfg := runtimeconfig.FromApplication(app)
+
+		Expect(
+			t,
+			"unexpected routes",
+			cfg.Routes().MessageTypes(),
+			map[message.Type]RouteDirection{
+				message.TypeFor[CommandStub[TypeA]](): InboundDirection,
+				message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
+				message.TypeFor[EventStub[TypeB]]():   InboundDirection | OutboundDirection,
+				message.TypeFor[CommandStub[TypeB]](): OutboundDirection,
+				message.TypeFor[TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
+			},
+		)
+	})
+
+	t.Run("it panics if the routes are invalid", func(t *testing.T) {
+		cfg := &Application{
+			ConfiguredHandlers: []Handler{
+				&Projection{
+					ConfiguredRoutes: []Route{
+						{},
+					},
+				},
+			},
+		}
+
+		ExpectPanic(
+			t,
+			`partial application is invalid: partial projection is invalid: route is invalid: missing route type`,
+			func() {
+				cfg.Routes()
+			},
+		)
 	})
 }
 

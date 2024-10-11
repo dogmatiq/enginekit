@@ -9,8 +9,8 @@ import (
 
 // FromApplication returns a new [config.Application] that represents the
 // configuration of the given [dogma.Application].
-func FromApplication(app dogma.Application) config.Application {
-	var cfg config.Application
+func FromApplication(app dogma.Application) *config.Application {
+	cfg := &config.Application{}
 
 	if app == nil {
 		return cfg
@@ -19,12 +19,12 @@ func FromApplication(app dogma.Application) config.Application {
 	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.Application]{
-			TypeName: typename.Of(app),
-			Value:    optional.Some(app),
+			TypeName:  typename.Of(app),
+			Interface: optional.Some(app),
 		},
 	)
 
-	app.Configure(&applicationConfigurer{&cfg})
+	app.Configure(&applicationConfigurer{cfg})
 
 	return cfg
 }

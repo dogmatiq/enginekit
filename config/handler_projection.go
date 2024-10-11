@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // Projection represents the (potentially invalid) configuration of a
@@ -32,41 +33,41 @@ type Projection struct {
 	ConfigurationIsExhaustive bool
 }
 
-func (h Projection) String() string {
-	return stringify("projection", h, h.ConfigurationSource)
+func (h *Projection) String() string {
+	return renderEntity("projection", h, h.ConfigurationSource)
 }
 
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
-func (h Projection) Identity() Identity {
-	return normalizedIdentity(h)
+func (h *Projection) Identity() *identitypb.Identity {
+	return finalizeIdentity(newFinalizeContext(h), h)
 }
 
 // IsExhaustive returns true if the entire configuration was loaded.
-func (h Projection) IsExhaustive() bool {
+func (h *Projection) IsExhaustive() bool {
 	return h.ConfigurationIsExhaustive
 }
 
 // HandlerType returns [HandlerType] of the handler.
-func (h Projection) HandlerType() HandlerType {
+func (h *Projection) HandlerType() HandlerType {
 	return ProjectionHandlerType
 }
 
 // Routes returns the routes configured for the handler.
 //
 // It panics if the routes are incomplete or invalid.
-func (h Projection) Routes() RouteSet {
-	return normalizedRouteSet(h)
+func (h *Projection) Routes() RouteSet {
+	return finalizeRouteSet(newFinalizeContext(h), h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.
-func (h Projection) IsDisabled() bool {
+func (h *Projection) IsDisabled() bool {
 	return h.ConfiguredAsDisabled
 }
 
 // DeliveryPolicy returns the delivery policy for the handler.
-func (h Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
+func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 	if p, ok := h.ConfiguredDeliveryPolicy.TryGet(); ok {
 		return p.Implementation.Get()
 	}
@@ -75,21 +76,21 @@ func (h Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 
 // Interface returns the [dogma.ProjectionMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
-func (h Projection) Interface() dogma.ProjectionMessageHandler {
-	return h.ConfigurationSource.Get().Value.Get()
+func (h *Projection) Interface() dogma.ProjectionMessageHandler {
+	return h.ConfigurationSource.Get().Interface.Get()
 }
 
-func (h Projection) normalize(ctx *normalizationContext) Component {
+func (h *Projection) normalize(ctx *normalizeContext) Component {
 	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
 	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
 	return h
 }
 
-func (h Projection) identities() []Identity {
+func (h *Projection) identities() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h Projection) routes() []Route {
+func (h *Projection) routes() []Route {
 	return h.ConfiguredRoutes
 }
 

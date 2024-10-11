@@ -9,8 +9,8 @@ import (
 
 // FromProcess returns a new [config.Process] that represents the configuration
 // of the given [dogma.ProcessMessageHandler].
-func FromProcess(h dogma.ProcessMessageHandler) config.Process {
-	var cfg config.Process
+func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
+	cfg := &config.Process{}
 
 	if h == nil {
 		return cfg
@@ -19,12 +19,12 @@ func FromProcess(h dogma.ProcessMessageHandler) config.Process {
 	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.ProcessMessageHandler]{
-			TypeName: typename.Of(h),
-			Value:    optional.Some(h),
+			TypeName:  typename.Of(h),
+			Interface: optional.Some(h),
 		},
 	)
 
-	h.Configure(&processConfigurer{&cfg})
+	h.Configure(&processConfigurer{cfg})
 
 	return cfg
 }

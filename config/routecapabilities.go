@@ -33,7 +33,7 @@ func (s RouteCapabilities) DirectionOf(k message.Kind) RouteDirection {
 
 	for rt, cap := range s.RouteTypes {
 		if cap != RouteTypeDisallowed {
-			if rt.Kind() == k {
+			if rt.MessageKind() == k {
 				dir |= rt.Direction()
 			}
 		}

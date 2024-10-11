@@ -54,6 +54,13 @@ func (s RouteSet) DirectionOf(t message.Type) RouteDirection {
 	return dir
 }
 
+// HasMessageType returns true if the [RouteSet] contains any routes for the
+// given message type.
+func (s RouteSet) HasMessageType(t message.Type) bool {
+	_, ok := s.byMessageType[t]
+	return ok
+}
+
 // Filter returns a new [RouteSet] that contains only the routes that match all
 // of the given filters.
 func (s RouteSet) Filter(filters ...RouteSetFilter) RouteSet {

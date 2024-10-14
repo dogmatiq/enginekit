@@ -110,12 +110,15 @@ func TestFromApplication(t *testing.T) {
 								},
 							},
 							&config.Projection{
-								ConfigurationSource: optional.Some(
-									config.Source[dogma.ProjectionMessageHandler]{
-										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-										Interface: optional.Some(projection),
-									},
-								),
+								AsConfigured: config.ProjectionAsConfigured{
+									Source: optional.Some(
+										config.Source[dogma.ProjectionMessageHandler]{
+											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+											Interface: optional.Some(projection),
+										},
+									),
+									IsDisabled: optional.Some(false),
+								},
 							},
 						},
 					},

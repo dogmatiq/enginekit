@@ -6,36 +6,39 @@ import (
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
+// ProjectionAsConfigured contains the raw unvalidated properties of a
+// [Projection].
+type ProjectionAsConfigured struct {
+	// Source describes the type and value that produced the configuration, if
+	// available.
+	Source optional.Optional[Source[dogma.ProjectionMessageHandler]]
+
+	// Identities is the list of identities configured for the handler.
+	Identities []Identity
+
+	// Routes is the list of routes configured on the handler.
+	Routes []Route
+
+	// IsDisabled is true if the handler was disabled via the configurer, if
+	// known.
+	IsDisabled optional.Optional[bool]
+
+	// DeliveryPolicy is the delivery policy for the handler, if configured.
+	DeliveryPolicy optional.Optional[ProjectionDeliveryPolicy]
+
+	// Fidelity describes the configuration's accuracy in comparison to the
+	// actual configuration that would be used at runtime.
+	Fidelity Fidelity
+}
+
 // Projection represents the (potentially invalid) configuration of a
 // [dogma.ProjectionMessageHandler] implementation.
 type Projection struct {
-	// ConfigurationSource contains information about the type and value that
-	// produced the configuration, if available.
-	ConfigurationSource optional.Optional[Source[dogma.ProjectionMessageHandler]]
-
-	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
-	// identities configured for the handler.
-	ConfiguredIdentities []Identity
-
-	// ConfiguredRoutes is the list of (potentially invalid, incomplete or
-	// duplicated) message routes configured for the handler.
-	ConfiguredRoutes []Route
-
-	// ConfiguredDeliveryPolicy is the delivery policy for the handler, if
-	// configured.
-	ConfiguredDeliveryPolicy optional.Optional[ProjectionDeliveryPolicy]
-
-	// ConfiguredAsDisabled is true if the handler was disabled via the
-	// configurer.
-	ConfiguredAsDisabled bool
-
-	// ConfigurationFidelity describes the configuration's accuracy in
-	// comparison to the actual configuration that would be used at runtime.
-	ConfigurationFidelity Fidelity
+	AsConfigured ProjectionAsConfigured
 }
 
 func (h *Projection) String() string {
-	return renderEntity("projection", h, h.ConfigurationSource)
+	return renderEntity("projection", h, h.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -48,7 +51,7 @@ func (h *Projection) Identity() *identitypb.Identity {
 // Fidelity returns information about how well the configuration represents
 // the actual configuration that would be used at runtime.
 func (h *Projection) Fidelity() Fidelity {
-	return h.ConfigurationFidelity
+	return h.AsConfigured.Fidelity
 }
 
 // HandlerType returns [HandlerType] of the handler.
@@ -65,12 +68,12 @@ func (h *Projection) RouteSet() RouteSet {
 
 // IsDisabled returns true if the handler was disabled via the configurer.
 func (h *Projection) IsDisabled() bool {
-	return h.ConfiguredAsDisabled
+	return h.AsConfigured.IsDisabled.Get()
 }
 
 // DeliveryPolicy returns the delivery policy for the handler.
 func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
-	if p, ok := h.ConfiguredDeliveryPolicy.TryGet(); ok {
+	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
 		return p.Implementation.Get()
 	}
 	return dogma.UnicastProjectionDeliveryPolicy{}
@@ -79,21 +82,21 @@ func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 // Interface returns the [dogma.ProjectionMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
-	return h.ConfigurationSource.Get().Interface.Get()
+	return h.AsConfigured.Source.Get().Interface.Get()
 }
 
 func (h *Projection) normalize(ctx *normalizeContext) Component {
-	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
-	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
+	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
+	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
 	return h
 }
 
 func (h *Projection) identitiesAsConfigured() []Identity {
-	return h.ConfiguredIdentities
+	return h.AsConfigured.Identities
 }
 
 func (h *Projection) routesAsConfigured() []Route {
-	return h.ConfiguredRoutes
+	return h.AsConfigured.Routes
 }
 
 // ProjectionDeliveryPolicy represents the (potentially invalid) configuration

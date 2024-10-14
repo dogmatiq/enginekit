@@ -10,13 +10,17 @@ import (
 // FromProjection returns a new [config.Projection] that represents the
 // configuration of the given [dogma.ProjectionMessageHandler].
 func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
-	cfg := &config.Projection{}
+	cfg := &config.Projection{
+		AsConfigured: config.ProjectionAsConfigured{
+			IsDisabled: optional.Some(false),
+		},
+	}
 
 	if h == nil {
 		return cfg
 	}
 
-	cfg.ConfigurationSource = optional.Some(
+	cfg.AsConfigured.Source = optional.Some(
 		config.Source[dogma.ProjectionMessageHandler]{
 			TypeName:  typename.Of(h),
 			Interface: optional.Some(h),
@@ -33,8 +37,8 @@ type projectionConfigurer struct {
 }
 
 func (c *projectionConfigurer) Identity(name, key string) {
-	c.cfg.ConfiguredIdentities = append(
-		c.cfg.ConfiguredIdentities,
+	c.cfg.AsConfigured.Identities = append(
+		c.cfg.AsConfigured.Identities,
 		config.Identity{
 			AsConfigured: config.IdentityAsConfigured{
 				Name: name,
@@ -46,7 +50,7 @@ func (c *projectionConfigurer) Identity(name, key string) {
 
 func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {
 	for _, r := range routes {
-		c.cfg.ConfiguredRoutes = append(c.cfg.ConfiguredRoutes, fromRoute(r))
+		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
 	}
 }
 
@@ -58,9 +62,9 @@ func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) 
 		cfg.Implementation = optional.Some(p)
 	}
 
-	c.cfg.ConfiguredDeliveryPolicy = optional.Some(cfg)
+	c.cfg.AsConfigured.DeliveryPolicy = optional.Some(cfg)
 }
 
 func (c *projectionConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.ConfiguredAsDisabled = true
+	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
 }

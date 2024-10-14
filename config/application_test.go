@@ -131,8 +131,10 @@ func TestApplication_Routes(t *testing.T) {
 			AsConfigured: ApplicationAsConfigured{
 				Handlers: []Handler{
 					&Projection{
-						ConfiguredRoutes: []Route{
-							{},
+						AsConfigured: ProjectionAsConfigured{
+							Routes: []Route{
+								{},
+							},
 						},
 					},
 				},

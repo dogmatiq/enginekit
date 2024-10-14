@@ -22,7 +22,11 @@ func TestFromProjection(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.ProjectionMessageHandler) *config.Projection {
-				return &config.Projection{}
+				return &config.Projection{
+					AsConfigured: config.ProjectionAsConfigured{
+						IsDisabled: optional.Some(false),
+					},
+				}
 			},
 		},
 		{
@@ -30,12 +34,15 @@ func TestFromProjection(t *testing.T) {
 			&ProjectionMessageHandlerStub{},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.ProjectionMessageHandler]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Interface: optional.Some(h),
-						},
-					),
+					AsConfigured: config.ProjectionAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.ProjectionMessageHandler]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+								Interface: optional.Some(h),
+							},
+						),
+						IsDisabled: optional.Some(false),
+					},
 				}
 			},
 		},
@@ -55,34 +62,36 @@ func TestFromProjection(t *testing.T) {
 			},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.ProjectionMessageHandler]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Interface: optional.Some(h),
-						},
-					),
-					ConfiguredIdentities: []config.Identity{
-						{
-							AsConfigured: config.IdentityAsConfigured{
-								Name: "projection",
-								Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+					AsConfigured: config.ProjectionAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.ProjectionMessageHandler]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+								Interface: optional.Some(h),
+							},
+						),
+						Identities: []config.Identity{
+							{
+								AsConfigured: config.IdentityAsConfigured{
+									Name: "projection",
+									Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+								},
 							},
 						},
-					},
-					ConfiguredRoutes: []config.Route{
-						{
-							RouteType:       optional.Some(config.HandlesEventRouteType),
-							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+						Routes: []config.Route{
+							{
+								RouteType:       optional.Some(config.HandlesEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+							},
 						},
+						DeliveryPolicy: optional.Some(
+							config.ProjectionDeliveryPolicy{
+								TypeName:       optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
+								Implementation: optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
+							},
+						),
+						IsDisabled: optional.Some(true),
 					},
-					ConfiguredDeliveryPolicy: optional.Some(
-						config.ProjectionDeliveryPolicy{
-							TypeName:       optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
-							Implementation: optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
-						},
-					),
-					ConfiguredAsDisabled: true,
 				}
 			},
 		},

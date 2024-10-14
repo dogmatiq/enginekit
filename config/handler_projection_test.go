@@ -169,7 +169,9 @@ func TestProjection_Routes(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Projection{
-					ConfiguredRoutes: []Route{c.Route},
+					AsConfigured: ProjectionAsConfigured{
+						Routes: []Route{c.Route},
+					},
 				}
 
 				ExpectPanic(

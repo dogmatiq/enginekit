@@ -5,22 +5,14 @@ import (
 	"reflect"
 )
 
-// MissingTypeNameError indicates that a [Component] that refers to a Go type is
-// missing the type name.
-type MissingTypeNameError struct{}
-
-func (e MissingTypeNameError) Error() string {
-	return "missing type name"
-}
-
-// MissingImplementationError indicates that a [Component] is invalid because it
-// does not contain some runtime value or type information and the
+// ImplementationUnavailableError indicates that a [Component] is invalid
+// because it does not contain some runtime value or type information and the
 // [WithImplementations] option was specified during normalization.
-type MissingImplementationError struct {
+type ImplementationUnavailableError struct {
 	MissingType reflect.Type
 }
 
-func (e MissingImplementationError) Error() string {
+func (e ImplementationUnavailableError) Error() string {
 	return fmt.Sprintf("missing implementation: no %s value is available", e.MissingType)
 }
 

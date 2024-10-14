@@ -137,7 +137,7 @@ func TestProcess_Routes(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`process is invalid: route is invalid: missing route type`,
+				`process is invalid: route is invalid: could not evaluate entire configuration`,
 				Route{},
 			},
 			{

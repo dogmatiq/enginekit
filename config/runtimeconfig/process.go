@@ -41,8 +41,8 @@ func (c *processConfigurer) Identity(name, key string) {
 		c.cfg.AsConfigured.Identities,
 		config.Identity{
 			AsConfigured: config.IdentityAsConfigured{
-				Name: name,
-				Key:  key,
+				Name: optional.Some(name),
+				Key:  optional.Some(key),
 			},
 		},
 	)

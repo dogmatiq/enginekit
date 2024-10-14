@@ -69,11 +69,11 @@ func (r Route) normalize(ctx *normalizeContext) Component {
 	messageType, hasMessageType := r.AsConfigured.MessageType.TryGet()
 
 	if !hasRouteType {
-		ctx.Fail(MissingRouteTypeError{})
+		r.AsConfigured.Fidelity.IsPartial = true
 	}
 
 	if !hasTypeName {
-		ctx.Fail(MissingTypeNameError{})
+		r.AsConfigured.Fidelity.IsPartial = true
 	}
 
 	if hasMessageType {
@@ -88,7 +88,7 @@ func (r Route) normalize(ctx *normalizeContext) Component {
 
 		r.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireImplementations {
-		ctx.Fail(MissingImplementationError{reflect.TypeFor[message.Type]()})
+		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[message.Type]()})
 	}
 
 	return r

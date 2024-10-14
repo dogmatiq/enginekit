@@ -131,7 +131,7 @@ func TestIntegration_Routes(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`integration is invalid: route is invalid: missing route type`,
+				`integration is invalid: route is invalid: could not evaluate entire configuration`,
 				Route{},
 			},
 			{

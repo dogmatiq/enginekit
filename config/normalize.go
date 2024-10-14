@@ -15,10 +15,10 @@ func Normalize[T Component](c T, options ...NormalizeOption) (T, error) {
 		opt(&ctx.Options)
 	}
 
+	c = c.normalize(ctx).(T)
 	reportFidelityErrors(ctx, c)
-	norm := c.normalize(ctx).(T)
 
-	return norm, ctx.Err()
+	return c, ctx.Err()
 }
 
 // MustNormalize returns a normalized copy of v, or panics if v is invalid.
@@ -33,8 +33,10 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 
 func normalize[T Component](ctx *normalizeContext, c T) T {
 	ctx = ctx.NewChild(c)
+	c = c.normalize(ctx).(T)
 	reportFidelityErrors(ctx, c)
-	return c.normalize(ctx).(T)
+
+	return c
 }
 
 func reportFidelityErrors(ctx *normalizeContext, c Component) {
@@ -99,6 +101,7 @@ func (c *normalizeContext) Fail(err error) {
 				Causes:    []error{err},
 			}
 		}
+
 		panic(err)
 	}
 

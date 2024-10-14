@@ -2,7 +2,7 @@ package config
 
 import "fmt"
 
-// InvalidIdentityNameError indicates that the "name" component of an [Identity]
+// InvalidIdentityNameError indicates that the "name" element of an [Identity]
 // is invalid.
 type InvalidIdentityNameError struct {
 	InvalidName string
@@ -12,7 +12,7 @@ func (e InvalidIdentityNameError) Error() string {
 	return fmt.Sprintf("invalid name (%q), expected a non-empty, printable UTF-8 string with no whitespace", e.InvalidName)
 }
 
-// InvalidIdentityKeyError indicates that the "key" component of an [Identity]
+// InvalidIdentityKeyError indicates that the "key" element of an [Identity]
 // is invalid.
 type InvalidIdentityKeyError struct {
 	InvalidKey string
@@ -43,23 +43,8 @@ func (e MultipleIdentitiesError) Error() string {
 	)
 }
 
-// IdentityConflictError indicates that more than one [Entity] within the same
-// [Application] shares the same [Identity].
-type IdentityConflictError struct {
-	Entities            []Entity
-	ConflictingIdentity Identity
-}
-
-func (e IdentityConflictError) Error() string {
-	return fmt.Sprintf(
-		"entities have conflicting identities: %s is shared by %s",
-		e.ConflictingIdentity,
-		renderList(e.Entities),
-	)
-}
-
 // IdentityNameConflictError indicates that more than one [Entity] within the
-// same [Application] is shares the same "name" component of an [Identity].
+// same [Application] is shares the same "name" element of an [Identity].
 type IdentityNameConflictError struct {
 	Entities        []Entity
 	ConflictingName string
@@ -74,7 +59,7 @@ func (e IdentityNameConflictError) Error() string {
 }
 
 // IdentityKeyConflictError indicates that more than one [Entity] within the
-// same [Application] is shares the same "key" component of an [Identity].
+// same [Application] is shares the same "key" element of an [Identity].
 type IdentityKeyConflictError struct {
 	Entities       []Entity
 	ConflictingKey string

@@ -120,7 +120,6 @@ func normalizeHandlers(ctx *normalizeContext, app *Application) []Handler {
 // identities that conflict with other handlers or the application itself.
 func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 	var (
-		conflictingIDs   conflictDetector[Identity, Entity]
 		conflictingNames conflictDetector[string, Entity]
 		conflictingKeys  conflictDetector[string, Entity]
 	)
@@ -132,37 +131,32 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 
 	for i, ent1 := range entities {
 		for _, id1 := range ent1.identitiesAsConfigured() {
+			k1, hasK1 := id1.AsConfigured.Key.TryGet()
+			n1, hasN1 := id1.AsConfigured.Name.TryGet()
+
 			for j, ent2 := range entities[i+1:] {
 				for _, id2 := range ent2.identitiesAsConfigured() {
-					if conflictingIDs.Add(
-						id1, i, ent1,
-						id2, j, ent2,
-					) {
-						continue
+					k2, hasK2 := id2.AsConfigured.Key.TryGet()
+					n2, hasN2 := id2.AsConfigured.Name.TryGet()
+
+					if hasK1 && hasK2 {
+						conflictingKeys.Add(
+							k1, i, ent1,
+							k2, j, ent2,
+						)
 					}
 
-					if conflictingKeys.Add(
-						id1.AsConfigured.Key, i, ent1,
-						id2.AsConfigured.Key, j, ent2,
-					) {
-						continue
-					}
-
-					// Index 0 is the application, which is allowed to have
-					// the same name as one of its handlers.
-					if i > 0 {
+					// Index 0 is the application, which is allowed to have the
+					// same name as one of its handlers.
+					if i > 0 && hasN1 && hasN2 {
 						conflictingNames.Add(
-							id1.AsConfigured.Name, i, ent1,
-							id2.AsConfigured.Name, j, ent2,
+							n1, i, ent1,
+							n2, j, ent2,
 						)
 					}
 				}
 			}
 		}
-	}
-
-	for id, entities := range conflictingIDs.All() {
-		ctx.Fail(IdentityConflictError{entities, id})
 	}
 
 	for name, entities := range conflictingNames.All() {

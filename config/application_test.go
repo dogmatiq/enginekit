@@ -143,7 +143,7 @@ func TestApplication_Routes(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`application is invalid: projection is invalid: route is invalid: missing route type`,
+			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
 			func() {
 				cfg.RouteSet()
 			},
@@ -308,24 +308,6 @@ func TestApplication_validation(t *testing.T) {
 			},
 		},
 		{
-			"application must not have the same identity as one of its handlers",
-			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: entities have conflicting identities: identity:app/14769f7f-87fe-48dd-916e-5bcab6ba6aca is shared by application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub and aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-			&ApplicationStub{
-				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-					c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME IDENTITY
-					c.RegisterAggregate(&AggregateMessageHandlerStub{
-						ConfigureFunc: func(c dogma.AggregateConfigurer) {
-							c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME IDENTITY
-							c.Routes(
-								dogma.HandlesCommand[CommandStub[TypeA]](),
-								dogma.RecordsEvent[EventStub[TypeA]](),
-							)
-						},
-					})
-				},
-			},
-		},
-		{
 			"application must not have the same identity key as one of its handlers",
 			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: entities have conflicting identities: the "14769f7f-87fe-48dd-916e-5bcab6ba6aca" key is shared by application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub and aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
 			&ApplicationStub{
@@ -337,41 +319,6 @@ func TestApplication_validation(t *testing.T) {
 							c.Routes(
 								dogma.HandlesCommand[CommandStub[TypeA]](),
 								dogma.RecordsEvent[EventStub[TypeA]](),
-							)
-						},
-					})
-				},
-			},
-		},
-		{
-			"multiple handlers must not have the same identity",
-			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: entities have conflicting identities: identity:handler/4f2a6c38-0651-4ca5-b6a1-1edf4b2624db is shared by aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub, integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub and projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
-			&ApplicationStub{
-				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-					c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-					c.RegisterAggregate(&AggregateMessageHandlerStub{
-						ConfigureFunc: func(c dogma.AggregateConfigurer) {
-							c.Identity("handler", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db") // <-- SAME IDENTITY
-							c.Routes(
-								dogma.HandlesCommand[CommandStub[TypeA]](),
-								dogma.RecordsEvent[EventStub[TypeA]](),
-							)
-						},
-					})
-					c.RegisterIntegration(&IntegrationMessageHandlerStub{
-						ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-							c.Identity("handler", "4F2A6C38-0651-4CA5-B6A1-1EDF4B2624DB") // <-- SAME IDENTITY (note: non-canonical UUID)
-							c.Routes(
-								dogma.HandlesCommand[CommandStub[TypeB]](),
-								dogma.RecordsEvent[EventStub[TypeB]](),
-							)
-						},
-					})
-					c.RegisterProjection(&ProjectionMessageHandlerStub{
-						ConfigureFunc: func(c dogma.ProjectionConfigurer) {
-							c.Identity("handler", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db") // <-- SAME IDENTITY
-							c.Routes(
-								dogma.HandlesEvent[EventStub[TypeA]](),
 							)
 						},
 					})

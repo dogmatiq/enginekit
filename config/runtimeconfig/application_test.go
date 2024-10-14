@@ -70,8 +70,8 @@ func TestFromApplication(t *testing.T) {
 						Identities: []config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
-									Name: "app",
-									Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
+									Name: optional.Some("app"),
+									Key:  optional.Some("bed53df8-bf22-4502-be4b-64d56532d8be"),
 								},
 							},
 						},

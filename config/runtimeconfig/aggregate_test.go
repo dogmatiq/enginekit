@@ -70,8 +70,8 @@ func TestFromAggregate(t *testing.T) {
 						Identities: []config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
-									Name: "aggregate",
-									Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
+									Name: optional.Some("aggregate"),
+									Key:  optional.Some("d9d75a75-7839-4b3e-a7e5-c8884b88ea57"),
 								},
 							},
 						},

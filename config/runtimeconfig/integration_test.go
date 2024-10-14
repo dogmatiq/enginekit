@@ -70,8 +70,8 @@ func TestFromIntegration(t *testing.T) {
 						Identities: []config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
-									Name: "integration",
-									Key:  "51ffcb6f-171f-41a1-90e7-6fe1111649cd",
+									Name: optional.Some("integration"),
+									Key:  optional.Some("51ffcb6f-171f-41a1-90e7-6fe1111649cd"),
 								},
 							},
 						},

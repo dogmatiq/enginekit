@@ -49,7 +49,7 @@ func (e ComponentError) Unwrap() []error {
 type PartialError struct{}
 
 func (e PartialError) Error() string {
-	return "some configuration is potentially missing"
+	return "could not evaluate entire configuration"
 }
 
 // SpeculativeError indicates that a [Component]'s inclusion in the

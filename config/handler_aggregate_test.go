@@ -135,7 +135,7 @@ func TestAggregate_Routes(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`aggregate is invalid: route is invalid: missing route type`,
+				`aggregate is invalid: route is invalid: could not evaluate entire configuration`,
 				Route{},
 			},
 			{

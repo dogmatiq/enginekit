@@ -28,10 +28,6 @@ func renderEntity[T any](
 	e Entity,
 	s optional.Optional[Source[T]],
 ) string {
-	w := &strings.Builder{}
-
-	writeComponentPrefix(w, label, e)
-
 	identifier := ""
 
 	if i, ok := s.TryGet(); ok {
@@ -46,34 +42,9 @@ func renderEntity[T any](
 		}
 	}
 
-	if identifier != "" {
-		w.WriteByte(':')
-		w.WriteString(identifier)
+	if identifier == "" {
+		return label
 	}
 
-	return w.String()
-}
-
-func writeComponentPrefix(
-	w *strings.Builder,
-	label string,
-	c Component,
-) string {
-	f := c.Fidelity()
-
-	if f.IsPartial {
-		w.WriteString("partial ")
-	}
-
-	if f.IsSpeculative {
-		w.WriteString("speculative ")
-	}
-
-	if f.IsUnresolved {
-		w.WriteString("unresolved ")
-	}
-
-	w.WriteString(label)
-
-	return w.String()
+	return label + ":" + identifier
 }

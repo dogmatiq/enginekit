@@ -43,13 +43,6 @@ func (e DuplicateRouteError) Error() string {
 	)
 }
 
-// MissingRouteTypeError indicates that a [Route] is missing its [RouteType].
-type MissingRouteTypeError struct{}
-
-func (e MissingRouteTypeError) Error() string {
-	return "missing route type"
-}
-
 // MessageKindMismatchError indicates that a [Route] refers to a [message.Type]
 // that has a different [message.Kind] than the route's [RouteType].
 type MessageKindMismatchError struct {

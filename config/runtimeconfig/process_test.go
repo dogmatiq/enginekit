@@ -71,8 +71,8 @@ func TestFromProcess(t *testing.T) {
 						Identities: []config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
-									Name: "projection",
-									Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+									Name: optional.Some("projection"),
+									Key:  optional.Some("050415ad-ce90-496f-8987-40467e5415e0"),
 								},
 							},
 						},

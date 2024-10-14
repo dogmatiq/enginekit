@@ -77,12 +77,15 @@ func TestFromApplication(t *testing.T) {
 						},
 						Handlers: []config.Handler{
 							&config.Aggregate{
-								ConfigurationSource: optional.Some(
-									config.Source[dogma.AggregateMessageHandler]{
-										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-										Interface: optional.Some(aggregate),
-									},
-								),
+								AsConfigured: config.AggregateAsConfigured{
+									Source: optional.Some(
+										config.Source[dogma.AggregateMessageHandler]{
+											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+											Interface: optional.Some(aggregate),
+										},
+									),
+									IsDisabled: optional.Some(false),
+								},
 							},
 							&config.Process{
 								ConfigurationSource: optional.Some(

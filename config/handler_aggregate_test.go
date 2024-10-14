@@ -167,7 +167,9 @@ func TestAggregate_Routes(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Aggregate{
-					ConfiguredRoutes: []Route{c.Route},
+					AsConfigured: AggregateAsConfigured{
+						Routes: []Route{c.Route},
+					},
 				}
 
 				ExpectPanic(

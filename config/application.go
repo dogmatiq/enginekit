@@ -20,7 +20,7 @@ type ApplicationAsConfigured struct {
 	// Identities is the list of identities configured for the application.
 	Identities []Identity
 
-	// ConfiguredHandlers is a list of handlers registered with the application.
+	// Handlers is a list of handlers registered with the application.
 	Handlers []Handler
 
 	// Fidelity describes the configuration's accuracy in comparison to the

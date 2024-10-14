@@ -22,7 +22,11 @@ func TestFromAggregate(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
-				return &config.Aggregate{}
+				return &config.Aggregate{
+					AsConfigured: config.AggregateAsConfigured{
+						IsDisabled: optional.Some(false),
+					},
+				}
 			},
 		},
 		{
@@ -30,12 +34,15 @@ func TestFromAggregate(t *testing.T) {
 			&AggregateMessageHandlerStub{},
 			func(h dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.AggregateMessageHandler]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-							Interface: optional.Some(h),
-						},
-					),
+					AsConfigured: config.AggregateAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.AggregateMessageHandler]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+								Interface: optional.Some(h),
+							},
+						),
+						IsDisabled: optional.Some(false),
+					},
 				}
 			},
 		},
@@ -53,33 +60,35 @@ func TestFromAggregate(t *testing.T) {
 			},
 			func(app dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.AggregateMessageHandler]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-							Interface: optional.Some(app),
-						},
-					),
-					ConfiguredIdentities: []config.Identity{
-						{
-							AsConfigured: config.IdentityAsConfigured{
-								Name: "aggregate",
-								Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
+					AsConfigured: config.AggregateAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.AggregateMessageHandler]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+								Interface: optional.Some(app),
+							},
+						),
+						Identities: []config.Identity{
+							{
+								AsConfigured: config.IdentityAsConfigured{
+									Name: "aggregate",
+									Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
+								},
 							},
 						},
-					},
-					ConfiguredRoutes: []config.Route{
-						{
-							RouteType:       optional.Some(config.HandlesCommandRouteType),
-							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+						Routes: []config.Route{
+							{
+								RouteType:       optional.Some(config.HandlesCommandRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+							},
+							{
+								RouteType:       optional.Some(config.RecordsEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+							},
 						},
-						{
-							RouteType:       optional.Some(config.RecordsEventRouteType),
-							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-						},
+						IsDisabled: optional.Some(true),
 					},
-					ConfiguredAsDisabled: true,
 				}
 			},
 		},

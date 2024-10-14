@@ -125,9 +125,9 @@ func (s *RouteSet) merge(set RouteSet) {
 // RouteSetFilter applies a filter to the routes within a [RouteSet].
 type RouteSetFilter func(*routeSetFilters)
 
-// WithRouteTypeFilter is a [RouteSetFilter] that limits results to routes with
+// FilterByRouteType is a [RouteSetFilter] that limits results to routes with
 // one of the given [RouteType] values.
-func WithRouteTypeFilter(types ...RouteType) RouteSetFilter {
+func FilterByRouteType(types ...RouteType) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
@@ -138,9 +138,9 @@ func WithRouteTypeFilter(types ...RouteType) RouteSetFilter {
 	}
 }
 
-// WithRouteDirectionFilter is a [RouteSetFilter] that limits results to routes
+// FilterByRouteDirection is a [RouteSetFilter] that limits results to routes
 // with a [RouteDirection] that matches one of the given directions bit-masks.
-func WithRouteDirectionFilter(directions ...RouteDirection) RouteSetFilter {
+func FilterByRouteDirection(directions ...RouteDirection) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
@@ -156,9 +156,9 @@ func WithRouteDirectionFilter(directions ...RouteDirection) RouteSetFilter {
 	}
 }
 
-// WithMessageKindFilter is a [RouteSetFilter] that limits results to routes
-// with a [message.Kind] that matches one of the given kinds.
-func WithMessageKindFilter(kinds ...message.Kind) RouteSetFilter {
+// FilterByMessageKind is a [RouteSetFilter] that limits results to routes with
+// a [message.Kind] that matches one of the given kinds.
+func FilterByMessageKind(kinds ...message.Kind) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
@@ -169,9 +169,9 @@ func WithMessageKindFilter(kinds ...message.Kind) RouteSetFilter {
 	}
 }
 
-// WithMessageTypeFilter is a [RouteSetFilter] that limits results to routes
+// FilterByMessageType is a [RouteSetFilter] that limits results to routes
 // with a [message.Type] that matches one of the given types.
-func WithMessageTypeFilter(kinds ...message.Kind) RouteSetFilter {
+func FilterByMessageType(kinds ...message.Kind) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
@@ -182,11 +182,10 @@ func WithMessageTypeFilter(kinds ...message.Kind) RouteSetFilter {
 	}
 }
 
-// WithMessageDirectionFilter is a [RouteSetFilter] that limits results to
-// routes for message types that have a [RouteDirection] that matches one of the
-// given directions bit-masks, when considering all routes for that message
-// type.
-func WithMessageDirectionFilter(directions ...RouteDirection) RouteSetFilter {
+// FilterByMessageDirection is a [RouteSetFilter] that limits results to routes
+// for message types that have a [RouteDirection] that matches one of the given
+// directions bit-masks, when considering all routes for that message type.
+func FilterByMessageDirection(directions ...RouteDirection) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.messagePredicates = append(
 			f.messagePredicates,

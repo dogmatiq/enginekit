@@ -79,9 +79,11 @@ func TestFromProjection(t *testing.T) {
 						},
 						Routes: []config.Route{
 							{
-								RouteType:       optional.Some(config.HandlesEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								AsConfigured: config.RouteAsConfigured{
+									RouteType:       optional.Some(config.HandlesEventRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								},
 							},
 						},
 						DeliveryPolicy: optional.Some(

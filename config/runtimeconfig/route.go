@@ -15,30 +15,31 @@ import (
 func fromRoute(r dogma.Route) config.Route {
 	cfg := config.Route{}
 
+	configure := func(
+		rt config.RouteType,
+		t reflect.Type,
+	) {
+		cfg.AsConfigured = config.RouteAsConfigured{
+			RouteType:       optional.Some(rt),
+			MessageTypeName: optional.Some(typename.Get(t)),
+			MessageType:     optional.Some(message.TypeFromReflect(t)),
+		}
+	}
+
 	if r != nil {
 		switch r := r.(type) {
 		case dogma.HandlesCommandRoute:
-			setupRoute(&cfg, config.HandlesCommandRouteType, r.Type)
+			configure(config.HandlesCommandRouteType, r.Type)
 		case dogma.RecordsEventRoute:
-			setupRoute(&cfg, config.RecordsEventRouteType, r.Type)
+			configure(config.RecordsEventRouteType, r.Type)
 		case dogma.HandlesEventRoute:
-			setupRoute(&cfg, config.HandlesEventRouteType, r.Type)
+			configure(config.HandlesEventRouteType, r.Type)
 		case dogma.ExecutesCommandRoute:
-			setupRoute(&cfg, config.ExecutesCommandRouteType, r.Type)
+			configure(config.ExecutesCommandRouteType, r.Type)
 		case dogma.SchedulesTimeoutRoute:
-			setupRoute(&cfg, config.SchedulesTimeoutRouteType, r.Type)
+			configure(config.SchedulesTimeoutRouteType, r.Type)
 		}
 	}
 
 	return cfg
-}
-
-func setupRoute(
-	cfg *config.Route,
-	rt config.RouteType,
-	t reflect.Type,
-) {
-	cfg.RouteType = optional.Some(rt)
-	cfg.MessageTypeName = optional.Some(typename.Get(t))
-	cfg.MessageType = optional.Some(message.TypeFromReflect(t))
 }

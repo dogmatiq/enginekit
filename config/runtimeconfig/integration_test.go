@@ -77,14 +77,18 @@ func TestFromIntegration(t *testing.T) {
 						},
 						Routes: []config.Route{
 							{
-								RouteType:       optional.Some(config.HandlesCommandRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								AsConfigured: config.RouteAsConfigured{
+									RouteType:       optional.Some(config.HandlesCommandRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								},
 							},
 							{
-								RouteType:       optional.Some(config.RecordsEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								AsConfigured: config.RouteAsConfigured{
+									RouteType:       optional.Some(config.RecordsEventRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								},
 							},
 						},
 						IsDisabled: optional.Some(true),

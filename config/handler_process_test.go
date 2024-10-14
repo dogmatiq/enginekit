@@ -144,16 +144,20 @@ func TestProcess_Routes(t *testing.T) {
 				"unexpected HandlesCommand route",
 				`process is invalid: unexpected route: HandlesCommand[pkg.SomeCommandType]`,
 				Route{
-					RouteType:       optional.Some(HandlesCommandRouteType),
-					MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(HandlesCommandRouteType),
+						MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					},
 				},
 			},
 			{
 				"unexpected RecordsEvent route",
 				`process is invalid: unexpected route: RecordsEvent[pkg.SomeEventType]`,
 				Route{
-					RouteType:       optional.Some(RecordsEventRouteType),
-					MessageTypeName: optional.Some("pkg.SomeEventType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(RecordsEventRouteType),
+						MessageTypeName: optional.Some("pkg.SomeEventType"),
+					},
 				},
 			},
 		}

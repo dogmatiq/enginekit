@@ -11,8 +11,8 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// Route represents a message route to or from a handler.
-type Route struct {
+// RouteAsConfigured contains the raw unvalidated properties of a [Route].
+type RouteAsConfigured struct {
 	// RouteType is the type of route, if available.
 	RouteType optional.Optional[RouteType]
 
@@ -23,33 +23,50 @@ type Route struct {
 	// MessageType is the [message.Type], if available.
 	MessageType optional.Optional[message.Type]
 
-	ConfigurationFidelity Fidelity
+	Fidelity Fidelity
+}
+
+// Route represents a message route to or from a handler.
+type Route struct {
+	AsConfigured RouteAsConfigured
+}
+
+// RouteType returns the type of route, or panics if the route type is not
+// available.
+func (r Route) RouteType() RouteType {
+	return r.AsConfigured.RouteType.Get()
+}
+
+// MessageType returns the [message.Type] associated with the route, or panics
+// if the message type is not available.
+func (r Route) MessageType() message.Type {
+	return r.AsConfigured.MessageType.Get()
+}
+
+// Fidelity returns information about how well the configuration represents
+// the actual configuration that would be used at runtime.
+func (r Route) Fidelity() Fidelity {
+	return r.AsConfigured.Fidelity
 }
 
 func (r Route) String() string {
 	s := "route"
 
-	if rt, ok := r.RouteType.TryGet(); ok {
+	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 		s = rt.String()
 	}
 
-	if mt, ok := r.MessageTypeName.TryGet(); ok {
+	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
 		s += "[" + mt + "]"
 	}
 
 	return s
 }
 
-// Fidelity returns information about how well the configuration represents
-// the actual configuration that would be used at runtime.
-func (r Route) Fidelity() Fidelity {
-	return r.ConfigurationFidelity
-}
-
 func (r Route) normalize(ctx *normalizeContext) Component {
-	routeType, hasRouteType := r.RouteType.TryGet()
-	typeName, hasTypeName := r.MessageTypeName.TryGet()
-	messageType, hasMessageType := r.MessageType.TryGet()
+	routeType, hasRouteType := r.AsConfigured.RouteType.TryGet()
+	typeName, hasTypeName := r.AsConfigured.MessageTypeName.TryGet()
+	messageType, hasMessageType := r.AsConfigured.MessageType.TryGet()
 
 	if !hasRouteType {
 		ctx.Fail(MissingRouteTypeError{})
@@ -69,7 +86,7 @@ func (r Route) normalize(ctx *normalizeContext) Component {
 			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
 		}
 
-		r.MessageTypeName = optional.Some(actualTypeName)
+		r.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireImplementations {
 		ctx.Fail(MissingImplementationError{reflect.TypeFor[message.Type]()})
 	}
@@ -91,8 +108,8 @@ func (k routeKey) Compare(x routeKey) int {
 }
 
 func (r Route) key() (routeKey, bool) {
-	rt, rtOK := r.RouteType.TryGet()
-	mt, mtOK := r.MessageTypeName.TryGet()
+	rt, rtOK := r.AsConfigured.RouteType.TryGet()
+	mt, mtOK := r.AsConfigured.MessageTypeName.TryGet()
 	return routeKey{rt, mt}, rtOK && mtOK
 }
 
@@ -115,7 +132,7 @@ func normalizeRoutes(ctx *normalizeContext, h Handler) []Route {
 		r = normalize(ctx, r)
 		routes[i] = r
 
-		if rt, ok := r.RouteType.TryGet(); ok {
+		if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
 				ctx.Fail(UnexpectedRouteError{r})
 			} else {

@@ -142,24 +142,30 @@ func TestAggregate_Routes(t *testing.T) {
 				"unexpected ExecutesCommand route",
 				`aggregate is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
 				Route{
-					RouteType:       optional.Some(ExecutesCommandRouteType),
-					MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(ExecutesCommandRouteType),
+						MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					},
 				},
 			},
 			{
 				"unexpected HandlesEvent route",
 				`aggregate is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
 				Route{
-					RouteType:       optional.Some(HandlesEventRouteType),
-					MessageTypeName: optional.Some("pkg.SomeEventType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(HandlesEventRouteType),
+						MessageTypeName: optional.Some("pkg.SomeEventType"),
+					},
 				},
 			},
 			{
 				"unexpected SchedulesTimeout route",
 				`aggregate is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
 				Route{
-					RouteType:       optional.Some(SchedulesTimeoutRouteType),
-					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(SchedulesTimeoutRouteType),
+						MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
+					},
 				},
 			},
 		}

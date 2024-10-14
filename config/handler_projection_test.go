@@ -136,32 +136,40 @@ func TestProjection_Routes(t *testing.T) {
 				"",
 				`projection is invalid: unexpected route: HandlesCommand[pkg.SomeCommandType]`,
 				Route{
-					RouteType:       optional.Some(HandlesCommandRouteType),
-					MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(HandlesCommandRouteType),
+						MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					},
 				},
 			},
 			{
 				"",
 				`projection is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
 				Route{
-					RouteType:       optional.Some(ExecutesCommandRouteType),
-					MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(ExecutesCommandRouteType),
+						MessageTypeName: optional.Some("pkg.SomeCommandType"),
+					},
 				},
 			},
 			{
 				"",
 				`projection is invalid: unexpected route: RecordsEvent[pkg.SomeEventType]`,
 				Route{
-					RouteType:       optional.Some(RecordsEventRouteType),
-					MessageTypeName: optional.Some("pkg.SomeEventType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(RecordsEventRouteType),
+						MessageTypeName: optional.Some("pkg.SomeEventType"),
+					},
 				},
 			},
 			{
 				"",
 				`projection is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
 				Route{
-					RouteType:       optional.Some(SchedulesTimeoutRouteType),
-					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
+					AsConfigured: RouteAsConfigured{
+						RouteType:       optional.Some(SchedulesTimeoutRouteType),
+						MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
+					},
 				},
 			},
 		}

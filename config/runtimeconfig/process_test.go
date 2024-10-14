@@ -78,19 +78,25 @@ func TestFromProcess(t *testing.T) {
 						},
 						Routes: []config.Route{
 							{
-								RouteType:       optional.Some(config.HandlesEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								AsConfigured: config.RouteAsConfigured{
+									RouteType:       optional.Some(config.HandlesEventRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								},
 							},
 							{
-								RouteType:       optional.Some(config.ExecutesCommandRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								AsConfigured: config.RouteAsConfigured{
+									RouteType:       optional.Some(config.ExecutesCommandRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								},
 							},
 							{
-								RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
+								AsConfigured: config.RouteAsConfigured{
+									RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
+								},
 							},
 						},
 						IsDisabled: optional.Some(true),

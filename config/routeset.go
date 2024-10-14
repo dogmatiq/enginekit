@@ -132,7 +132,7 @@ func WithRouteTypeFilter(types ...RouteType) RouteSetFilter {
 		f.routePredicates = append(
 			f.routePredicates,
 			func(r Route) bool {
-				return slices.Contains(types, r.RouteType.Get())
+				return slices.Contains(types, r.RouteType())
 			},
 		)
 	}
@@ -146,7 +146,7 @@ func WithRouteDirectionFilter(directions ...RouteDirection) RouteSetFilter {
 			f.routePredicates,
 			func(r Route) bool {
 				for _, dir := range directions {
-					if dir.Has(r.RouteType.Get().Direction()) {
+					if dir.Has(r.RouteType().Direction()) {
 						return true
 					}
 				}
@@ -163,7 +163,7 @@ func WithMessageKindFilter(kinds ...message.Kind) RouteSetFilter {
 		f.routePredicates = append(
 			f.routePredicates,
 			func(r Route) bool {
-				return slices.Contains(kinds, r.MessageType.Get().Kind())
+				return slices.Contains(kinds, r.MessageType().Kind())
 			},
 		)
 	}
@@ -176,7 +176,7 @@ func WithMessageTypeFilter(kinds ...message.Kind) RouteSetFilter {
 		f.routePredicates = append(
 			f.routePredicates,
 			func(r Route) bool {
-				return slices.Contains(kinds, r.RouteType.Get().MessageKind())
+				return slices.Contains(kinds, r.RouteType().MessageKind())
 			},
 		)
 	}
@@ -238,8 +238,8 @@ func finalizeRouteSet(ctx *normalizeContext, h Handler) RouteSet {
 	set := RouteSet{}
 
 	for _, r := range routes {
-		rt := r.RouteType.Get()
-		mt := r.MessageType.Get()
+		rt := r.RouteType()
+		mt := r.MessageType()
 
 		if set.byMessageType == nil {
 			set.byMessageType = map[message.Type]map[RouteType]map[Handler]Route{}

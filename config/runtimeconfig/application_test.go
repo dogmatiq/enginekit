@@ -96,12 +96,15 @@ func TestFromApplication(t *testing.T) {
 								),
 							},
 							&config.Integration{
-								ConfigurationSource: optional.Some(
-									config.Source[dogma.IntegrationMessageHandler]{
-										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-										Interface: optional.Some(integration),
-									},
-								),
+								AsConfigured: config.IntegrationAsConfigured{
+									Source: optional.Some(
+										config.Source[dogma.IntegrationMessageHandler]{
+											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+											Interface: optional.Some(integration),
+										},
+									),
+									IsDisabled: optional.Some(false),
+								},
 							},
 							&config.Projection{
 								ConfigurationSource: optional.Some(

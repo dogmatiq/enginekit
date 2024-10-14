@@ -10,13 +10,17 @@ import (
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
 func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
-	cfg := &config.Integration{}
+	cfg := &config.Integration{
+		AsConfigured: config.IntegrationAsConfigured{
+			IsDisabled: optional.Some(false),
+		},
+	}
 
 	if h == nil {
 		return cfg
 	}
 
-	cfg.ConfigurationSource = optional.Some(
+	cfg.AsConfigured.Source = optional.Some(
 		config.Source[dogma.IntegrationMessageHandler]{
 			TypeName:  typename.Of(h),
 			Interface: optional.Some(h),
@@ -33,8 +37,8 @@ type integrationConfigurer struct {
 }
 
 func (c *integrationConfigurer) Identity(name, key string) {
-	c.cfg.ConfiguredIdentities = append(
-		c.cfg.ConfiguredIdentities,
+	c.cfg.AsConfigured.Identities = append(
+		c.cfg.AsConfigured.Identities,
 		config.Identity{
 			AsConfigured: config.IdentityAsConfigured{
 				Name: name,
@@ -46,10 +50,10 @@ func (c *integrationConfigurer) Identity(name, key string) {
 
 func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {
 	for _, r := range routes {
-		c.cfg.ConfiguredRoutes = append(c.cfg.ConfiguredRoutes, fromRoute(r))
+		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
 	}
 }
 
 func (c *integrationConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.ConfiguredAsDisabled = true
+	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
 }

@@ -163,7 +163,9 @@ func TestIntegration_Routes(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Integration{
-					ConfiguredRoutes: []Route{c.Route},
+					AsConfigured: IntegrationAsConfigured{
+						Routes: []Route{c.Route},
+					},
 				}
 
 				ExpectPanic(

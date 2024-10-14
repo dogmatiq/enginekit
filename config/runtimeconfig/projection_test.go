@@ -22,11 +22,7 @@ func TestFromProjection(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.ProjectionMessageHandler) *config.Projection {
-				return &config.Projection{
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
-				}
+				return &config.Projection{}
 			},
 		},
 		{
@@ -40,9 +36,6 @@ func TestFromProjection(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},
@@ -70,8 +63,10 @@ func TestFromProjection(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							Name: "projection",
-							Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+							AsConfigured: config.IdentityProperties{
+								Name: "projection",
+								Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+							},
 						},
 					},
 					ConfiguredRoutes: []config.Route{
@@ -88,9 +83,6 @@ func TestFromProjection(t *testing.T) {
 						},
 					),
 					ConfiguredAsDisabled: true,
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},

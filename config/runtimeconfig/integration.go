@@ -10,11 +10,7 @@ import (
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
 func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
-	cfg := &config.Integration{
-		ConfigurationFidelity: config.Fidelity{
-			IsExhaustive: true,
-		},
-	}
+	cfg := &config.Integration{}
 
 	if h == nil {
 		return cfg
@@ -40,8 +36,10 @@ func (c *integrationConfigurer) Identity(name, key string) {
 	c.cfg.ConfiguredIdentities = append(
 		c.cfg.ConfiguredIdentities,
 		config.Identity{
-			Name: name,
-			Key:  key,
+			AsConfigured: config.IdentityProperties{
+				Name: name,
+				Key:  key,
+			},
 		},
 	)
 }

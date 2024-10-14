@@ -22,11 +22,7 @@ func TestFromProcess(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.ProcessMessageHandler) *config.Process {
-				return &config.Process{
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
-				}
+				return &config.Process{}
 			},
 		},
 		{
@@ -40,9 +36,6 @@ func TestFromProcess(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},
@@ -69,8 +62,10 @@ func TestFromProcess(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							Name: "projection",
-							Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+							AsConfigured: config.IdentityProperties{
+								Name: "projection",
+								Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+							},
 						},
 					},
 					ConfiguredRoutes: []config.Route{
@@ -91,9 +86,6 @@ func TestFromProcess(t *testing.T) {
 						},
 					},
 					ConfiguredAsDisabled: true,
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},

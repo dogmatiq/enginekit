@@ -131,12 +131,12 @@ func TestIntegration_Routes(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`partial integration is invalid: route is invalid: missing route type`,
+				`integration is invalid: route is invalid: missing route type`,
 				Route{},
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`partial integration is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
+				`integration is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
 				Route{
 					RouteType:       optional.Some(ExecutesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
@@ -144,7 +144,7 @@ func TestIntegration_Routes(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`partial integration is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
+				`integration is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
 				Route{
 					RouteType:       optional.Some(HandlesEventRouteType),
 					MessageTypeName: optional.Some("pkg.SomeEventType"),
@@ -152,7 +152,7 @@ func TestIntegration_Routes(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`partial integration is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
+				`integration is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
 				Route{
 					RouteType:       optional.Some(SchedulesTimeoutRouteType),
 					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),

@@ -76,10 +76,10 @@ func (h *Aggregate) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Aggregate) identities() []Identity {
+func (h *Aggregate) identitiesAsConfigured() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h *Aggregate) routes() []Route {
+func (h *Aggregate) routesAsConfigured() []Route {
 	return h.ConfiguredRoutes
 }

@@ -109,7 +109,7 @@ func normalizeRoutes(ctx *normalizeContext, h Handler) []Route {
 		}
 	}
 
-	routes := slices.Clone(h.routes())
+	routes := slices.Clone(h.routesAsConfigured())
 
 	for i, r := range routes {
 		r = normalize(ctx, r)

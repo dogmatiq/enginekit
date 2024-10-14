@@ -135,12 +135,12 @@ func TestAggregate_Routes(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`partial aggregate is invalid: route is invalid: missing route type`,
+				`aggregate is invalid: route is invalid: missing route type`,
 				Route{},
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`partial aggregate is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
+				`aggregate is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
 				Route{
 					RouteType:       optional.Some(ExecutesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommandType"),
@@ -148,7 +148,7 @@ func TestAggregate_Routes(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`partial aggregate is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
+				`aggregate is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
 				Route{
 					RouteType:       optional.Some(HandlesEventRouteType),
 					MessageTypeName: optional.Some("pkg.SomeEventType"),
@@ -156,7 +156,7 @@ func TestAggregate_Routes(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`partial aggregate is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
+				`aggregate is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
 				Route{
 					RouteType:       optional.Some(SchedulesTimeoutRouteType),
 					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),

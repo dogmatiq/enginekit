@@ -25,33 +25,19 @@ func renderList[T any](items []T) string {
 
 func renderEntity[T any](
 	label string,
-	ent Entity,
-	impl optional.Optional[Source[T]],
+	e Entity,
+	s optional.Optional[Source[T]],
 ) string {
-	var w strings.Builder
+	w := &strings.Builder{}
 
-	f := ent.Fidelity()
-
-	if !f.IsExhaustive {
-		w.WriteString("partial ")
-	}
-
-	if f.IsSpeculative {
-		w.WriteString("speculative ")
-	}
-
-	if f.IsUnresolved || f.HasSpeculativeSubcomponents || f.HasMutuallyExclusiveSubcomponents {
-		w.WriteString("non-deterministic ")
-	}
-
-	w.WriteString(label)
+	writeComponentPrefix(w, label, e)
 
 	identifier := ""
 
-	if i, ok := impl.TryGet(); ok {
+	if i, ok := s.TryGet(); ok {
 		identifier = strings.TrimPrefix(i.TypeName, "*")
 	} else {
-		for _, id := range ent.identities() {
+		for _, id := range e.identitiesAsConfigured() {
 			if norm, err := Normalize(id); err == nil {
 				identifier = norm.String()
 				break
@@ -64,6 +50,30 @@ func renderEntity[T any](
 		w.WriteByte(':')
 		w.WriteString(identifier)
 	}
+
+	return w.String()
+}
+
+func writeComponentPrefix(
+	w *strings.Builder,
+	label string,
+	c Component,
+) string {
+	f := c.Fidelity()
+
+	if f.IsPartial {
+		w.WriteString("partial ")
+	}
+
+	if f.IsSpeculative {
+		w.WriteString("speculative ")
+	}
+
+	if f.IsUnresolved {
+		w.WriteString("unresolved ")
+	}
+
+	w.WriteString(label)
 
 	return w.String()
 }

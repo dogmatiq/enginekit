@@ -10,11 +10,7 @@ import (
 // FromAggregate returns a new [config.Aggregate] that represents the
 // configuration of the given [dogma.AggregateMessageHandler].
 func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
-	cfg := &config.Aggregate{
-		ConfigurationFidelity: config.Fidelity{
-			IsExhaustive: true,
-		},
-	}
+	cfg := &config.Aggregate{}
 
 	if h == nil {
 		return cfg
@@ -40,8 +36,10 @@ func (c *aggregateConfigurer) Identity(name, key string) {
 	c.cfg.ConfiguredIdentities = append(
 		c.cfg.ConfiguredIdentities,
 		config.Identity{
-			Name: name,
-			Key:  key,
+			AsConfigured: config.IdentityProperties{
+				Name: name,
+				Key:  key,
+			},
 		},
 	)
 }

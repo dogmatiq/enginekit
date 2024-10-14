@@ -6,23 +6,24 @@ import "slices"
 //
 // It returns a non-nil error if the component is invalid, in which case the
 // returned component is normalized as possible in light of the error.
-func Normalize[T Component](component T, options ...NormalizeOption) (T, error) {
+func Normalize[T Component](c T, options ...NormalizeOption) (T, error) {
 	ctx := &normalizeContext{
-		Component: component,
+		Component: c,
 	}
 
 	for _, opt := range options {
 		opt(&ctx.Options)
 	}
 
-	norm := component.normalize(ctx).(T)
+	reportFidelityErrors(ctx, c)
+	norm := c.normalize(ctx).(T)
 
 	return norm, ctx.Err()
 }
 
 // MustNormalize returns a normalized copy of v, or panics if v is invalid.
-func MustNormalize[T Component](component T, options ...NormalizeOption) T {
-	norm, err := Normalize(component, options...)
+func MustNormalize[T Component](c T, options ...NormalizeOption) T {
+	norm, err := Normalize(c, options...)
 	if err != nil {
 		panic(err)
 	}
@@ -30,8 +31,26 @@ func MustNormalize[T Component](component T, options ...NormalizeOption) T {
 	return norm
 }
 
-func normalize[T Component](ctx *normalizeContext, component T) T {
-	return component.normalize(ctx.NewChild(component)).(T)
+func normalize[T Component](ctx *normalizeContext, c T) T {
+	ctx = ctx.NewChild(c)
+	reportFidelityErrors(ctx, c)
+	return c.normalize(ctx).(T)
+}
+
+func reportFidelityErrors(ctx *normalizeContext, c Component) {
+	f := c.Fidelity()
+
+	if f.IsPartial {
+		ctx.Fail(PartialError{})
+	}
+
+	if f.IsSpeculative {
+		ctx.Fail(SpeculativeError{})
+	}
+
+	if f.IsUnresolved {
+		ctx.Fail(UnresolvedError{})
+	}
 }
 
 // normalizeContext is the context in which normalization occurs.

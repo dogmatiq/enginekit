@@ -88,7 +88,7 @@ func (a *Application) RouteSet() RouteSet {
 	return set
 }
 
-func (a *Application) identities() []Identity {
+func (a *Application) identitiesAsConfigured() []Identity {
 	return a.ConfiguredIdentities
 }
 
@@ -127,9 +127,9 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 	}
 
 	for i, ent1 := range entities {
-		for _, id1 := range ent1.identities() {
+		for _, id1 := range ent1.identitiesAsConfigured() {
 			for j, ent2 := range entities[i+1:] {
-				for _, id2 := range ent2.identities() {
+				for _, id2 := range ent2.identitiesAsConfigured() {
 					if conflictingIDs.Add(
 						id1, i, ent1,
 						id2, j, ent2,
@@ -138,8 +138,8 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 					}
 
 					if conflictingKeys.Add(
-						id1.Key, i, ent1,
-						id2.Key, j, ent2,
+						id1.AsConfigured.Key, i, ent1,
+						id2.AsConfigured.Key, j, ent2,
 					) {
 						continue
 					}
@@ -148,8 +148,8 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 					// the same name as one of its handlers.
 					if i > 0 {
 						conflictingNames.Add(
-							id1.Name, i, ent1,
-							id2.Name, j, ent2,
+							id1.AsConfigured.Name, i, ent1,
+							id2.AsConfigured.Name, j, ent2,
 						)
 					}
 				}
@@ -174,7 +174,7 @@ func detectRouteConflicts(ctx *normalizeContext, app *Application) {
 	var conflictingRoutes conflictDetector[routeKey, Handler]
 
 	for i, h1 := range app.ConfiguredHandlers {
-		for _, r1 := range h1.routes() {
+		for _, r1 := range h1.routesAsConfigured() {
 			k1, ok := r1.key()
 			if !ok {
 				continue
@@ -185,7 +185,7 @@ func detectRouteConflicts(ctx *normalizeContext, app *Application) {
 			}
 
 			for j, h2 := range app.ConfiguredHandlers[i+1:] {
-				for _, r2 := range h2.routes() {
+				for _, r2 := range h2.routesAsConfigured() {
 					k2, ok := r2.key()
 					if !ok {
 						continue

@@ -10,11 +10,7 @@ import (
 // FromApplication returns a new [config.Application] that represents the
 // configuration of the given [dogma.Application].
 func FromApplication(app dogma.Application) *config.Application {
-	cfg := &config.Application{
-		ConfigurationFidelity: config.Fidelity{
-			IsExhaustive: true,
-		},
-	}
+	cfg := &config.Application{}
 
 	if app == nil {
 		return cfg
@@ -40,8 +36,10 @@ func (c *applicationConfigurer) Identity(name, key string) {
 	c.cfg.ConfiguredIdentities = append(
 		c.cfg.ConfiguredIdentities,
 		config.Identity{
-			Name: name,
-			Key:  key,
+			AsConfigured: config.IdentityProperties{
+				Name: name,
+				Key:  key,
+			},
 		},
 	)
 }

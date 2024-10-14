@@ -88,11 +88,11 @@ func (h *Projection) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Projection) identities() []Identity {
+func (h *Projection) identitiesAsConfigured() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h *Projection) routes() []Route {
+func (h *Projection) routesAsConfigured() []Route {
 	return h.ConfiguredRoutes
 }
 

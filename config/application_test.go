@@ -139,7 +139,7 @@ func TestApplication_Routes(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`partial application is invalid: partial projection is invalid: route is invalid: missing route type`,
+			`application is invalid: projection is invalid: route is invalid: missing route type`,
 			func() {
 				cfg.RouteSet()
 			},

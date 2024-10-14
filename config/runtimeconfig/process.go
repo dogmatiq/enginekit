@@ -10,11 +10,7 @@ import (
 // FromProcess returns a new [config.Process] that represents the configuration
 // of the given [dogma.ProcessMessageHandler].
 func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
-	cfg := &config.Process{
-		ConfigurationFidelity: config.Fidelity{
-			IsExhaustive: true,
-		},
-	}
+	cfg := &config.Process{}
 
 	if h == nil {
 		return cfg
@@ -40,8 +36,10 @@ func (c *processConfigurer) Identity(name, key string) {
 	c.cfg.ConfiguredIdentities = append(
 		c.cfg.ConfiguredIdentities,
 		config.Identity{
-			Name: name,
-			Key:  key,
+			AsConfigured: config.IdentityProperties{
+				Name: name,
+				Key:  key,
+			},
 		},
 	)
 }

@@ -22,11 +22,7 @@ func TestFromIntegration(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.IntegrationMessageHandler) *config.Integration {
-				return &config.Integration{
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
-				}
+				return &config.Integration{}
 			},
 		},
 		{
@@ -40,9 +36,6 @@ func TestFromIntegration(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},
@@ -68,8 +61,10 @@ func TestFromIntegration(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							Name: "integration",
-							Key:  "51ffcb6f-171f-41a1-90e7-6fe1111649cd",
+							AsConfigured: config.IdentityProperties{
+								Name: "integration",
+								Key:  "51ffcb6f-171f-41a1-90e7-6fe1111649cd",
+							},
 						},
 					},
 					ConfiguredRoutes: []config.Route{
@@ -85,9 +80,6 @@ func TestFromIntegration(t *testing.T) {
 						},
 					},
 					ConfiguredAsDisabled: true,
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},

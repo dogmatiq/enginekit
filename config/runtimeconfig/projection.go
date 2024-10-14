@@ -10,11 +10,7 @@ import (
 // FromProjection returns a new [config.Projection] that represents the
 // configuration of the given [dogma.ProjectionMessageHandler].
 func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
-	cfg := &config.Projection{
-		ConfigurationFidelity: config.Fidelity{
-			IsExhaustive: true,
-		},
-	}
+	cfg := &config.Projection{}
 
 	if h == nil {
 		return cfg
@@ -40,8 +36,10 @@ func (c *projectionConfigurer) Identity(name, key string) {
 	c.cfg.ConfiguredIdentities = append(
 		c.cfg.ConfiguredIdentities,
 		config.Identity{
-			Name: name,
-			Key:  key,
+			AsConfigured: config.IdentityProperties{
+				Name: name,
+				Key:  key,
+			},
 		},
 	)
 }

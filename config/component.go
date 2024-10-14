@@ -33,7 +33,7 @@ type Entity interface {
 	// It panics if the route configuration is incomplete or invalid.
 	RouteSet() RouteSet
 
-	identities() []Identity
+	identitiesAsConfigured() []Identity
 }
 
 // A Handler is a specialization of [Entity] that represents configuration of a
@@ -47,7 +47,27 @@ type Handler interface {
 	// IsDisabled returns true if the handler was disabled via the configurer.
 	IsDisabled() bool
 
-	routes() []Route
+	routesAsConfigured() []Route
+}
+
+// Fidelity describes how well a [Component] configuration represents the actual
+// configuration that would be when running an application.
+type Fidelity struct {
+	// IsPartial is true if some configuration logic was not applied when
+	// building the configuration.
+	//
+	// It is false if all of the _available_ configuration logic was applied.
+	// This does not imply that all _mandatory_ configuration is present.
+	IsPartial bool
+
+	// IsSpeculative is true if the component is only included in the
+	// configuration under certain conditions and those conditions could not be
+	// evaluated at the time the configuration was built.
+	IsSpeculative bool
+
+	// IsUnresolved is true if any of the component's configuration values
+	// could not be determined at the time the configuration was built.
+	IsUnresolved bool
 }
 
 var (

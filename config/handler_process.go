@@ -76,10 +76,10 @@ func (h *Process) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Process) identities() []Identity {
+func (h *Process) identitiesAsConfigured() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h *Process) routes() []Route {
+func (h *Process) routesAsConfigured() []Route {
 	return h.ConfiguredRoutes
 }

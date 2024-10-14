@@ -3,58 +3,73 @@ package config
 import (
 	"slices"
 	"strconv"
+	"strings"
 	"unicode"
 
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
-// Identity represents the (potentially invalid) identity of an entity.
-type Identity struct {
-	Name string
-	Key  string
-
-	ConfigurationFidelity Fidelity
+// IdentityProperties contains the raw unvalidated properties of an [Identity].
+type IdentityProperties struct {
+	Name     string
+	Key      string
+	Fidelity Fidelity
 }
 
-func (i Identity) String() string {
-	if i.Name == "" && i.Key == "" {
-		return "identity"
-	}
-
-	name := i.Name
-	key := i.Key
-
-	if !isPrintableIdentifier(name) {
-		name = strconv.Quote(name)
-	}
-
-	if norm, err := uuidpb.Parse(key); err == nil {
-		key = norm.AsString()
-	} else {
-		if !isPrintableIdentifier(key) {
-			key = strconv.Quote(key)
-		}
-	}
-
-	return "identity:" + name + "/" + key
+// Identity represents the (potentially invalid) identity of an entity.
+type Identity struct {
+	AsConfigured IdentityProperties
 }
 
 // Fidelity returns information about how well the configuration represents
 // the actual configuration that would be used at runtime.
 func (i Identity) Fidelity() Fidelity {
-	return i.ConfigurationFidelity
+	return i.AsConfigured.Fidelity
+}
+
+func (i Identity) String() string {
+	w := strings.Builder{}
+
+	writeComponentPrefix(&w, "identity", i)
+
+	n := i.AsConfigured.Name
+	k := i.AsConfigured.Key
+
+	if n == "" && k == "" {
+		return w.String()
+	}
+
+	w.WriteByte(':')
+
+	if isPrintableIdentifier(n) {
+		w.WriteString(n)
+	} else {
+		w.WriteString(strconv.Quote(n))
+	}
+
+	w.WriteByte('/')
+
+	if norm, err := uuidpb.Parse(k); err == nil {
+		w.WriteString(norm.AsString())
+	} else if isPrintableIdentifier(k) {
+		w.WriteString(k)
+	} else {
+		w.WriteString(strconv.Quote(k))
+	}
+
+	return w.String()
 }
 
 func (i Identity) normalize(ctx *normalizeContext) Component {
-	if !isPrintableIdentifier(i.Name) {
-		ctx.Fail(InvalidIdentityNameError{i.Name})
+	if !isPrintableIdentifier(i.AsConfigured.Name) {
+		ctx.Fail(InvalidIdentityNameError{i.AsConfigured.Name})
 	}
 
-	if k, err := uuidpb.Parse(i.Key); err != nil {
-		ctx.Fail(InvalidIdentityKeyError{i.Key})
+	if k, err := uuidpb.Parse(i.AsConfigured.Key); err != nil {
+		ctx.Fail(InvalidIdentityKeyError{i.AsConfigured.Key})
 	} else {
-		i.Key = k.AsString()
+		i.AsConfigured.Key = k.AsString()
 	}
 
 	return i
@@ -77,16 +92,16 @@ func isPrintableIdentifier(n string) bool {
 }
 
 func finalizeIdentity(ctx *normalizeContext, ent Entity) *identitypb.Identity {
-	identities := normalizeIdentities(ctx, ent)
+	id := normalizeIdentities(ctx, ent)[0].AsConfigured
 
 	return &identitypb.Identity{
-		Name: identities[0].Name,
-		Key:  uuidpb.MustParse(identities[0].Key),
+		Name: id.Name,
+		Key:  uuidpb.MustParse(id.Key),
 	}
 }
 
 func normalizeIdentities(ctx *normalizeContext, ent Entity) []Identity {
-	identities := slices.Clone(ent.identities())
+	identities := slices.Clone(ent.identitiesAsConfigured())
 
 	if len(identities) == 0 {
 		ctx.Fail(MissingIdentityError{})

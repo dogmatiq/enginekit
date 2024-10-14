@@ -22,11 +22,7 @@ func TestFromAggregate(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
-				return &config.Aggregate{
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
-				}
+				return &config.Aggregate{}
 			},
 		},
 		{
@@ -40,9 +36,6 @@ func TestFromAggregate(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},
@@ -68,8 +61,10 @@ func TestFromAggregate(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							Name: "aggregate",
-							Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
+							AsConfigured: config.IdentityProperties{
+								Name: "aggregate",
+								Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
+							},
 						},
 					},
 					ConfiguredRoutes: []config.Route{
@@ -85,9 +80,6 @@ func TestFromAggregate(t *testing.T) {
 						},
 					},
 					ConfiguredAsDisabled: true,
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},

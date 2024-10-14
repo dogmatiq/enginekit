@@ -76,10 +76,10 @@ func (h *Integration) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Integration) identities() []Identity {
+func (h *Integration) identitiesAsConfigured() []Identity {
 	return h.ConfiguredIdentities
 }
 
-func (h *Integration) routes() []Route {
+func (h *Integration) routesAsConfigured() []Route {
 	return h.ConfiguredRoutes
 }

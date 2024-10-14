@@ -28,11 +28,7 @@ func TestFromApplication(t *testing.T) {
 			"nil application",
 			nil,
 			func(dogma.Application) *config.Application {
-				return &config.Application{
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
-				}
+				return &config.Application{}
 			},
 		},
 		{
@@ -46,9 +42,6 @@ func TestFromApplication(t *testing.T) {
 							Interface: optional.Some(app),
 						},
 					),
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
-					},
 				}
 			},
 		},
@@ -73,8 +66,10 @@ func TestFromApplication(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							Name: "app",
-							Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
+							AsConfigured: config.IdentityProperties{
+								Name: "app",
+								Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
+							},
 						},
 					},
 					ConfiguredHandlers: []config.Handler{
@@ -85,9 +80,6 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(aggregate),
 								},
 							),
-							ConfigurationFidelity: config.Fidelity{
-								IsExhaustive: true,
-							},
 						},
 						&config.Process{
 							ConfigurationSource: optional.Some(
@@ -96,9 +88,6 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(process),
 								},
 							),
-							ConfigurationFidelity: config.Fidelity{
-								IsExhaustive: true,
-							},
 						},
 						&config.Integration{
 							ConfigurationSource: optional.Some(
@@ -107,9 +96,6 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(integration),
 								},
 							),
-							ConfigurationFidelity: config.Fidelity{
-								IsExhaustive: true,
-							},
 						},
 						&config.Projection{
 							ConfigurationSource: optional.Some(
@@ -118,13 +104,7 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(projection),
 								},
 							),
-							ConfigurationFidelity: config.Fidelity{
-								IsExhaustive: true,
-							},
 						},
-					},
-					ConfigurationFidelity: config.Fidelity{
-						IsExhaustive: true,
 					},
 				}
 			},

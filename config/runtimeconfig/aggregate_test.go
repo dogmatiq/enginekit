@@ -61,7 +61,7 @@ func TestFromAggregate(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							AsConfigured: config.IdentityProperties{
+							AsConfigured: config.IdentityAsConfigured{
 								Name: "aggregate",
 								Key:  "d9d75a75-7839-4b3e-a7e5-c8884b88ea57",
 							},

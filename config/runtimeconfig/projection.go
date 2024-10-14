@@ -36,7 +36,7 @@ func (c *projectionConfigurer) Identity(name, key string) {
 	c.cfg.ConfiguredIdentities = append(
 		c.cfg.ConfiguredIdentities,
 		config.Identity{
-			AsConfigured: config.IdentityProperties{
+			AsConfigured: config.IdentityAsConfigured{
 				Name: name,
 				Key:  key,
 			},

@@ -36,12 +36,14 @@ func TestFromApplication(t *testing.T) {
 			&ApplicationStub{},
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.Application]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
-							Interface: optional.Some(app),
-						},
-					),
+					AsConfigured: config.ApplicationAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.Application]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
+								Interface: optional.Some(app),
+							},
+						),
+					},
 				}
 			},
 		},
@@ -58,52 +60,54 @@ func TestFromApplication(t *testing.T) {
 			},
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.Application]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
-							Interface: optional.Some(app),
-						},
-					),
-					ConfiguredIdentities: []config.Identity{
-						{
-							AsConfigured: config.IdentityProperties{
-								Name: "app",
-								Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
+					AsConfigured: config.ApplicationAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.Application]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
+								Interface: optional.Some(app),
+							},
+						),
+						Identities: []config.Identity{
+							{
+								AsConfigured: config.IdentityAsConfigured{
+									Name: "app",
+									Key:  "bed53df8-bf22-4502-be4b-64d56532d8be",
+								},
 							},
 						},
-					},
-					ConfiguredHandlers: []config.Handler{
-						&config.Aggregate{
-							ConfigurationSource: optional.Some(
-								config.Source[dogma.AggregateMessageHandler]{
-									TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-									Interface: optional.Some(aggregate),
-								},
-							),
-						},
-						&config.Process{
-							ConfigurationSource: optional.Some(
-								config.Source[dogma.ProcessMessageHandler]{
-									TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-									Interface: optional.Some(process),
-								},
-							),
-						},
-						&config.Integration{
-							ConfigurationSource: optional.Some(
-								config.Source[dogma.IntegrationMessageHandler]{
-									TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-									Interface: optional.Some(integration),
-								},
-							),
-						},
-						&config.Projection{
-							ConfigurationSource: optional.Some(
-								config.Source[dogma.ProjectionMessageHandler]{
-									TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-									Interface: optional.Some(projection),
-								},
-							),
+						Handlers: []config.Handler{
+							&config.Aggregate{
+								ConfigurationSource: optional.Some(
+									config.Source[dogma.AggregateMessageHandler]{
+										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+										Interface: optional.Some(aggregate),
+									},
+								),
+							},
+							&config.Process{
+								ConfigurationSource: optional.Some(
+									config.Source[dogma.ProcessMessageHandler]{
+										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+										Interface: optional.Some(process),
+									},
+								),
+							},
+							&config.Integration{
+								ConfigurationSource: optional.Some(
+									config.Source[dogma.IntegrationMessageHandler]{
+										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+										Interface: optional.Some(integration),
+									},
+								),
+							},
+							&config.Projection{
+								ConfigurationSource: optional.Some(
+									config.Source[dogma.ProjectionMessageHandler]{
+										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+										Interface: optional.Some(projection),
+									},
+								),
+							},
 						},
 					},
 				}

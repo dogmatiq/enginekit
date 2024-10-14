@@ -16,7 +16,7 @@ func FromApplication(app dogma.Application) *config.Application {
 		return cfg
 	}
 
-	cfg.ConfigurationSource = optional.Some(
+	cfg.AsConfigured.Source = optional.Some(
 		config.Source[dogma.Application]{
 			TypeName:  typename.Of(app),
 			Interface: optional.Some(app),
@@ -33,10 +33,10 @@ type applicationConfigurer struct {
 }
 
 func (c *applicationConfigurer) Identity(name, key string) {
-	c.cfg.ConfiguredIdentities = append(
-		c.cfg.ConfiguredIdentities,
+	c.cfg.AsConfigured.Identities = append(
+		c.cfg.AsConfigured.Identities,
 		config.Identity{
-			AsConfigured: config.IdentityProperties{
+			AsConfigured: config.IdentityAsConfigured{
 				Name: name,
 				Key:  key,
 			},
@@ -45,17 +45,17 @@ func (c *applicationConfigurer) Identity(name, key string) {
 }
 
 func (c *applicationConfigurer) RegisterAggregate(h dogma.AggregateMessageHandler, _ ...dogma.RegisterAggregateOption) {
-	c.cfg.ConfiguredHandlers = append(c.cfg.ConfiguredHandlers, FromAggregate(h))
+	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromAggregate(h))
 }
 
 func (c *applicationConfigurer) RegisterProcess(h dogma.ProcessMessageHandler, _ ...dogma.RegisterProcessOption) {
-	c.cfg.ConfiguredHandlers = append(c.cfg.ConfiguredHandlers, FromProcess(h))
+	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromProcess(h))
 }
 
 func (c *applicationConfigurer) RegisterIntegration(h dogma.IntegrationMessageHandler, _ ...dogma.RegisterIntegrationOption) {
-	c.cfg.ConfiguredHandlers = append(c.cfg.ConfiguredHandlers, FromIntegration(h))
+	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromIntegration(h))
 }
 
 func (c *applicationConfigurer) RegisterProjection(h dogma.ProjectionMessageHandler, _ ...dogma.RegisterProjectionOption) {
-	c.cfg.ConfiguredHandlers = append(c.cfg.ConfiguredHandlers, FromProjection(h))
+	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromProjection(h))
 }

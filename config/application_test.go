@@ -128,10 +128,12 @@ func TestApplication_Routes(t *testing.T) {
 
 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
 		cfg := &Application{
-			ConfiguredHandlers: []Handler{
-				&Projection{
-					ConfiguredRoutes: []Route{
-						{},
+			AsConfigured: ApplicationAsConfigured{
+				Handlers: []Handler{
+					&Projection{
+						ConfiguredRoutes: []Route{
+							{},
+						},
 					},
 				},
 			},

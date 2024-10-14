@@ -10,16 +10,23 @@ import (
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
-// IdentityProperties contains the raw unvalidated properties of an [Identity].
-type IdentityProperties struct {
-	Name     string
-	Key      string
+// IdentityAsConfigured contains the raw unvalidated properties of an
+// [Identity].
+type IdentityAsConfigured struct {
+	// Name is the human-readable name of the entity.
+	Name string
+
+	// Key is the unique identifier for the entity.
+	Key string
+
+	// Fidelity describes the configuration's accuracy in comparison to the
+	// actual configuration that would be used at runtime.
 	Fidelity Fidelity
 }
 
 // Identity represents the (potentially invalid) identity of an entity.
 type Identity struct {
-	AsConfigured IdentityProperties
+	AsConfigured IdentityAsConfigured
 }
 
 // Fidelity returns information about how well the configuration represents

@@ -63,7 +63,7 @@ func TestFromProjection(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							AsConfigured: config.IdentityProperties{
+							AsConfigured: config.IdentityAsConfigured{
 								Name: "projection",
 								Key:  "050415ad-ce90-496f-8987-40467e5415e0",
 							},

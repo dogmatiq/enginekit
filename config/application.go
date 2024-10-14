@@ -10,28 +10,32 @@ import (
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
+// ApplicationAsConfigured contains the raw unvalidated properties of an
+// [Application].
+type ApplicationAsConfigured struct {
+	// Source describes the type and value that produced the configuration, if
+	// available.
+	Source optional.Optional[Source[dogma.Application]]
+
+	// Identities is the list of identities configured for the application.
+	Identities []Identity
+
+	// ConfiguredHandlers is a list of handlers registered with the application.
+	Handlers []Handler
+
+	// Fidelity describes the configuration's accuracy in comparison to the
+	// actual configuration that would be used at runtime.
+	Fidelity Fidelity
+}
+
 // Application represents the (potentially invalid) configuration of a
 // [dogma.Application] implementation.
 type Application struct {
-	// ConfigurationSource contains information about the type and value that
-	// produced the configuration, if available.
-	ConfigurationSource optional.Optional[Source[dogma.Application]]
-
-	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
-	// identities configured for the application.
-	ConfiguredIdentities []Identity
-
-	// ConfiguredHandlers is a list of (potentially invalid, incomplete or
-	// conflicting) handlers configured for the application.
-	ConfiguredHandlers []Handler
-
-	// ConfigurationFidelity describes the configuration's accuracy in
-	// comparison to the actual configuration that would be used at runtime.
-	ConfigurationFidelity Fidelity
+	AsConfigured ApplicationAsConfigured
 }
 
 func (a *Application) String() string {
-	return renderEntity("application", a, a.ConfigurationSource)
+	return renderEntity("application", a, a.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -44,13 +48,13 @@ func (a *Application) Identity() *identitypb.Identity {
 // Fidelity returns information about how well the configuration represents
 // the actual configuration that would be used at runtime.
 func (a *Application) Fidelity() Fidelity {
-	return a.ConfigurationFidelity
+	return a.AsConfigured.Fidelity
 }
 
 // Interface returns the [dogma.Application] instance that the configuration
 // represents, or panics if it is not available.
 func (a *Application) Interface() dogma.Application {
-	return a.ConfigurationSource.Get().Interface.Get()
+	return a.AsConfigured.Source.Get().Interface.Get()
 }
 
 // Handlers returns the list of handlers configured for the application.
@@ -81,7 +85,7 @@ func (a *Application) RouteSet() RouteSet {
 	ctx := newFinalizeContext(a)
 	var set RouteSet
 
-	for _, h := range a.ConfiguredHandlers {
+	for _, h := range a.AsConfigured.Handlers {
 		set.merge(finalizeRouteSet(ctx.NewChild(h), h))
 	}
 
@@ -89,12 +93,12 @@ func (a *Application) RouteSet() RouteSet {
 }
 
 func (a *Application) identitiesAsConfigured() []Identity {
-	return a.ConfiguredIdentities
+	return a.AsConfigured.Identities
 }
 
 func (a *Application) normalize(ctx *normalizeContext) Component {
-	a.ConfiguredIdentities = normalizeIdentities(ctx, a)
-	a.ConfiguredHandlers = normalizeHandlers(ctx, a)
+	a.AsConfigured.Identities = normalizeIdentities(ctx, a)
+	a.AsConfigured.Handlers = normalizeHandlers(ctx, a)
 
 	detectIdentityConflicts(ctx, a)
 	detectRouteConflicts(ctx, a)
@@ -103,7 +107,7 @@ func (a *Application) normalize(ctx *normalizeContext) Component {
 }
 
 func normalizeHandlers(ctx *normalizeContext, app *Application) []Handler {
-	handlers := slices.Clone(app.ConfiguredHandlers)
+	handlers := slices.Clone(app.AsConfigured.Handlers)
 
 	for i, h := range handlers {
 		handlers[i] = normalize(ctx, h)
@@ -122,7 +126,7 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 	)
 
 	entities := []Entity{app}
-	for _, h := range app.ConfiguredHandlers {
+	for _, h := range app.AsConfigured.Handlers {
 		entities = append(entities, h)
 	}
 
@@ -173,7 +177,7 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 func detectRouteConflicts(ctx *normalizeContext, app *Application) {
 	var conflictingRoutes conflictDetector[routeKey, Handler]
 
-	for i, h1 := range app.ConfiguredHandlers {
+	for i, h1 := range app.AsConfigured.Handlers {
 		for _, r1 := range h1.routesAsConfigured() {
 			k1, ok := r1.key()
 			if !ok {
@@ -184,7 +188,7 @@ func detectRouteConflicts(ctx *normalizeContext, app *Application) {
 				continue
 			}
 
-			for j, h2 := range app.ConfiguredHandlers[i+1:] {
+			for j, h2 := range app.AsConfigured.Handlers[i+1:] {
 				for _, r2 := range h2.routesAsConfigured() {
 					k2, ok := r2.key()
 					if !ok {

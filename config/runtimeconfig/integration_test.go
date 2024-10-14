@@ -61,7 +61,7 @@ func TestFromIntegration(t *testing.T) {
 					),
 					ConfiguredIdentities: []config.Identity{
 						{
-							AsConfigured: config.IdentityProperties{
+							AsConfigured: config.IdentityAsConfigured{
 								Name: "integration",
 								Key:  "51ffcb6f-171f-41a1-90e7-6fe1111649cd",
 							},

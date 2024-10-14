@@ -88,12 +88,15 @@ func TestFromApplication(t *testing.T) {
 								},
 							},
 							&config.Process{
-								ConfigurationSource: optional.Some(
-									config.Source[dogma.ProcessMessageHandler]{
-										TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-										Interface: optional.Some(process),
-									},
-								),
+								AsConfigured: config.ProcessAsConfigured{
+									Source: optional.Some(
+										config.Source[dogma.ProcessMessageHandler]{
+											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+											Interface: optional.Some(process),
+										},
+									),
+									IsDisabled: optional.Some(false),
+								},
 							},
 							&config.Integration{
 								AsConfigured: config.IntegrationAsConfigured{

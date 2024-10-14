@@ -6,32 +6,36 @@ import (
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
+// ProcessAsConfigured contains the raw unvalidated properties of a
+// [Process].
+type ProcessAsConfigured struct {
+	// Source describes the type and value that produced the configuration, if
+	// available.
+	Source optional.Optional[Source[dogma.ProcessMessageHandler]]
+
+	// Identities is the list of identities configured for the handler.
+	Identities []Identity
+
+	// Routes is the list of routes configured on the handler.
+	Routes []Route
+
+	// IsDisabled is true if the handler was disabled via the configurer, if
+	// known.
+	IsDisabled optional.Optional[bool]
+
+	// Fidelity describes the configuration's accuracy in comparison to the
+	// actual configuration that would be used at runtime.
+	Fidelity Fidelity
+}
+
 // Process represents the (potentially invalid) configuration of a
 // [dogma.ProcessMessageHandler] implementation.
 type Process struct {
-	// ConfigurationSource contains information about the type and value that
-	// produced the configuration, if available.
-	ConfigurationSource optional.Optional[Source[dogma.ProcessMessageHandler]]
-
-	// ConfiguredIdentities is the list of (potentially invalid or duplicated)
-	// identities configured for the handler.
-	ConfiguredIdentities []Identity
-
-	// ConfiguredRoutes is the list of (potentially invalid, incomplete or
-	// duplicated) message routes configured for the handler.
-	ConfiguredRoutes []Route
-
-	// ConfiguredAsDisabled is true if the handler was disabled via the
-	// configurer.
-	ConfiguredAsDisabled bool
-
-	// ConfigurationFidelity describes the configuration's accuracy in
-	// comparison to the actual configuration that would be used at runtime.
-	ConfigurationFidelity Fidelity
+	AsConfigured ProcessAsConfigured
 }
 
 func (h *Process) String() string {
-	return renderEntity("process", h, h.ConfigurationSource)
+	return renderEntity("process", h, h.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -44,7 +48,7 @@ func (h *Process) Identity() *identitypb.Identity {
 // Fidelity returns information about how well the configuration represents
 // the actual configuration that would be used at runtime.
 func (h *Process) Fidelity() Fidelity {
-	return h.ConfigurationFidelity
+	return h.AsConfigured.Fidelity
 }
 
 // HandlerType returns [HandlerType] of the handler.
@@ -61,25 +65,25 @@ func (h *Process) RouteSet() RouteSet {
 
 // IsDisabled returns true if the handler was disabled via the configurer.
 func (h *Process) IsDisabled() bool {
-	return h.ConfiguredAsDisabled
+	return h.AsConfigured.IsDisabled.Get()
 }
 
 // Interface returns the [dogma.ProcessMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Process) Interface() dogma.ProcessMessageHandler {
-	return h.ConfigurationSource.Get().Interface.Get()
+	return h.AsConfigured.Source.Get().Interface.Get()
 }
 
 func (h *Process) normalize(ctx *normalizeContext) Component {
-	h.ConfiguredIdentities = normalizeIdentities(ctx, h)
-	h.ConfiguredRoutes = normalizeRoutes(ctx, h)
+	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
+	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
 	return h
 }
 
 func (h *Process) identitiesAsConfigured() []Identity {
-	return h.ConfiguredIdentities
+	return h.AsConfigured.Identities
 }
 
 func (h *Process) routesAsConfigured() []Route {
-	return h.ConfiguredRoutes
+	return h.AsConfigured.Routes
 }

@@ -10,13 +10,17 @@ import (
 // FromProcess returns a new [config.Process] that represents the configuration
 // of the given [dogma.ProcessMessageHandler].
 func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
-	cfg := &config.Process{}
+	cfg := &config.Process{
+		AsConfigured: config.ProcessAsConfigured{
+			IsDisabled: optional.Some(false),
+		},
+	}
 
 	if h == nil {
 		return cfg
 	}
 
-	cfg.ConfigurationSource = optional.Some(
+	cfg.AsConfigured.Source = optional.Some(
 		config.Source[dogma.ProcessMessageHandler]{
 			TypeName:  typename.Of(h),
 			Interface: optional.Some(h),
@@ -33,8 +37,8 @@ type processConfigurer struct {
 }
 
 func (c *processConfigurer) Identity(name, key string) {
-	c.cfg.ConfiguredIdentities = append(
-		c.cfg.ConfiguredIdentities,
+	c.cfg.AsConfigured.Identities = append(
+		c.cfg.AsConfigured.Identities,
 		config.Identity{
 			AsConfigured: config.IdentityAsConfigured{
 				Name: name,
@@ -46,10 +50,10 @@ func (c *processConfigurer) Identity(name, key string) {
 
 func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {
 	for _, r := range routes {
-		c.cfg.ConfiguredRoutes = append(c.cfg.ConfiguredRoutes, fromRoute(r))
+		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
 	}
 }
 
 func (c *processConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.ConfiguredAsDisabled = true
+	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
 }

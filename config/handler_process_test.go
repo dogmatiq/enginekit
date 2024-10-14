@@ -161,7 +161,9 @@ func TestProcess_Routes(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Process{
-					ConfiguredRoutes: []Route{c.Route},
+					AsConfigured: ProcessAsConfigured{
+						Routes: []Route{c.Route},
+					},
 				}
 
 				ExpectPanic(

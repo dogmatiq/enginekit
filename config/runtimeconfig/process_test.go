@@ -22,7 +22,11 @@ func TestFromProcess(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.ProcessMessageHandler) *config.Process {
-				return &config.Process{}
+				return &config.Process{
+					AsConfigured: config.ProcessAsConfigured{
+						IsDisabled: optional.Some(false),
+					},
+				}
 			},
 		},
 		{
@@ -30,12 +34,15 @@ func TestFromProcess(t *testing.T) {
 			&ProcessMessageHandlerStub{},
 			func(h dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.ProcessMessageHandler]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-							Interface: optional.Some(h),
-						},
-					),
+					AsConfigured: config.ProcessAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.ProcessMessageHandler]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+								Interface: optional.Some(h),
+							},
+						),
+						IsDisabled: optional.Some(false),
+					},
 				}
 			},
 		},
@@ -54,38 +61,40 @@ func TestFromProcess(t *testing.T) {
 			},
 			func(h dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					ConfigurationSource: optional.Some(
-						config.Source[dogma.ProcessMessageHandler]{
-							TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-							Interface: optional.Some(h),
-						},
-					),
-					ConfiguredIdentities: []config.Identity{
-						{
-							AsConfigured: config.IdentityAsConfigured{
-								Name: "projection",
-								Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+					AsConfigured: config.ProcessAsConfigured{
+						Source: optional.Some(
+							config.Source[dogma.ProcessMessageHandler]{
+								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+								Interface: optional.Some(h),
+							},
+						),
+						Identities: []config.Identity{
+							{
+								AsConfigured: config.IdentityAsConfigured{
+									Name: "projection",
+									Key:  "050415ad-ce90-496f-8987-40467e5415e0",
+								},
 							},
 						},
+						Routes: []config.Route{
+							{
+								RouteType:       optional.Some(config.HandlesEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+							},
+							{
+								RouteType:       optional.Some(config.ExecutesCommandRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+							},
+							{
+								RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
+							},
+						},
+						IsDisabled: optional.Some(true),
 					},
-					ConfiguredRoutes: []config.Route{
-						{
-							RouteType:       optional.Some(config.HandlesEventRouteType),
-							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-						},
-						{
-							RouteType:       optional.Some(config.ExecutesCommandRouteType),
-							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
-						},
-						{
-							RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
-							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
-						},
-					},
-					ConfiguredAsDisabled: true,
 				}
 			},
 		},

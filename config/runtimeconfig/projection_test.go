@@ -22,7 +22,11 @@ func TestFromProjection(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.ProjectionMessageHandler) *config.Projection {
-				return &config.Projection{}
+				return &config.Projection{
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
+				}
 			},
 		},
 		{
@@ -36,7 +40,9 @@ func TestFromProjection(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationIsExhaustive: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},
@@ -81,8 +87,10 @@ func TestFromProjection(t *testing.T) {
 							Implementation: optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
 						},
 					),
-					ConfiguredAsDisabled:      true,
-					ConfigurationIsExhaustive: true,
+					ConfiguredAsDisabled: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},

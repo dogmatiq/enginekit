@@ -224,7 +224,7 @@ func TestAggregate_validation(t *testing.T) {
 		},
 		{
 			"nil aggregate",
-			`partial aggregate is invalid:` +
+			`aggregate is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesCommand" route` +
 				"\n" + `- expected at least one "RecordsEvent" route`,

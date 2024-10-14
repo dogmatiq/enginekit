@@ -1,4 +1,4 @@
-package runtimeconfig
+package configbuilder
 
 import (
 	"github.com/dogmatiq/dogma"
@@ -7,29 +7,17 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// FromProjection returns a new [config.Projection] that represents the
-// configuration of the given [dogma.ProjectionMessageHandler].
-func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
-	cfg := &config.Projection{
-		ConfigurationFidelity: config.Fidelity{
-			IsExhaustive: true,
-		},
-	}
+// Projection builds [config.Projection] values.
+type Projection struct {
+	config config.Projection
+}
 
-	if h == nil {
-		return cfg
-	}
+func (b *Projection) Configurer() dogma.ProjectionConfigurer {
+	panic("not implemented")
+}
 
-	cfg.ConfigurationSource = optional.Some(
-		config.Source[dogma.ProjectionMessageHandler]{
-			TypeName:  typename.Of(h),
-			Interface: optional.Some(h),
-		},
-	)
-
-	h.Configure(&projectionConfigurer{cfg})
-
-	return cfg
+func (b *Projection) Get() *config.Projection {
+	return &b.config
 }
 
 type projectionConfigurer struct {

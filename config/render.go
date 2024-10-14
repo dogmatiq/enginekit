@@ -28,9 +28,23 @@ func renderEntity[T any](
 	ent Entity,
 	impl optional.Optional[Source[T]],
 ) string {
-	if !ent.IsExhaustive() {
-		label = "partial " + label
+	var w strings.Builder
+
+	f := ent.Fidelity()
+
+	if !f.IsExhaustive {
+		w.WriteString("partial ")
 	}
+
+	if f.IsSpeculative {
+		w.WriteString("speculative ")
+	}
+
+	if f.IsUnresolved || f.HasSpeculativeSubcomponents || f.HasMutuallyExclusiveSubcomponents {
+		w.WriteString("non-deterministic ")
+	}
+
+	w.WriteString(label)
 
 	identifier := ""
 
@@ -46,9 +60,10 @@ func renderEntity[T any](
 		}
 	}
 
-	if identifier == "" {
-		return label
+	if identifier != "" {
+		w.WriteByte(':')
+		w.WriteString(identifier)
 	}
 
-	return label + ":" + identifier
+	return w.String()
 }

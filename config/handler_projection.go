@@ -29,8 +29,9 @@ type Projection struct {
 	// configurer.
 	ConfiguredAsDisabled bool
 
-	// ConfigurationIsExhaustive is true if the entire configuration was loaded.
-	ConfigurationIsExhaustive bool
+	// ConfigurationFidelity describes the configuration's accuracy in
+	// comparison to the actual configuration that would be used at runtime.
+	ConfigurationFidelity Fidelity
 }
 
 func (h *Projection) String() string {
@@ -44,9 +45,10 @@ func (h *Projection) Identity() *identitypb.Identity {
 	return finalizeIdentity(newFinalizeContext(h), h)
 }
 
-// IsExhaustive returns true if the entire configuration was loaded.
-func (h *Projection) IsExhaustive() bool {
-	return h.ConfigurationIsExhaustive
+// Fidelity returns information about how well the configuration represents
+// the actual configuration that would be used at runtime.
+func (h *Projection) Fidelity() Fidelity {
+	return h.ConfigurationFidelity
 }
 
 // HandlerType returns [HandlerType] of the handler.

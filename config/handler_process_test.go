@@ -219,7 +219,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			"nil process",
-			`partial process is invalid:` +
+			`process is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesEvent" route` +
 				"\n" + `- expected at least one "ExecutesCommand" route`,

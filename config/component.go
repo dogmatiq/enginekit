@@ -10,6 +10,10 @@ import (
 type Component interface {
 	fmt.Stringer
 
+	// Fidelity returns information about how well the configuration represents
+	// the actual configuration that would be used at runtime.
+	Fidelity() Fidelity
+
 	normalize(*normalizeContext) Component
 }
 
@@ -29,11 +33,6 @@ type Entity interface {
 	// It panics if the route configuration is incomplete or invalid.
 	RouteSet() RouteSet
 
-	// IsExhaustive returns true if the complete configuration was loaded. It
-	// may be false, for example, when attempting to load configuration using
-	// static analysis, but the code depends on runtime type information.
-	IsExhaustive() bool
-
 	identities() []Identity
 }
 
@@ -50,3 +49,15 @@ type Handler interface {
 
 	routes() []Route
 }
+
+var (
+	_ Component = (*Identity)(nil)
+	_ Component = (*Route)(nil)
+
+	_ Entity = (*Application)(nil)
+
+	_ Handler = (*Aggregate)(nil)
+	_ Handler = (*Process)(nil)
+	_ Handler = (*Integration)(nil)
+	_ Handler = (*Projection)(nil)
+)

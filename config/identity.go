@@ -13,6 +13,8 @@ import (
 type Identity struct {
 	Name string
 	Key  string
+
+	ConfigurationFidelity Fidelity
 }
 
 func (i Identity) String() string {
@@ -36,6 +38,12 @@ func (i Identity) String() string {
 	}
 
 	return "identity:" + name + "/" + key
+}
+
+// Fidelity returns information about how well the configuration represents
+// the actual configuration that would be used at runtime.
+func (i Identity) Fidelity() Fidelity {
+	return i.ConfigurationFidelity
 }
 
 func (i Identity) normalize(ctx *normalizeContext) Component {

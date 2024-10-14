@@ -22,6 +22,8 @@ type Route struct {
 
 	// MessageType is the [message.Type], if available.
 	MessageType optional.Optional[message.Type]
+
+	ConfigurationFidelity Fidelity
 }
 
 func (r Route) String() string {
@@ -36,6 +38,12 @@ func (r Route) String() string {
 	}
 
 	return s
+}
+
+// Fidelity returns information about how well the configuration represents
+// the actual configuration that would be used at runtime.
+func (r Route) Fidelity() Fidelity {
+	return r.ConfigurationFidelity
 }
 
 func (r Route) normalize(ctx *normalizeContext) Component {

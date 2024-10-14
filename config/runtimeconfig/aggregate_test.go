@@ -22,7 +22,11 @@ func TestFromAggregate(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
-				return &config.Aggregate{}
+				return &config.Aggregate{
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
+				}
 			},
 		},
 		{
@@ -36,7 +40,9 @@ func TestFromAggregate(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationIsExhaustive: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},
@@ -78,8 +84,10 @@ func TestFromAggregate(t *testing.T) {
 							MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 						},
 					},
-					ConfiguredAsDisabled:      true,
-					ConfigurationIsExhaustive: true,
+					ConfiguredAsDisabled: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},

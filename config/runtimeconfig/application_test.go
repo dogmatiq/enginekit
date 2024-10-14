@@ -28,7 +28,11 @@ func TestFromApplication(t *testing.T) {
 			"nil application",
 			nil,
 			func(dogma.Application) *config.Application {
-				return &config.Application{}
+				return &config.Application{
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
+				}
 			},
 		},
 		{
@@ -42,7 +46,9 @@ func TestFromApplication(t *testing.T) {
 							Interface: optional.Some(app),
 						},
 					),
-					ConfigurationIsExhaustive: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},
@@ -79,7 +85,9 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(aggregate),
 								},
 							),
-							ConfigurationIsExhaustive: true,
+							ConfigurationFidelity: config.Fidelity{
+								IsExhaustive: true,
+							},
 						},
 						&config.Process{
 							ConfigurationSource: optional.Some(
@@ -88,7 +96,9 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(process),
 								},
 							),
-							ConfigurationIsExhaustive: true,
+							ConfigurationFidelity: config.Fidelity{
+								IsExhaustive: true,
+							},
 						},
 						&config.Integration{
 							ConfigurationSource: optional.Some(
@@ -97,7 +107,9 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(integration),
 								},
 							),
-							ConfigurationIsExhaustive: true,
+							ConfigurationFidelity: config.Fidelity{
+								IsExhaustive: true,
+							},
 						},
 						&config.Projection{
 							ConfigurationSource: optional.Some(
@@ -106,10 +118,14 @@ func TestFromApplication(t *testing.T) {
 									Interface: optional.Some(projection),
 								},
 							),
-							ConfigurationIsExhaustive: true,
+							ConfigurationFidelity: config.Fidelity{
+								IsExhaustive: true,
+							},
 						},
 					},
-					ConfigurationIsExhaustive: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},

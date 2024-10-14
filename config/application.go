@@ -25,8 +25,9 @@ type Application struct {
 	// conflicting) handlers configured for the application.
 	ConfiguredHandlers []Handler
 
-	// ConfigurationIsExhaustive is true if the entire configuration was loaded.
-	ConfigurationIsExhaustive bool
+	// ConfigurationFidelity describes the configuration's accuracy in
+	// comparison to the actual configuration that would be used at runtime.
+	ConfigurationFidelity Fidelity
 }
 
 func (a *Application) String() string {
@@ -40,9 +41,10 @@ func (a *Application) Identity() *identitypb.Identity {
 	return finalizeIdentity(newFinalizeContext(a), a)
 }
 
-// IsExhaustive returns true if the entire configuration was loaded.
-func (a *Application) IsExhaustive() bool {
-	return a.ConfigurationIsExhaustive
+// Fidelity returns information about how well the configuration represents
+// the actual configuration that would be used at runtime.
+func (a *Application) Fidelity() Fidelity {
+	return a.ConfigurationFidelity
 }
 
 // Interface returns the [dogma.Application] instance that the configuration

@@ -10,13 +10,16 @@ import (
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
 func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
-	cfg := &config.Integration{}
+	cfg := &config.Integration{
+		ConfigurationFidelity: config.Fidelity{
+			IsExhaustive: true,
+		},
+	}
 
 	if h == nil {
 		return cfg
 	}
 
-	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.IntegrationMessageHandler]{
 			TypeName:  typename.Of(h),

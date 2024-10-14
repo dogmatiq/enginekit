@@ -224,7 +224,7 @@ func TestProjection_validation(t *testing.T) {
 		},
 		{
 			"nil projection",
-			`partial projection is invalid:` +
+			`projection is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "HandlesEvent" route`,
 			nil,

@@ -25,8 +25,9 @@ type Integration struct {
 	// configurer.
 	ConfiguredAsDisabled bool
 
-	// ConfigurationIsExhaustive is true if the entire configuration was loaded.
-	ConfigurationIsExhaustive bool
+	// ConfigurationFidelity describes the configuration's accuracy in
+	// comparison to the actual configuration that would be used at runtime.
+	ConfigurationFidelity Fidelity
 }
 
 func (h *Integration) String() string {
@@ -40,9 +41,10 @@ func (h *Integration) Identity() *identitypb.Identity {
 	return finalizeIdentity(newFinalizeContext(h), h)
 }
 
-// IsExhaustive returns true if the entire configuration was loaded.
-func (h *Integration) IsExhaustive() bool {
-	return h.ConfigurationIsExhaustive
+// Fidelity returns information about how well the configuration represents
+// the actual configuration that would be used at runtime.
+func (h *Integration) Fidelity() Fidelity {
+	return h.ConfigurationFidelity
 }
 
 // HandlerType returns [HandlerType] of the handler.

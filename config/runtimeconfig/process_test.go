@@ -22,7 +22,11 @@ func TestFromProcess(t *testing.T) {
 			"nil handler",
 			nil,
 			func(dogma.ProcessMessageHandler) *config.Process {
-				return &config.Process{}
+				return &config.Process{
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
+				}
 			},
 		},
 		{
@@ -36,7 +40,9 @@ func TestFromProcess(t *testing.T) {
 							Interface: optional.Some(h),
 						},
 					),
-					ConfigurationIsExhaustive: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},
@@ -84,8 +90,10 @@ func TestFromProcess(t *testing.T) {
 							MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
 						},
 					},
-					ConfiguredAsDisabled:      true,
-					ConfigurationIsExhaustive: true,
+					ConfiguredAsDisabled: true,
+					ConfigurationFidelity: config.Fidelity{
+						IsExhaustive: true,
+					},
 				}
 			},
 		},

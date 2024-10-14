@@ -10,13 +10,16 @@ import (
 // FromApplication returns a new [config.Application] that represents the
 // configuration of the given [dogma.Application].
 func FromApplication(app dogma.Application) *config.Application {
-	cfg := &config.Application{}
+	cfg := &config.Application{
+		ConfigurationFidelity: config.Fidelity{
+			IsExhaustive: true,
+		},
+	}
 
 	if app == nil {
 		return cfg
 	}
 
-	cfg.ConfigurationIsExhaustive = true
 	cfg.ConfigurationSource = optional.Some(
 		config.Source[dogma.Application]{
 			TypeName:  typename.Of(app),

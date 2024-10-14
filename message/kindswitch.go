@@ -20,12 +20,7 @@ func SwitchByKind(
 	event func(),
 	timeout func(),
 ) {
-	enum.Switch(
-		k,
-		enum.Case(CommandKind, command),
-		enum.Case(EventKind, event),
-		enum.Case(TimeoutKind, timeout),
-	)
+	enum.Switch(k, command, event, timeout)
 }
 
 // MapByKind maps k to a value of type T.
@@ -34,13 +29,8 @@ func SwitchByKind(
 // even if new [Kind] values are added in the future.
 //
 // It panics if k is not a valid [Kind].
-func MapByKind[T any](k Kind, command, event, timeout T) (result T) {
-	return enum.Map(
-		k,
-		enum.Case(CommandKind, command),
-		enum.Case(EventKind, event),
-		enum.Case(TimeoutKind, timeout),
-	)
+func MapByKind[T any](k Kind, command, event, timeout T) T {
+	return enum.Map(k, command, event, timeout)
 }
 
 // SwitchByKindOf invokes one of the provided functions based on the [Kind] of m.

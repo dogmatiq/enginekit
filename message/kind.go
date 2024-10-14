@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/enum"
 )
 
 // Kind is an enumeration of the different kinds of messages.
@@ -28,7 +29,7 @@ const (
 )
 
 func (k Kind) String() string {
-	return MapByKind(k, "command", "event", "timeout")
+	return enum.String(k, "command", "event", "timeout")
 }
 
 // Symbol returns a single-character symbol that represents the kind. It is

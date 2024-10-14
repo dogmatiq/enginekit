@@ -39,9 +39,9 @@ func TestSwitchByKind(t *testing.T) {
 			Kind Kind
 			Want string
 		}{
-			{CommandKind, `no case function was provided for the "command" kind`},
-			{EventKind, `no case function was provided for the "event" kind`},
-			{TimeoutKind, `no case function was provided for the "timeout" kind`},
+			{CommandKind, `no case function was provided for "command"`},
+			{EventKind, `no case function was provided for "event"`},
+			{TimeoutKind, `no case function was provided for "timeout"`},
 		}
 
 		for _, c := range cases {

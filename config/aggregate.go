@@ -74,11 +74,17 @@ func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
 	return h.AsConfigured.Source.Get().Value.Get()
 }
 
-func (h *Aggregate) normalize(ctx *normalizeContext) Component {
+func (h *Aggregate) clone() Component {
+	clone := &Aggregate{h.AsConfigured}
+	cloneSliceInPlace(&clone.AsConfigured.Identities)
+	cloneSliceInPlace(&clone.AsConfigured.Routes)
+	return clone
+}
+
+func (h *Aggregate) normalize(ctx *normalizeContext) {
 	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
 	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
 	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
-	return h
 }
 
 func (h *Aggregate) identitiesAsConfigured() []*Identity {

@@ -68,30 +68,28 @@ func (i *Identity) String() string {
 	return w.String()
 }
 
-func (i *Identity) normalize(ctx *normalizeContext) Component {
-	clone := &Identity{
-		AsConfigured: i.AsConfigured,
-	}
+func (i *Identity) clone() Component {
+	return &Identity{i.AsConfigured}
+}
 
-	if n, ok := clone.AsConfigured.Name.TryGet(); ok {
+func (i *Identity) normalize(ctx *normalizeContext) {
+	if n, ok := i.AsConfigured.Name.TryGet(); ok {
 		if !isPrintableIdentifier(n) {
 			ctx.Fail(InvalidIdentityNameError{n})
 		}
 	} else {
-		clone.AsConfigured.Fidelity.IsPartial = true
+		i.AsConfigured.Fidelity.IsPartial = true
 	}
 
-	if k, ok := clone.AsConfigured.Key.TryGet(); ok {
+	if k, ok := i.AsConfigured.Key.TryGet(); ok {
 		if id, err := uuidpb.Parse(k); err != nil {
 			ctx.Fail(InvalidIdentityKeyError{k})
 		} else {
-			clone.AsConfigured.Key = optional.Some(id.AsString())
+			i.AsConfigured.Key = optional.Some(id.AsString())
 		}
 	} else {
-		clone.AsConfigured.Fidelity.IsPartial = true
+		i.AsConfigured.Fidelity.IsPartial = true
 	}
-
-	return clone
 }
 
 // isPrintableIdentifier returns true if n contains only non-whitespace printable

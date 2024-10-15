@@ -15,7 +15,8 @@ func Normalize[T Component](c T, options ...NormalizeOption) (T, error) {
 		opt(&ctx.Options)
 	}
 
-	c = c.normalize(ctx).(T)
+	c = clone(c)
+	c.normalize(ctx)
 	reportFidelityErrors(ctx, c)
 
 	return c, ctx.Err()
@@ -33,7 +34,9 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 
 func normalize[T Component](ctx *normalizeContext, c T) T {
 	ctx = ctx.NewChild(c)
-	c = c.normalize(ctx).(T)
+
+	c = clone(c)
+	c.normalize(ctx)
 	reportFidelityErrors(ctx, c)
 
 	return c

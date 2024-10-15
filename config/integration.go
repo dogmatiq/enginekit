@@ -74,11 +74,17 @@ func (h *Integration) Interface() dogma.IntegrationMessageHandler {
 	return h.AsConfigured.Source.Get().Value.Get()
 }
 
-func (h *Integration) normalize(ctx *normalizeContext) Component {
+func (h *Integration) clone() Component {
+	clone := &Integration{h.AsConfigured}
+	cloneSliceInPlace(&clone.AsConfigured.Identities)
+	cloneSliceInPlace(&clone.AsConfigured.Routes)
+	return clone
+}
+
+func (h *Integration) normalize(ctx *normalizeContext) {
 	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
 	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
 	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
-	return h
 }
 
 func (h *Integration) identitiesAsConfigured() []*Identity {

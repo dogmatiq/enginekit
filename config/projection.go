@@ -85,12 +85,18 @@ func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return h.AsConfigured.Source.Get().Value.Get()
 }
 
-func (h *Projection) normalize(ctx *normalizeContext) Component {
+func (h *Projection) clone() Component {
+	clone := &Projection{h.AsConfigured}
+	cloneSliceInPlace(&clone.AsConfigured.Identities)
+	cloneSliceInPlace(&clone.AsConfigured.Routes)
+	return clone
+}
+
+func (h *Projection) normalize(ctx *normalizeContext) {
 	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
 	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
 	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
 	h.AsConfigured.Fidelity, h.AsConfigured.DeliveryPolicy = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.DeliveryPolicy)
-	return h
 }
 
 func (h *Projection) identitiesAsConfigured() []*Identity {

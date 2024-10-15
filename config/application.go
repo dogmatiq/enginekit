@@ -96,15 +96,20 @@ func (a *Application) identitiesAsConfigured() []*Identity {
 	return a.AsConfigured.Identities
 }
 
-func (a *Application) normalize(ctx *normalizeContext) Component {
+func (a *Application) clone() Component {
+	clone := &Application{a.AsConfigured}
+	cloneSliceInPlace(&clone.AsConfigured.Identities)
+	cloneSliceInPlace(&clone.AsConfigured.Handlers)
+	return clone
+}
+
+func (a *Application) normalize(ctx *normalizeContext) {
 	a.AsConfigured.Fidelity, a.AsConfigured.Source = normalizeValue(ctx, a.AsConfigured.Fidelity, a.AsConfigured.Source)
 	a.AsConfigured.Identities = normalizeIdentities(ctx, a)
 	a.AsConfigured.Handlers = normalizeHandlers(ctx, a)
 
 	detectIdentityConflicts(ctx, a)
 	detectRouteConflicts(ctx, a)
-
-	return a
 }
 
 func normalizeHandlers(ctx *normalizeContext, app *Application) []Handler {

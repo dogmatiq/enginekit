@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -14,7 +15,8 @@ type Component interface {
 	// the actual configuration that would be used at runtime.
 	Fidelity() Fidelity
 
-	normalize(*normalizeContext) Component
+	clone() Component
+	normalize(*normalizeContext)
 }
 
 // An Entity is a [Component] that represents the configuration of some
@@ -81,3 +83,17 @@ var (
 	_ Handler = (*Integration)(nil)
 	_ Handler = (*Projection)(nil)
 )
+
+func clone[T Component](c T) T {
+	return c.clone().(T)
+}
+
+func cloneSliceInPlace[T Component](components *[]T) {
+	clones := slices.Clone(*components)
+
+	for i, c := range clones {
+		clones[i] = clone(c)
+	}
+
+	*components = clones
+}

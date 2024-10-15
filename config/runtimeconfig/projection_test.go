@@ -36,9 +36,9 @@ func TestFromProjection(t *testing.T) {
 				return &config.Projection{
 					AsConfigured: config.ProjectionAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.ProjectionMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.ProjectionMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						IsDisabled: optional.Some(false),
@@ -64,9 +64,9 @@ func TestFromProjection(t *testing.T) {
 				return &config.Projection{
 					AsConfigured: config.ProjectionAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.ProjectionMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.ProjectionMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						Identities: []config.Identity{
@@ -87,9 +87,9 @@ func TestFromProjection(t *testing.T) {
 							},
 						},
 						DeliveryPolicy: optional.Some(
-							config.ProjectionDeliveryPolicy{
-								TypeName:       optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
-								Implementation: optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
+							config.Value[dogma.ProjectionDeliveryPolicy]{
+								TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
+								Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
 							},
 						),
 						IsDisabled: optional.Some(true),

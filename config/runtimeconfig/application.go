@@ -17,9 +17,9 @@ func FromApplication(app dogma.Application) *config.Application {
 	}
 
 	cfg.AsConfigured.Source = optional.Some(
-		config.Source[dogma.Application]{
-			TypeName:  typename.Of(app),
-			Interface: optional.Some(app),
+		config.Value[dogma.Application]{
+			TypeName: optional.Some(typename.Of(app)),
+			Value:    optional.Some(app),
 		},
 	)
 

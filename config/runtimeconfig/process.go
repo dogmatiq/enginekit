@@ -21,9 +21,9 @@ func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
 	}
 
 	cfg.AsConfigured.Source = optional.Some(
-		config.Source[dogma.ProcessMessageHandler]{
-			TypeName:  typename.Of(h),
-			Interface: optional.Some(h),
+		config.Value[dogma.ProcessMessageHandler]{
+			TypeName: optional.Some(typename.Of(h)),
+			Value:    optional.Some(h),
 		},
 	)
 

@@ -26,13 +26,17 @@ func renderList[T any](items []T) string {
 func renderEntity[T any](
 	label string,
 	e Entity,
-	s optional.Optional[Source[T]],
+	src optional.Optional[Value[T]],
 ) string {
 	identifier := ""
 
-	if i, ok := s.TryGet(); ok {
-		identifier = strings.TrimPrefix(i.TypeName, "*")
-	} else {
+	if s, ok := src.TryGet(); ok {
+		if n, ok := s.TypeName.TryGet(); ok {
+			identifier = strings.TrimPrefix(n, "*")
+		}
+	}
+
+	if identifier == "" {
 		for _, id := range e.identitiesAsConfigured() {
 			if norm, err := Normalize(id); err == nil {
 				identifier = norm.String()

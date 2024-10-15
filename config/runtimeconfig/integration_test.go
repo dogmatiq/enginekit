@@ -36,9 +36,9 @@ func TestFromIntegration(t *testing.T) {
 				return &config.Integration{
 					AsConfigured: config.IntegrationAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.IntegrationMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.IntegrationMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						IsDisabled: optional.Some(false),
@@ -62,9 +62,9 @@ func TestFromIntegration(t *testing.T) {
 				return &config.Integration{
 					AsConfigured: config.IntegrationAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.IntegrationMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.IntegrationMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						Identities: []config.Identity{

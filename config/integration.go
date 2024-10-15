@@ -11,7 +11,7 @@ import (
 type IntegrationAsConfigured struct {
 	// Source describes the type and value that produced the configuration, if
 	// available.
-	Source optional.Optional[Source[dogma.IntegrationMessageHandler]]
+	Source optional.Optional[Value[dogma.IntegrationMessageHandler]]
 
 	// Identities is the list of identities configured for the handler.
 	Identities []Identity
@@ -71,10 +71,11 @@ func (h *Integration) IsDisabled() bool {
 // Interface returns the [dogma.IntegrationMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Integration) Interface() dogma.IntegrationMessageHandler {
-	return h.AsConfigured.Source.Get().Interface.Get()
+	return h.AsConfigured.Source.Get().Value.Get()
 }
 
 func (h *Integration) normalize(ctx *normalizeContext) Component {
+	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
 	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
 	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
 	return h

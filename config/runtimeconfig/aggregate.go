@@ -21,9 +21,9 @@ func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
 	}
 
 	cfg.AsConfigured.Source = optional.Some(
-		config.Source[dogma.AggregateMessageHandler]{
-			TypeName:  typename.Of(h),
-			Interface: optional.Some(h),
+		config.Value[dogma.AggregateMessageHandler]{
+			TypeName: optional.Some(typename.Of(h)),
+			Value:    optional.Some(h),
 		},
 	)
 

@@ -11,7 +11,7 @@ import (
 type ProjectionAsConfigured struct {
 	// Source describes the type and value that produced the configuration, if
 	// available.
-	Source optional.Optional[Source[dogma.ProjectionMessageHandler]]
+	Source optional.Optional[Value[dogma.ProjectionMessageHandler]]
 
 	// Identities is the list of identities configured for the handler.
 	Identities []Identity
@@ -24,7 +24,7 @@ type ProjectionAsConfigured struct {
 	IsDisabled optional.Optional[bool]
 
 	// DeliveryPolicy is the delivery policy for the handler, if configured.
-	DeliveryPolicy optional.Optional[ProjectionDeliveryPolicy]
+	DeliveryPolicy optional.Optional[Value[dogma.ProjectionDeliveryPolicy]]
 
 	// Fidelity describes the configuration's accuracy in comparison to the
 	// actual configuration that would be used at runtime.
@@ -74,7 +74,7 @@ func (h *Projection) IsDisabled() bool {
 // DeliveryPolicy returns the delivery policy for the handler.
 func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
-		return p.Implementation.Get()
+		return p.Value.Get()
 	}
 	return dogma.UnicastProjectionDeliveryPolicy{}
 }
@@ -82,12 +82,14 @@ func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 // Interface returns the [dogma.ProjectionMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
-	return h.AsConfigured.Source.Get().Interface.Get()
+	return h.AsConfigured.Source.Get().Value.Get()
 }
 
 func (h *Projection) normalize(ctx *normalizeContext) Component {
+	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
 	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
 	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
+	h.AsConfigured.Fidelity, h.AsConfigured.DeliveryPolicy = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.DeliveryPolicy)
 	return h
 }
 
@@ -97,16 +99,4 @@ func (h *Projection) identitiesAsConfigured() []Identity {
 
 func (h *Projection) routesAsConfigured() []Route {
 	return h.AsConfigured.Routes
-}
-
-// ProjectionDeliveryPolicy represents the (potentially invalid) configuration
-// of a [dogma.ProjectionDeliveryPolicy].
-type ProjectionDeliveryPolicy struct {
-	// TypeName is the fully-qualified name of the Go type that implements
-	// [dogma.DeliveryPolicy], if available.
-	TypeName optional.Optional[string]
-
-	// Implementation is the value that produced the configuration, if
-	// available.
-	Implementation optional.Optional[dogma.ProjectionDeliveryPolicy]
 }

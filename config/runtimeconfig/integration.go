@@ -21,9 +21,9 @@ func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
 	}
 
 	cfg.AsConfigured.Source = optional.Some(
-		config.Source[dogma.IntegrationMessageHandler]{
-			TypeName:  typename.Of(h),
-			Interface: optional.Some(h),
+		config.Value[dogma.IntegrationMessageHandler]{
+			TypeName: optional.Some(typename.Of(h)),
+			Value:    optional.Some(h),
 		},
 	)
 

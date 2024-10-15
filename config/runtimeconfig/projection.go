@@ -21,9 +21,9 @@ func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
 	}
 
 	cfg.AsConfigured.Source = optional.Some(
-		config.Source[dogma.ProjectionMessageHandler]{
-			TypeName:  typename.Of(h),
-			Interface: optional.Some(h),
+		config.Value[dogma.ProjectionMessageHandler]{
+			TypeName: optional.Some(typename.Of(h)),
+			Value:    optional.Some(h),
 		},
 	)
 
@@ -55,11 +55,11 @@ func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {
 }
 
 func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {
-	cfg := config.ProjectionDeliveryPolicy{}
+	cfg := config.Value[dogma.ProjectionDeliveryPolicy]{}
 
 	if p != nil {
 		cfg.TypeName = optional.Some(typename.Of(p))
-		cfg.Implementation = optional.Some(p)
+		cfg.Value = optional.Some(p)
 	}
 
 	c.cfg.AsConfigured.DeliveryPolicy = optional.Some(cfg)

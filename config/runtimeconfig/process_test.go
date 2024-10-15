@@ -36,9 +36,9 @@ func TestFromProcess(t *testing.T) {
 				return &config.Process{
 					AsConfigured: config.ProcessAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.ProcessMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.ProcessMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						IsDisabled: optional.Some(false),
@@ -63,9 +63,9 @@ func TestFromProcess(t *testing.T) {
 				return &config.Process{
 					AsConfigured: config.ProcessAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.ProcessMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.ProcessMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						Identities: []config.Identity{

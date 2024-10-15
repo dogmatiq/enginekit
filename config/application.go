@@ -15,7 +15,7 @@ import (
 type ApplicationAsConfigured struct {
 	// Source describes the type and value that produced the configuration, if
 	// available.
-	Source optional.Optional[Source[dogma.Application]]
+	Source optional.Optional[Value[dogma.Application]]
 
 	// Identities is the list of identities configured for the application.
 	Identities []Identity
@@ -54,7 +54,7 @@ func (a *Application) Fidelity() Fidelity {
 // Interface returns the [dogma.Application] instance that the configuration
 // represents, or panics if it is not available.
 func (a *Application) Interface() dogma.Application {
-	return a.AsConfigured.Source.Get().Interface.Get()
+	return a.AsConfigured.Source.Get().Value.Get()
 }
 
 // Handlers returns the list of handlers configured for the application.
@@ -97,6 +97,7 @@ func (a *Application) identitiesAsConfigured() []Identity {
 }
 
 func (a *Application) normalize(ctx *normalizeContext) Component {
+	a.AsConfigured.Fidelity, a.AsConfigured.Source = normalizeValue(ctx, a.AsConfigured.Fidelity, a.AsConfigured.Source)
 	a.AsConfigured.Identities = normalizeIdentities(ctx, a)
 	a.AsConfigured.Handlers = normalizeHandlers(ctx, a)
 

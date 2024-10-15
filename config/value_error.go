@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-// ImplementationUnavailableError indicates that a [Component] is invalid
+// ImplementationUnavailableError indicates that a [Value] is invalid
 // because it does not contain some runtime value or type information and the
 // [WithImplementations] option was specified during normalization.
 type ImplementationUnavailableError struct {
@@ -13,7 +13,7 @@ type ImplementationUnavailableError struct {
 }
 
 func (e ImplementationUnavailableError) Error() string {
-	return fmt.Sprintf("missing implementation: no %s value is available", e.MissingType)
+	return fmt.Sprintf("missing implementation: %s value is not available", e.MissingType)
 }
 
 // TypeNameMismatchError indicates that the type name specified in some

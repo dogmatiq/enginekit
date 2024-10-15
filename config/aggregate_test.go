@@ -242,11 +242,11 @@ func TestAggregate_Interface(t *testing.T) {
 }
 
 func TestAggregate_validation(t *testing.T) {
-	cases := []validationTestCase[dogma.AggregateMessageHandler]{
+	cases := []validationTestCase{
 		{
-			"valid",
-			``, // no error
-			&AggregateMessageHandlerStub{
+			Name:   "valid",
+			Expect: ``,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 					c.Routes(
@@ -254,28 +254,104 @@ func TestAggregate_validation(t *testing.T) {
 						dogma.RecordsEvent[EventStub[TypeA]](),
 					)
 				},
+			}),
+		},
+		{
+			Name:   "missing implementations",
+			Expect: ``,
+			Component: &Aggregate{
+				AsConfigured: AggregateAsConfigured{
+					Source: optional.Some(
+						Value[dogma.AggregateMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+						},
+					),
+					Identities: []Identity{
+						{
+							AsConfigured: IdentityAsConfigured{
+								Name: optional.Some("name"),
+								Key:  optional.Some("494157ef-6f91-45ec-ab19-df61bb96210a"),
+							},
+						},
+					},
+					Routes: []Route{
+						{
+							AsConfigured: RouteAsConfigured{
+								RouteType:       optional.Some(HandlesCommandRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+							},
+						},
+						{
+							AsConfigured: RouteAsConfigured{
+								RouteType:       optional.Some(RecordsEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+							},
+						},
+					},
+				},
 			},
 		},
 		{
-			"nil aggregate",
-			`aggregate is invalid:` +
+			Name: "missing implementations using WithImplementations() option",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid:` +
+				"\n" + `- missing implementation: dogma.AggregateMessageHandler value is not available` +
+				"\n" + `- handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
+				"\n" + `- records-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+			Options: []NormalizeOption{
+				WithImplementations(),
+			},
+			Component: &Aggregate{
+				AsConfigured: AggregateAsConfigured{
+					Source: optional.Some(
+						Value[dogma.AggregateMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+						},
+					),
+					Identities: []Identity{
+						{
+							AsConfigured: IdentityAsConfigured{
+								Name: optional.Some("name"),
+								Key:  optional.Some("494157ef-6f91-45ec-ab19-df61bb96210a"),
+							},
+						},
+					},
+					Routes: []Route{
+						{
+							AsConfigured: RouteAsConfigured{
+								RouteType:       optional.Some(HandlesCommandRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+							},
+						},
+						{
+							AsConfigured: RouteAsConfigured{
+								RouteType:       optional.Some(RecordsEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "nil aggregate",
+			Expect: `aggregate is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "handles-command" route` +
 				"\n" + `- expected at least one "records-event" route`,
-			nil,
+			Component: runtimeconfig.FromAggregate(nil),
 		},
 		{
-			"unconfigured aggregate",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid:` +
+			Name: "unconfigured aggregate",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "handles-command" route` +
 				"\n" + `- expected at least one "records-event" route`,
-			&AggregateMessageHandlerStub{},
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{}),
 		},
 		{
-			"aggregate identity must be valid",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
-			&AggregateMessageHandlerStub{
+			Name:   "aggregate identity must be valid",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("name", "non-uuid")
 					c.Routes(
@@ -283,12 +359,12 @@ func TestAggregate_validation(t *testing.T) {
 						dogma.RecordsEvent[EventStub[TypeA]](),
 					)
 				},
-			},
+			}),
 		},
 		{
-			"aggregate must not have multiple identities",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8, identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:bar/ee316cdb-894c-454e-91dd-ec0cc4531c42`,
-			&AggregateMessageHandlerStub{
+			Name:   "aggregate must not have multiple identities",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8, identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:bar/ee316cdb-894c-454e-91dd-ec0cc4531c42`,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
 					c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -298,12 +374,12 @@ func TestAggregate_validation(t *testing.T) {
 						dogma.RecordsEvent[EventStub[TypeA]](),
 					)
 				},
-			},
+			}),
 		},
 		{
-			"aggregate must handle at least one command type",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "handles-command" route`,
-			&AggregateMessageHandlerStub{
+			Name:   "aggregate must handle at least one command type",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "handles-command" route`,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 					c.Routes(
@@ -311,12 +387,12 @@ func TestAggregate_validation(t *testing.T) {
 						dogma.RecordsEvent[EventStub[TypeA]](),
 					)
 				},
-			},
+			}),
 		},
 		{
-			"aggregate must record at least one event type",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "records-event" route`,
-			&AggregateMessageHandlerStub{
+			Name:   "aggregate must record at least one event type",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "records-event" route`,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 					c.Routes(
@@ -324,12 +400,12 @@ func TestAggregate_validation(t *testing.T) {
 						// <-- MISSING "RecordEvent" ROUTE
 					)
 				},
-			},
+			}),
 		},
 		{
-			"aggregate must not have multiple routes for the same command type",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: multiple "handles-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-			&AggregateMessageHandlerStub{
+			Name:   "aggregate must not have multiple routes for the same command type",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: multiple "handles-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 					c.Routes(
@@ -338,12 +414,12 @@ func TestAggregate_validation(t *testing.T) {
 						dogma.RecordsEvent[EventStub[TypeA]](),
 					)
 				},
-			},
+			}),
 		},
 		{
-			"aggregate must not have multiple routes for the same event type",
-			`aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: multiple "records-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-			&AggregateMessageHandlerStub{
+			Name:   "aggregate must not have multiple routes for the same event type",
+			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: multiple "records-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 					c.Routes(
@@ -352,9 +428,9 @@ func TestAggregate_validation(t *testing.T) {
 						dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
 					)
 				},
-			},
+			}),
 		},
 	}
 
-	runValidationTests(t, cases, runtimeconfig.FromAggregate)
+	runValidationTests(t, cases)
 }

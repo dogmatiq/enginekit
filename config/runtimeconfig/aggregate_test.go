@@ -36,9 +36,9 @@ func TestFromAggregate(t *testing.T) {
 				return &config.Aggregate{
 					AsConfigured: config.AggregateAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.AggregateMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-								Interface: optional.Some(h),
+							config.Value[dogma.AggregateMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+								Value:    optional.Some(h),
 							},
 						),
 						IsDisabled: optional.Some(false),
@@ -62,9 +62,9 @@ func TestFromAggregate(t *testing.T) {
 				return &config.Aggregate{
 					AsConfigured: config.AggregateAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.AggregateMessageHandler]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-								Interface: optional.Some(app),
+							config.Value[dogma.AggregateMessageHandler]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+								Value:    optional.Some(app),
 							},
 						),
 						Identities: []config.Identity{

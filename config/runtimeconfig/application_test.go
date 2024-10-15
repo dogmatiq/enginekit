@@ -38,9 +38,9 @@ func TestFromApplication(t *testing.T) {
 				return &config.Application{
 					AsConfigured: config.ApplicationAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.Application]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
-								Interface: optional.Some(app),
+							config.Value[dogma.Application]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
+								Value:    optional.Some(app),
 							},
 						),
 					},
@@ -62,9 +62,9 @@ func TestFromApplication(t *testing.T) {
 				return &config.Application{
 					AsConfigured: config.ApplicationAsConfigured{
 						Source: optional.Some(
-							config.Source[dogma.Application]{
-								TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
-								Interface: optional.Some(app),
+							config.Value[dogma.Application]{
+								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
+								Value:    optional.Some(app),
 							},
 						),
 						Identities: []config.Identity{
@@ -79,9 +79,9 @@ func TestFromApplication(t *testing.T) {
 							&config.Aggregate{
 								AsConfigured: config.AggregateAsConfigured{
 									Source: optional.Some(
-										config.Source[dogma.AggregateMessageHandler]{
-											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
-											Interface: optional.Some(aggregate),
+										config.Value[dogma.AggregateMessageHandler]{
+											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+											Value:    optional.Some(aggregate),
 										},
 									),
 									IsDisabled: optional.Some(false),
@@ -90,9 +90,9 @@ func TestFromApplication(t *testing.T) {
 							&config.Process{
 								AsConfigured: config.ProcessAsConfigured{
 									Source: optional.Some(
-										config.Source[dogma.ProcessMessageHandler]{
-											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
-											Interface: optional.Some(process),
+										config.Value[dogma.ProcessMessageHandler]{
+											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+											Value:    optional.Some(process),
 										},
 									),
 									IsDisabled: optional.Some(false),
@@ -101,9 +101,9 @@ func TestFromApplication(t *testing.T) {
 							&config.Integration{
 								AsConfigured: config.IntegrationAsConfigured{
 									Source: optional.Some(
-										config.Source[dogma.IntegrationMessageHandler]{
-											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-											Interface: optional.Some(integration),
+										config.Value[dogma.IntegrationMessageHandler]{
+											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+											Value:    optional.Some(integration),
 										},
 									),
 									IsDisabled: optional.Some(false),
@@ -112,9 +112,9 @@ func TestFromApplication(t *testing.T) {
 							&config.Projection{
 								AsConfigured: config.ProjectionAsConfigured{
 									Source: optional.Some(
-										config.Source[dogma.ProjectionMessageHandler]{
-											TypeName:  "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-											Interface: optional.Some(projection),
+										config.Value[dogma.ProjectionMessageHandler]{
+											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+											Value:    optional.Some(projection),
 										},
 									),
 									IsDisabled: optional.Some(false),

@@ -231,8 +231,9 @@ func (f routeSetFilters) TestMessage(t message.Type, routes map[RouteType]map[Ha
 	return true
 }
 
-func finalizeRouteSet(ctx *normalizeContext, h Handler) RouteSet {
-	routes := normalizeRoutes(ctx, h)
+func buildRouteSet(ctx *normalizationContext, h Handler) RouteSet {
+	routes := clone(h.routes())
+	normalizeRoutes(ctx, h, routes)
 
 	set := RouteSet{}
 

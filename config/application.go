@@ -42,7 +42,7 @@ func (a *Application) String() string {
 //
 // It panics if no single valid identity is configured.
 func (a *Application) Identity() *identitypb.Identity {
-	return finalizeIdentity(newFinalizeContext(a), a)
+	return buildIdentity(strictContext(a), a.AsConfigured.Identities)
 }
 
 // Fidelity returns information about how well the configuration represents
@@ -61,7 +61,9 @@ func (a *Application) Interface() dogma.Application {
 //
 // It panics if the handlers are incomplete or invalid.
 func (a *Application) Handlers() []Handler {
-	return normalizeHandlers(newFinalizeContext(a), a)
+	handlers := clone(a.AsConfigured.Handlers)
+	normalize(strictContext(a), handlers...)
+	return handlers
 }
 
 // HandlerByName returns the [Handler] with the given name, or false if no such
@@ -82,49 +84,39 @@ func (a *Application) HandlerByName(name string) (Handler, bool) {
 //
 // It panics if the route configuration is incomplete or invalid.
 func (a *Application) RouteSet() RouteSet {
-	ctx := newFinalizeContext(a)
+	ctx := strictContext(a)
 	var set RouteSet
 
 	for _, h := range a.AsConfigured.Handlers {
-		set.merge(finalizeRouteSet(ctx.NewChild(h), h))
+		set.merge(buildRouteSet(ctx.NewChild(h), h))
 	}
 
 	return set
 }
 
-func (a *Application) identitiesAsConfigured() []*Identity {
+func (a *Application) identities() []*Identity {
 	return a.AsConfigured.Identities
 }
 
 func (a *Application) clone() Component {
 	clone := &Application{a.AsConfigured}
-	cloneSliceInPlace(&clone.AsConfigured.Identities)
-	cloneSliceInPlace(&clone.AsConfigured.Handlers)
+	cloneInPlace(&clone.AsConfigured.Identities)
+	cloneInPlace(&clone.AsConfigured.Handlers)
 	return clone
 }
 
-func (a *Application) normalize(ctx *normalizeContext) {
-	a.AsConfigured.Fidelity, a.AsConfigured.Source = normalizeValue(ctx, a.AsConfigured.Fidelity, a.AsConfigured.Source)
-	a.AsConfigured.Identities = normalizeIdentities(ctx, a)
-	a.AsConfigured.Handlers = normalizeHandlers(ctx, a)
+func (a *Application) normalize(ctx *normalizationContext) {
+	normalizeValue(ctx, &a.AsConfigured.Source, &a.AsConfigured.Fidelity)
+	normalizeIdentities(ctx, a.AsConfigured.Identities)
+	normalize(ctx, a.AsConfigured.Handlers...)
 
-	detectIdentityConflicts(ctx, a)
-	detectRouteConflicts(ctx, a)
+	reportIdentityConflicts(ctx, a)
+	reportRouteConflicts(ctx, a)
 }
 
-func normalizeHandlers(ctx *normalizeContext, app *Application) []Handler {
-	handlers := slices.Clone(app.AsConfigured.Handlers)
-
-	for i, h := range handlers {
-		handlers[i] = normalize(ctx, h)
-	}
-
-	return handlers
-}
-
-// detectIdentityConflicts appends errors related to handlers that have
+// reportIdentityConflicts appends errors related to handlers that have
 // identities that conflict with other handlers or the application itself.
-func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
+func reportIdentityConflicts(ctx *normalizationContext, app *Application) {
 	var (
 		conflictingNames conflictDetector[string, Entity]
 		conflictingKeys  conflictDetector[string, Entity]
@@ -136,12 +128,12 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 	}
 
 	for i, ent1 := range entities {
-		for _, id1 := range ent1.identitiesAsConfigured() {
+		for _, id1 := range ent1.identities() {
 			k1, hasK1 := id1.AsConfigured.Key.TryGet()
 			n1, hasN1 := id1.AsConfigured.Name.TryGet()
 
 			for j, ent2 := range entities[i+1:] {
-				for _, id2 := range ent2.identitiesAsConfigured() {
+				for _, id2 := range ent2.identities() {
 					k2, hasK2 := id2.AsConfigured.Key.TryGet()
 					n2, hasN2 := id2.AsConfigured.Name.TryGet()
 
@@ -174,11 +166,11 @@ func detectIdentityConflicts(ctx *normalizeContext, app *Application) {
 	}
 }
 
-func detectRouteConflicts(ctx *normalizeContext, app *Application) {
+func reportRouteConflicts(ctx *normalizationContext, app *Application) {
 	var conflictingRoutes conflictDetector[routeKey, Handler]
 
 	for i, h1 := range app.AsConfigured.Handlers {
-		for _, r1 := range h1.routesAsConfigured() {
+		for _, r1 := range h1.routes() {
 			k1, ok := r1.key()
 			if !ok {
 				continue
@@ -189,7 +181,7 @@ func detectRouteConflicts(ctx *normalizeContext, app *Application) {
 			}
 
 			for j, h2 := range app.AsConfigured.Handlers[i+1:] {
-				for _, r2 := range h2.routesAsConfigured() {
+				for _, r2 := range h2.routes() {
 					k2, ok := r2.key()
 					if !ok {
 						continue

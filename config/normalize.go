@@ -7,7 +7,7 @@ import "slices"
 // It returns a non-nil error if the component is invalid, in which case the
 // returned component is normalized as possible in light of the error.
 func Normalize[T Component](c T, options ...NormalizeOption) (T, error) {
-	ctx := &normalizeContext{
+	ctx := &normalizationContext{
 		Component: c,
 	}
 
@@ -15,7 +15,7 @@ func Normalize[T Component](c T, options ...NormalizeOption) (T, error) {
 		opt(&ctx.Options)
 	}
 
-	c = clone(c)
+	c = c.clone().(T)
 	c.normalize(ctx)
 	reportFidelityErrors(ctx, c)
 
@@ -32,17 +32,15 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 	return norm
 }
 
-func normalize[T Component](ctx *normalizeContext, c T) T {
-	ctx = ctx.NewChild(c)
-
-	c = clone(c)
-	c.normalize(ctx)
-	reportFidelityErrors(ctx, c)
-
-	return c
+func normalize[T Component](ctx *normalizationContext, components ...T) {
+	for _, c := range components {
+		ctx = ctx.NewChild(c)
+		c.normalize(ctx)
+		reportFidelityErrors(ctx, c)
+	}
 }
 
-func reportFidelityErrors(ctx *normalizeContext, c Component) {
+func reportFidelityErrors(ctx *normalizationContext, c Component) {
 	f := c.Fidelity()
 
 	if f.IsPartial {
@@ -58,33 +56,34 @@ func reportFidelityErrors(ctx *normalizeContext, c Component) {
 	}
 }
 
-// normalizeContext is the context in which normalization occurs.
-type normalizeContext struct {
+// normalizationContext is the context in which normalization occurs.
+type normalizationContext struct {
 	Component Component
-	Options   normalizeOptions
+	Options   normalizationOptions
 	Errors    []error
 
-	parent   *normalizeContext
-	children []*normalizeContext
+	parent   *normalizationContext
+	children []*normalizationContext
 }
 
-func newFinalizeContext(c Component) *normalizeContext {
-	return &normalizeContext{
+func strictContext(c Component) *normalizationContext {
+	return &normalizationContext{
 		Component: c,
-		Options: normalizeOptions{
+		Options: normalizationOptions{
 			PanicOnFailure: true,
 		},
 	}
 }
 
-// normalizeOptions is the result of applying a set of [NormalizeOption] values.
-type normalizeOptions struct {
+// normalizationOptions is the result of applying a set of [NormalizeOption]
+// values.
+type normalizationOptions struct {
 	PanicOnFailure bool
 	RequireValues  bool
 }
 
-func (c *normalizeContext) NewChild(com Component) *normalizeContext {
-	ctx := &normalizeContext{
+func (c *normalizationContext) NewChild(com Component) *normalizationContext {
+	ctx := &normalizationContext{
 		Component: com,
 		Options:   c.Options,
 
@@ -96,7 +95,7 @@ func (c *normalizeContext) NewChild(com Component) *normalizeContext {
 	return ctx
 }
 
-func (c *normalizeContext) Fail(err error) {
+func (c *normalizationContext) Fail(err error) {
 	if c.Options.PanicOnFailure {
 		for ctx := c; ctx != nil; ctx = ctx.parent {
 			err = ComponentError{
@@ -113,7 +112,7 @@ func (c *normalizeContext) Fail(err error) {
 	}
 }
 
-func (c *normalizeContext) Err() error {
+func (c *normalizationContext) Err() error {
 	errors := slices.Clone(c.Errors)
 
 	for _, child := range c.children {

@@ -45,7 +45,7 @@ func (h *Projection) String() string {
 //
 // It panics if no single valid identity is configured.
 func (h *Projection) Identity() *identitypb.Identity {
-	return finalizeIdentity(newFinalizeContext(h), h)
+	return buildIdentity(strictContext(h), h.AsConfigured.Identities)
 }
 
 // Fidelity returns information about how well the configuration represents
@@ -63,7 +63,7 @@ func (h *Projection) HandlerType() HandlerType {
 //
 // It panics if the routes are incomplete or invalid.
 func (h *Projection) RouteSet() RouteSet {
-	return finalizeRouteSet(newFinalizeContext(h), h)
+	return buildRouteSet(strictContext(h), h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.
@@ -87,22 +87,22 @@ func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 
 func (h *Projection) clone() Component {
 	clone := &Projection{h.AsConfigured}
-	cloneSliceInPlace(&clone.AsConfigured.Identities)
-	cloneSliceInPlace(&clone.AsConfigured.Routes)
+	cloneInPlace(&clone.AsConfigured.Identities)
+	cloneInPlace(&clone.AsConfigured.Routes)
 	return clone
 }
 
-func (h *Projection) normalize(ctx *normalizeContext) {
-	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
-	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
-	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
-	h.AsConfigured.Fidelity, h.AsConfigured.DeliveryPolicy = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.DeliveryPolicy)
+func (h *Projection) normalize(ctx *normalizationContext) {
+	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
+	normalizeIdentities(ctx, h.AsConfigured.Identities)
+	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+	normalizeValue(ctx, &h.AsConfigured.DeliveryPolicy, &h.AsConfigured.Fidelity)
 }
 
-func (h *Projection) identitiesAsConfigured() []*Identity {
+func (h *Projection) identities() []*Identity {
 	return h.AsConfigured.Identities
 }
 
-func (h *Projection) routesAsConfigured() []*Route {
+func (h *Projection) routes() []*Route {
 	return h.AsConfigured.Routes
 }

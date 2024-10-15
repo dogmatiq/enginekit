@@ -16,7 +16,7 @@ type Component interface {
 	Fidelity() Fidelity
 
 	clone() Component
-	normalize(*normalizeContext)
+	normalize(*normalizationContext)
 }
 
 // An Entity is a [Component] that represents the configuration of some
@@ -35,7 +35,7 @@ type Entity interface {
 	// It panics if the route configuration is incomplete or invalid.
 	RouteSet() RouteSet
 
-	identitiesAsConfigured() []*Identity
+	identities() []*Identity
 }
 
 // A Handler is a specialization of [Entity] that represents configuration of a
@@ -49,7 +49,7 @@ type Handler interface {
 	// IsDisabled returns true if the handler was disabled via the configurer.
 	IsDisabled() bool
 
-	routesAsConfigured() []*Route
+	routes() []*Route
 }
 
 // Fidelity describes how well a [Component] configuration represents the actual
@@ -84,16 +84,16 @@ var (
 	_ Handler = (*Projection)(nil)
 )
 
-func clone[T Component](c T) T {
-	return c.clone().(T)
-}
+func clone[T Component](components []T) []T {
+	clones := slices.Clone(components)
 
-func cloneSliceInPlace[T Component](components *[]T) {
-	clones := slices.Clone(*components)
-
-	for i, c := range clones {
-		clones[i] = clone(c)
+	for i, c := range components {
+		clones[i] = c.clone().(T)
 	}
 
-	*components = clones
+	return clones
+}
+
+func cloneInPlace[T Component](components *[]T) {
+	*components = clone(*components)
 }

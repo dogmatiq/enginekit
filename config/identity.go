@@ -1,7 +1,6 @@
 package config
 
 import (
-	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -72,7 +71,7 @@ func (i *Identity) clone() Component {
 	return &Identity{i.AsConfigured}
 }
 
-func (i *Identity) normalize(ctx *normalizeContext) {
+func (i *Identity) normalize(ctx *normalizationContext) {
 	if n, ok := i.AsConfigured.Name.TryGet(); ok {
 		if !isPrintableIdentifier(n) {
 			ctx.Fail(InvalidIdentityNameError{n})
@@ -108,8 +107,11 @@ func isPrintableIdentifier(n string) bool {
 	return true
 }
 
-func finalizeIdentity(ctx *normalizeContext, ent Entity) *identitypb.Identity {
-	id := normalizeIdentities(ctx, ent)[0].AsConfigured
+func buildIdentity(ctx *normalizationContext, identities []*Identity) *identitypb.Identity {
+	identities = clone(identities)
+	normalizeIdentities(ctx, identities)
+
+	id := identities[0].AsConfigured
 
 	return &identitypb.Identity{
 		Name: id.Name.Get(),
@@ -117,18 +119,12 @@ func finalizeIdentity(ctx *normalizeContext, ent Entity) *identitypb.Identity {
 	}
 }
 
-func normalizeIdentities(ctx *normalizeContext, ent Entity) []*Identity {
-	identities := slices.Clone(ent.identitiesAsConfigured())
+func normalizeIdentities(ctx *normalizationContext, identities []*Identity) {
+	normalize(ctx, identities...)
 
 	if len(identities) == 0 {
 		ctx.Fail(MissingIdentityError{})
 	} else if len(identities) > 1 {
 		ctx.Fail(MultipleIdentitiesError{identities})
 	}
-
-	for i, id := range identities {
-		identities[i] = normalize(ctx, id)
-	}
-
-	return identities
 }

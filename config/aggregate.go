@@ -42,7 +42,7 @@ func (h *Aggregate) String() string {
 //
 // It panics if no single valid identity is configured.
 func (h *Aggregate) Identity() *identitypb.Identity {
-	return finalizeIdentity(newFinalizeContext(h), h)
+	return buildIdentity(strictContext(h), h.AsConfigured.Identities)
 }
 
 // Fidelity returns information about how well the configuration represents
@@ -60,7 +60,7 @@ func (h *Aggregate) HandlerType() HandlerType {
 //
 // It panics if the routes are incomplete or invalid.
 func (h *Aggregate) RouteSet() RouteSet {
-	return finalizeRouteSet(newFinalizeContext(h), h)
+	return buildRouteSet(strictContext(h), h)
 }
 
 // IsDisabled returns true if the handler was disabled via the configurer.
@@ -76,21 +76,21 @@ func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
 
 func (h *Aggregate) clone() Component {
 	clone := &Aggregate{h.AsConfigured}
-	cloneSliceInPlace(&clone.AsConfigured.Identities)
-	cloneSliceInPlace(&clone.AsConfigured.Routes)
+	cloneInPlace(&clone.AsConfigured.Identities)
+	cloneInPlace(&clone.AsConfigured.Routes)
 	return clone
 }
 
-func (h *Aggregate) normalize(ctx *normalizeContext) {
-	h.AsConfigured.Fidelity, h.AsConfigured.Source = normalizeValue(ctx, h.AsConfigured.Fidelity, h.AsConfigured.Source)
-	h.AsConfigured.Identities = normalizeIdentities(ctx, h)
-	h.AsConfigured.Routes = normalizeRoutes(ctx, h)
+func (h *Aggregate) normalize(ctx *normalizationContext) {
+	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
+	normalizeIdentities(ctx, h.AsConfigured.Identities)
+	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
 }
 
-func (h *Aggregate) identitiesAsConfigured() []*Identity {
+func (h *Aggregate) identities() []*Identity {
 	return h.AsConfigured.Identities
 }
 
-func (h *Aggregate) routesAsConfigured() []*Route {
+func (h *Aggregate) routes() []*Route {
 	return h.AsConfigured.Routes
 }

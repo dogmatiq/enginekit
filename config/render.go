@@ -37,7 +37,7 @@ func renderEntity[T any](
 	}
 
 	if identifier == "" {
-		for _, id := range e.identitiesAsConfigured() {
+		for _, id := range e.identities() {
 			if norm, err := Normalize(id); err == nil {
 				identifier = norm.String()
 				break

@@ -3,7 +3,6 @@ package config
 import (
 	"cmp"
 	"reflect"
-	"slices"
 
 	"github.com/dogmatiq/enginekit/collections/maps"
 	"github.com/dogmatiq/enginekit/internal/typename"
@@ -69,7 +68,7 @@ func (r *Route) clone() Component {
 	return &Route{r.AsConfigured}
 }
 
-func (r *Route) normalize(ctx *normalizeContext) {
+func (r *Route) normalize(ctx *normalizationContext) {
 	routeType, routeTypeOK := r.AsConfigured.RouteType.TryGet()
 	typeName, typeNameOK := r.AsConfigured.MessageTypeName.TryGet()
 	messageType, messageTypeOK := r.AsConfigured.MessageType.TryGet()
@@ -117,7 +116,7 @@ func (r *Route) key() (routeKey, bool) {
 	return routeKey{rt, mt}, rtOK && mtOK
 }
 
-func normalizeRoutes(ctx *normalizeContext, h Handler) []*Route {
+func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
 	var (
 		capabilities = h.HandlerType().RouteCapabilities()
 		missing      maps.Ordered[RouteType, MissingRequiredRouteError]
@@ -130,11 +129,8 @@ func normalizeRoutes(ctx *normalizeContext, h Handler) []*Route {
 		}
 	}
 
-	routes := slices.Clone(h.routesAsConfigured())
-
-	for i, r := range routes {
-		r = normalize(ctx, r)
-		routes[i] = r
+	for _, r := range routes {
+		normalize(ctx, r)
 
 		if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
@@ -165,6 +161,4 @@ func normalizeRoutes(ctx *normalizeContext, h Handler) []*Route {
 			ctx.Fail(err)
 		}
 	}
-
-	return routes
 }

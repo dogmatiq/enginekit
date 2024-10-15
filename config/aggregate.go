@@ -14,7 +14,7 @@ type AggregateAsConfigured struct {
 	Source optional.Optional[Value[dogma.AggregateMessageHandler]]
 
 	// Identities is the list of identities configured for the handler.
-	Identities []Identity
+	Identities []*Identity
 
 	// Routes is the list of routes configured on the handler.
 	Routes []Route
@@ -81,7 +81,7 @@ func (h *Aggregate) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Aggregate) identitiesAsConfigured() []Identity {
+func (h *Aggregate) identitiesAsConfigured() []*Identity {
 	return h.AsConfigured.Identities
 }
 

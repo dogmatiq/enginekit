@@ -266,7 +266,7 @@ func TestAggregate_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),
@@ -307,7 +307,7 @@ func TestAggregate_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),

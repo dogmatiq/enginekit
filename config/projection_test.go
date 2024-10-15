@@ -267,7 +267,7 @@ func TestProjection_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),
@@ -305,7 +305,7 @@ func TestProjection_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),

@@ -35,7 +35,7 @@ type applicationConfigurer struct {
 func (c *applicationConfigurer) Identity(name, key string) {
 	c.cfg.AsConfigured.Identities = append(
 		c.cfg.AsConfigured.Identities,
-		config.Identity{
+		&config.Identity{
 			AsConfigured: config.IdentityAsConfigured{
 				Name: optional.Some(name),
 				Key:  optional.Some(key),

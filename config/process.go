@@ -14,7 +14,7 @@ type ProcessAsConfigured struct {
 	Source optional.Optional[Value[dogma.ProcessMessageHandler]]
 
 	// Identities is the list of identities configured for the handler.
-	Identities []Identity
+	Identities []*Identity
 
 	// Routes is the list of routes configured on the handler.
 	Routes []Route
@@ -81,7 +81,7 @@ func (h *Process) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Process) identitiesAsConfigured() []Identity {
+func (h *Process) identitiesAsConfigured() []*Identity {
 	return h.AsConfigured.Identities
 }
 

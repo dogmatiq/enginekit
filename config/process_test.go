@@ -259,7 +259,7 @@ func TestProcess_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),
@@ -300,7 +300,7 @@ func TestProcess_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),

@@ -33,7 +33,7 @@ type Entity interface {
 	// It panics if the route configuration is incomplete or invalid.
 	RouteSet() RouteSet
 
-	identitiesAsConfigured() []Identity
+	identitiesAsConfigured() []*Identity
 }
 
 // A Handler is a specialization of [Entity] that represents configuration of a

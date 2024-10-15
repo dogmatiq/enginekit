@@ -259,7 +259,7 @@ func TestIntegration_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),
@@ -293,7 +293,7 @@ func TestIntegration_validation(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 						},
 					),
-					Identities: []Identity{
+					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
 								Name: optional.Some("name"),

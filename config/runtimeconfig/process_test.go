@@ -68,7 +68,7 @@ func TestFromProcess(t *testing.T) {
 								Value:    optional.Some(h),
 							},
 						),
-						Identities: []config.Identity{
+						Identities: []*config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
 									Name: optional.Some("projection"),

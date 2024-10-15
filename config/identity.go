@@ -32,11 +32,11 @@ type Identity struct {
 
 // Fidelity returns information about how well the configuration represents
 // the actual configuration that would be used at runtime.
-func (i Identity) Fidelity() Fidelity {
+func (i *Identity) Fidelity() Fidelity {
 	return i.AsConfigured.Fidelity
 }
 
-func (i Identity) String() string {
+func (i *Identity) String() string {
 	w := strings.Builder{}
 	w.WriteString("identity")
 
@@ -68,26 +68,30 @@ func (i Identity) String() string {
 	return w.String()
 }
 
-func (i Identity) normalize(ctx *normalizeContext) Component {
-	if n, ok := i.AsConfigured.Name.TryGet(); ok {
+func (i *Identity) normalize(ctx *normalizeContext) Component {
+	clone := &Identity{
+		AsConfigured: i.AsConfigured,
+	}
+
+	if n, ok := clone.AsConfigured.Name.TryGet(); ok {
 		if !isPrintableIdentifier(n) {
 			ctx.Fail(InvalidIdentityNameError{n})
 		}
 	} else {
-		i.AsConfigured.Fidelity.IsPartial = true
+		clone.AsConfigured.Fidelity.IsPartial = true
 	}
 
-	if k, ok := i.AsConfigured.Key.TryGet(); ok {
+	if k, ok := clone.AsConfigured.Key.TryGet(); ok {
 		if id, err := uuidpb.Parse(k); err != nil {
 			ctx.Fail(InvalidIdentityKeyError{k})
 		} else {
-			i.AsConfigured.Key = optional.Some(id.AsString())
+			clone.AsConfigured.Key = optional.Some(id.AsString())
 		}
 	} else {
-		i.AsConfigured.Fidelity.IsPartial = true
+		clone.AsConfigured.Fidelity.IsPartial = true
 	}
 
-	return i
+	return clone
 }
 
 // isPrintableIdentifier returns true if n contains only non-whitespace printable
@@ -115,7 +119,7 @@ func finalizeIdentity(ctx *normalizeContext, ent Entity) *identitypb.Identity {
 	}
 }
 
-func normalizeIdentities(ctx *normalizeContext, ent Entity) []Identity {
+func normalizeIdentities(ctx *normalizeContext, ent Entity) []*Identity {
 	identities := slices.Clone(ent.identitiesAsConfigured())
 
 	if len(identities) == 0 {

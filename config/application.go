@@ -18,7 +18,7 @@ type ApplicationAsConfigured struct {
 	Source optional.Optional[Value[dogma.Application]]
 
 	// Identities is the list of identities configured for the application.
-	Identities []Identity
+	Identities []*Identity
 
 	// Handlers is a list of handlers registered with the application.
 	Handlers []Handler
@@ -92,7 +92,7 @@ func (a *Application) RouteSet() RouteSet {
 	return set
 }
 
-func (a *Application) identitiesAsConfigured() []Identity {
+func (a *Application) identitiesAsConfigured() []*Identity {
 	return a.AsConfigured.Identities
 }
 

@@ -33,7 +33,7 @@ func (e MissingIdentityError) Error() string {
 // MultipleIdentitiesError indicates that an [Entity] has been configured with
 // more than one [Identity].
 type MultipleIdentitiesError struct {
-	Identities []Identity
+	Identities []*Identity
 }
 
 func (e MultipleIdentitiesError) Error() string {

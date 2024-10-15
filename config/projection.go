@@ -14,7 +14,7 @@ type ProjectionAsConfigured struct {
 	Source optional.Optional[Value[dogma.ProjectionMessageHandler]]
 
 	// Identities is the list of identities configured for the handler.
-	Identities []Identity
+	Identities []*Identity
 
 	// Routes is the list of routes configured on the handler.
 	Routes []Route
@@ -93,7 +93,7 @@ func (h *Projection) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Projection) identitiesAsConfigured() []Identity {
+func (h *Projection) identitiesAsConfigured() []*Identity {
 	return h.AsConfigured.Identities
 }
 

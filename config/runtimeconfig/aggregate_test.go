@@ -67,7 +67,7 @@ func TestFromAggregate(t *testing.T) {
 								Value:    optional.Some(app),
 							},
 						),
-						Identities: []config.Identity{
+						Identities: []*config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
 									Name: optional.Some("aggregate"),

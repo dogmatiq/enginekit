@@ -14,7 +14,7 @@ type IntegrationAsConfigured struct {
 	Source optional.Optional[Value[dogma.IntegrationMessageHandler]]
 
 	// Identities is the list of identities configured for the handler.
-	Identities []Identity
+	Identities []*Identity
 
 	// Routes is the list of routes configured on the handler.
 	Routes []Route
@@ -81,7 +81,7 @@ func (h *Integration) normalize(ctx *normalizeContext) Component {
 	return h
 }
 
-func (h *Integration) identitiesAsConfigured() []Identity {
+func (h *Integration) identitiesAsConfigured() []*Identity {
 	return h.AsConfigured.Identities
 }
 

@@ -244,11 +244,7 @@ func TestProjection_Interface(t *testing.T) {
 }
 
 func TestProjection_validation(t *testing.T) {
-	cases := []struct {
-		Name    string
-		Want    string
-		Handler dogma.ProjectionMessageHandler
-	}{
+	cases := []validationTestCase[dogma.ProjectionMessageHandler]{
 		{
 			"valid",
 			``, // no error
@@ -326,21 +322,5 @@ func TestProjection_validation(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.Name, func(t *testing.T) {
-			cfg := runtimeconfig.FromProjection(c.Handler)
-
-			var got string
-			if _, err := Normalize(cfg); err != nil {
-				got = err.Error()
-			}
-
-			if c.Want != got {
-				t.Log("unexpected error:")
-				t.Log("  got:  ", got)
-				t.Log("  want: ", c.Want)
-				t.FailNow()
-			}
-		})
-	}
+	runValidationTests(t, cases, runtimeconfig.FromProjection)
 }

@@ -207,11 +207,7 @@ func TestApplication_HandlerByName(t *testing.T) {
 }
 
 func TestApplication_validation(t *testing.T) {
-	cases := []struct {
-		Name string
-		Want string
-		App  dogma.Application
-	}{
+	cases := []validationTestCase[dogma.Application]{
 		{
 			`application name may be shared with one of its handlers`,
 			``, // no error
@@ -435,21 +431,5 @@ func TestApplication_validation(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.Name, func(t *testing.T) {
-			cfg := runtimeconfig.FromApplication(c.App)
-
-			var got string
-			if _, err := Normalize(cfg); err != nil {
-				got = err.Error()
-			}
-
-			if c.Want != got {
-				t.Log("unexpected error:")
-				t.Log("  got:  ", got)
-				t.Log("  want: ", c.Want)
-				t.FailNow()
-			}
-		})
-	}
+	runValidationTests(t, cases, runtimeconfig.FromApplication)
 }

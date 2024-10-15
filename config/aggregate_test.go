@@ -242,11 +242,7 @@ func TestAggregate_Interface(t *testing.T) {
 }
 
 func TestAggregate_validation(t *testing.T) {
-	cases := []struct {
-		Name    string
-		Want    string
-		Handler dogma.AggregateMessageHandler
-	}{
+	cases := []validationTestCase[dogma.AggregateMessageHandler]{
 		{
 			"valid",
 			``, // no error
@@ -360,21 +356,5 @@ func TestAggregate_validation(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.Name, func(t *testing.T) {
-			cfg := runtimeconfig.FromAggregate(c.Handler)
-
-			var got string
-			if _, err := Normalize(cfg); err != nil {
-				got = err.Error()
-			}
-
-			if c.Want != got {
-				t.Log("unexpected error:")
-				t.Log("  got:  ", got)
-				t.Log("  want: ", c.Want)
-				t.FailNow()
-			}
-		})
-	}
+	runValidationTests(t, cases, runtimeconfig.FromAggregate)
 }

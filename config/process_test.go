@@ -234,11 +234,7 @@ func TestProcess_Interface(t *testing.T) {
 }
 
 func TestProcess_validation(t *testing.T) {
-	cases := []struct {
-		Name    string
-		Want    string
-		Handler dogma.ProcessMessageHandler
-	}{
+	cases := []validationTestCase[dogma.ProcessMessageHandler]{
 		{
 			"valid",
 			``, // no error
@@ -368,21 +364,5 @@ func TestProcess_validation(t *testing.T) {
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.Name, func(t *testing.T) {
-			cfg := runtimeconfig.FromProcess(c.Handler)
-
-			var got string
-			if _, err := Normalize(cfg); err != nil {
-				got = err.Error()
-			}
-
-			if c.Want != got {
-				t.Log("unexpected error:")
-				t.Log("  got:  ", got)
-				t.Log("  want: ", c.Want)
-				t.FailNow()
-			}
-		})
-	}
+	runValidationTests(t, cases, runtimeconfig.FromProcess)
 }

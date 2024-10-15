@@ -1,5 +1,11 @@
 package config
 
+import (
+	"iter"
+
+	"github.com/dogmatiq/enginekit/internal/enum"
+)
+
 // HandlerType is an enumeration of the types of message handlers.
 type HandlerType int
 
@@ -21,99 +27,37 @@ const (
 	ProjectionHandlerType
 )
 
-// HandlerTypes returns a list of all [HandlerType] values.
-func HandlerTypes() []HandlerType {
-	return []HandlerType{
-		AggregateHandlerType,
-		ProcessHandlerType,
-		IntegrationHandlerType,
-		ProjectionHandlerType,
-	}
+// HandlerTypes returns a sequence that yields all valid [HandlerType] values.
+func HandlerTypes() iter.Seq[HandlerType] {
+	return enum.Range(AggregateHandlerType, ProjectionHandlerType)
 }
 
 func (t HandlerType) String() string {
-	switch t {
-	case AggregateHandlerType:
-		return "aggregate"
-	case ProcessHandlerType:
-		return "process"
-	case IntegrationHandlerType:
-		return "integration"
-	case ProjectionHandlerType:
-		return "projection"
-	default:
-		panic("invalid handler type")
-	}
-}
-
-// SwitchByHandlerTypeOf invokes one of the provided functions based on the
-// [HandlerType] of h.
-func SwitchByHandlerTypeOf(
-	h Handler,
-	aggregate func(*Aggregate),
-	process func(*Process),
-	integration func(*Integration),
-	projection func(*Projection),
-) {
-	switch h := h.(type) {
-	case *Aggregate:
-		if aggregate == nil {
-			panic("no case function was provided for aggregate handlers")
-		}
-		aggregate(h)
-	case *Process:
-		if process == nil {
-			panic("no case function was provided for process handlers")
-		}
-		process(h)
-	case *Integration:
-		if integration == nil {
-			panic("no case function was provided for integration handlers")
-		}
-		integration(h)
-	case *Projection:
-		if projection == nil {
-			panic("no case function was provided for projection handlers")
-		}
-		projection(h)
-	default:
-		panic("invalid handler type")
-	}
+	return enum.String(t, "aggregate", "process", "integration", "projection")
 }
 
 // RouteCapabilities returns a value that describes the routing capabilities of
 // the handler type.
 func (t HandlerType) RouteCapabilities() RouteCapabilities {
-	switch t {
-	case AggregateHandlerType:
-		return RouteCapabilities{
+	return RouteCapabilities{
+		MapByHandlerType(
+			t,
 			map[RouteType]RouteTypeCapability{
 				HandlesCommandRouteType: RouteTypeRequired,
 				RecordsEventRouteType:   RouteTypeRequired,
 			},
-		}
-	case IntegrationHandlerType:
-		return RouteCapabilities{
-			map[RouteType]RouteTypeCapability{
-				HandlesCommandRouteType: RouteTypeRequired,
-				RecordsEventRouteType:   RouteTypeAllowed,
-			},
-		}
-	case ProcessHandlerType:
-		return RouteCapabilities{
 			map[RouteType]RouteTypeCapability{
 				HandlesEventRouteType:     RouteTypeRequired,
 				ExecutesCommandRouteType:  RouteTypeRequired,
 				SchedulesTimeoutRouteType: RouteTypeAllowed,
 			},
-		}
-	case ProjectionHandlerType:
-		return RouteCapabilities{
+			map[RouteType]RouteTypeCapability{
+				HandlesCommandRouteType: RouteTypeRequired,
+				RecordsEventRouteType:   RouteTypeAllowed,
+			},
 			map[RouteType]RouteTypeCapability{
 				HandlesEventRouteType: RouteTypeRequired,
 			},
-		}
-	default:
-		panic("invalid handler type")
+		),
 	}
 }

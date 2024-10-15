@@ -12,8 +12,8 @@ import (
 
 // fromRoute returns a new [config.Route] that represents the configuration of
 // the given [dogma.Route].
-func fromRoute(r dogma.Route) config.Route {
-	cfg := config.Route{}
+func fromRoute(r dogma.Route) *config.Route {
+	cfg := &config.Route{}
 
 	configure := func(
 		rt config.RouteType,

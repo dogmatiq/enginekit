@@ -131,17 +131,17 @@ func TestAggregate_RouteSet(t *testing.T) {
 		cases := []struct {
 			Name  string
 			Want  string
-			Route Route
+			Route *Route
 		}{
 			{
 				"empty route",
 				`aggregate is invalid: route is invalid: could not evaluate entire configuration`,
-				Route{},
+				&Route{},
 			},
 			{
 				"unexpected ExecutesCommand route",
 				`aggregate is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
 						MessageTypeName: optional.Some("pkg.SomeCommandType"),
@@ -151,7 +151,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			{
 				"unexpected HandlesEvent route",
 				`aggregate is invalid: unexpected route: handles-event(pkg.SomeEventType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
 						MessageTypeName: optional.Some("pkg.SomeEventType"),
@@ -161,7 +161,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			{
 				"unexpected SchedulesTimeout route",
 				`aggregate is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
 						MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
@@ -174,7 +174,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Aggregate{
 					AsConfigured: AggregateAsConfigured{
-						Routes: []Route{c.Route},
+						Routes: []*Route{c.Route},
 					},
 				}
 
@@ -274,7 +274,7 @@ func TestAggregate_validation(t *testing.T) {
 							},
 						},
 					},
-					Routes: []Route{
+					Routes: []*Route{
 						{
 							AsConfigured: RouteAsConfigured{
 								RouteType:       optional.Some(HandlesCommandRouteType),
@@ -315,7 +315,7 @@ func TestAggregate_validation(t *testing.T) {
 							},
 						},
 					},
-					Routes: []Route{
+					Routes: []*Route{
 						{
 							AsConfigured: RouteAsConfigured{
 								RouteType:       optional.Some(HandlesCommandRouteType),

@@ -47,7 +47,7 @@ type Handler interface {
 	// IsDisabled returns true if the handler was disabled via the configurer.
 	IsDisabled() bool
 
-	routesAsConfigured() []Route
+	routesAsConfigured() []*Route
 }
 
 // Fidelity describes how well a [Component] configuration represents the actual

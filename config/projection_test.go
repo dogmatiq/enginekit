@@ -125,17 +125,17 @@ func TestProjection_RouteSet(t *testing.T) {
 		cases := []struct {
 			Name  string
 			Want  string
-			Route Route
+			Route *Route
 		}{
 			{
 				"empty route",
 				`projection is invalid: route is invalid: could not evaluate entire configuration`,
-				Route{},
+				&Route{},
 			},
 			{
 				"",
 				`projection is invalid: unexpected route: handles-command(pkg.SomeCommandType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
 						MessageTypeName: optional.Some("pkg.SomeCommandType"),
@@ -145,7 +145,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			{
 				"",
 				`projection is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
 						MessageTypeName: optional.Some("pkg.SomeCommandType"),
@@ -155,7 +155,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			{
 				"",
 				`projection is invalid: unexpected route: records-event(pkg.SomeEventType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
 						MessageTypeName: optional.Some("pkg.SomeEventType"),
@@ -165,7 +165,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			{
 				"",
 				`projection is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
 						MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
@@ -178,7 +178,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Projection{
 					AsConfigured: ProjectionAsConfigured{
-						Routes: []Route{c.Route},
+						Routes: []*Route{c.Route},
 					},
 				}
 
@@ -275,7 +275,7 @@ func TestProjection_validation(t *testing.T) {
 							},
 						},
 					},
-					Routes: []Route{
+					Routes: []*Route{
 						{
 							AsConfigured: RouteAsConfigured{
 								RouteType:       optional.Some(HandlesEventRouteType),
@@ -313,7 +313,7 @@ func TestProjection_validation(t *testing.T) {
 							},
 						},
 					},
-					Routes: []Route{
+					Routes: []*Route{
 						{
 							AsConfigured: RouteAsConfigured{
 								RouteType:       optional.Some(HandlesEventRouteType),

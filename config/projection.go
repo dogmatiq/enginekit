@@ -17,7 +17,7 @@ type ProjectionAsConfigured struct {
 	Identities []*Identity
 
 	// Routes is the list of routes configured on the handler.
-	Routes []Route
+	Routes []*Route
 
 	// IsDisabled is true if the handler was disabled via the configurer, if
 	// known.
@@ -97,6 +97,6 @@ func (h *Projection) identitiesAsConfigured() []*Identity {
 	return h.AsConfigured.Identities
 }
 
-func (h *Projection) routesAsConfigured() []Route {
+func (h *Projection) routesAsConfigured() []*Route {
 	return h.AsConfigured.Routes
 }

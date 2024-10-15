@@ -35,23 +35,23 @@ type Route struct {
 
 // RouteType returns the type of route, or panics if the route type is not
 // available.
-func (r Route) RouteType() RouteType {
+func (r *Route) RouteType() RouteType {
 	return r.AsConfigured.RouteType.Get()
 }
 
 // MessageType returns the [message.Type] associated with the route, or panics
 // if the message type is not available.
-func (r Route) MessageType() message.Type {
+func (r *Route) MessageType() message.Type {
 	return r.AsConfigured.MessageType.Get()
 }
 
 // Fidelity returns information about how well the configuration represents
 // the actual configuration that would be used at runtime.
-func (r Route) Fidelity() Fidelity {
+func (r *Route) Fidelity() Fidelity {
 	return r.AsConfigured.Fidelity
 }
 
-func (r Route) String() string {
+func (r *Route) String() string {
 	s := "route"
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
@@ -65,17 +65,21 @@ func (r Route) String() string {
 	return s
 }
 
-func (r Route) normalize(ctx *normalizeContext) Component {
-	routeType, hasRouteType := r.AsConfigured.RouteType.TryGet()
-	typeName, hasTypeName := r.AsConfigured.MessageTypeName.TryGet()
-	messageType, hasMessageType := r.AsConfigured.MessageType.TryGet()
+func (r *Route) normalize(ctx *normalizeContext) Component {
+	clone := &Route{
+		AsConfigured: r.AsConfigured,
+	}
+
+	routeType, hasRouteType := clone.AsConfigured.RouteType.TryGet()
+	typeName, hasTypeName := clone.AsConfigured.MessageTypeName.TryGet()
+	messageType, hasMessageType := clone.AsConfigured.MessageType.TryGet()
 
 	if !hasRouteType {
-		r.AsConfigured.Fidelity.IsPartial = true
+		clone.AsConfigured.Fidelity.IsPartial = true
 	}
 
 	if !hasTypeName {
-		r.AsConfigured.Fidelity.IsPartial = true
+		clone.AsConfigured.Fidelity.IsPartial = true
 	}
 
 	if hasMessageType {
@@ -88,12 +92,12 @@ func (r Route) normalize(ctx *normalizeContext) Component {
 			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
 		}
 
-		r.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
+		clone.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireValues {
 		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[message.Type]()})
 	}
 
-	return r
+	return clone
 }
 
 // routeKey is the components of a [Route] that uniquely identify it.
@@ -109,13 +113,13 @@ func (k routeKey) Compare(x routeKey) int {
 	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
 }
 
-func (r Route) key() (routeKey, bool) {
+func (r *Route) key() (routeKey, bool) {
 	rt, rtOK := r.AsConfigured.RouteType.TryGet()
 	mt, mtOK := r.AsConfigured.MessageTypeName.TryGet()
 	return routeKey{rt, mt}, rtOK && mtOK
 }
 
-func normalizeRoutes(ctx *normalizeContext, h Handler) []Route {
+func normalizeRoutes(ctx *normalizeContext, h Handler) []*Route {
 	var (
 		capabilities = h.HandlerType().RouteCapabilities()
 		missing      maps.Ordered[RouteType, MissingRequiredRouteError]

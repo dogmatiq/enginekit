@@ -75,7 +75,7 @@ func TestFromIntegration(t *testing.T) {
 								},
 							},
 						},
-						Routes: []config.Route{
+						Routes: []*config.Route{
 							{
 								AsConfigured: config.RouteAsConfigured{
 									RouteType:       optional.Some(config.HandlesCommandRouteType),

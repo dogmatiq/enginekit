@@ -20,7 +20,7 @@ func (e MissingRequiredRouteError) Error() string {
 // UnexpectedRouteError indicates that a [Handler] is configured with a [Route]
 // with a [RouteType] that is not allowed for that handler type.
 type UnexpectedRouteError struct {
-	UnexpectedRoute Route
+	UnexpectedRoute *Route
 }
 
 func (e UnexpectedRouteError) Error() string {
@@ -32,7 +32,7 @@ func (e UnexpectedRouteError) Error() string {
 type DuplicateRouteError struct {
 	RouteType       RouteType
 	MessageTypeName string
-	DuplicateRoutes []Route
+	DuplicateRoutes []*Route
 }
 
 func (e DuplicateRouteError) Error() string {

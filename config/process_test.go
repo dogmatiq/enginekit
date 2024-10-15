@@ -133,17 +133,17 @@ func TestProcess_RouteSet(t *testing.T) {
 		cases := []struct {
 			Name  string
 			Want  string
-			Route Route
+			Route *Route
 		}{
 			{
 				"empty route",
 				`process is invalid: route is invalid: could not evaluate entire configuration`,
-				Route{},
+				&Route{},
 			},
 			{
 				"unexpected HandlesCommand route",
 				`process is invalid: unexpected route: handles-command(pkg.SomeCommandType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
 						MessageTypeName: optional.Some("pkg.SomeCommandType"),
@@ -153,7 +153,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			{
 				"unexpected RecordsEvent route",
 				`process is invalid: unexpected route: records-event(pkg.SomeEventType)`,
-				Route{
+				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
 						MessageTypeName: optional.Some("pkg.SomeEventType"),
@@ -166,7 +166,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Process{
 					AsConfigured: ProcessAsConfigured{
-						Routes: []Route{c.Route},
+						Routes: []*Route{c.Route},
 					},
 				}
 
@@ -267,7 +267,7 @@ func TestProcess_validation(t *testing.T) {
 							},
 						},
 					},
-					Routes: []Route{
+					Routes: []*Route{
 						{
 							AsConfigured: RouteAsConfigured{
 								RouteType:       optional.Some(HandlesEventRouteType),
@@ -308,7 +308,7 @@ func TestProcess_validation(t *testing.T) {
 							},
 						},
 					},
-					Routes: []Route{
+					Routes: []*Route{
 						{
 							AsConfigured: RouteAsConfigured{
 								RouteType:       optional.Some(HandlesEventRouteType),

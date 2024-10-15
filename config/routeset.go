@@ -9,13 +9,13 @@ import (
 
 // RouteSet is the set of routes configured for a specific [Handler].
 type RouteSet struct {
-	byMessageType map[message.Type]map[RouteType]map[Handler]Route
+	byMessageType map[message.Type]map[RouteType]map[Handler]*Route
 }
 
 // Routes returns a sequence that yields the routes in the set, and the handler
 // it belongs to.
-func (s RouteSet) Routes() iter.Seq2[Route, Handler] {
-	return func(yield func(Route, Handler) bool) {
+func (s RouteSet) Routes() iter.Seq2[*Route, Handler] {
+	return func(yield func(*Route, Handler) bool) {
 		for _, byRouteType := range s.byMessageType {
 			for _, byHandler := range byRouteType {
 				for h, r := range byHandler {
@@ -69,13 +69,13 @@ func (s RouteSet) Filter(filters ...RouteSetFilter) RouteSet {
 		f(&filter)
 	}
 
-	byMessageTypeFiltered := map[message.Type]map[RouteType]map[Handler]Route{}
+	byMessageTypeFiltered := map[message.Type]map[RouteType]map[Handler]*Route{}
 
 	for mt, byRouteType := range s.byMessageType {
-		byRouteTypeFiltered := map[RouteType]map[Handler]Route{}
+		byRouteTypeFiltered := map[RouteType]map[Handler]*Route{}
 
 		for rt, byHandler := range byRouteType {
-			byHandlerFiltered := map[Handler]Route{}
+			byHandlerFiltered := map[Handler]*Route{}
 
 			for h, r := range byHandler {
 				if filter.TestRoute(r) {
@@ -99,19 +99,19 @@ func (s RouteSet) Filter(filters ...RouteSetFilter) RouteSet {
 func (s *RouteSet) merge(set RouteSet) {
 	for mt, byRouteTypeSource := range set.byMessageType {
 		if s.byMessageType == nil {
-			s.byMessageType = map[message.Type]map[RouteType]map[Handler]Route{}
+			s.byMessageType = map[message.Type]map[RouteType]map[Handler]*Route{}
 		}
 
 		byRouteTypeTarget, ok := s.byMessageType[mt]
 		if !ok {
-			byRouteTypeTarget = map[RouteType]map[Handler]Route{}
+			byRouteTypeTarget = map[RouteType]map[Handler]*Route{}
 			s.byMessageType[mt] = byRouteTypeTarget
 		}
 
 		for rt, byHandlerSource := range byRouteTypeSource {
 			byHandlerTarget, ok := byRouteTypeTarget[rt]
 			if !ok {
-				byHandlerTarget = map[Handler]Route{}
+				byHandlerTarget = map[Handler]*Route{}
 				byRouteTypeTarget[rt] = byHandlerTarget
 			}
 
@@ -131,7 +131,7 @@ func FilterByRouteType(types ...RouteType) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
-			func(r Route) bool {
+			func(r *Route) bool {
 				return slices.Contains(types, r.RouteType())
 			},
 		)
@@ -144,7 +144,7 @@ func FilterByRouteDirection(directions ...RouteDirection) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
-			func(r Route) bool {
+			func(r *Route) bool {
 				for _, dir := range directions {
 					if dir.Has(r.RouteType().Direction()) {
 						return true
@@ -162,7 +162,7 @@ func FilterByMessageKind(kinds ...message.Kind) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
-			func(r Route) bool {
+			func(r *Route) bool {
 				return slices.Contains(kinds, r.MessageType().Kind())
 			},
 		)
@@ -175,7 +175,7 @@ func FilterByMessageType(kinds ...message.Kind) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.routePredicates = append(
 			f.routePredicates,
-			func(r Route) bool {
+			func(r *Route) bool {
 				return slices.Contains(kinds, r.RouteType().MessageKind())
 			},
 		)
@@ -189,7 +189,7 @@ func FilterByMessageDirection(directions ...RouteDirection) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.messagePredicates = append(
 			f.messagePredicates,
-			func(t message.Type, routes map[RouteType]map[Handler]Route) bool {
+			func(t message.Type, routes map[RouteType]map[Handler]*Route) bool {
 				var d RouteDirection
 
 				for rt := range routes {
@@ -209,11 +209,11 @@ func FilterByMessageDirection(directions ...RouteDirection) RouteSetFilter {
 }
 
 type routeSetFilters struct {
-	routePredicates   []func(r Route) bool
-	messagePredicates []func(t message.Type, routes map[RouteType]map[Handler]Route) bool
+	routePredicates   []func(r *Route) bool
+	messagePredicates []func(t message.Type, routes map[RouteType]map[Handler]*Route) bool
 }
 
-func (f routeSetFilters) TestRoute(r Route) bool {
+func (f routeSetFilters) TestRoute(r *Route) bool {
 	for _, p := range f.routePredicates {
 		if !p(r) {
 			return false
@@ -222,7 +222,7 @@ func (f routeSetFilters) TestRoute(r Route) bool {
 	return true
 }
 
-func (f routeSetFilters) TestMessage(t message.Type, routes map[RouteType]map[Handler]Route) bool {
+func (f routeSetFilters) TestMessage(t message.Type, routes map[RouteType]map[Handler]*Route) bool {
 	for _, p := range f.messagePredicates {
 		if !p(t, routes) {
 			return false
@@ -241,18 +241,18 @@ func finalizeRouteSet(ctx *normalizeContext, h Handler) RouteSet {
 		mt := r.MessageType()
 
 		if set.byMessageType == nil {
-			set.byMessageType = map[message.Type]map[RouteType]map[Handler]Route{}
+			set.byMessageType = map[message.Type]map[RouteType]map[Handler]*Route{}
 		}
 
 		byRouteType, ok := set.byMessageType[mt]
 		if !ok {
-			byRouteType = map[RouteType]map[Handler]Route{}
+			byRouteType = map[RouteType]map[Handler]*Route{}
 			set.byMessageType[mt] = byRouteType
 		}
 
 		byHandler, ok := byRouteType[rt]
 		if !ok {
-			byHandler = map[Handler]Route{}
+			byHandler = map[Handler]*Route{}
 			byRouteType[rt] = byHandler
 		}
 

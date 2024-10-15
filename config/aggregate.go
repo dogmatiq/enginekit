@@ -17,7 +17,7 @@ type AggregateAsConfigured struct {
 	Identities []*Identity
 
 	// Routes is the list of routes configured on the handler.
-	Routes []Route
+	Routes []*Route
 
 	// IsDisabled is true if the handler was disabled via the configurer, if
 	// known.
@@ -85,6 +85,6 @@ func (h *Aggregate) identitiesAsConfigured() []*Identity {
 	return h.AsConfigured.Identities
 }
 
-func (h *Aggregate) routesAsConfigured() []Route {
+func (h *Aggregate) routesAsConfigured() []*Route {
 	return h.AsConfigured.Routes
 }

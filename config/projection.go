@@ -9,9 +9,8 @@ import (
 // ProjectionAsConfigured contains the raw unvalidated properties of a
 // [Projection].
 type ProjectionAsConfigured struct {
-	// Source describes the type and value that produced the configuration, if
-	// available.
-	Source optional.Optional[Value[dogma.ProjectionMessageHandler]]
+	// Source describes the type and value that produced the configuration.
+	Source Value[dogma.ProjectionMessageHandler]
 
 	// Identities is the list of identities configured for the handler.
 	Identities []*Identity
@@ -82,7 +81,7 @@ func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
 // Interface returns the [dogma.ProjectionMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
-	return h.AsConfigured.Source.Get().Value.Get()
+	return h.AsConfigured.Source.Value.Get()
 }
 
 func (h *Projection) clone() Component {
@@ -96,7 +95,11 @@ func (h *Projection) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 	normalizeIdentities(ctx, h.AsConfigured.Identities)
 	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-	normalizeValue(ctx, &h.AsConfigured.DeliveryPolicy, &h.AsConfigured.Fidelity)
+
+	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
+		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
+		h.AsConfigured.DeliveryPolicy = optional.Some(p)
+	}
 }
 
 func (h *Projection) identities() []*Identity {

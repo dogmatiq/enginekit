@@ -261,11 +261,9 @@ func TestAggregate_validation(t *testing.T) {
 			Expect: ``,
 			Component: &Aggregate{
 				AsConfigured: AggregateAsConfigured{
-					Source: optional.Some(
-						Value[dogma.AggregateMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.AggregateMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -302,11 +300,9 @@ func TestAggregate_validation(t *testing.T) {
 			},
 			Component: &Aggregate{
 				AsConfigured: AggregateAsConfigured{
-					Source: optional.Some(
-						Value[dogma.AggregateMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.AggregateMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -337,7 +333,8 @@ func TestAggregate_validation(t *testing.T) {
 			Expect: `aggregate is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "handles-command" route` +
-				"\n" + `- expected at least one "records-event" route`,
+				"\n" + `- expected at least one "records-event" route` +
+				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromAggregate(nil),
 		},
 		{

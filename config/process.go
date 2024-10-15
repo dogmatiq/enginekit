@@ -9,9 +9,8 @@ import (
 // ProcessAsConfigured contains the raw unvalidated properties of a
 // [Process].
 type ProcessAsConfigured struct {
-	// Source describes the type and value that produced the configuration, if
-	// available.
-	Source optional.Optional[Value[dogma.ProcessMessageHandler]]
+	// Source describes the type and value that produced the configuration.
+	Source Value[dogma.ProcessMessageHandler]
 
 	// Identities is the list of identities configured for the handler.
 	Identities []*Identity
@@ -71,7 +70,7 @@ func (h *Process) IsDisabled() bool {
 // Interface returns the [dogma.ProcessMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Process) Interface() dogma.ProcessMessageHandler {
-	return h.AsConfigured.Source.Get().Value.Get()
+	return h.AsConfigured.Source.Value.Get()
 }
 
 func (h *Process) clone() Component {

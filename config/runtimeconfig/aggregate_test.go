@@ -35,12 +35,10 @@ func TestFromAggregate(t *testing.T) {
 			func(h dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
 					AsConfigured: config.AggregateAsConfigured{
-						Source: optional.Some(
-							config.Value[dogma.AggregateMessageHandler]{
-								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-								Value:    optional.Some(h),
-							},
-						),
+						Source: config.Value[dogma.AggregateMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+							Value:    optional.Some(h),
+						},
 						IsDisabled: optional.Some(false),
 					},
 				}
@@ -61,12 +59,10 @@ func TestFromAggregate(t *testing.T) {
 			func(app dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
 					AsConfigured: config.AggregateAsConfigured{
-						Source: optional.Some(
-							config.Value[dogma.AggregateMessageHandler]{
-								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-								Value:    optional.Some(app),
-							},
-						),
+						Source: config.Value[dogma.AggregateMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+							Value:    optional.Some(app),
+						},
 						Identities: []*config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{

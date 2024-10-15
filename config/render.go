@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"strings"
-
-	"github.com/dogmatiq/enginekit/optional"
 )
 
 // renderList returns a human-readable list of items.
@@ -26,14 +24,12 @@ func renderList[T any](items []T) string {
 func renderEntity[T any](
 	label string,
 	e Entity,
-	src optional.Optional[Value[T]],
+	src Value[T],
 ) string {
 	identifier := ""
 
-	if s, ok := src.TryGet(); ok {
-		if n, ok := s.TypeName.TryGet(); ok {
-			identifier = strings.TrimPrefix(n, "*")
-		}
+	if n, ok := src.TypeName.TryGet(); ok {
+		identifier = strings.TrimPrefix(n, "*")
 	}
 
 	if identifier == "" {

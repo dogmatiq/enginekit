@@ -37,12 +37,10 @@ func TestFromApplication(t *testing.T) {
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
 					AsConfigured: config.ApplicationAsConfigured{
-						Source: optional.Some(
-							config.Value[dogma.Application]{
-								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
-								Value:    optional.Some(app),
-							},
-						),
+						Source: config.Value[dogma.Application]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
+							Value:    optional.Some(app),
+						},
 					},
 				}
 			},
@@ -61,12 +59,10 @@ func TestFromApplication(t *testing.T) {
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
 					AsConfigured: config.ApplicationAsConfigured{
-						Source: optional.Some(
-							config.Value[dogma.Application]{
-								TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
-								Value:    optional.Some(app),
-							},
-						),
+						Source: config.Value[dogma.Application]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
+							Value:    optional.Some(app),
+						},
 						Identities: []*config.Identity{
 							{
 								AsConfigured: config.IdentityAsConfigured{
@@ -78,45 +74,37 @@ func TestFromApplication(t *testing.T) {
 						Handlers: []config.Handler{
 							&config.Aggregate{
 								AsConfigured: config.AggregateAsConfigured{
-									Source: optional.Some(
-										config.Value[dogma.AggregateMessageHandler]{
-											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-											Value:    optional.Some(aggregate),
-										},
-									),
+									Source: config.Value[dogma.AggregateMessageHandler]{
+										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+										Value:    optional.Some(aggregate),
+									},
 									IsDisabled: optional.Some(false),
 								},
 							},
 							&config.Process{
 								AsConfigured: config.ProcessAsConfigured{
-									Source: optional.Some(
-										config.Value[dogma.ProcessMessageHandler]{
-											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-											Value:    optional.Some(process),
-										},
-									),
+									Source: config.Value[dogma.ProcessMessageHandler]{
+										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+										Value:    optional.Some(process),
+									},
 									IsDisabled: optional.Some(false),
 								},
 							},
 							&config.Integration{
 								AsConfigured: config.IntegrationAsConfigured{
-									Source: optional.Some(
-										config.Value[dogma.IntegrationMessageHandler]{
-											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-											Value:    optional.Some(integration),
-										},
-									),
+									Source: config.Value[dogma.IntegrationMessageHandler]{
+										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+										Value:    optional.Some(integration),
+									},
 									IsDisabled: optional.Some(false),
 								},
 							},
 							&config.Projection{
 								AsConfigured: config.ProjectionAsConfigured{
-									Source: optional.Some(
-										config.Value[dogma.ProjectionMessageHandler]{
-											TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-											Value:    optional.Some(projection),
-										},
-									),
+									Source: config.Value[dogma.ProjectionMessageHandler]{
+										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+										Value:    optional.Some(projection),
+									},
 									IsDisabled: optional.Some(false),
 								},
 							},

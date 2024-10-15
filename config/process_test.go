@@ -254,11 +254,9 @@ func TestProcess_validation(t *testing.T) {
 			Expect: ``,
 			Component: &Process{
 				AsConfigured: ProcessAsConfigured{
-					Source: optional.Some(
-						Value[dogma.ProcessMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.ProcessMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -295,11 +293,9 @@ func TestProcess_validation(t *testing.T) {
 			},
 			Component: &Process{
 				AsConfigured: ProcessAsConfigured{
-					Source: optional.Some(
-						Value[dogma.ProcessMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.ProcessMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -330,7 +326,8 @@ func TestProcess_validation(t *testing.T) {
 			Expect: `process is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "handles-event" route` +
-				"\n" + `- expected at least one "executes-command" route`,
+				"\n" + `- expected at least one "executes-command" route` +
+				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromProcess(nil),
 		},
 		{

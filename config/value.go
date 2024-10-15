@@ -22,16 +22,11 @@ type Value[T any] struct {
 
 func normalizeValue[T any](
 	ctx *normalizationContext,
-	v *optional.Optional[Value[T]],
+	v *Value[T],
 	f *Fidelity,
 ) {
-	inner, ok := v.TryGet()
-	if !ok {
-		return
-	}
-
-	typeName, typeNameOK := inner.TypeName.TryGet()
-	value, valueOK := inner.Value.TryGet()
+	typeName, typeNameOK := v.TypeName.TryGet()
+	value, valueOK := v.Value.TryGet()
 
 	if !typeNameOK {
 		f.IsPartial = true
@@ -43,7 +38,7 @@ func normalizeValue[T any](
 			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
 		}
 
-		inner.TypeName = optional.Some(actualTypeName)
+		v.TypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireValues {
 		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[T]()})
 	}

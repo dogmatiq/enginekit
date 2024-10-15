@@ -20,12 +20,8 @@ func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
 		return cfg
 	}
 
-	cfg.AsConfigured.Source = optional.Some(
-		config.Value[dogma.IntegrationMessageHandler]{
-			TypeName: optional.Some(typename.Of(h)),
-			Value:    optional.Some(h),
-		},
-	)
+	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(h))
+	cfg.AsConfigured.Source.Value = optional.Some(h)
 
 	h.Configure(&integrationConfigurer{cfg})
 

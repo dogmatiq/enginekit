@@ -16,12 +16,8 @@ func FromApplication(app dogma.Application) *config.Application {
 		return cfg
 	}
 
-	cfg.AsConfigured.Source = optional.Some(
-		config.Value[dogma.Application]{
-			TypeName: optional.Some(typename.Of(app)),
-			Value:    optional.Some(app),
-		},
-	)
+	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(app))
+	cfg.AsConfigured.Source.Value = optional.Some(app)
 
 	app.Configure(&applicationConfigurer{cfg})
 

@@ -9,9 +9,8 @@ import (
 // AggregateAsConfigured contains the raw unvalidated properties of an
 // [Aggregate].
 type AggregateAsConfigured struct {
-	// Source describes the type and value that produced the configuration, if
-	// available.
-	Source optional.Optional[Value[dogma.AggregateMessageHandler]]
+	// Source describes the type and value that produced the configuration.
+	Source Value[dogma.AggregateMessageHandler]
 
 	// Identities is the list of identities configured for the handler.
 	Identities []*Identity
@@ -71,7 +70,7 @@ func (h *Aggregate) IsDisabled() bool {
 // Interface returns the [dogma.AggregateMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
-	return h.AsConfigured.Source.Get().Value.Get()
+	return h.AsConfigured.Source.Value.Get()
 }
 
 func (h *Aggregate) clone() Component {

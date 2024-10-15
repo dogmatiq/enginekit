@@ -256,8 +256,10 @@ func TestApplication_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:      "nil application",
-			Expect:    `application is invalid: no identity is configured`,
+			Name: "nil application",
+			Expect: `application is invalid:` +
+				"\n" + `- no identity is configured` +
+				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromApplication(nil),
 		},
 		{

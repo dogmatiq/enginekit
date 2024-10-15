@@ -6,16 +6,14 @@ import (
 	"slices"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // ApplicationAsConfigured contains the raw unvalidated properties of an
 // [Application].
 type ApplicationAsConfigured struct {
-	// Source describes the type and value that produced the configuration, if
-	// available.
-	Source optional.Optional[Value[dogma.Application]]
+	// Source describes the type and value that produced the configuration.
+	Source Value[dogma.Application]
 
 	// Identities is the list of identities configured for the application.
 	Identities []*Identity
@@ -54,7 +52,7 @@ func (a *Application) Fidelity() Fidelity {
 // Interface returns the [dogma.Application] instance that the configuration
 // represents, or panics if it is not available.
 func (a *Application) Interface() dogma.Application {
-	return a.AsConfigured.Source.Get().Value.Get()
+	return a.AsConfigured.Source.Value.Get()
 }
 
 // Handlers returns the list of handlers configured for the application.

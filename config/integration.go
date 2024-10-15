@@ -9,9 +9,8 @@ import (
 // IntegrationAsConfigured contains the raw unvalidated properties of an
 // [Integration].
 type IntegrationAsConfigured struct {
-	// Source describes the type and value that produced the configuration, if
-	// available.
-	Source optional.Optional[Value[dogma.IntegrationMessageHandler]]
+	// Source describes the type and value that produced the configuration.
+	Source Value[dogma.IntegrationMessageHandler]
 
 	// Identities is the list of identities configured for the handler.
 	Identities []*Identity
@@ -71,7 +70,7 @@ func (h *Integration) IsDisabled() bool {
 // Interface returns the [dogma.IntegrationMessageHandler] instance that the
 // configuration represents, or panics if it is not available.
 func (h *Integration) Interface() dogma.IntegrationMessageHandler {
-	return h.AsConfigured.Source.Get().Value.Get()
+	return h.AsConfigured.Source.Value.Get()
 }
 
 func (h *Integration) clone() Component {

@@ -254,11 +254,9 @@ func TestIntegration_validation(t *testing.T) {
 			Expect: ``,
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{
-					Source: optional.Some(
-						Value[dogma.IntegrationMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.IntegrationMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -288,11 +286,9 @@ func TestIntegration_validation(t *testing.T) {
 			},
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{
-					Source: optional.Some(
-						Value[dogma.IntegrationMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.IntegrationMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -316,7 +312,8 @@ func TestIntegration_validation(t *testing.T) {
 			Name: "nil integration",
 			Expect: `integration is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-command" route`,
+				"\n" + `- expected at least one "handles-command" route` +
+				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromIntegration(nil),
 		},
 		{

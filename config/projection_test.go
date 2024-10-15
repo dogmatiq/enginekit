@@ -262,11 +262,9 @@ func TestProjection_validation(t *testing.T) {
 			Expect: ``,
 			Component: &Projection{
 				AsConfigured: ProjectionAsConfigured{
-					Source: optional.Some(
-						Value[dogma.ProjectionMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.ProjectionMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -300,11 +298,9 @@ func TestProjection_validation(t *testing.T) {
 			},
 			Component: &Projection{
 				AsConfigured: ProjectionAsConfigured{
-					Source: optional.Some(
-						Value[dogma.ProjectionMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-						},
-					),
+					Source: Value[dogma.ProjectionMessageHandler]{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+					},
 					Identities: []*Identity{
 						{
 							AsConfigured: IdentityAsConfigured{
@@ -331,7 +327,8 @@ func TestProjection_validation(t *testing.T) {
 			Name: "nil projection",
 			Expect: `projection is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-event" route`,
+				"\n" + `- expected at least one "handles-event" route` +
+				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromProjection(nil),
 		},
 		{

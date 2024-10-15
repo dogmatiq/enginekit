@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/internal/test"
 )
 
 type validationTestCase struct {
@@ -25,10 +26,12 @@ func runValidationTests(
 			}
 
 			if c.Expect != got {
-				t.Log("unexpected error:")
-				t.Log("  got:  ", got)
-				t.Log("  want: ", c.Expect)
-				t.FailNow()
+				test.Expect(
+					t,
+					"unexpected error",
+					got,
+					c.Expect,
+				)
 			}
 
 			// Only test MustNormalize() if Normalize() passes, otherwise
@@ -46,12 +49,12 @@ func runValidationTests(
 						t.Fatalf("expected panic to be an error, got %T", r)
 					}
 
-					if c.Expect != err.Error() {
-						t.Log("unexpected error:")
-						t.Log("  got:  ", err.Error())
-						t.Log("  want: ", c.Expect)
-						t.FailNow()
-					}
+					test.Expect(
+						t,
+						"unexpected error",
+						err.Error(),
+						c.Expect,
+					)
 				}()
 			}
 

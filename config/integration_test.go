@@ -136,7 +136,7 @@ func TestIntegration_Routes(t *testing.T) {
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`integration is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
+				`integration is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -146,7 +146,7 @@ func TestIntegration_Routes(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`integration is invalid: unexpected route: HandlesEvent[pkg.SomeEventType]`,
+				`integration is invalid: unexpected route: handles-event(pkg.SomeEventType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
@@ -156,7 +156,7 @@ func TestIntegration_Routes(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`integration is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
+				`integration is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -228,14 +228,14 @@ func TestIntegration_validation(t *testing.T) {
 			"nil integration",
 			`integration is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "HandlesCommand" route`,
+				"\n" + `- expected at least one "handles-command" route`,
 			nil,
 		},
 		{
 			"unconfigured integration",
 			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "HandlesCommand" route`,
+				"\n" + `- expected at least one "handles-command" route`,
 			&IntegrationMessageHandlerStub{},
 		},
 		{
@@ -266,17 +266,17 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			"integration must handle at least one command type",
-			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: expected at least one "HandlesCommand" route`,
+			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: expected at least one "handles-command" route`,
 			&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
-					// <-- MISSING "HandlesCommand" ROUTE
+					// <-- MISSING "handles-command" ROUTE
 				},
 			},
 		},
 		{
 			"integration must not have multiple routes for the same command type",
-			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple "HandlesCommand" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple "handles-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -289,7 +289,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			"integration must not have multiple routes for the same event type",
-			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple "RecordsEvent" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple "records-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

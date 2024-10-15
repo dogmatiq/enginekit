@@ -23,6 +23,8 @@ type RouteAsConfigured struct {
 	// MessageType is the [message.Type], if available.
 	MessageType optional.Optional[message.Type]
 
+	// Fidelity describes the configuration's accuracy in comparison to the
+	// actual configuration that would be used at runtime.
 	Fidelity Fidelity
 }
 
@@ -57,7 +59,7 @@ func (r Route) String() string {
 	}
 
 	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
-		s += "[" + mt + "]"
+		s += "(" + mt + ")"
 	}
 
 	return s

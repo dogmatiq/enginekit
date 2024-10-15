@@ -33,7 +33,13 @@ func HandlerTypes() iter.Seq[HandlerType] {
 }
 
 func (t HandlerType) String() string {
-	return enum.String(t, "aggregate", "process", "integration", "projection")
+	return enum.String(
+		t,
+		"aggregate",
+		"process",
+		"integration",
+		"projection",
+	)
 }
 
 // RouteCapabilities returns a value that describes the routing capabilities of
@@ -76,7 +82,13 @@ func SwitchByHandlerType(
 	integration func(),
 	projection func(),
 ) {
-	enum.Switch(t, aggregate, process, integration, projection)
+	enum.Switch(
+		t,
+		aggregate,
+		process,
+		integration,
+		projection,
+	)
 }
 
 // MapByHandlerType maps t to a value of type T.
@@ -85,8 +97,20 @@ func SwitchByHandlerType(
 // even if new [HandlerType] values are added in the future.
 //
 // It panics if t is not a valid [HandlerType].
-func MapByHandlerType[T any](t HandlerType, aggregate, process, integration, projection T) T {
-	return enum.Map(t, aggregate, process, integration, projection)
+func MapByHandlerType[T any](
+	t HandlerType,
+	aggregate T,
+	process T,
+	integration T,
+	projection T,
+) T {
+	return enum.Map(
+		t,
+		aggregate,
+		process,
+		integration,
+		projection,
+	)
 }
 
 // SwitchByHandlerTypeOf invokes one of the provided functions based on the

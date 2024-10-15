@@ -134,7 +134,7 @@ func TestProjection_Routes(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: HandlesCommand[pkg.SomeCommandType]`,
+				`projection is invalid: unexpected route: handles-command(pkg.SomeCommandType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
@@ -144,7 +144,7 @@ func TestProjection_Routes(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: ExecutesCommand[pkg.SomeCommandType]`,
+				`projection is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -154,7 +154,7 @@ func TestProjection_Routes(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: RecordsEvent[pkg.SomeEventType]`,
+				`projection is invalid: unexpected route: records-event(pkg.SomeEventType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
@@ -164,7 +164,7 @@ func TestProjection_Routes(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: SchedulesTimeout[pkg.SomeTimeoutType]`,
+				`projection is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
 				Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -236,14 +236,14 @@ func TestProjection_validation(t *testing.T) {
 			"nil projection",
 			`projection is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "HandlesEvent" route`,
+				"\n" + `- expected at least one "handles-event" route`,
 			nil,
 		},
 		{
 			"unconfigured projection",
 			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "HandlesEvent" route`,
+				"\n" + `- expected at least one "handles-event" route`,
 			&ProjectionMessageHandlerStub{},
 		},
 		{
@@ -274,17 +274,17 @@ func TestProjection_validation(t *testing.T) {
 		},
 		{
 			"projection must handle at least one event type",
-			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: expected at least one "HandlesEvent" route`,
+			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: expected at least one "handles-event" route`,
 			&ProjectionMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
-					// <-- MISSING "HandlesEvent" ROUTE
+					// <-- MISSING "handles-event" ROUTE
 				},
 			},
 		},
 		{
 			"projection must not have multiple routes for the same event type",
-			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: multiple "HandlesEvent" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			`projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid: multiple "handles-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			&ProjectionMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

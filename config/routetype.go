@@ -1,6 +1,9 @@
 package config
 
 import (
+	"iter"
+
+	"github.com/dogmatiq/enginekit/internal/enum"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -41,57 +44,90 @@ const (
 )
 
 // RouteTypes returns a list of all [HandlerType] values.
-func RouteTypes() []RouteType {
-	return []RouteType{
-		HandlesCommandRouteType,
-		HandlesEventRouteType,
-		ExecutesCommandRouteType,
-		RecordsEventRouteType,
-		SchedulesTimeoutRouteType,
-	}
+func RouteTypes() iter.Seq[RouteType] {
+	return enum.Range(HandlesCommandRouteType, SchedulesTimeoutRouteType)
 }
 
 // Direction returns the direction in which messages flow for the route type.
 func (r RouteType) Direction() RouteDirection {
-	switch r {
-	case HandlesCommandRouteType, HandlesEventRouteType:
-		return InboundDirection
-	case ExecutesCommandRouteType, RecordsEventRouteType:
-		return OutboundDirection
-	case SchedulesTimeoutRouteType:
-		return InboundDirection | OutboundDirection
-	default:
-		panic("unrecognized route type")
-	}
+	return MapByRouteType(
+		r,
+		InboundDirection,
+		InboundDirection,
+		OutboundDirection,
+		OutboundDirection,
+		InboundDirection|OutboundDirection,
+	)
 }
 
 // MessageKind returns the kind of message that the route type is associated with.
 func (r RouteType) MessageKind() message.Kind {
-	switch r {
-	case HandlesCommandRouteType, ExecutesCommandRouteType:
-		return message.CommandKind
-	case HandlesEventRouteType, RecordsEventRouteType:
-		return message.EventKind
-	case SchedulesTimeoutRouteType:
-		return message.TimeoutKind
-	default:
-		panic("unrecognized route type")
-	}
+	return MapByRouteType(
+		r,
+		message.CommandKind,
+		message.EventKind,
+		message.CommandKind,
+		message.EventKind,
+		message.TimeoutKind,
+	)
 }
 
 func (r RouteType) String() string {
-	switch r {
-	case HandlesCommandRouteType:
-		return "HandlesCommand"
-	case HandlesEventRouteType:
-		return "HandlesEvent"
-	case ExecutesCommandRouteType:
-		return "ExecutesCommand"
-	case RecordsEventRouteType:
-		return "RecordsEvent"
-	case SchedulesTimeoutRouteType:
-		return "SchedulesTimeout"
-	default:
-		panic("unrecognized route type")
-	}
+	return enum.String(
+		r,
+		"handles-command",
+		"handles-event",
+		"executes-command",
+		"records-event",
+		"schedules-timeout",
+	)
+}
+
+// SwitchByRouteType invokes one of the provided functions based on t.
+//
+// It provides a compile-time guarantee that all possible values are handled,
+// even if new [RouteType] values are added in the future.
+//
+// It panics if the function associated with t is nil, or if t is not a valid
+// [RouteType].
+func SwitchByRouteType(
+	t RouteType,
+	handlesCommand func(),
+	handlesEvent func(),
+	executesCommand func(),
+	recordsEvent func(),
+	schedulesTimeout func(),
+) {
+	enum.Switch(
+		t,
+		handlesCommand,
+		handlesEvent,
+		executesCommand,
+		recordsEvent,
+		schedulesTimeout,
+	)
+}
+
+// MapByRouteType maps t to a value of type T.
+//
+// It provides a compile-time guarantee that all possible values are handled,
+// even if new [RouteType] values are added in the future.
+//
+// It panics if t is not a valid [RouteType].
+func MapByRouteType[T any](
+	t RouteType,
+	handlesCommand T,
+	handlesEvent T,
+	executesCommand T,
+	recordsEvent T,
+	schedulesTimeout T,
+) T {
+	return enum.Map(
+		t,
+		handlesCommand,
+		handlesEvent,
+		executesCommand,
+		recordsEvent,
+		schedulesTimeout,
+	)
 }

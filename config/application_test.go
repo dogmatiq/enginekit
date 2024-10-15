@@ -291,7 +291,7 @@ func TestApplication_validation(t *testing.T) {
 		},
 		{
 			"application must not contain invalid handlers",
-			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "HandlesCommand" route`,
+			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid: expected at least one "handles-command" route`,
 			&ApplicationStub{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -299,7 +299,7 @@ func TestApplication_validation(t *testing.T) {
 						ConfigureFunc: func(c dogma.AggregateConfigurer) {
 							c.Identity("aggregate", "fe78acbf-dfd4-490a-bf99-93b6acf9f891")
 							c.Routes(
-								// <-- MISSING "HandlesCommand" ROUTE
+								// <-- MISSING "handles-command" ROUTE
 								dogma.RecordsEvent[EventStub[TypeA]](),
 							)
 						},
@@ -381,7 +381,7 @@ func TestApplication_validation(t *testing.T) {
 		},
 		{
 			"multiple handlers must not handle the same command type",
-			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: handlers have conflicting "HandlesCommand" routes: github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is handled by aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub and integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: handlers have conflicting "handles-command" routes: github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is handled by aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub and integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 			&ApplicationStub{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -408,7 +408,7 @@ func TestApplication_validation(t *testing.T) {
 		},
 		{
 			"multiple handlers must not record the same event type",
-			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: handlers have conflicting "RecordsEvent" routes: github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is recorded by aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub and integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+			`application:github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub is invalid: handlers have conflicting "records-event" routes: github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is recorded by aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub and integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 			&ApplicationStub{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")

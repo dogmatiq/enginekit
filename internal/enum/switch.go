@@ -24,7 +24,7 @@ func Map[E Enum, T any](
 	if result, ok := try(v, cases...); ok {
 		return result
 	}
-	panic(fmt.Sprintf("invalid %T (%d %q)", v, v, v))
+	panic(fmt.Sprintf("invalid %T (%d)", v, v))
 }
 
 // String is a convenience method for implementing [fmt.Stringer]. It is similar
@@ -37,7 +37,7 @@ func String[E Enum](
 	if result, ok := try(v, cases...); ok {
 		return result
 	}
-	return fmt.Sprintf("invalid (%d)", v)
+	return fmt.Sprintf("invalid(%d)", v)
 }
 
 func try[E Enum, T any](

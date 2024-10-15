@@ -6,100 +6,20 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	"github.com/dogmatiq/enginekit/internal/test"
 	. "github.com/dogmatiq/enginekit/message"
 )
 
-func TestSwitchByKind(t *testing.T) {
-	cases := []struct {
-		Kind Kind
-		Want string
-	}{
-		{CommandKind, "command"},
-		{EventKind, "event"},
-		{TimeoutKind, "timeout"},
-	}
-
-	for _, c := range cases {
-		var result string
-
-		SwitchByKind(
-			c.Kind,
-			func() { result = "command" },
-			func() { result = "event" },
-			func() { result = "timeout" },
-		)
-
-		if result != c.Want {
-			t.Fatalf("unexpected result: got %q, want %q", result, c.Want)
-		}
-	}
-
-	t.Run("it panics when the associated function is nil", func(t *testing.T) {
-		cases := []struct {
-			Kind Kind
-			Want string
-		}{
-			{CommandKind, `no case function was provided for "command"`},
-			{EventKind, `no case function was provided for "event"`},
-			{TimeoutKind, `no case function was provided for "timeout"`},
-		}
-
-		for _, c := range cases {
-			func() {
-				defer func() {
-					if got := recover(); got != c.Want {
-						t.Fatalf("unexpected panic: got %q, want %q", got, c.Want)
-					}
-				}()
-
-				SwitchByKind(c.Kind, nil, nil, nil)
-			}()
-		}
-	})
-
-	t.Run("it panics when the kind is invalid", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected a panic")
-			}
-		}()
-
-		SwitchByKind(Kind(-1), nil, nil, nil)
-	})
-}
-
-func TestMapByKind(t *testing.T) {
-	cases := []struct {
-		Kind Kind
-		Want string
-	}{
-		{CommandKind, "command"},
-		{EventKind, "event"},
-		{TimeoutKind, "timeout"},
-	}
-
-	for _, c := range cases {
-		got := MapByKind(
-			c.Kind,
-			"command",
-			"event",
-			"timeout",
-		)
-
-		if got != c.Want {
-			t.Fatalf("unexpected result: got %q, want %q", got, c.Want)
-		}
-	}
-
-	t.Run("it panics when the kind is invalid", func(t *testing.T) {
-		defer func() {
-			if r := recover(); r == nil {
-				t.Fatal("expected a panic")
-			}
-		}()
-
-		MapByKind(Kind(-1), "command", "event", "timeout")
-	})
+func TestKind(t *testing.T) {
+	test.Enum(
+		t,
+		test.EnumParameters[Kind]{
+			InclusiveBegin: CommandKind,
+			InclusiveEnd:   TimeoutKind,
+			Switch:         SwitchByKind,
+			MapToString:    MapByKind[string],
+		},
+	)
 }
 
 func TestSwitchByKindOf(t *testing.T) {
@@ -153,9 +73,9 @@ func TestSwitchByKindOf(t *testing.T) {
 			Message dogma.Message
 			Want    string
 		}{
-			{CommandA1, `no case function was provided for dogma.Command messages`},
-			{EventA1, `no case function was provided for dogma.Event messages`},
-			{TimeoutA1, `no case function was provided for dogma.Timeout messages`},
+			{CommandA1, `no case function was provided for dogma.Command`},
+			{EventA1, `no case function was provided for dogma.Event`},
+			{TimeoutA1, `no case function was provided for dogma.Timeout`},
 		}
 
 		for _, c := range cases {
@@ -215,9 +135,9 @@ func TestMapByKindOf(t *testing.T) {
 			Message dogma.Message
 			Want    string
 		}{
-			{CommandA1, `no case function was provided for dogma.Command messages`},
-			{EventA1, `no case function was provided for dogma.Event messages`},
-			{TimeoutA1, `no case function was provided for dogma.Timeout messages`},
+			{CommandA1, `no case function was provided for dogma.Command`},
+			{EventA1, `no case function was provided for dogma.Event`},
+			{TimeoutA1, `no case function was provided for dogma.Timeout`},
 		}
 
 		for _, c := range cases {
@@ -285,9 +205,9 @@ func TestMapByKindOfWithErr(t *testing.T) {
 			Message dogma.Message
 			Want    string
 		}{
-			{CommandA1, `no case function was provided for dogma.Command messages`},
-			{EventA1, `no case function was provided for dogma.Event messages`},
-			{TimeoutA1, `no case function was provided for dogma.Timeout messages`},
+			{CommandA1, `no case function was provided for dogma.Command`},
+			{EventA1, `no case function was provided for dogma.Event`},
+			{TimeoutA1, `no case function was provided for dogma.Timeout`},
 		}
 
 		for _, c := range cases {

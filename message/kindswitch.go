@@ -49,17 +49,17 @@ func SwitchByKindOf(
 	switch m := m.(type) {
 	case dogma.Command:
 		if command == nil {
-			panic("no case function was provided for dogma.Command messages")
+			panic("no case function was provided for dogma.Command")
 		}
 		command(m)
 	case dogma.Event:
 		if event == nil {
-			panic("no case function was provided for dogma.Event messages")
+			panic("no case function was provided for dogma.Event")
 		}
 		event(m)
 	case dogma.Timeout:
 		if timeout == nil {
-			panic("no case function was provided for dogma.Timeout messages")
+			panic("no case function was provided for dogma.Timeout")
 		}
 		timeout(m)
 	default:

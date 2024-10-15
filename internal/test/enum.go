@@ -4,54 +4,70 @@ import (
 	"fmt"
 	"iter"
 	"reflect"
+	"slices"
 	"testing"
 
 	"github.com/dogmatiq/enginekit/internal/enum"
 )
 
-// EnumParameters is a set of parameters for testing enumeration types.
-type EnumParameters[E enum.Enum] struct {
-	InclusiveBegin, InclusiveEnd E
-	Switch                       any // func(E, ...func())
-	MapToString                  any // func(E, ...func() string)
+// EnumSpec is a set of parameters for testing enumeration types.
+type EnumSpec[E enum.Enum] struct {
+	Range       func() iter.Seq[E]
+	Switch      any // func(E, ...func())
+	MapToString any // func(E, ...func() string)
 }
 
-func (p EnumParameters[E]) cardinality() int {
-	return 1 + int(p.InclusiveEnd-p.InclusiveBegin)
+func (p EnumSpec[E]) cardinality() int {
+	values := slices.Collect(p.Range())
+	return len(values)
 }
 
-func (p EnumParameters[E]) values() iter.Seq[E] {
-	return func(yield func(E) bool) {
-		for v := p.InclusiveBegin; v <= p.InclusiveEnd; v++ {
-			if !yield(v) {
-				return
-			}
-		}
+func (p EnumSpec[E]) begin() (v E) {
+	for v = range p.Range() {
+		break
 	}
+	return v
+}
+
+func (p EnumSpec[E]) end() (v E) {
+	for v = range p.Range() {
+		continue
+	}
+	return v
 }
 
 // Enum is a helper for testing enumeration types.
-func Enum[E enum.Enum](t *testing.T, params EnumParameters[E]) {
-	if params.InclusiveBegin != 0 {
-		t.Fatalf("unexpected begin value: got %d, want 0", params.InclusiveBegin)
-	}
-
-	if params.InclusiveBegin >= params.InclusiveEnd {
-		t.Fatalf("unexpected end value: got %d, want > %d", params.InclusiveEnd, params.InclusiveBegin)
-	}
-
-	t.Run("switch", func(t *testing.T) { enumSwitch(t, params) })
-	t.Run("map", func(t *testing.T) { enumMap(t, params) })
+func Enum[E enum.Enum](t *testing.T, spec EnumSpec[E]) {
+	t.Run("range", func(t *testing.T) { enumRange(t, spec) })
+	t.Run("switch", func(t *testing.T) { enumSwitch(t, spec) })
+	t.Run("map", func(t *testing.T) { enumMap(t, spec) })
 }
 
-func enumSwitch[E enum.Enum](t *testing.T, params EnumParameters[E]) {
-	fn := reflect.ValueOf(params.Switch)
+func enumRange[E enum.Enum](t *testing.T, spec EnumSpec[E]) {
+	var want E
+	empty := true
 
-	if fn.Kind() != reflect.Func {
-		t.Fatalf("unexpected type for switch function: %T", params.Switch)
+	for got := range spec.Range() {
+		empty = false
+		if want != got {
+			t.Fatalf("unexpected value in range: got %d (%s), want %d (%s)", got, got, want, want)
+		}
+		want++
 	}
 
-	arity := 1 + params.cardinality()
+	if empty {
+		t.Fatalf("range function did not yield any values")
+	}
+}
+
+func enumSwitch[E enum.Enum](t *testing.T, spec EnumSpec[E]) {
+	fn := reflect.ValueOf(spec.Switch)
+
+	if fn.Kind() != reflect.Func {
+		t.Fatalf("unexpected type for switch function: %T", spec.Switch)
+	}
+
+	arity := 1 + spec.cardinality()
 	if fn.Type().NumIn() != arity {
 		t.Fatalf("unexpected number of arguments for switch function: got %d, want %d", fn.Type().NumIn(), arity)
 	}
@@ -61,12 +77,12 @@ func enumSwitch[E enum.Enum](t *testing.T, params EnumParameters[E]) {
 	}
 
 	t.Run("it calls the function associated with each case", func(t *testing.T) {
-		for v := range params.values() {
+		for v := range spec.Range() {
 			t.Run(fmt.Sprintf("case #%d", v), func(t *testing.T) {
 				args := []reflect.Value{reflect.ValueOf(v)}
 				called := false
 
-				for x := range params.values() {
+				for x := range spec.Range() {
 					arg := func() { t.Errorf("invoked unexpected case function: got %d, want %d", x, v) }
 					if v == x {
 						arg = func() { called = true }
@@ -84,11 +100,11 @@ func enumSwitch[E enum.Enum](t *testing.T, params EnumParameters[E]) {
 	})
 
 	t.Run("it panics when the associated function is nil", func(t *testing.T) {
-		for v := range params.values() {
+		for v := range spec.Range() {
 			t.Run(fmt.Sprintf("case #%d", v), func(t *testing.T) {
 				args := []reflect.Value{reflect.ValueOf(v)}
 
-				for x := range params.values() {
+				for x := range spec.Range() {
 					arg := func() { t.Errorf("invoked unexpected case function: got %d, want %d", x, v) }
 					if v == x {
 						arg = nil
@@ -110,14 +126,18 @@ func enumSwitch[E enum.Enum](t *testing.T, params EnumParameters[E]) {
 
 	t.Run("it panics when the kind is invalid", func(t *testing.T) {
 		cases := []E{
-			params.InclusiveBegin - 1,
-			params.InclusiveEnd + 1,
+			spec.begin() - 3,
+			spec.begin() - 2,
+			spec.begin() - 1,
+			spec.end() + 1,
+			spec.end() + 2,
+			spec.end() + 3,
 		}
 
 		for _, c := range cases {
 			t.Run(fmt.Sprintf("case #%d", c), func(t *testing.T) {
 				args := []reflect.Value{reflect.ValueOf(c)}
-				for range params.values() {
+				for range spec.Range() {
 					var arg func()
 					args = append(args, reflect.ValueOf(arg))
 				}
@@ -135,14 +155,14 @@ func enumSwitch[E enum.Enum](t *testing.T, params EnumParameters[E]) {
 	})
 }
 
-func enumMap[E enum.Enum](t *testing.T, params EnumParameters[E]) {
-	fn := reflect.ValueOf(params.MapToString)
+func enumMap[E enum.Enum](t *testing.T, spec EnumSpec[E]) {
+	fn := reflect.ValueOf(spec.MapToString)
 
 	if fn.Kind() != reflect.Func {
-		t.Fatalf("unexpected type for map function: %T", params.MapToString)
+		t.Fatalf("unexpected type for map function: %T", spec.MapToString)
 	}
 
-	arity := 1 + params.cardinality()
+	arity := 1 + spec.cardinality()
 	if fn.Type().NumIn() != arity {
 		t.Fatalf("unexpected number of arguments for map function: got %d, want %d", fn.Type().NumIn(), arity)
 	}
@@ -152,11 +172,11 @@ func enumMap[E enum.Enum](t *testing.T, params EnumParameters[E]) {
 	}
 
 	t.Run("it returns the value associated with each case", func(t *testing.T) {
-		for v := range params.values() {
+		for v := range spec.Range() {
 			t.Run(fmt.Sprintf("case #%d", v), func(t *testing.T) {
 				args := []reflect.Value{reflect.ValueOf(v)}
 
-				for x := range params.values() {
+				for x := range spec.Range() {
 					args = append(
 						args,
 						reflect.ValueOf(
@@ -179,15 +199,19 @@ func enumMap[E enum.Enum](t *testing.T, params EnumParameters[E]) {
 
 	t.Run("it panics when the kind is invalid", func(t *testing.T) {
 		cases := []E{
-			params.InclusiveBegin - 1,
-			params.InclusiveEnd + 1,
+			spec.begin() - 3,
+			spec.begin() - 2,
+			spec.begin() - 1,
+			spec.end() + 1,
+			spec.end() + 2,
+			spec.end() + 3,
 		}
 
 		for _, c := range cases {
 			t.Run(fmt.Sprintf("case #%d", c), func(t *testing.T) {
 				args := []reflect.Value{reflect.ValueOf(c)}
 
-				for x := range params.values() {
+				for x := range spec.Range() {
 					args = append(
 						args,
 						reflect.ValueOf(

@@ -2,6 +2,7 @@ package message
 
 import (
 	"fmt"
+	"iter"
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
@@ -27,6 +28,11 @@ const (
 	// messages implement the [dogma.Timeout] interface.
 	TimeoutKind
 )
+
+// Kinds returns a sequence that yields all valid [Kind] values.
+func Kinds() iter.Seq[Kind] {
+	return enum.Range(CommandKind, TimeoutKind)
+}
 
 func (k Kind) String() string {
 	return enum.String(k, "command", "event", "timeout")

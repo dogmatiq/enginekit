@@ -13,11 +13,10 @@ import (
 func TestKind(t *testing.T) {
 	test.Enum(
 		t,
-		test.EnumParameters[Kind]{
-			InclusiveBegin: CommandKind,
-			InclusiveEnd:   TimeoutKind,
-			Switch:         SwitchByKind,
-			MapToString:    MapByKind[string],
+		test.EnumSpec[Kind]{
+			Range:       Kinds,
+			Switch:      SwitchByKind,
+			MapToString: MapByKind[string],
 		},
 	)
 }

@@ -98,7 +98,7 @@ func TestIntegration_Identity(t *testing.T) {
 	})
 }
 
-func TestIntegration_Routes(t *testing.T) {
+func TestIntegration_RouteSet(t *testing.T) {
 	t.Run("it returns the normalized routes", func(t *testing.T) {
 		h := &IntegrationMessageHandlerStub{
 			ConfigureFunc: func(c dogma.IntegrationConfigurer) {
@@ -184,6 +184,35 @@ func TestIntegration_Routes(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestIntegration_IsDisabled(t *testing.T) {
+	disable := false
+
+	h := &IntegrationMessageHandlerStub{
+		ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesCommand[CommandStub[TypeA]](),
+			)
+			if disable {
+				c.Disable()
+			}
+		},
+	}
+
+	cfg := runtimeconfig.FromIntegration(h)
+
+	if cfg.IsDisabled() {
+		t.Fatal("did not expect handler to be disabled")
+	}
+
+	disable = true
+	cfg = runtimeconfig.FromIntegration(h)
+
+	if !cfg.IsDisabled() {
+		t.Fatal("expected handler to be disabled")
+	}
 }
 
 func TestIntegration_Interface(t *testing.T) {

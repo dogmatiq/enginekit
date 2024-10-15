@@ -98,7 +98,7 @@ func TestProjection_Identity(t *testing.T) {
 	})
 }
 
-func TestProjection_Routes(t *testing.T) {
+func TestProjection_RouteSet(t *testing.T) {
 	t.Run("it returns the normalized routes", func(t *testing.T) {
 		h := &ProjectionMessageHandlerStub{
 			ConfigureFunc: func(c dogma.ProjectionConfigurer) {
@@ -192,6 +192,35 @@ func TestProjection_Routes(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestProjection_IsDisabled(t *testing.T) {
+	disable := false
+
+	h := &ProjectionMessageHandlerStub{
+		ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesEvent[EventStub[TypeA]](),
+			)
+			if disable {
+				c.Disable()
+			}
+		},
+	}
+
+	cfg := runtimeconfig.FromProjection(h)
+
+	if cfg.IsDisabled() {
+		t.Fatal("did not expect handler to be disabled")
+	}
+
+	disable = true
+	cfg = runtimeconfig.FromProjection(h)
+
+	if !cfg.IsDisabled() {
+		t.Fatal("expected handler to be disabled")
+	}
 }
 
 func TestProjection_Interface(t *testing.T) {

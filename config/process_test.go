@@ -102,7 +102,7 @@ func TestProcess_Identity(t *testing.T) {
 	})
 }
 
-func TestProcess_Routes(t *testing.T) {
+func TestProcess_RouteSet(t *testing.T) {
 	t.Run("it returns the normalized routes", func(t *testing.T) {
 		h := &ProcessMessageHandlerStub{
 			ConfigureFunc: func(c dogma.ProcessConfigurer) {
@@ -180,6 +180,36 @@ func TestProcess_Routes(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestProcess_IsDisabled(t *testing.T) {
+	disable := false
+
+	h := &ProcessMessageHandlerStub{
+		ConfigureFunc: func(c dogma.ProcessConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesEvent[EventStub[TypeA]](),
+				dogma.ExecutesCommand[CommandStub[TypeA]](),
+			)
+			if disable {
+				c.Disable()
+			}
+		},
+	}
+
+	cfg := runtimeconfig.FromProcess(h)
+
+	if cfg.IsDisabled() {
+		t.Fatal("did not expect handler to be disabled")
+	}
+
+	disable = true
+	cfg = runtimeconfig.FromProcess(h)
+
+	if !cfg.IsDisabled() {
+		t.Fatal("expected handler to be disabled")
+	}
 }
 
 func TestProcess_Interface(t *testing.T) {

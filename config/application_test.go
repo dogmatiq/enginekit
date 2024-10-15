@@ -82,7 +82,7 @@ func TestApplication_Identity(t *testing.T) {
 	})
 }
 
-func TestApplication_Routes(t *testing.T) {
+func TestApplication_RouteSet(t *testing.T) {
 	t.Run("it returns the normalized routes", func(t *testing.T) {
 		app := &ApplicationStub{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {

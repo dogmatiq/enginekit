@@ -102,7 +102,7 @@ func TestAggregate_Identity(t *testing.T) {
 	})
 }
 
-func TestAggregate_Routes(t *testing.T) {
+func TestAggregate_RouteSet(t *testing.T) {
 	t.Run("it returns the normalized routes", func(t *testing.T) {
 		h := &AggregateMessageHandlerStub{
 			ConfigureFunc: func(c dogma.AggregateConfigurer) {
@@ -188,6 +188,36 @@ func TestAggregate_Routes(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestAggregate_IsDisabled(t *testing.T) {
+	disable := false
+
+	h := &AggregateMessageHandlerStub{
+		ConfigureFunc: func(c dogma.AggregateConfigurer) {
+			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+			c.Routes(
+				dogma.HandlesCommand[CommandStub[TypeA]](),
+				dogma.RecordsEvent[EventStub[TypeA]](),
+			)
+			if disable {
+				c.Disable()
+			}
+		},
+	}
+
+	cfg := runtimeconfig.FromAggregate(h)
+
+	if cfg.IsDisabled() {
+		t.Fatal("did not expect handler to be disabled")
+	}
+
+	disable = true
+	cfg = runtimeconfig.FromAggregate(h)
+
+	if !cfg.IsDisabled() {
+		t.Fatal("expected handler to be disabled")
+	}
 }
 
 func TestAggregate_Interface(t *testing.T) {

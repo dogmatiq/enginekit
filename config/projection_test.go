@@ -290,13 +290,13 @@ func TestProjection_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithImplementations() option",
+			Name: "missing implementations using WithRuntimeValues() option",
 			Expect: `projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.ProjectionMessageHandler value is not available` +
 				"\n" + `- missing implementation: dogma.ProjectionDeliveryPolicy value is not available` +
 				"\n" + `- handles-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithImplementations(),
+				WithRuntimeValues(),
 			},
 			Component: &Projection{
 				AsConfigured: ProjectionAsConfigured{

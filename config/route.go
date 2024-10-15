@@ -89,7 +89,7 @@ func (r Route) normalize(ctx *normalizeContext) Component {
 		}
 
 		r.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
-	} else if ctx.Options.RequireImplementations {
+	} else if ctx.Options.RequireValues {
 		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[message.Type]()})
 	}
 

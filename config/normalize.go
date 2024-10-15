@@ -76,8 +76,8 @@ func newFinalizeContext(c Component) *normalizeContext {
 
 // normalizeOptions is the result of applying a set of [NormalizeOption] values.
 type normalizeOptions struct {
-	PanicOnFailure         bool
-	RequireImplementations bool
+	PanicOnFailure bool
+	RequireValues  bool
 }
 
 func (c *normalizeContext) NewChild(com Component) *normalizeContext {

@@ -279,12 +279,12 @@ func TestIntegration_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithImplementations() option",
+			Name: "missing implementations using WithRuntimeValues() option",
 			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.IntegrationMessageHandler value is not available` +
 				"\n" + `- handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithImplementations(),
+				WithRuntimeValues(),
 			},
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{

@@ -292,13 +292,13 @@ func TestAggregate_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithImplementations() option",
+			Name: "missing implementations using WithRuntimeValues() option",
 			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.AggregateMessageHandler value is not available` +
 				"\n" + `- handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
 				"\n" + `- records-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithImplementations(),
+				WithRuntimeValues(),
 			},
 			Component: &Aggregate{
 				AsConfigured: AggregateAsConfigured{

@@ -44,7 +44,7 @@ func normalizeValue[T any](
 		}
 
 		inner.TypeName = optional.Some(actualTypeName)
-	} else if ctx.Options.RequireImplementations {
+	} else if ctx.Options.RequireValues {
 		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[T]()})
 	}
 

@@ -7,7 +7,7 @@ import (
 
 // ImplementationUnavailableError indicates that a [Value] is invalid
 // because it does not contain some runtime value or type information and the
-// [WithImplementations] option was specified during normalization.
+// [WithRuntimeValues] option was specified during normalization.
 type ImplementationUnavailableError struct {
 	MissingType reflect.Type
 }

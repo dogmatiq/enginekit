@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/typename"
 )
 
 // Name is the fully-qualified name of a Go type that implements
@@ -28,5 +29,5 @@ func NameOf(m dogma.Message) Name {
 
 func nameFromReflect(r reflect.Type) Name {
 	guardAgainstNonMessage(r)
-	return Name(r.PkgPath() + "." + r.Name())
+	return Name(typename.Get(r))
 }

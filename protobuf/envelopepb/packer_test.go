@@ -6,7 +6,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
-	"github.com/dogmatiq/enginekit/internal/test"
+	. "github.com/dogmatiq/enginekit/internal/test"
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
@@ -54,7 +54,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		Data:              []byte(`{"content":"A1"}`),
 	}
 
-	test.Expect(
+	Expect(
 		t,
 		"unexpected envelope",
 		got,
@@ -66,7 +66,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	test.Expect(
+	Expect(
 		t,
 		"unexpected message",
 		gotMessage,

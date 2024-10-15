@@ -129,7 +129,7 @@ func TestProjection_RouteSet(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`projection is invalid: route is invalid: configuration includes values that could not be evaluated`,
+				`projection is invalid: route is invalid: could not evaluate entire configuration`,
 				&Route{},
 			},
 			{

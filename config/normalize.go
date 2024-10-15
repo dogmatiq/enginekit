@@ -43,16 +43,12 @@ func normalize[T Component](ctx *normalizationContext, components ...T) {
 func reportFidelityErrors(ctx *normalizationContext, c Component) {
 	f := c.Fidelity()
 
-	if f.IsPartial {
-		ctx.Fail(PartialError{})
-	}
-
-	if f.IsSpeculative {
+	if f&Speculative != 0 {
 		ctx.Fail(SpeculativeError{})
 	}
 
-	if f.IsUnresolved {
-		ctx.Fail(UnresolvedError{})
+	if f&Incomplete != 0 {
+		ctx.Fail(IncompleteError{})
 	}
 }
 

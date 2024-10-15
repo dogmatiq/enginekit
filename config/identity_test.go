@@ -154,19 +154,8 @@ func TestIdentity_validation(t *testing.T) {
 		},
 		{
 			Name:      "empty",
-			Expect:    `identity is invalid: configuration includes values that could not be evaluated`,
+			Expect:    `identity is invalid: could not evaluate entire configuration`,
 			Component: &Identity{},
-		},
-		{
-			Name:   "partial",
-			Expect: `identity:name/e6b691dd-731c-4c14-8e1c-1622381202dc is invalid: could not evaluate entire configuration`,
-			Component: &Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name:     optional.Some("name"),
-					Key:      optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
-					Fidelity: Fidelity{IsPartial: true},
-				},
-			},
 		},
 		{
 			Name:   "spectulative",
@@ -175,22 +164,22 @@ func TestIdentity_validation(t *testing.T) {
 				AsConfigured: IdentityAsConfigured{
 					Name:     optional.Some("name"),
 					Key:      optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
-					Fidelity: Fidelity{IsSpeculative: true},
+					Fidelity: Speculative,
 				},
 			},
 		},
 		{
-			Name:   "unresolved",
-			Expect: `identity:name/e6b691dd-731c-4c14-8e1c-1622381202dc is invalid: configuration includes values that could not be evaluated`,
+			Name:   "incomplete",
+			Expect: `identity:name/e6b691dd-731c-4c14-8e1c-1622381202dc is invalid: could not evaluate entire configuration`,
 			Component: &Identity{
 				// It's possibly non-sensical to have an identity that contains
-				// both it's name and key be considered unresolved, but this
+				// both it's name and key be considered incomplete, but this
 				// allows us to represent a case where the name and key are
 				// build dynamically and we don't have the _entire_ string.
 				AsConfigured: IdentityAsConfigured{
 					Name:     optional.Some("name"),
 					Key:      optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
-					Fidelity: Fidelity{IsUnresolved: true},
+					Fidelity: Incomplete,
 				},
 			},
 		},

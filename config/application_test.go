@@ -143,7 +143,7 @@ func TestApplication_RouteSet(t *testing.T) {
 
 		ExpectPanic(
 			t,
-			`application is invalid: projection is invalid: route is invalid: configuration includes values that could not be evaluated`,
+			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
 			func() {
 				cfg.RouteSet()
 			},

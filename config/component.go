@@ -52,25 +52,31 @@ type Handler interface {
 	routes() []*Route
 }
 
-// Fidelity describes how well a [Component] configuration represents the actual
-// configuration that would be when running an application.
-type Fidelity struct {
-	// IsPartial is true if some configuration logic was not applied when
-	// building the configuration.
+// Fidelity is a bit-field that describes how well a [Component] configuration
+// represents the actual configuration that would be used at runtime.
+type Fidelity int
+
+const (
+	// Immaculate is the [Fidelity] value that indicates the configuration is an
+	// exact match for the actual configuration that would be used at runtime.
+	Immaculate Fidelity = 0
+
+	// Speculative is a [Fidelity] flag that indicates that the [Component] is
+	// only present in the configuration under certain conditions, and that
+	// those conditions could not be evaluated at configuration time.
+	Speculative Fidelity = 1 << iota
+
+	// Incomplete is a [Fidelity] flag that indicates that the [Component] has
+	// some configuration that could not be resolved accurately at configuration
+	// time.
 	//
-	// It is false if all of the _available_ configuration logic was applied.
-	// This does not imply that all _mandatory_ configuration is present.
-	IsPartial bool
-
-	// IsSpeculative is true if the component is only included in the
-	// configuration under certain conditions and those conditions could not be
-	// evaluated at the time the configuration was built.
-	IsSpeculative bool
-
-	// IsUnresolved is true if any of the component's configuration values
-	// could not be determined at the time the configuration was built.
-	IsUnresolved bool
-}
+	// Most commonly this is occurs during static analysis of code that uses
+	// interfaces that cannot be followed statically.
+	//
+	// Its absence means that all of the _available_ configuration logic was
+	// applied; it does not imply that all _mandatory_ configuration is present.
+	Incomplete
+)
 
 var (
 	_ Component = (*Identity)(nil)

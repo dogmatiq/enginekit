@@ -137,7 +137,7 @@ func TestProcess_RouteSet(t *testing.T) {
 		}{
 			{
 				"empty route",
-				`process is invalid: route is invalid: configuration includes values that could not be evaluated`,
+				`process is invalid: route is invalid: could not evaluate entire configuration`,
 				&Route{},
 			},
 			{

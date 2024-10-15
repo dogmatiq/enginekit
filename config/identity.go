@@ -77,7 +77,7 @@ func (i *Identity) normalize(ctx *normalizationContext) {
 			ctx.Fail(InvalidIdentityNameError{n})
 		}
 	} else {
-		i.AsConfigured.Fidelity.IsUnresolved = true
+		i.AsConfigured.Fidelity |= Incomplete
 	}
 
 	if k, ok := i.AsConfigured.Key.TryGet(); ok {
@@ -87,7 +87,7 @@ func (i *Identity) normalize(ctx *normalizationContext) {
 			i.AsConfigured.Key = optional.Some(id.AsString())
 		}
 	} else {
-		i.AsConfigured.Fidelity.IsUnresolved = true
+		i.AsConfigured.Fidelity |= Incomplete
 	}
 }
 

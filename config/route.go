@@ -74,11 +74,11 @@ func (r *Route) normalize(ctx *normalizationContext) {
 	messageType, messageTypeOK := r.AsConfigured.MessageType.TryGet()
 
 	if !routeTypeOK {
-		r.AsConfigured.Fidelity.IsUnresolved = true
+		r.AsConfigured.Fidelity |= Incomplete
 	}
 
 	if !typeNameOK {
-		r.AsConfigured.Fidelity.IsUnresolved = true
+		r.AsConfigured.Fidelity |= Incomplete
 	}
 
 	if messageTypeOK {

@@ -29,7 +29,7 @@ func normalizeValue[T any](
 	value, valueOK := v.Value.TryGet()
 
 	if !typeNameOK {
-		f.IsPartial = true
+		*f |= Incomplete
 	}
 
 	if valueOK {

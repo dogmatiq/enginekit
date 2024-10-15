@@ -42,16 +42,6 @@ func (e ComponentError) Unwrap() []error {
 	return e.Causes
 }
 
-// PartialError indicates that a [Component] has only partial
-// configuration.
-//
-// See [Fidelity] for more information.
-type PartialError struct{}
-
-func (e PartialError) Error() string {
-	return "could not evaluate entire configuration"
-}
-
 // SpeculativeError indicates that a [Component]'s inclusion in the
 // configuration is subject to some condition that could not be evaluated at the
 // time the configuration was built.
@@ -63,12 +53,12 @@ func (e SpeculativeError) Error() string {
 	return "conditions for the component's inclusion in the configuration could not be evaluated"
 }
 
-// UnresolvedError indicates that a [Component] is contains values that could
+// IncompleteError indicates that a [Component] is contains values that could
 // not be resolved at the time the configuration was built.
 //
 // See [Fidelity] for more information.
-type UnresolvedError struct{}
+type IncompleteError struct{}
 
-func (e UnresolvedError) Error() string {
-	return "configuration includes values that could not be evaluated"
+func (e IncompleteError) Error() string {
+	return "could not evaluate entire configuration"
 }

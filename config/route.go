@@ -3,6 +3,7 @@ package config
 import (
 	"cmp"
 	"reflect"
+	"strings"
 
 	"github.com/dogmatiq/enginekit/collections/maps"
 	"github.com/dogmatiq/enginekit/internal/typename"
@@ -51,17 +52,22 @@ func (r *Route) Fidelity() Fidelity {
 }
 
 func (r *Route) String() string {
-	s := "route"
+	w := &strings.Builder{}
+
+	w.WriteString("route")
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
-		s = rt.String()
+		w.WriteByte(':')
+		w.WriteString(rt.String())
 	}
 
 	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
-		s += "(" + mt + ")"
+		w.WriteByte('(')
+		w.WriteString(mt)
+		w.WriteByte(')')
 	}
 
-	return s
+	return w.String()
 }
 
 func (r *Route) clone() Component {

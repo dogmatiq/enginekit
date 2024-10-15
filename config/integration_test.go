@@ -136,7 +136,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`integration is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
+				`integration is invalid: unexpected route: route:executes-command(pkg.SomeCommandType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -146,7 +146,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`integration is invalid: unexpected route: handles-event(pkg.SomeEventType)`,
+				`integration is invalid: unexpected route: route:handles-event(pkg.SomeEventType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
@@ -156,7 +156,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`integration is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
+				`integration is invalid: unexpected route: route:schedules-timeout(pkg.SomeTimeoutType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -280,7 +280,7 @@ func TestIntegration_validation(t *testing.T) {
 			Name: "missing implementations using WithRuntimeValues() option",
 			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.IntegrationMessageHandler value is not available` +
-				"\n" + `- handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+				"\n" + `- route:handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
 				WithRuntimeValues(),
 			},

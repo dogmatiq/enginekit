@@ -142,7 +142,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesCommand route",
-				`process is invalid: unexpected route: handles-command(pkg.SomeCommandType)`,
+				`process is invalid: unexpected route: route:handles-command(pkg.SomeCommandType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
@@ -152,7 +152,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected RecordsEvent route",
-				`process is invalid: unexpected route: records-event(pkg.SomeEventType)`,
+				`process is invalid: unexpected route: route:records-event(pkg.SomeEventType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
@@ -286,8 +286,8 @@ func TestProcess_validation(t *testing.T) {
 			Name: "missing implementations using WithRuntimeValues() option",
 			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.ProcessMessageHandler value is not available` +
-				"\n" + `- handles-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
-				"\n" + `- executes-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+				"\n" + `- route:handles-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
+				"\n" + `- route:executes-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
 				WithRuntimeValues(),
 			},

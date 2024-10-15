@@ -189,7 +189,7 @@ func FilterByMessageDirection(directions ...RouteDirection) RouteSetFilter {
 	return func(f *routeSetFilters) {
 		f.messagePredicates = append(
 			f.messagePredicates,
-			func(t message.Type, routes map[RouteType]map[Handler]*Route) bool {
+			func(_ message.Type, routes map[RouteType]map[Handler]*Route) bool {
 				var d RouteDirection
 
 				for rt := range routes {

@@ -134,7 +134,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: handles-command(pkg.SomeCommandType)`,
+				`projection is invalid: unexpected route: route:handles-command(pkg.SomeCommandType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
@@ -144,7 +144,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
+				`projection is invalid: unexpected route: route:executes-command(pkg.SomeCommandType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -154,7 +154,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: records-event(pkg.SomeEventType)`,
+				`projection is invalid: unexpected route: route:records-event(pkg.SomeEventType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
@@ -164,7 +164,7 @@ func TestProjection_RouteSet(t *testing.T) {
 			},
 			{
 				"",
-				`projection is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
+				`projection is invalid: unexpected route: route:schedules-timeout(pkg.SomeTimeoutType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -292,7 +292,7 @@ func TestProjection_validation(t *testing.T) {
 			Expect: `projection:github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.ProjectionMessageHandler value is not available` +
 				"\n" + `- missing implementation: dogma.ProjectionDeliveryPolicy value is not available` +
-				"\n" + `- handles-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+				"\n" + `- route:handles-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
 				WithRuntimeValues(),
 			},

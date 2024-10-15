@@ -140,7 +140,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`aggregate is invalid: unexpected route: executes-command(pkg.SomeCommandType)`,
+				`aggregate is invalid: unexpected route: route:executes-command(pkg.SomeCommandType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -150,7 +150,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`aggregate is invalid: unexpected route: handles-event(pkg.SomeEventType)`,
+				`aggregate is invalid: unexpected route: route:handles-event(pkg.SomeEventType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
@@ -160,7 +160,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`aggregate is invalid: unexpected route: schedules-timeout(pkg.SomeTimeoutType)`,
+				`aggregate is invalid: unexpected route: route:schedules-timeout(pkg.SomeTimeoutType)`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -293,8 +293,8 @@ func TestAggregate_validation(t *testing.T) {
 			Name: "missing implementations using WithRuntimeValues() option",
 			Expect: `aggregate:github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub is invalid:` +
 				"\n" + `- missing implementation: dogma.AggregateMessageHandler value is not available` +
-				"\n" + `- handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
-				"\n" + `- records-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+				"\n" + `- route:handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
+				"\n" + `- route:records-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
 			Options: []NormalizeOption{
 				WithRuntimeValues(),
 			},

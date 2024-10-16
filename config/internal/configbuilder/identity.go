@@ -34,9 +34,15 @@ func (b *IdentityBuilder) Edit(fn func(*config.IdentityAsConfigured)) *IdentityB
 	return b
 }
 
+// UpdateFidelity merges f with the current fidelity of the identity.
+func (b *IdentityBuilder) UpdateFidelity(f config.Fidelity) *IdentityBuilder {
+	b.target.AsConfigured.Fidelity |= f
+	return b
+}
+
 // Done completes the configuration of the identity.
-func (b *IdentityBuilder) Done(f config.Fidelity) *config.Identity {
-	if f&config.Incomplete == 0 {
+func (b *IdentityBuilder) Done() *config.Identity {
+	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
 		if !b.target.AsConfigured.Name.IsPresent() {
 			panic("identity must have a name or be marked as incomplete")
 		}
@@ -45,8 +51,6 @@ func (b *IdentityBuilder) Done(f config.Fidelity) *config.Identity {
 			panic("identity must have a key or be marked as incomplete")
 		}
 	}
-
-	b.target.AsConfigured.Fidelity = f
 
 	if b.appendTo != nil {
 		*b.appendTo = append(*b.appendTo, &b.target)

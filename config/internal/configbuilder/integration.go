@@ -37,11 +37,10 @@ func (b *IntegrationBuilder) AddIdentity() *IdentityBuilder {
 
 // BuildIdentity calls fn which configures a [config.Identity] that is added to
 // the handler.
-func (b *IntegrationBuilder) BuildIdentity(
-	fn func(*IdentityBuilder) config.Fidelity,
-) *IntegrationBuilder {
+func (b *IntegrationBuilder) BuildIdentity(fn func(*IdentityBuilder)) *IntegrationBuilder {
 	x := b.AddIdentity()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
@@ -57,9 +56,15 @@ func (b *IntegrationBuilder) Edit(fn func(*config.IntegrationAsConfigured)) *Int
 	return b
 }
 
+// UpdateFidelity merges f with the current fidelity of the handler.
+func (b *IntegrationBuilder) UpdateFidelity(f config.Fidelity) *IntegrationBuilder {
+	b.target.AsConfigured.Fidelity |= f
+	return b
+}
+
 // Done completes the configuration of the handler.
-func (b *IntegrationBuilder) Done(f config.Fidelity) *config.Integration {
-	if f&config.Incomplete == 0 {
+func (b *IntegrationBuilder) Done() *config.Integration {
+	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
 		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
 			panic("handler must have a source or be marked as incomplete")
 		}
@@ -67,8 +72,6 @@ func (b *IntegrationBuilder) Done(f config.Fidelity) *config.Integration {
 			panic("handler must be known to be enabled or disabled, or be marked as incomplete")
 		}
 	}
-
-	b.target.AsConfigured.Fidelity = f
 
 	if b.appendTo != nil {
 		*b.appendTo = append(*b.appendTo, &b.target)

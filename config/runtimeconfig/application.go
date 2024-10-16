@@ -30,50 +30,46 @@ func (c *applicationConfigurer) Identity(name, key string) {
 		AddIdentity().
 		SetName(name).
 		SetKey(key).
-		Done(config.Immaculate)
+		Done()
 }
 
 func (c *applicationConfigurer) RegisterAggregate(h dogma.AggregateMessageHandler, _ ...dogma.RegisterAggregateOption) {
 	c.b.BuildAggregate(
-		func(b *configbuilder.AggregateBuilder) config.Fidelity {
+		func(b *configbuilder.AggregateBuilder) {
 			b.SetSource(h)
 			b.SetDisabled(false)
 			h.Configure(&aggregateConfigurer{b})
-			return config.Immaculate
 		},
 	)
 }
 
 func (c *applicationConfigurer) RegisterProcess(h dogma.ProcessMessageHandler, _ ...dogma.RegisterProcessOption) {
 	c.b.BuildProcess(
-		func(b *configbuilder.ProcessBuilder) config.Fidelity {
+		func(b *configbuilder.ProcessBuilder) {
 			b.SetSource(h)
 			b.SetDisabled(false)
 			h.Configure(&processConfigurer{b})
-			return config.Immaculate
 		},
 	)
 }
 
 func (c *applicationConfigurer) RegisterIntegration(h dogma.IntegrationMessageHandler, _ ...dogma.RegisterIntegrationOption) {
 	c.b.BuildIntegration(
-		func(b *configbuilder.IntegrationBuilder) config.Fidelity {
+		func(b *configbuilder.IntegrationBuilder) {
 			b.SetSource(h)
 			b.SetDisabled(false)
 			h.Configure(&integrationConfigurer{b})
-			return config.Immaculate
 		},
 	)
 }
 
 func (c *applicationConfigurer) RegisterProjection(h dogma.ProjectionMessageHandler, _ ...dogma.RegisterProjectionOption) {
 	c.b.BuildProjection(
-		func(b *configbuilder.ProjectionBuilder) config.Fidelity {
+		func(b *configbuilder.ProjectionBuilder) {
 			b.SetSource(h)
 			b.SetDisabled(false)
 			b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
 			h.Configure(&projectionConfigurer{b})
-			return config.Immaculate
 		},
 	)
 }

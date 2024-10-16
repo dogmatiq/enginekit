@@ -12,14 +12,14 @@ func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
 	b := configbuilder.Process()
 
 	if h == nil {
-		return b.Done(config.Incomplete)
+		b.UpdateFidelity(config.Incomplete)
+	} else {
+		b.SetDisabled(false)
+		b.SetSource(h)
+		h.Configure(&processConfigurer{b})
 	}
 
-	b.SetDisabled(false)
-	b.SetSource(h)
-	h.Configure(&processConfigurer{b})
-
-	return b.Done(config.Immaculate)
+	return b.Done()
 }
 
 type processConfigurer struct {
@@ -31,7 +31,7 @@ func (c *processConfigurer) Identity(name, key string) {
 		AddIdentity().
 		SetName(name).
 		SetKey(key).
-		Done(config.Immaculate)
+		Done()
 }
 
 func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {

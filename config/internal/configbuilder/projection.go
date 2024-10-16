@@ -38,11 +38,10 @@ func (b *ProjectionBuilder) AddIdentity() *IdentityBuilder {
 
 // BuildIdentity calls fn which configures a [config.Identity] that is added to
 // the handler.
-func (b *ProjectionBuilder) BuildIdentity(
-	fn func(*IdentityBuilder) config.Fidelity,
-) *ProjectionBuilder {
+func (b *ProjectionBuilder) BuildIdentity(fn func(*IdentityBuilder)) *ProjectionBuilder {
 	x := b.AddIdentity()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
@@ -89,9 +88,15 @@ func (b *ProjectionBuilder) Edit(fn func(*config.ProjectionAsConfigured)) *Proje
 	return b
 }
 
+// UpdateFidelity merges f with the current fidelity of the handler.
+func (b *ProjectionBuilder) UpdateFidelity(f config.Fidelity) *ProjectionBuilder {
+	b.target.AsConfigured.Fidelity |= f
+	return b
+}
+
 // Done completes the configuration of the handler.
-func (b *ProjectionBuilder) Done(f config.Fidelity) *config.Projection {
-	if f&config.Incomplete == 0 {
+func (b *ProjectionBuilder) Done() *config.Projection {
+	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
 		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
 			panic("handler must have a source or be marked as incomplete")
 		}
@@ -99,8 +104,6 @@ func (b *ProjectionBuilder) Done(f config.Fidelity) *config.Projection {
 			panic("handler must be known to be enabled or disabled, or be marked as incomplete")
 		}
 	}
-
-	b.target.AsConfigured.Fidelity = f
 
 	if b.appendTo != nil {
 		*b.appendTo = append(*b.appendTo, &b.target)

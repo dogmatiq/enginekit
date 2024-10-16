@@ -12,14 +12,14 @@ func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
 	b := configbuilder.Integration()
 
 	if h == nil {
-		return b.Done(config.Incomplete)
+		b.UpdateFidelity(config.Incomplete)
+	} else {
+		b.SetDisabled(false)
+		b.SetSource(h)
+		h.Configure(&integrationConfigurer{b})
 	}
 
-	b.SetDisabled(false)
-	b.SetSource(h)
-	h.Configure(&integrationConfigurer{b})
-
-	return b.Done(config.Immaculate)
+	return b.Done()
 }
 
 type integrationConfigurer struct {
@@ -31,7 +31,7 @@ func (c *integrationConfigurer) Identity(name, key string) {
 		AddIdentity().
 		SetName(name).
 		SetKey(key).
-		Done(config.Immaculate)
+		Done()
 }
 
 func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {

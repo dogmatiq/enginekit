@@ -12,14 +12,14 @@ func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
 	b := configbuilder.Aggregate()
 
 	if h == nil {
-		return b.Done(config.Incomplete)
+		b.UpdateFidelity(config.Incomplete)
+	} else {
+		b.SetDisabled(false)
+		b.SetSource(h)
+		h.Configure(&aggregateConfigurer{b})
 	}
 
-	b.SetDisabled(false)
-	b.SetSource(h)
-	h.Configure(&aggregateConfigurer{b})
-
-	return b.Done(config.Immaculate)
+	return b.Done()
 }
 
 type aggregateConfigurer struct {
@@ -31,7 +31,7 @@ func (c *aggregateConfigurer) Identity(name, key string) {
 		AddIdentity().
 		SetName(name).
 		SetKey(key).
-		Done(config.Immaculate)
+		Done()
 }
 
 func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {

@@ -37,10 +37,11 @@ func (b *ApplicationBuilder) AddIdentity() *IdentityBuilder {
 // BuildIdentity calls fn which configures a [config.Identity] that is added to
 // the application.
 func (b *ApplicationBuilder) BuildIdentity(
-	fn func(*IdentityBuilder) config.Fidelity,
+	fn func(*IdentityBuilder),
 ) *ApplicationBuilder {
 	x := b.AddIdentity()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
@@ -52,11 +53,10 @@ func (b *ApplicationBuilder) AddAggregate() *AggregateBuilder {
 
 // BuildAggregate calls fn which configures a [config.Aggregate] that is added
 // to the application.
-func (b *ApplicationBuilder) BuildAggregate(
-	fn func(*AggregateBuilder) config.Fidelity,
-) *ApplicationBuilder {
+func (b *ApplicationBuilder) BuildAggregate(fn func(*AggregateBuilder)) *ApplicationBuilder {
 	x := b.AddAggregate()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
@@ -68,11 +68,10 @@ func (b *ApplicationBuilder) AddProcess() *ProcessBuilder {
 
 // BuildProcess calls fn which configures a [config.Process] that is added to
 // the application.
-func (b *ApplicationBuilder) BuildProcess(
-	fn func(*ProcessBuilder) config.Fidelity,
-) *ApplicationBuilder {
+func (b *ApplicationBuilder) BuildProcess(fn func(*ProcessBuilder)) *ApplicationBuilder {
 	x := b.AddProcess()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
@@ -84,11 +83,10 @@ func (b *ApplicationBuilder) AddIntegration() *IntegrationBuilder {
 
 // BuildIntegration calls fn which configures a [config.Integration] that is
 // added to the application.
-func (b *ApplicationBuilder) BuildIntegration(
-	fn func(*IntegrationBuilder) config.Fidelity,
-) *ApplicationBuilder {
+func (b *ApplicationBuilder) BuildIntegration(fn func(*IntegrationBuilder)) *ApplicationBuilder {
 	x := b.AddIntegration()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
@@ -100,17 +98,22 @@ func (b *ApplicationBuilder) AddProjection() *ProjectionBuilder {
 
 // BuildProjection calls fn which configures a [config.Projection] that is added
 // to the application.
-func (b *ApplicationBuilder) BuildProjection(
-	fn func(*ProjectionBuilder) config.Fidelity,
-) *ApplicationBuilder {
+func (b *ApplicationBuilder) BuildProjection(fn func(*ProjectionBuilder)) *ApplicationBuilder {
 	x := b.AddProjection()
-	x.Done(fn(x))
+	fn(x)
+	x.Done()
 	return b
 }
 
 // Edit calls fn, which can apply arbitrary changes to the application.
 func (b *ApplicationBuilder) Edit(fn func(*config.ApplicationAsConfigured)) *ApplicationBuilder {
 	fn(&b.target.AsConfigured)
+	return b
+}
+
+// UpdateFidelity merges f with the current fidelity of the application.
+func (b *ApplicationBuilder) UpdateFidelity(f config.Fidelity) *ApplicationBuilder {
+	b.target.AsConfigured.Fidelity |= f
 	return b
 }
 

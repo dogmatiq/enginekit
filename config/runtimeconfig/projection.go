@@ -12,15 +12,15 @@ func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
 	b := configbuilder.Projection()
 
 	if h == nil {
-		return b.Done(config.Incomplete)
+		b.UpdateFidelity(config.Incomplete)
+	} else {
+		b.SetDisabled(false)
+		b.SetSource(h)
+		b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
+		h.Configure(&projectionConfigurer{b})
 	}
 
-	b.SetDisabled(false)
-	b.SetSource(h)
-	b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
-	h.Configure(&projectionConfigurer{b})
-
-	return b.Done(config.Immaculate)
+	return b.Done()
 }
 
 type projectionConfigurer struct {
@@ -32,7 +32,7 @@ func (c *projectionConfigurer) Identity(name, key string) {
 		AddIdentity().
 		SetName(name).
 		SetKey(key).
-		Done(config.Immaculate)
+		Done()
 }
 
 func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {

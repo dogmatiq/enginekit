@@ -118,14 +118,12 @@ func (b *ApplicationBuilder) UpdateFidelity(f config.Fidelity) *ApplicationBuild
 }
 
 // Done completes the configuration of the application.
-func (b *ApplicationBuilder) Done(f config.Fidelity) *config.Application {
-	if f&config.Incomplete == 0 {
+func (b *ApplicationBuilder) Done() *config.Application {
+	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
 		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
 			panic("aggregate must have a source or be marked as incomplete")
 		}
 	}
-
-	b.target.AsConfigured.Fidelity = f
 
 	return &b.target
 }

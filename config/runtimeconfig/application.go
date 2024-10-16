@@ -12,13 +12,13 @@ func FromApplication(app dogma.Application) *config.Application {
 	b := configbuilder.Application()
 
 	if app == nil {
-		return b.Done(config.Incomplete)
+		b.UpdateFidelity(config.Incomplete)
+	} else {
+		b.SetSource(app)
+		app.Configure(&applicationConfigurer{b})
 	}
 
-	b.SetSource(app)
-	app.Configure(&applicationConfigurer{b})
-
-	return b.Done(config.Immaculate)
+	return b.Done()
 }
 
 type applicationConfigurer struct {

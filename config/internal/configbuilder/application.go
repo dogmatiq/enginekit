@@ -121,7 +121,7 @@ func (b *ApplicationBuilder) UpdateFidelity(f config.Fidelity) *ApplicationBuild
 func (b *ApplicationBuilder) Done() *config.Application {
 	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
 		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
-			panic("aggregate must have a source or be marked as incomplete")
+			panic("application must have a source or be marked as incomplete")
 		}
 	}
 

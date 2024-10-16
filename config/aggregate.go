@@ -34,10 +34,6 @@ type Aggregate struct {
 	AsConfigured AggregateAsConfigured
 }
 
-func (h *Aggregate) String() string {
-	return RenderDescriptor(h)
-}
-
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
@@ -74,6 +70,26 @@ func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Aggregate) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Aggregate) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "aggregate", h, h.AsConfigured.Source)
+}
+
+func (h *Aggregate) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
+}
+
+func (h *Aggregate) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Aggregate) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Aggregate) clone() Component {
 	clone := &Aggregate{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -85,20 +101,4 @@ func (h *Aggregate) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 	normalizeIdentities(ctx, h.AsConfigured.Identities)
 	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-}
-
-func (h *Aggregate) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
-
-func (h *Aggregate) routes() []*Route {
-	return h.AsConfigured.Routes
-}
-
-func (h *Aggregate) renderDescriptor(ren *ioutil.Renderer) {
-	renderEntityDescriptor(ren, "aggregate", h, h.AsConfigured.Source)
-}
-
-func (h *Aggregate) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
 }

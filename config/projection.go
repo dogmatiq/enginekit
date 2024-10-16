@@ -37,10 +37,6 @@ type Projection struct {
 	AsConfigured ProjectionAsConfigured
 }
 
-func (h *Projection) String() string {
-	return RenderDescriptor(h)
-}
-
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
@@ -82,6 +78,26 @@ func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Projection) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Projection) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "projection", h, h.AsConfigured.Source)
+}
+
+func (h *Projection) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
+}
+
+func (h *Projection) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Projection) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Projection) clone() Component {
 	clone := &Projection{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -98,20 +114,4 @@ func (h *Projection) normalize(ctx *normalizationContext) {
 		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
 		h.AsConfigured.DeliveryPolicy = optional.Some(p)
 	}
-}
-
-func (h *Projection) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
-
-func (h *Projection) routes() []*Route {
-	return h.AsConfigured.Routes
-}
-
-func (h *Projection) renderDescriptor(ren *ioutil.Renderer) {
-	renderEntityDescriptor(ren, "projection", h, h.AsConfigured.Source)
-}
-
-func (h *Projection) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
 }

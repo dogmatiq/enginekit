@@ -33,10 +33,6 @@ type Application struct {
 	AsConfigured ApplicationAsConfigured
 }
 
-func (a *Application) String() string {
-	return RenderDescriptor(a)
-}
-
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
@@ -91,6 +87,18 @@ func (a *Application) RouteSet() RouteSet {
 	}
 
 	return set
+}
+
+func (a *Application) String() string {
+	return RenderDescriptor(a)
+}
+
+func (a *Application) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "application", a, a.AsConfigured.Source)
+}
+
+func (a *Application) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }
 
 func (a *Application) identities() []*Identity {
@@ -241,12 +249,4 @@ func (t *conflictDetector[T, S]) All() iter.Seq2[T, []S] {
 			}
 		}
 	}
-}
-
-func (a *Application) renderDescriptor(ren *ioutil.Renderer) {
-	renderEntityDescriptor(ren, "application", a, a.AsConfigured.Source)
-}
-
-func (a *Application) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
 }

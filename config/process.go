@@ -34,10 +34,6 @@ type Process struct {
 	AsConfigured ProcessAsConfigured
 }
 
-func (h *Process) String() string {
-	return RenderDescriptor(h)
-}
-
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
@@ -74,6 +70,26 @@ func (h *Process) Interface() dogma.ProcessMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Process) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Process) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "process", h, h.AsConfigured.Source)
+}
+
+func (h *Process) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
+}
+
+func (h *Process) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Process) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Process) clone() Component {
 	clone := &Process{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -85,20 +101,4 @@ func (h *Process) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 	normalizeIdentities(ctx, h.AsConfigured.Identities)
 	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-}
-
-func (h *Process) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
-
-func (h *Process) routes() []*Route {
-	return h.AsConfigured.Routes
-}
-
-func (h *Process) renderDescriptor(ren *ioutil.Renderer) {
-	renderEntityDescriptor(ren, "process", h, h.AsConfigured.Source)
-}
-
-func (h *Process) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
 }

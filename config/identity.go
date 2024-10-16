@@ -35,6 +35,37 @@ func (i *Identity) Fidelity() Fidelity {
 	return i.AsConfigured.Fidelity
 }
 
+func (i *Identity) String() string {
+	return RenderDescriptor(i)
+}
+
+func (i *Identity) renderDescriptor(ren *ioutil.Renderer) {
+	ren.Print("identity")
+
+	name, nameOK := i.AsConfigured.Name.TryGet()
+	key, keyOK := i.AsConfigured.Key.TryGet()
+
+	if !nameOK && !keyOK {
+		return
+	}
+
+	if !isPrintableIdentifier(name) {
+		name = strconv.Quote(name)
+	}
+
+	if norm, err := uuidpb.Parse(key); err == nil {
+		key = norm.AsString()
+	} else if !isPrintableIdentifier(key) {
+		key = strconv.Quote(key)
+	}
+
+	ren.Print(":", name, "/", key)
+}
+
+func (i *Identity) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
+}
+
 func (i *Identity) clone() Component {
 	return &Identity{i.AsConfigured}
 }
@@ -95,35 +126,4 @@ func normalizeIdentities(ctx *normalizationContext, identities []*Identity) {
 	} else if len(identities) > 1 {
 		ctx.Fail(MultipleIdentitiesError{identities})
 	}
-}
-
-func (i *Identity) String() string {
-	return RenderDescriptor(i)
-}
-
-func (i *Identity) renderDescriptor(ren *ioutil.Renderer) {
-	ren.Print("identity")
-
-	name, nameOK := i.AsConfigured.Name.TryGet()
-	key, keyOK := i.AsConfigured.Key.TryGet()
-
-	if !nameOK && !keyOK {
-		return
-	}
-
-	if !isPrintableIdentifier(name) {
-		name = strconv.Quote(name)
-	}
-
-	if norm, err := uuidpb.Parse(key); err == nil {
-		key = norm.AsString()
-	} else if !isPrintableIdentifier(key) {
-		key = strconv.Quote(key)
-	}
-
-	ren.Print(":", name, "/", key)
-}
-
-func (i *Identity) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
 }

@@ -34,10 +34,6 @@ type Integration struct {
 	AsConfigured IntegrationAsConfigured
 }
 
-func (h *Integration) String() string {
-	return RenderDescriptor(h)
-}
-
 // Identity returns the entity's identity.
 //
 // It panics if no single valid identity is configured.
@@ -74,6 +70,26 @@ func (h *Integration) Interface() dogma.IntegrationMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Integration) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Integration) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "integration", h, h.AsConfigured.Source)
+}
+
+func (h *Integration) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
+}
+
+func (h *Integration) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Integration) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Integration) clone() Component {
 	clone := &Integration{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -85,20 +101,4 @@ func (h *Integration) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 	normalizeIdentities(ctx, h.AsConfigured.Identities)
 	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-}
-
-func (h *Integration) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
-
-func (h *Integration) routes() []*Route {
-	return h.AsConfigured.Routes
-}
-
-func (h *Integration) renderDescriptor(ren *ioutil.Renderer) {
-	renderEntityDescriptor(ren, "integration", h, h.AsConfigured.Source)
-}
-
-func (h *Integration) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
 }

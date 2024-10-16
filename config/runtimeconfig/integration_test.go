@@ -24,7 +24,7 @@ func TestFromIntegration(t *testing.T) {
 			func(dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
 					AsConfigured: config.IntegrationAsConfigured{
-						IsDisabled: optional.Some(false),
+						Fidelity: config.Incomplete,
 					},
 				}
 			},

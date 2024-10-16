@@ -54,6 +54,8 @@ type Handler interface {
 
 // Fidelity is a bit-field that describes how well a [Component] configuration
 // represents the actual configuration that would be used at runtime.
+//
+// Importantly, it does not describe the validity of the configuration itself.
 type Fidelity int
 
 const (

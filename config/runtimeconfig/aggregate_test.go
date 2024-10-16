@@ -24,7 +24,7 @@ func TestFromAggregate(t *testing.T) {
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
 					AsConfigured: config.AggregateAsConfigured{
-						IsDisabled: optional.Some(false),
+						Fidelity: config.Incomplete,
 					},
 				}
 			},

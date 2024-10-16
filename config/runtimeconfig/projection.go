@@ -3,64 +3,52 @@ package runtimeconfig
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/internal/typename"
-	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
 // FromProjection returns a new [config.Projection] that represents the
 // configuration of the given [dogma.ProjectionMessageHandler].
 func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
-	cfg := &config.Projection{
-		AsConfigured: config.ProjectionAsConfigured{
-			IsDisabled: optional.Some(false),
-		},
-	}
+	b := configbuilder.Projection()
 
 	if h == nil {
-		return cfg
+		return b.Done(config.Incomplete)
 	}
 
-	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(h))
-	cfg.AsConfigured.Source.Value = optional.Some(h)
+	b.SetDisabled(false)
+	b.SetSource(h)
+	b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
+	h.Configure(&projectionConfigurer{b})
 
-	h.Configure(&projectionConfigurer{cfg})
-
-	return cfg
+	return b.Done(config.Immaculate)
 }
 
 type projectionConfigurer struct {
-	cfg *config.Projection
+	b *configbuilder.ProjectionBuilder
 }
 
 func (c *projectionConfigurer) Identity(name, key string) {
-	c.cfg.AsConfigured.Identities = append(
-		c.cfg.AsConfigured.Identities,
-		&config.Identity{
-			AsConfigured: config.IdentityAsConfigured{
-				Name: optional.Some(name),
-				Key:  optional.Some(key),
-			},
+	c.b.
+		AddIdentity().
+		SetName(name).
+		SetKey(key).
+		Done(config.Immaculate)
+}
+
+func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {
+	c.b.Edit(
+		func(cfg *config.ProjectionAsConfigured) {
+			for _, r := range routes {
+				cfg.Routes = append(cfg.Routes, fromRoute(r))
+			}
 		},
 	)
 }
 
-func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {
-	for _, r := range routes {
-		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
-	}
-}
-
 func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {
-	cfg := config.Value[dogma.ProjectionDeliveryPolicy]{}
-
-	if p != nil {
-		cfg.TypeName = optional.Some(typename.Of(p))
-		cfg.Value = optional.Some(p)
-	}
-
-	c.cfg.AsConfigured.DeliveryPolicy = optional.Some(cfg)
+	c.b.SetDeliveryPolicy(p)
 }
 
 func (c *projectionConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
+	c.b.SetDisabled(true)
 }

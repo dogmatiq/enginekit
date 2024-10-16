@@ -24,7 +24,7 @@ func TestFromProcess(t *testing.T) {
 			func(dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
 					AsConfigured: config.ProcessAsConfigured{
-						IsDisabled: optional.Some(false),
+						Fidelity: config.Incomplete,
 					},
 				}
 			},

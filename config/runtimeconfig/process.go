@@ -3,53 +3,47 @@ package runtimeconfig
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/internal/typename"
-	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
 // FromProcess returns a new [config.Process] that represents the configuration
 // of the given [dogma.ProcessMessageHandler].
 func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
-	cfg := &config.Process{
-		AsConfigured: config.ProcessAsConfigured{
-			IsDisabled: optional.Some(false),
-		},
-	}
+	b := configbuilder.Process()
 
 	if h == nil {
-		return cfg
+		return b.Done(config.Incomplete)
 	}
 
-	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(h))
-	cfg.AsConfigured.Source.Value = optional.Some(h)
+	b.SetDisabled(false)
+	b.SetSource(h)
+	h.Configure(&processConfigurer{b})
 
-	h.Configure(&processConfigurer{cfg})
-
-	return cfg
+	return b.Done(config.Immaculate)
 }
 
 type processConfigurer struct {
-	cfg *config.Process
+	b *configbuilder.ProcessBuilder
 }
 
 func (c *processConfigurer) Identity(name, key string) {
-	c.cfg.AsConfigured.Identities = append(
-		c.cfg.AsConfigured.Identities,
-		&config.Identity{
-			AsConfigured: config.IdentityAsConfigured{
-				Name: optional.Some(name),
-				Key:  optional.Some(key),
-			},
+	c.b.
+		AddIdentity().
+		SetName(name).
+		SetKey(key).
+		Done(config.Immaculate)
+}
+
+func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {
+	c.b.Edit(
+		func(cfg *config.ProcessAsConfigured) {
+			for _, r := range routes {
+				cfg.Routes = append(cfg.Routes, fromRoute(r))
+			}
 		},
 	)
 }
 
-func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {
-	for _, r := range routes {
-		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
-	}
-}
-
 func (c *processConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
+	c.b.SetDisabled(true)
 }

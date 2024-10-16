@@ -3,55 +3,77 @@ package runtimeconfig
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/internal/typename"
-	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
 // FromApplication returns a new [config.Application] that represents the
 // configuration of the given [dogma.Application].
 func FromApplication(app dogma.Application) *config.Application {
-	cfg := &config.Application{}
+	b := configbuilder.Application()
 
 	if app == nil {
-		return cfg
+		return b.Done(config.Incomplete)
 	}
 
-	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(app))
-	cfg.AsConfigured.Source.Value = optional.Some(app)
+	b.SetSource(app)
+	app.Configure(&applicationConfigurer{b})
 
-	app.Configure(&applicationConfigurer{cfg})
-
-	return cfg
+	return b.Done(config.Immaculate)
 }
 
 type applicationConfigurer struct {
-	cfg *config.Application
+	b *configbuilder.ApplicationBuilder
 }
 
 func (c *applicationConfigurer) Identity(name, key string) {
-	c.cfg.AsConfigured.Identities = append(
-		c.cfg.AsConfigured.Identities,
-		&config.Identity{
-			AsConfigured: config.IdentityAsConfigured{
-				Name: optional.Some(name),
-				Key:  optional.Some(key),
-			},
+	c.b.
+		AddIdentity().
+		SetName(name).
+		SetKey(key).
+		Done(config.Immaculate)
+}
+
+func (c *applicationConfigurer) RegisterAggregate(h dogma.AggregateMessageHandler, _ ...dogma.RegisterAggregateOption) {
+	c.b.BuildAggregate(
+		func(b *configbuilder.AggregateBuilder) config.Fidelity {
+			b.SetSource(h)
+			b.SetDisabled(false)
+			h.Configure(&aggregateConfigurer{b})
+			return config.Immaculate
 		},
 	)
 }
 
-func (c *applicationConfigurer) RegisterAggregate(h dogma.AggregateMessageHandler, _ ...dogma.RegisterAggregateOption) {
-	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromAggregate(h))
-}
-
 func (c *applicationConfigurer) RegisterProcess(h dogma.ProcessMessageHandler, _ ...dogma.RegisterProcessOption) {
-	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromProcess(h))
+	c.b.BuildProcess(
+		func(b *configbuilder.ProcessBuilder) config.Fidelity {
+			b.SetSource(h)
+			b.SetDisabled(false)
+			h.Configure(&processConfigurer{b})
+			return config.Immaculate
+		},
+	)
 }
 
 func (c *applicationConfigurer) RegisterIntegration(h dogma.IntegrationMessageHandler, _ ...dogma.RegisterIntegrationOption) {
-	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromIntegration(h))
+	c.b.BuildIntegration(
+		func(b *configbuilder.IntegrationBuilder) config.Fidelity {
+			b.SetSource(h)
+			b.SetDisabled(false)
+			h.Configure(&integrationConfigurer{b})
+			return config.Immaculate
+		},
+	)
 }
 
 func (c *applicationConfigurer) RegisterProjection(h dogma.ProjectionMessageHandler, _ ...dogma.RegisterProjectionOption) {
-	c.cfg.AsConfigured.Handlers = append(c.cfg.AsConfigured.Handlers, FromProjection(h))
+	c.b.BuildProjection(
+		func(b *configbuilder.ProjectionBuilder) config.Fidelity {
+			b.SetSource(h)
+			b.SetDisabled(false)
+			b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
+			h.Configure(&projectionConfigurer{b})
+			return config.Immaculate
+		},
+	)
 }

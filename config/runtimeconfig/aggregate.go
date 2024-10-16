@@ -3,53 +3,47 @@ package runtimeconfig
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/internal/typename"
-	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
 // FromAggregate returns a new [config.Aggregate] that represents the
 // configuration of the given [dogma.AggregateMessageHandler].
 func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
-	cfg := &config.Aggregate{
-		AsConfigured: config.AggregateAsConfigured{
-			IsDisabled: optional.Some(false),
-		},
-	}
+	b := configbuilder.Aggregate()
 
 	if h == nil {
-		return cfg
+		return b.Done(config.Incomplete)
 	}
 
-	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(h))
-	cfg.AsConfigured.Source.Value = optional.Some(h)
+	b.SetDisabled(false)
+	b.SetSource(h)
+	h.Configure(&aggregateConfigurer{b})
 
-	h.Configure(&aggregateConfigurer{cfg})
-
-	return cfg
+	return b.Done(config.Immaculate)
 }
 
 type aggregateConfigurer struct {
-	cfg *config.Aggregate
+	b *configbuilder.AggregateBuilder
 }
 
 func (c *aggregateConfigurer) Identity(name, key string) {
-	c.cfg.AsConfigured.Identities = append(
-		c.cfg.AsConfigured.Identities,
-		&config.Identity{
-			AsConfigured: config.IdentityAsConfigured{
-				Name: optional.Some(name),
-				Key:  optional.Some(key),
-			},
+	c.b.
+		AddIdentity().
+		SetName(name).
+		SetKey(key).
+		Done(config.Immaculate)
+}
+
+func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {
+	c.b.Edit(
+		func(cfg *config.AggregateAsConfigured) {
+			for _, r := range routes {
+				cfg.Routes = append(cfg.Routes, fromRoute(r))
+			}
 		},
 	)
 }
 
-func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {
-	for _, r := range routes {
-		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
-	}
-}
-
 func (c *aggregateConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
+	c.b.SetDisabled(true)
 }

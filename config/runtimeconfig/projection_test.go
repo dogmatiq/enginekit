@@ -24,7 +24,7 @@ func TestFromProjection(t *testing.T) {
 			func(dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
 					AsConfigured: config.ProjectionAsConfigured{
-						IsDisabled: optional.Some(false),
+						Fidelity: config.Incomplete,
 					},
 				}
 			},
@@ -39,6 +39,12 @@ func TestFromProjection(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 							Value:    optional.Some(h),
 						},
+						DeliveryPolicy: optional.Some(
+							config.Value[dogma.ProjectionDeliveryPolicy]{
+								TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
+								Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
+							},
+						),
 						IsDisabled: optional.Some(false),
 					},
 				}
@@ -53,7 +59,9 @@ func TestFromProjection(t *testing.T) {
 						dogma.HandlesEvent[EventStub[TypeA]](),
 					)
 					c.DeliveryPolicy(
-						dogma.UnicastProjectionDeliveryPolicy{},
+						dogma.BroadcastProjectionDeliveryPolicy{
+							PrimaryFirst: true,
+						},
 					)
 					c.Disable()
 				},
@@ -84,8 +92,12 @@ func TestFromProjection(t *testing.T) {
 						},
 						DeliveryPolicy: optional.Some(
 							config.Value[dogma.ProjectionDeliveryPolicy]{
-								TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
-								Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
+								TypeName: optional.Some("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy"),
+								Value: optional.Some[dogma.ProjectionDeliveryPolicy](
+									dogma.BroadcastProjectionDeliveryPolicy{
+										PrimaryFirst: true,
+									},
+								),
 							},
 						),
 						IsDisabled: optional.Some(true),

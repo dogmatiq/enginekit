@@ -28,7 +28,11 @@ func TestFromApplication(t *testing.T) {
 			"nil application",
 			nil,
 			func(dogma.Application) *config.Application {
-				return &config.Application{}
+				return &config.Application{
+					AsConfigured: config.ApplicationAsConfigured{
+						Fidelity: config.Incomplete,
+					},
+				}
 			},
 		},
 		{
@@ -105,6 +109,12 @@ func TestFromApplication(t *testing.T) {
 										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 										Value:    optional.Some(projection),
 									},
+									DeliveryPolicy: optional.Some(
+										config.Value[dogma.ProjectionDeliveryPolicy]{
+											TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
+											Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
+										},
+									),
 									IsDisabled: optional.Some(false),
 								},
 							},

@@ -3,53 +3,47 @@ package runtimeconfig
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/internal/typename"
-	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
 func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
-	cfg := &config.Integration{
-		AsConfigured: config.IntegrationAsConfigured{
-			IsDisabled: optional.Some(false),
-		},
-	}
+	b := configbuilder.Integration()
 
 	if h == nil {
-		return cfg
+		return b.Done(config.Incomplete)
 	}
 
-	cfg.AsConfigured.Source.TypeName = optional.Some(typename.Of(h))
-	cfg.AsConfigured.Source.Value = optional.Some(h)
+	b.SetDisabled(false)
+	b.SetSource(h)
+	h.Configure(&integrationConfigurer{b})
 
-	h.Configure(&integrationConfigurer{cfg})
-
-	return cfg
+	return b.Done(config.Immaculate)
 }
 
 type integrationConfigurer struct {
-	cfg *config.Integration
+	b *configbuilder.IntegrationBuilder
 }
 
 func (c *integrationConfigurer) Identity(name, key string) {
-	c.cfg.AsConfigured.Identities = append(
-		c.cfg.AsConfigured.Identities,
-		&config.Identity{
-			AsConfigured: config.IdentityAsConfigured{
-				Name: optional.Some(name),
-				Key:  optional.Some(key),
-			},
+	c.b.
+		AddIdentity().
+		SetName(name).
+		SetKey(key).
+		Done(config.Immaculate)
+}
+
+func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {
+	c.b.Edit(
+		func(cfg *config.IntegrationAsConfigured) {
+			for _, r := range routes {
+				cfg.Routes = append(cfg.Routes, fromRoute(r))
+			}
 		},
 	)
 }
 
-func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {
-	for _, r := range routes {
-		c.cfg.AsConfigured.Routes = append(c.cfg.AsConfigured.Routes, fromRoute(r))
-	}
-}
-
 func (c *integrationConfigurer) Disable(...dogma.DisableOption) {
-	c.cfg.AsConfigured.IsDisabled = optional.Some(true)
+	c.b.SetDisabled(true)
 }

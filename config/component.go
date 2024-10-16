@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
@@ -14,6 +15,9 @@ type Component interface {
 	// Fidelity returns information about how well the configuration represents
 	// the actual configuration that would be used at runtime.
 	Fidelity() Fidelity
+
+	renderDescriptor(*ioutil.Renderer)
+	renderDetails(*ioutil.Renderer)
 
 	clone() Component
 	normalize(*normalizationContext)

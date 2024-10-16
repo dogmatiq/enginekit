@@ -1,11 +1,10 @@
 package config
 
 import (
-	"cmp"
 	"reflect"
-	"strings"
 
 	"github.com/dogmatiq/enginekit/collections/maps"
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
@@ -52,22 +51,23 @@ func (r *Route) Fidelity() Fidelity {
 }
 
 func (r *Route) String() string {
-	w := &strings.Builder{}
+	return RenderDescriptor(r)
+}
 
-	w.WriteString("route")
+func (r *Route) renderDescriptor(ren *ioutil.Renderer) {
+	ren.Print("route")
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
-		w.WriteByte(':')
-		w.WriteString(rt.String())
+		ren.Print(":", rt.String())
 	}
 
 	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
-		w.WriteByte('(')
-		w.WriteString(mt)
-		w.WriteByte(')')
+		ren.Print("(", mt, ")")
 	}
+}
 
-	return w.String()
+func (r *Route) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }
 
 func (r *Route) clone() Component {
@@ -103,25 +103,6 @@ func (r *Route) normalize(ctx *normalizationContext) {
 	}
 }
 
-// routeKey is the components of a [Route] that uniquely identify it.
-type routeKey struct {
-	RouteType       RouteType
-	MessageTypeName string
-}
-
-func (k routeKey) Compare(x routeKey) int {
-	if c := cmp.Compare(k.RouteType, x.RouteType); c != 0 {
-		return c
-	}
-	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
-}
-
-func (r *Route) key() (routeKey, bool) {
-	rt, rtOK := r.AsConfigured.RouteType.TryGet()
-	mt, mtOK := r.AsConfigured.MessageTypeName.TryGet()
-	return routeKey{rt, mt}, rtOK && mtOK
-}
-
 func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
 	var (
 		capabilities = h.HandlerType().RouteCapabilities()
@@ -146,7 +127,7 @@ func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
 			}
 		}
 
-		if k, ok := r.key(); ok {
+		if k, ok := routeKeyOf(r); ok {
 			duplicate.Update(
 				k,
 				func(err *DuplicateRouteError) {

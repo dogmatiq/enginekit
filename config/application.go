@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
@@ -33,7 +34,7 @@ type Application struct {
 }
 
 func (a *Application) String() string {
-	return renderEntity("application", a, a.AsConfigured.Source)
+	return RenderDescriptor(a)
 }
 
 // Identity returns the entity's identity.
@@ -169,7 +170,7 @@ func reportRouteConflicts(ctx *normalizationContext, app *Application) {
 
 	for i, h1 := range app.AsConfigured.Handlers {
 		for _, r1 := range h1.routes() {
-			k1, ok := r1.key()
+			k1, ok := routeKeyOf(r1)
 			if !ok {
 				continue
 			}
@@ -180,7 +181,7 @@ func reportRouteConflicts(ctx *normalizationContext, app *Application) {
 
 			for j, h2 := range app.AsConfigured.Handlers[i+1:] {
 				for _, r2 := range h2.routes() {
-					k2, ok := r2.key()
+					k2, ok := routeKeyOf(r2)
 					if !ok {
 						continue
 					}
@@ -240,4 +241,12 @@ func (t *conflictDetector[T, S]) All() iter.Seq2[T, []S] {
 			}
 		}
 	}
+}
+
+func (a *Application) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "application", a, a.AsConfigured.Source)
+}
+
+func (a *Application) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }

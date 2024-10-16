@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -34,7 +35,7 @@ type Process struct {
 }
 
 func (h *Process) String() string {
-	return renderEntity("process", h, h.AsConfigured.Source)
+	return RenderDescriptor(h)
 }
 
 // Identity returns the entity's identity.
@@ -92,4 +93,12 @@ func (h *Process) identities() []*Identity {
 
 func (h *Process) routes() []*Route {
 	return h.AsConfigured.Routes
+}
+
+func (h *Process) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "process", h, h.AsConfigured.Source)
+}
+
+func (h *Process) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }

@@ -3,7 +3,31 @@ package config
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 )
+
+// RenderDescriptor returns a one-line, human-readable string that attempts to
+// uniquely identity the component based on the the information available. It
+// may or may not consist of information from an [Identity].
+func RenderDescriptor(c Component) string {
+	w := &strings.Builder{}
+	p := &ioutil.Renderer{Target: w}
+
+	c.renderDescriptor(p)
+
+	if _, err := p.Done(); err != nil {
+		panic(err)
+	}
+
+	return w.String()
+}
+
+// RenderDetails returns a multi-line, human-readable string that describes the
+// component in detail.
+func RenderDetails(Component) string {
+	panic("not implemented")
+}
 
 // renderList returns a human-readable list of items.
 func renderList[T any](items []T) string {
@@ -21,30 +45,31 @@ func renderList[T any](items []T) string {
 	return s
 }
 
-func renderEntity[T any](
+func renderEntityDescriptor[T any](
+	ren *ioutil.Renderer,
 	label string,
 	e Entity,
 	src Value[T],
-) string {
-	identifier := ""
+) {
+	ren.Print(label)
+
+	desc := ""
 
 	if n, ok := src.TypeName.TryGet(); ok {
-		identifier = strings.TrimPrefix(n, "*")
+		desc = strings.TrimPrefix(n, "*")
 	}
 
-	if identifier == "" {
+	if desc == "" {
 		for _, id := range e.identities() {
 			if norm, err := Normalize(id); err == nil {
-				identifier = norm.String()
+				desc = norm.String()
 				break
 			}
-			identifier = id.String()
+			desc = id.String()
 		}
 	}
 
-	if identifier == "" {
-		return label
+	if desc != "" {
+		ren.Print(":", desc)
 	}
-
-	return label + ":" + identifier
 }

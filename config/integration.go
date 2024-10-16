@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -34,7 +35,7 @@ type Integration struct {
 }
 
 func (h *Integration) String() string {
-	return renderEntity("integration", h, h.AsConfigured.Source)
+	return RenderDescriptor(h)
 }
 
 // Identity returns the entity's identity.
@@ -92,4 +93,12 @@ func (h *Integration) identities() []*Identity {
 
 func (h *Integration) routes() []*Route {
 	return h.AsConfigured.Routes
+}
+
+func (h *Integration) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "integration", h, h.AsConfigured.Source)
+}
+
+func (h *Integration) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }

@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -34,7 +35,7 @@ type Aggregate struct {
 }
 
 func (h *Aggregate) String() string {
-	return renderEntity("aggregate", h, h.AsConfigured.Source)
+	return RenderDescriptor(h)
 }
 
 // Identity returns the entity's identity.
@@ -92,4 +93,12 @@ func (h *Aggregate) identities() []*Identity {
 
 func (h *Aggregate) routes() []*Route {
 	return h.AsConfigured.Routes
+}
+
+func (h *Aggregate) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "aggregate", h, h.AsConfigured.Source)
+}
+
+func (h *Aggregate) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }

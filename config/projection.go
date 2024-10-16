@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/internal/ioutil"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -37,7 +38,7 @@ type Projection struct {
 }
 
 func (h *Projection) String() string {
-	return renderEntity("projection", h, h.AsConfigured.Source)
+	return RenderDescriptor(h)
 }
 
 // Identity returns the entity's identity.
@@ -105,4 +106,12 @@ func (h *Projection) identities() []*Identity {
 
 func (h *Projection) routes() []*Route {
 	return h.AsConfigured.Routes
+}
+
+func (h *Projection) renderDescriptor(ren *ioutil.Renderer) {
+	renderEntityDescriptor(ren, "projection", h, h.AsConfigured.Source)
+}
+
+func (h *Projection) renderDetails(*ioutil.Renderer) {
+	panic("not implemented")
 }

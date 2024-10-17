@@ -35,13 +35,12 @@ func (c *aggregateConfigurer) Identity(name, key string) {
 }
 
 func (c *aggregateConfigurer) Routes(routes ...dogma.AggregateRoute) {
-	c.b.Edit(
-		func(cfg *config.AggregateAsConfigured) {
-			for _, r := range routes {
-				cfg.Routes = append(cfg.Routes, fromRoute(r))
-			}
-		},
-	)
+	for _, r := range routes {
+		c.b.
+			AddRoute().
+			SetRoute(r).
+			Done()
+	}
 }
 
 func (c *aggregateConfigurer) Disable(...dogma.DisableOption) {

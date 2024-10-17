@@ -44,6 +44,20 @@ func (b *IntegrationBuilder) BuildIdentity(fn func(*IdentityBuilder)) *Integrati
 	return b
 }
 
+// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
+func (b *IntegrationBuilder) AddRoute() *RouteBuilder {
+	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
+}
+
+// BuildRoute calls fn which configures a [config.Route] that is added to the
+// handler.
+func (b *IntegrationBuilder) BuildRoute(fn func(*RouteBuilder)) *IntegrationBuilder {
+	x := b.AddRoute()
+	fn(x)
+	x.Done()
+	return b
+}
+
 // SetDisabled sets whether the handler is disabled or not.
 func (b *IntegrationBuilder) SetDisabled(disabled bool) *IntegrationBuilder {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)

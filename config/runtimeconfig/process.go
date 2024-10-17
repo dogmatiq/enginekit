@@ -35,13 +35,12 @@ func (c *processConfigurer) Identity(name, key string) {
 }
 
 func (c *processConfigurer) Routes(routes ...dogma.ProcessRoute) {
-	c.b.Edit(
-		func(cfg *config.ProcessAsConfigured) {
-			for _, r := range routes {
-				cfg.Routes = append(cfg.Routes, fromRoute(r))
-			}
-		},
-	)
+	for _, r := range routes {
+		c.b.
+			AddRoute().
+			SetRoute(r).
+			Done()
+	}
 }
 
 func (c *processConfigurer) Disable(...dogma.DisableOption) {

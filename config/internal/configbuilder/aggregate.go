@@ -44,6 +44,20 @@ func (b *AggregateBuilder) BuildIdentity(fn func(*IdentityBuilder)) *AggregateBu
 	return b
 }
 
+// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
+func (b *AggregateBuilder) AddRoute() *RouteBuilder {
+	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
+}
+
+// BuildRoute calls fn which configures a [config.Route] that is added to the
+// handler.
+func (b *AggregateBuilder) BuildRoute(fn func(*RouteBuilder)) *AggregateBuilder {
+	x := b.AddRoute()
+	fn(x)
+	x.Done()
+	return b
+}
+
 // SetDisabled sets whether the handler is disabled or not.
 func (b *AggregateBuilder) SetDisabled(disabled bool) *AggregateBuilder {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)

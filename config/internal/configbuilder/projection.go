@@ -45,6 +45,20 @@ func (b *ProjectionBuilder) BuildIdentity(fn func(*IdentityBuilder)) *Projection
 	return b
 }
 
+// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
+func (b *ProjectionBuilder) AddRoute() *RouteBuilder {
+	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
+}
+
+// BuildRoute calls fn which configures a [config.Route] that is added to the
+// handler.
+func (b *ProjectionBuilder) BuildRoute(fn func(*RouteBuilder)) *ProjectionBuilder {
+	x := b.AddRoute()
+	fn(x)
+	x.Done()
+	return b
+}
+
 // SetDisabled sets whether the handler is disabled or not.
 func (b *ProjectionBuilder) SetDisabled(disabled bool) *ProjectionBuilder {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)

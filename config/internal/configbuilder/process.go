@@ -44,6 +44,20 @@ func (b *ProcessBuilder) BuildIdentity(fn func(*IdentityBuilder)) *ProcessBuilde
 	return b
 }
 
+// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
+func (b *ProcessBuilder) AddRoute() *RouteBuilder {
+	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
+}
+
+// BuildRoute calls fn which configures a [config.Route] that is added to the
+// handler.
+func (b *ProcessBuilder) BuildRoute(fn func(*RouteBuilder)) *ProcessBuilder {
+	x := b.AddRoute()
+	fn(x)
+	x.Done()
+	return b
+}
+
 // SetDisabled sets whether the handler is disabled or not.
 func (b *ProcessBuilder) SetDisabled(disabled bool) *ProcessBuilder {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)

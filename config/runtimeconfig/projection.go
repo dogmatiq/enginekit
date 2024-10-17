@@ -36,13 +36,12 @@ func (c *projectionConfigurer) Identity(name, key string) {
 }
 
 func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {
-	c.b.Edit(
-		func(cfg *config.ProjectionAsConfigured) {
-			for _, r := range routes {
-				cfg.Routes = append(cfg.Routes, fromRoute(r))
-			}
-		},
-	)
+	for _, r := range routes {
+		c.b.
+			AddRoute().
+			SetRoute(r).
+			Done()
+	}
 }
 
 func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {

@@ -35,13 +35,12 @@ func (c *integrationConfigurer) Identity(name, key string) {
 }
 
 func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {
-	c.b.Edit(
-		func(cfg *config.IntegrationAsConfigured) {
-			for _, r := range routes {
-				cfg.Routes = append(cfg.Routes, fromRoute(r))
-			}
-		},
-	)
+	for _, r := range routes {
+		c.b.
+			AddRoute().
+			SetRoute(r).
+			Done()
+	}
 }
 
 func (c *integrationConfigurer) Disable(...dogma.DisableOption) {

@@ -75,7 +75,7 @@ func (h *Process) String() string {
 }
 
 func (h *Process) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "process", h, h.AsConfigured.Source)
+	renderEntityDescriptor(ren, "process", h.AsConfigured.Source)
 }
 
 func (h *Process) renderDetails(*renderer.Renderer) {

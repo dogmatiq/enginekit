@@ -94,7 +94,7 @@ func (a *Application) String() string {
 }
 
 func (a *Application) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "application", a, a.AsConfigured.Source)
+	renderEntityDescriptor(ren, "application", a.AsConfigured.Source)
 }
 
 func (a *Application) renderDetails(*renderer.Renderer) {

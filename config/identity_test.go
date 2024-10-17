@@ -100,7 +100,7 @@ func TestIdentity_render(t *testing.T) {
 		},
 	}
 
-	runRenderTestCases(t, cases)
+	runRenderTests(t, cases)
 }
 
 func TestIdentity_validation(t *testing.T) {

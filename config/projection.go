@@ -83,7 +83,7 @@ func (h *Projection) String() string {
 }
 
 func (h *Projection) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "projection", h, h.AsConfigured.Source)
+	renderEntityDescriptor(ren, "projection", h.AsConfigured.Source)
 }
 
 func (h *Projection) renderDetails(*renderer.Renderer) {

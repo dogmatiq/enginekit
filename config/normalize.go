@@ -97,7 +97,7 @@ type normalizationOptions struct {
 
 func (c *normalizationContext) NewChild(com Component) *normalizationContext {
 	if c.Options.Shallow {
-		panic("cannot normalize sub-components in shallow mode")
+		panic("did not expect to descend into subcomponents")
 	}
 
 	ctx := &normalizationContext{

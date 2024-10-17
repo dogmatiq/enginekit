@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
+	"github.com/dogmatiq/enginekit/internal/typename"
 )
 
 // RenderDescriptor returns a one-line human-readable description of c.
@@ -67,30 +68,17 @@ func renderList[T any](items []T) string {
 func renderEntityDescriptor[T any](
 	ren *renderer.Renderer,
 	label string,
-	e Entity,
 	src Value[T],
 ) {
-	ren.Print(label)
+	typeName := typename.Unqualified(
+		src.TypeName.Get(),
+	)
 
-	desc := ""
-
-	if n, ok := src.TypeName.TryGet(); ok {
-		desc = strings.TrimPrefix(n, "*")
-	}
-
-	if desc == "" {
-		for _, id := range e.identities() {
-			if norm, err := Normalize(id); err == nil {
-				desc = norm.String()
-				break
-			}
-			desc = id.String()
-		}
-	}
-
-	if desc != "" {
-		ren.Print(":", desc)
-	}
+	ren.Print(
+		label,
+		":",
+		strings.TrimPrefix(typeName, "*"),
+	)
 }
 
 func renderFidelity(r *renderer.Renderer, f Fidelity, errs []error) {

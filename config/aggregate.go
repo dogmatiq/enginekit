@@ -75,7 +75,7 @@ func (h *Aggregate) String() string {
 }
 
 func (h *Aggregate) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "aggregate", h, h.AsConfigured.Source)
+	renderEntityDescriptor(ren, "aggregate", h.AsConfigured.Source)
 }
 
 func (h *Aggregate) renderDetails(*renderer.Renderer) {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/test"
@@ -233,6 +234,70 @@ func TestIntegration_Interface(t *testing.T) {
 		cfg.Interface(),
 		h,
 	)
+}
+
+func TestIntegration_render(t *testing.T) {
+	cases := []renderTestCase{
+		{
+			Name:             "complete",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+					)
+				},
+			}),
+		},
+		{
+			Name:             "disabled",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`disabled valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+					)
+					c.Disable()
+				},
+			}),
+		},
+		{
+			Name:             "no runtime type information",
+			ExpectDescriptor: `integration:SomeIntegration`,
+			ExpectDetails: multiline(
+				`valid integration pkg.SomeIntegration (runtime type unavailable)`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-command route for pkg.SomeCommand (runtime type unavailable)`,
+			),
+			Component: configbuilder.
+				Integration().
+				SetSourceTypeName("pkg.SomeIntegration").
+				SetDisabled(false).
+				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+					b.SetName("name")
+					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				}).
+				BuildRoute(func(b *configbuilder.RouteBuilder) {
+					b.SetRouteType(HandlesCommandRouteType)
+					b.SetMessageTypeName("pkg.SomeCommand")
+				}).
+				Done(),
+		},
+	}
+
+	runRenderTests(t, cases)
 }
 
 func TestIntegration_validation(t *testing.T) {

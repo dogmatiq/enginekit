@@ -154,5 +154,5 @@ func TestRoute_render(t *testing.T) {
 		},
 	}
 
-	runRenderTestCases(t, cases)
+	runRenderTests(t, cases)
 }

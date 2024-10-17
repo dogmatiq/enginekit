@@ -75,11 +75,38 @@ func (h *Integration) String() string {
 }
 
 func (h *Integration) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "integration", h, h.AsConfigured.Source)
+	renderEntityDescriptor(ren, "integration", h.AsConfigured.Source)
 }
 
-func (h *Integration) renderDetails(*renderer.Renderer) {
-	panic("not implemented")
+func (h *Integration) renderDetails(ren *renderer.Renderer) {
+	f, err := validate(h)
+
+	if d, ok := h.AsConfigured.IsDisabled.TryGet(); ok && d {
+		ren.Print("disabled ")
+	}
+
+	renderFidelity(ren, f, err)
+	ren.Print("integration ")
+	ren.Print(h.AsConfigured.Source.TypeName.Get())
+
+	if !h.AsConfigured.Source.Value.IsPresent() {
+		ren.Print(" (runtime type unavailable)")
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, err)
+
+	for _, i := range h.AsConfigured.Identities {
+		ren.IndentBullet()
+		i.renderDetails(ren)
+		ren.Dedent()
+	}
+
+	for _, r := range h.AsConfigured.Routes {
+		ren.IndentBullet()
+		r.renderDetails(ren)
+		ren.Dedent()
+	}
 }
 
 func (h *Integration) identities() []*Identity {
@@ -99,6 +126,9 @@ func (h *Integration) clone() Component {
 
 func (h *Integration) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+	}
 }

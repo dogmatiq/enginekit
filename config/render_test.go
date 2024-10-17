@@ -15,7 +15,7 @@ type renderTestCase struct {
 	Component        Component
 }
 
-func runRenderTestCases(t *testing.T, cases []renderTestCase) {
+func runRenderTests(t *testing.T, cases []renderTestCase) {
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
 			test.Expect(

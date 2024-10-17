@@ -40,6 +40,13 @@ func normalize[T Component](ctx *normalizationContext, components ...T) {
 	}
 }
 
+func validate[T Component](c T) (Fidelity, []error) {
+	ctx := shallowContext(c)
+	c = c.clone().(T)
+	c.normalize(ctx)
+	return c.Fidelity(), ctx.Errors
+}
+
 func reportFidelityErrors(ctx *normalizationContext, c Component) {
 	f := c.Fidelity()
 
@@ -71,14 +78,28 @@ func strictContext(c Component) *normalizationContext {
 	}
 }
 
+func shallowContext(c Component) *normalizationContext {
+	return &normalizationContext{
+		Component: c,
+		Options: normalizationOptions{
+			Shallow: true,
+		},
+	}
+}
+
 // normalizationOptions is the result of applying a set of [NormalizeOption]
 // values.
 type normalizationOptions struct {
 	PanicOnFailure bool
 	RequireValues  bool
+	Shallow        bool
 }
 
 func (c *normalizationContext) NewChild(com Component) *normalizationContext {
+	if c.Options.Shallow {
+		panic("cannot normalize sub-components in shallow mode")
+	}
+
 	ctx := &normalizationContext{
 		Component: com,
 		Options:   c.Options,

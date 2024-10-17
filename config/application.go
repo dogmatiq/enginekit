@@ -6,7 +6,7 @@ import (
 	"slices"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/internal/ioutil"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
@@ -93,11 +93,11 @@ func (a *Application) String() string {
 	return RenderDescriptor(a)
 }
 
-func (a *Application) renderDescriptor(ren *ioutil.Renderer) {
+func (a *Application) renderDescriptor(ren *renderer.Renderer) {
 	renderEntityDescriptor(ren, "application", a, a.AsConfigured.Source)
 }
 
-func (a *Application) renderDetails(*ioutil.Renderer) {
+func (a *Application) renderDetails(*renderer.Renderer) {
 	panic("not implemented")
 }
 

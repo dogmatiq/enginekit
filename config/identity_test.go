@@ -8,7 +8,7 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-func TestIdentity_render(t *testing.T) {
+func TestIdentity_String(t *testing.T) {
 	cases := []struct {
 		Name     string
 		Want     string

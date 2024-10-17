@@ -390,21 +390,3 @@ func TestIntegration_validation(t *testing.T) {
 
 	runValidationTests(t, cases)
 }
-
-func TestIntegration_render(t *testing.T) {
-	testRender(
-		t,
-		"valid",
-		runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
-			ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-				c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-				c.Routes(
-					dogma.HandlesCommand[CommandStub[TypeA]](),
-				)
-			},
-		}),
-		`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
-		`  - identity:name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-		`  - route:handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA])`,
-	)
-}

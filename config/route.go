@@ -4,7 +4,7 @@ import (
 	"reflect"
 
 	"github.com/dogmatiq/enginekit/collections/maps"
-	"github.com/dogmatiq/enginekit/internal/ioutil"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
@@ -54,20 +54,62 @@ func (r *Route) String() string {
 	return RenderDescriptor(r)
 }
 
-func (r *Route) renderDescriptor(ren *ioutil.Renderer) {
-	ren.Print("route")
+func (r *Route) renderDescriptor(ren *renderer.Renderer) {
+	ren.Print("route:")
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
-		ren.Print(":", rt.String())
+		ren.Print(rt.String())
+	} else {
+		ren.Print("?")
 	}
 
+	ren.Print(":")
+
 	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
-		ren.Print("(", mt, ")")
+		ren.Print(typename.Unqualified(mt))
+	} else {
+		ren.Print("?")
 	}
 }
 
-func (r *Route) renderDetails(*ioutil.Renderer) {
-	panic("not implemented")
+func (r *Route) renderDetails(ren *renderer.Renderer) {
+	f, errs := validate(r)
+
+	if f&Speculative != 0 {
+		ren.Print("speculative ")
+	}
+
+	if f&Incomplete != 0 {
+		ren.Print("incomplete ")
+	} else if len(errs) == 0 {
+		ren.Print("valid ")
+	} else {
+		ren.Print("invalid ")
+	}
+
+	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
+		ren.Print(rt.String(), " ")
+	}
+
+	ren.Print("route")
+
+	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
+		ren.Print(" for ", mt)
+
+		if !r.AsConfigured.MessageType.IsPresent() {
+			ren.Print(" (runtime type unavailable)")
+		}
+	}
+
+	ren.Print("\n")
+
+	if len(errs) != 0 {
+		for _, err := range errs {
+			ren.IndentBullet()
+			ren.Print(err.Error(), "\n")
+			ren.Dedent()
+		}
+	}
 }
 
 func (r *Route) clone() Component {
@@ -94,12 +136,12 @@ func (r *Route) normalize(ctx *normalizationContext) {
 
 		actualTypeName := typename.Get(messageType.ReflectType())
 		if typeNameOK && typeName != actualTypeName {
-			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
+			ctx.Fail(TypeNameMismatchError{typeName, actualTypeName})
 		}
 
 		r.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireValues {
-		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[message.Type]()})
+		ctx.Fail(RuntimeValueUnavailableError{reflect.TypeFor[message.Type]()})
 	}
 }
 

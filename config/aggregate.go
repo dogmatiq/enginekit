@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/internal/ioutil"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -74,11 +74,11 @@ func (h *Aggregate) String() string {
 	return RenderDescriptor(h)
 }
 
-func (h *Aggregate) renderDescriptor(ren *ioutil.Renderer) {
+func (h *Aggregate) renderDescriptor(ren *renderer.Renderer) {
 	renderEntityDescriptor(ren, "aggregate", h, h.AsConfigured.Source)
 }
 
-func (h *Aggregate) renderDetails(*ioutil.Renderer) {
+func (h *Aggregate) renderDetails(*renderer.Renderer) {
 	panic("not implemented")
 }
 

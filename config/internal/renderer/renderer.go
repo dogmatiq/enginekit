@@ -1,67 +1,76 @@
-package ioutil
+package renderer
 
 import (
-	"fmt"
 	"io"
 	"strings"
 )
 
+// Renderer writes multi-line output to an io.Writer.
 type Renderer struct {
 	Target io.Writer
 
 	count int
 	err   error
 
-	depth        int
-	bullet       bool
-	continuation bool
+	indents  []*indent
+	sameLine bool
 }
 
+type indent struct {
+	isBullet  bool
+	firstLine bool
+}
+
+// Indent increases the indentation level.
 func (r *Renderer) Indent() {
-	r.depth++
+	r.indents = append(r.indents, &indent{false, true})
 }
 
+// IndentBullet increases the indentation level and adds a bullet point.
 func (r *Renderer) IndentBullet() {
-	r.depth++
-	r.bullet = true
+	r.indents = append(r.indents, &indent{true, true})
 }
 
+// Dedent decreases the indentation level.
 func (r *Renderer) Dedent() {
-	r.depth--
-	r.bullet = false
+	r.indents = r.indents[:len(r.indents)-1]
 }
 
+// Print writes several strings to the output.
 func (r *Renderer) Print(str ...string) {
 	for _, s := range str {
 		r.print(s)
 	}
 }
 
+// Printf writes a formatted string to the output.
 func (r *Renderer) Printf(format string, args ...any) {
-	r.print(fmt.Sprintf(format, args...))
+	r.print(Inflect(format, args...))
 }
 
+// Done returns the number of bytes written and any error that occurred.
 func (r *Renderer) Done() (int, error) {
 	return r.count, r.err
 }
 
 func (r *Renderer) print(s string) {
 	for s != "" && r.err == nil {
-		if !r.continuation {
-			if r.depth > 0 {
-				for range r.depth - 1 {
-					r.write("  ")
+		if !r.sameLine {
+			for _, i := range r.indents {
+				r.write("  ")
+
+				if i.isBullet {
+					if i.firstLine {
+						r.write("- ")
+					} else {
+						r.write("  ")
+					}
 				}
 
-				if r.bullet {
-					r.write("• ")
-					r.bullet = false
-				} else {
-					r.write("  ")
-				}
+				i.firstLine = false
 			}
 
-			r.continuation = true
+			r.sameLine = true
 		}
 
 		i := strings.IndexByte(s, '\n')
@@ -77,7 +86,7 @@ func (r *Renderer) print(s string) {
 		// and trim the beginning of the buffer.
 		r.write(s[:i+1])
 		s = s[i+1:]
-		r.continuation = false
+		r.sameLine = false
 	}
 }
 

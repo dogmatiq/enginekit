@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"unicode"
 
-	"github.com/dogmatiq/enginekit/internal/ioutil"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
@@ -39,7 +39,7 @@ func (i *Identity) String() string {
 	return RenderDescriptor(i)
 }
 
-func (i *Identity) renderDescriptor(ren *ioutil.Renderer) {
+func (i *Identity) renderDescriptor(ren *renderer.Renderer) {
 	ren.Print("identity")
 
 	name, nameOK := i.AsConfigured.Name.TryGet()
@@ -62,7 +62,7 @@ func (i *Identity) renderDescriptor(ren *ioutil.Renderer) {
 	ren.Print(":", name, "/", key)
 }
 
-func (i *Identity) renderDetails(*ioutil.Renderer) {
+func (i *Identity) renderDetails(*renderer.Renderer) {
 	panic("not implemented")
 }
 

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/message"
 )
@@ -51,12 +52,11 @@ type MessageKindMismatchError struct {
 }
 
 func (e MessageKindMismatchError) Error() string {
-	return fmt.Sprintf(
-		"message kind mismatch: %s expects %q, but %s is %q",
-		e.RouteType,
-		e.RouteType.MessageKind(),
+	return renderer.Inflect(
+		"unexpected message kind: %s is a %s, expected a %s",
 		typename.Get(e.MessageType.ReflectType()),
 		e.MessageType.Kind(),
+		e.RouteType.MessageKind(),
 	)
 }
 

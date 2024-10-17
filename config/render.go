@@ -2,31 +2,50 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
-	"github.com/dogmatiq/enginekit/internal/ioutil"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 )
 
-// RenderDescriptor returns a one-line, human-readable string that attempts to
-// uniquely identity the component based on the the information available. It
-// may or may not consist of information from an [Identity].
+// RenderDescriptor returns a one-line human-readable description of c.
+//
+// The descriptor attempts to uniquely identify the component based on the
+// information available. It may or may not consist of information from an
+// [Identity] component.
 func RenderDescriptor(c Component) string {
 	w := &strings.Builder{}
-	p := &ioutil.Renderer{Target: w}
-
-	c.renderDescriptor(p)
-
-	if _, err := p.Done(); err != nil {
+	if _, err := WriteDescriptor(w, c); err != nil {
 		panic(err)
 	}
-
 	return w.String()
 }
 
-// RenderDetails returns a multi-line, human-readable string that describes the
-// component in detail.
-func RenderDetails(Component) string {
-	panic("not implemented")
+// RenderDetails returns a detailed human-readable description of c.
+func RenderDetails(c Component) string {
+	w := &strings.Builder{}
+	if _, err := WriteDetails(w, c); err != nil {
+		panic(err)
+	}
+	return w.String()
+}
+
+// WriteDescriptor writes a one-line human-readable description of c to w.
+//
+// The descriptor attempts to uniquely identify the component based on the
+// information available. It may or may not consist of information from an
+// [Identity] component.
+func WriteDescriptor(w io.Writer, c Component) (int, error) {
+	p := &renderer.Renderer{Target: w}
+	c.renderDescriptor(p)
+	return p.Done()
+}
+
+// WriteDetails writes a detailed human-readable description of c to w.
+func WriteDetails(w io.Writer, c Component) (int, error) {
+	p := &renderer.Renderer{Target: w}
+	c.renderDetails(p)
+	return p.Done()
 }
 
 // renderList returns a human-readable list of items.
@@ -46,7 +65,7 @@ func renderList[T any](items []T) string {
 }
 
 func renderEntityDescriptor[T any](
-	ren *ioutil.Renderer,
+	ren *renderer.Renderer,
 	label string,
 	e Entity,
 	src Value[T],

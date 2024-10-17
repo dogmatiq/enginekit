@@ -4,19 +4,79 @@ import (
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/config"
+	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	"github.com/dogmatiq/enginekit/internal/typename"
+	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-func TestRoute_String(t *testing.T) {
-	cases := []struct {
-		Name  string
-		Want  string
-		Route *Route
-	}{
+func TestRoute_render(t *testing.T) {
+	cases := []renderTestCase{
 		{
-			"valid, handles command",
-			`route:handles-command(pkg.SomeCommand)`,
-			&Route{
+			Name:             "handles command",
+			ExpectDescriptor: `route:handles-command:CommandStub[TypeA]`,
+			ExpectDetails:    `valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(HandlesCommandRouteType),
+					MessageTypeName: optional.Some(typename.For[CommandStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+				},
+			},
+		},
+		{
+			Name:             "handles event",
+			ExpectDescriptor: `route:handles-event:EventStub[TypeA]`,
+			ExpectDetails:    `valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(HandlesEventRouteType),
+					MessageTypeName: optional.Some(typename.For[EventStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+				},
+			},
+		},
+		{
+			Name:             "executes command",
+			ExpectDescriptor: `route:executes-command:CommandStub[TypeA]`,
+			ExpectDetails:    `valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(ExecutesCommandRouteType),
+					MessageTypeName: optional.Some(typename.For[CommandStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+				},
+			},
+		},
+		{
+			Name:             "records event",
+			ExpectDescriptor: `route:records-event:EventStub[TypeA]`,
+			ExpectDetails:    `valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(RecordsEventRouteType),
+					MessageTypeName: optional.Some(typename.For[EventStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+				},
+			},
+		},
+		{
+			Name:             "schedules timeout",
+			ExpectDescriptor: `route:schedules-timeout:TimeoutStub[TypeA]`,
+			ExpectDetails:    `valid schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(SchedulesTimeoutRouteType),
+					MessageTypeName: optional.Some(typename.For[TimeoutStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
+				},
+			},
+		},
+		{
+			Name:             "no runtime type information",
+			ExpectDescriptor: `route:handles-command:SomeCommand`,
+			ExpectDetails:    `valid handles-command route for pkg.SomeCommand (runtime type unavailable)`,
+			Component: &Route{
 				AsConfigured: RouteAsConfigured{
 					RouteType:       optional.Some(HandlesCommandRouteType),
 					MessageTypeName: optional.Some("pkg.SomeCommand"),
@@ -24,72 +84,63 @@ func TestRoute_String(t *testing.T) {
 			},
 		},
 		{
-			"valid, handles event",
-			`route:handles-event(pkg.SomeEvent)`,
-			&Route{
+			Name:             "empty",
+			ExpectDescriptor: `route:?:?`,
+			ExpectDetails:    `incomplete route`,
+			Component:        &Route{},
+		},
+		{
+			Name:             "missing route type",
+			ExpectDescriptor: `route:?:CommandStub[TypeA]`,
+			ExpectDetails:    `incomplete route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Component: &Route{
 				AsConfigured: RouteAsConfigured{
-					RouteType:       optional.Some(HandlesEventRouteType),
-					MessageTypeName: optional.Some("pkg.SomeEvent"),
+					MessageTypeName: optional.Some(typename.For[CommandStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 				},
 			},
 		},
 		{
-			"valid, executes command",
-			`route:executes-command(pkg.SomeCommand)`,
-			&Route{
-				AsConfigured: RouteAsConfigured{
-					RouteType:       optional.Some(ExecutesCommandRouteType),
-					MessageTypeName: optional.Some("pkg.SomeCommand"),
-				},
-			},
-		},
-		{
-			"valid, records event",
-			`route:records-event(pkg.SomeEvent)`,
-			&Route{
-				AsConfigured: RouteAsConfigured{
-					RouteType:       optional.Some(RecordsEventRouteType),
-					MessageTypeName: optional.Some("pkg.SomeEvent"),
-				},
-			},
-		},
-		{
-			"valid, schedules timeout",
-			`route:schedules-timeout(pkg.SomeTimeout)`,
-			&Route{
-				AsConfigured: RouteAsConfigured{
-					RouteType:       optional.Some(SchedulesTimeoutRouteType),
-					MessageTypeName: optional.Some("pkg.SomeTimeout"),
-				},
-			},
-		},
-		{
-			"missing route type",
-			`route(pkg.SomeCommand)`,
-			&Route{
-				AsConfigured: RouteAsConfigured{
-					MessageTypeName: optional.Some("pkg.SomeCommand"),
-				},
-			},
-		},
-		{
-			"missing message type",
-			`route:handles-command`,
-			&Route{
+			Name:             "missing message type name",
+			ExpectDescriptor: `route:handles-command:?`,
+			ExpectDetails:    `incomplete handles-command route`,
+			Component: &Route{
 				AsConfigured: RouteAsConfigured{
 					RouteType: optional.Some(HandlesCommandRouteType),
 				},
 			},
 		},
+		{
+			Name:             "mismatched message type name",
+			ExpectDescriptor: `route:handles-command:SomeCommand`,
+			ExpectDetails: multiline(
+				`invalid handles-command route for pkg.SomeCommand`,
+				`  - type name mismatch: pkg.SomeCommand does not match the runtime type (github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA])`,
+			),
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(HandlesCommandRouteType),
+					MessageTypeName: optional.Some("pkg.SomeCommand"),
+					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+				},
+			},
+		},
+		{
+			Name:             "mismatched message kind",
+			ExpectDescriptor: `route:handles-event:CommandStub[TypeA]`,
+			ExpectDetails: multiline(
+				`invalid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - unexpected message kind: github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is a command, expected an event`,
+			),
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(HandlesEventRouteType),
+					MessageTypeName: optional.Some(typename.For[CommandStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+				},
+			},
+		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.Name, func(t *testing.T) {
-			got := c.Route.String()
-
-			if got != c.Want {
-				t.Fatalf("unexpected string: got %q, want %q", got, c.Want)
-			}
-		})
-	}
+	runRenderTestCases(t, cases)
 }

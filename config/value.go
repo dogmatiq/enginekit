@@ -35,11 +35,11 @@ func normalizeValue[T any](
 	if valueOK {
 		actualTypeName := typename.Get(reflect.TypeOf(value))
 		if typeNameOK && typeName != actualTypeName {
-			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
+			ctx.Fail(TypeNameMismatchError{typeName, actualTypeName})
 		}
 
 		v.TypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireValues {
-		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[T]()})
+		ctx.Fail(RuntimeValueUnavailableError{reflect.TypeFor[T]()})
 	}
 }

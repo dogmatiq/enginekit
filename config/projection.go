@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/internal/ioutil"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -82,11 +82,11 @@ func (h *Projection) String() string {
 	return RenderDescriptor(h)
 }
 
-func (h *Projection) renderDescriptor(ren *ioutil.Renderer) {
+func (h *Projection) renderDescriptor(ren *renderer.Renderer) {
 	renderEntityDescriptor(ren, "projection", h, h.AsConfigured.Source)
 }
 
-func (h *Projection) renderDetails(*ioutil.Renderer) {
+func (h *Projection) renderDetails(*renderer.Renderer) {
 	panic("not implemented")
 }
 

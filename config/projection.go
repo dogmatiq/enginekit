@@ -2,6 +2,8 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
+	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -34,10 +36,6 @@ type ProjectionAsConfigured struct {
 // [dogma.ProjectionMessageHandler] implementation.
 type Projection struct {
 	AsConfigured ProjectionAsConfigured
-}
-
-func (h *Projection) String() string {
-	return renderEntity("projection", h, h.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -81,21 +79,38 @@ func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
-func (h *Projection) clone() Component {
-	clone := &Projection{h.AsConfigured}
-	cloneInPlace(&clone.AsConfigured.Identities)
-	cloneInPlace(&clone.AsConfigured.Routes)
-	return clone
+func (h *Projection) String() string {
+	return RenderDescriptor(h)
 }
 
-func (h *Projection) normalize(ctx *normalizationContext) {
-	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+func (h *Projection) renderDescriptor(ren *renderer.Renderer) {
+	renderEntityDescriptor(ren, "projection", h.AsConfigured.Source)
+}
+
+func (h *Projection) renderDetails(ren *renderer.Renderer) {
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
 
 	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
-		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
-		h.AsConfigured.DeliveryPolicy = optional.Some(p)
+		// TODO: https://github.com/dogmatiq/enginekit/issues/55
+		if typeName, ok := p.TypeName.TryGet(); ok {
+			ren.IndentBullet()
+
+			switch typeName {
+			case typename.For[dogma.UnicastProjectionDeliveryPolicy]():
+				ren.Printf("unicast delivery policy")
+			case typename.For[dogma.BroadcastProjectionDeliveryPolicy]():
+				ren.Printf("broadcast delivery policy")
+			default:
+				ren.Printf("unrecognized delivery policy")
+			}
+
+			if !p.Value.IsPresent() {
+				ren.Print(" (runtime type unavailable)")
+			}
+
+			ren.Indent()
+			ren.Print("\n")
+		}
 	}
 }
 
@@ -105,4 +120,29 @@ func (h *Projection) identities() []*Identity {
 
 func (h *Projection) routes() []*Route {
 	return h.AsConfigured.Routes
+}
+
+func (h *Projection) clone() Component {
+	clone := &Projection{h.AsConfigured}
+	cloneInPlace(&clone.AsConfigured.Identities)
+	cloneInPlace(&clone.AsConfigured.Routes)
+	return clone
+}
+
+func (h *Projection) normalize(ctx *normalizationContext) {
+	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
+
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalize(ctx, h.AsConfigured.Routes...)
+	}
+
+	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
+		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
+		h.AsConfigured.DeliveryPolicy = optional.Some(p)
+	} else {
+		h.AsConfigured.Fidelity |= Incomplete
+	}
+
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

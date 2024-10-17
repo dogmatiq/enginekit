@@ -5,6 +5,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/test"
@@ -46,7 +47,7 @@ func TestIntegration_Identity(t *testing.T) {
 		}{
 			{
 				"no identity",
-				`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: no identity is configured`,
+				`integration:IntegrationMessageHandlerStub is invalid: no identity is configured`,
 				&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Routes(
@@ -57,7 +58,7 @@ func TestIntegration_Identity(t *testing.T) {
 			},
 			{
 				"invalid identity",
-				`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`integration:IntegrationMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
 				&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("name", "non-uuid")
@@ -69,7 +70,7 @@ func TestIntegration_Identity(t *testing.T) {
 			},
 			{
 				"multiple identities",
-				`integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
+				`integration:IntegrationMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
 				&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -136,7 +137,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`integration is invalid: unexpected route: route:executes-command(pkg.SomeCommandType)`,
+				`integration is invalid: unexpected route: route:executes-command:SomeCommandType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -146,7 +147,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`integration is invalid: unexpected route: route:handles-event(pkg.SomeEventType)`,
+				`integration is invalid: unexpected route: route:handles-event:SomeEventType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
@@ -156,7 +157,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`integration is invalid: unexpected route: route:schedules-timeout(pkg.SomeTimeoutType)`,
+				`integration is invalid: unexpected route: route:schedules-timeout:SomeTimeoutType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -235,6 +236,102 @@ func TestIntegration_Interface(t *testing.T) {
 	)
 }
 
+func TestIntegration_render(t *testing.T) {
+	cases := []renderTestCase{
+		{
+			Name:             "complete",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+					)
+				},
+			}),
+		},
+		{
+			Name:             "disabled",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`disabled valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+					)
+					c.Disable()
+				},
+			}),
+		},
+		{
+			Name:             "no runtime type information",
+			ExpectDescriptor: `integration:SomeIntegration`,
+			ExpectDetails: multiline(
+				`valid integration pkg.SomeIntegration (runtime type unavailable)`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-command route for pkg.SomeCommand (runtime type unavailable)`,
+			),
+			Component: configbuilder.
+				Integration().
+				SetSourceTypeName("pkg.SomeIntegration").
+				SetDisabled(false).
+				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+					b.SetName("name")
+					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				}).
+				BuildRoute(func(b *configbuilder.RouteBuilder) {
+					b.SetRouteType(HandlesCommandRouteType)
+					b.SetMessageTypeName("pkg.SomeCommand")
+				}).
+				Done(),
+		},
+		{
+			Name:             "invalid",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`invalid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - expected at least one "handles-command" route`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				},
+			}),
+		},
+		{
+			Name:             "invalid sub-component",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - invalid identity name/non-uuid`,
+				`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "non-uuid")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+					)
+				},
+			}),
+		},
+	}
+
+	runRenderTests(t, cases)
+}
+
 func TestIntegration_validation(t *testing.T) {
 	cases := []validationTestCase{
 		{
@@ -250,7 +347,7 @@ func TestIntegration_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:   "missing implementations",
+			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{
@@ -277,12 +374,12 @@ func TestIntegration_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithRuntimeValues() option",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid:` +
-				"\n" + `- missing implementation: dogma.IntegrationMessageHandler value is not available` +
-				"\n" + `- route:handles-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+			Name: "no runtime type information using WithRuntimeTypes() option",
+			Expect: `integration:IntegrationMessageHandlerStub is invalid:` +
+				"\n" + `- dogma.IntegrationMessageHandler value is not available` +
+				"\n" + `- route:handles-command:CommandStub[TypeA] is invalid: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithRuntimeValues(),
+				WithRuntimeTypes(),
 			},
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{
@@ -318,14 +415,14 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			Name: "unconfigured integration",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid:` +
+			Expect: `integration:IntegrationMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "handles-command" route`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{}),
 		},
 		{
 			Name:   "integration identity must be valid",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+			Expect: `integration:IntegrationMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("name", "non-uuid")
@@ -337,7 +434,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			Name:   "integration must not have multiple identities",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8, identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:bar/ee316cdb-894c-454e-91dd-ec0cc4531c42`,
+			Expect: `integration:IntegrationMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8, identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:bar/ee316cdb-894c-454e-91dd-ec0cc4531c42`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -351,7 +448,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			Name:   "integration must handle at least one command type",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: expected at least one "handles-command" route`,
+			Expect: `integration:IntegrationMessageHandlerStub is invalid: expected at least one "handles-command" route`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -361,7 +458,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			Name:   "integration must not have multiple routes for the same command type",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple "handles-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Expect: `integration:IntegrationMessageHandlerStub is invalid: multiple "handles-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -374,7 +471,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			Name:   "integration must not have multiple routes for the same event type",
-			Expect: `integration:github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub is invalid: multiple "records-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Expect: `integration:IntegrationMessageHandlerStub is invalid: multiple "records-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

@@ -34,10 +34,17 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 
 func normalize[T Component](ctx *normalizationContext, components ...T) {
 	for _, c := range components {
-		ctx = ctx.NewChild(c)
-		c.normalize(ctx)
-		reportFidelityErrors(ctx, c)
+		childCtx := ctx.NewChild(c)
+		c.normalize(childCtx)
+		reportFidelityErrors(childCtx, c)
 	}
+}
+
+func validate[T Component](c T) (Fidelity, []error) {
+	ctx := shallowContext(c)
+	c = c.clone().(T)
+	c.normalize(ctx)
+	return c.Fidelity(), ctx.Errors
 }
 
 func reportFidelityErrors(ctx *normalizationContext, c Component) {
@@ -71,14 +78,28 @@ func strictContext(c Component) *normalizationContext {
 	}
 }
 
+func shallowContext(c Component) *normalizationContext {
+	return &normalizationContext{
+		Component: c,
+		Options: normalizationOptions{
+			Shallow: true,
+		},
+	}
+}
+
 // normalizationOptions is the result of applying a set of [NormalizeOption]
 // values.
 type normalizationOptions struct {
 	PanicOnFailure bool
 	RequireValues  bool
+	Shallow        bool
 }
 
 func (c *normalizationContext) NewChild(com Component) *normalizationContext {
+	if c.Options.Shallow {
+		panic("did not expect to descend into subcomponents")
+	}
+
 	ctx := &normalizationContext{
 		Component: com,
 		Options:   c.Options,

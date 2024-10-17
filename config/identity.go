@@ -5,6 +5,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
@@ -36,35 +37,76 @@ func (i *Identity) Fidelity() Fidelity {
 }
 
 func (i *Identity) String() string {
-	w := strings.Builder{}
-	w.WriteString("identity")
+	return RenderDescriptor(i)
+}
 
-	n, nOK := i.AsConfigured.Name.TryGet()
-	k, kOK := i.AsConfigured.Key.TryGet()
+func (i *Identity) renderDescriptor(ren *renderer.Renderer) {
+	ren.Print("identity")
 
-	if !nOK && !kOK {
-		return w.String()
+	name, nameOK := i.AsConfigured.Name.TryGet()
+	key, keyOK := i.AsConfigured.Key.TryGet()
+
+	if !nameOK && !keyOK {
+		return
 	}
 
-	w.WriteByte(':')
+	ren.Print(":")
 
-	if isPrintableIdentifier(n) {
-		w.WriteString(n)
+	if !nameOK {
+		ren.Print("?")
+	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
+		ren.Print(strconv.Quote(name))
 	} else {
-		w.WriteString(strconv.Quote(n))
+		ren.Print(name)
 	}
 
-	w.WriteByte('/')
+	ren.Print("/")
 
-	if norm, err := uuidpb.Parse(k); err == nil {
-		w.WriteString(norm.AsString())
-	} else if isPrintableIdentifier(k) {
-		w.WriteString(k)
+	if !keyOK {
+		ren.Print("?")
+	} else if uuid, err := uuidpb.Parse(key); err == nil {
+		ren.Print(uuid.AsString())
+	} else if !isPrintableIdentifier(key) || strings.Contains(key, `"`) {
+		ren.Print(strconv.Quote(key))
 	} else {
-		w.WriteString(strconv.Quote(k))
+		ren.Print(key)
+	}
+}
+
+func (i *Identity) renderDetails(ren *renderer.Renderer) {
+	f, errs := validate(i)
+
+	renderFidelity(ren, f, errs)
+	ren.Print("identity ")
+
+	if name, ok := i.AsConfigured.Name.TryGet(); !ok {
+		ren.Print("?")
+	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
+		ren.Print(strconv.Quote(name))
+	} else {
+		ren.Print(name)
 	}
 
-	return w.String()
+	ren.Print("/")
+
+	if key, ok := i.AsConfigured.Key.TryGet(); !ok {
+		ren.Print("?")
+	} else if !isPrintableIdentifier(key) || strings.Contains(key, `"`) {
+		ren.Print(strconv.Quote(key))
+	} else {
+		ren.Print(key)
+	}
+
+	if key, ok := i.AsConfigured.Key.TryGet(); ok {
+		if uuid, err := uuidpb.Parse(key); err == nil {
+			if uuid.AsString() != key {
+				ren.Print(" (non-canonical)")
+			}
+		}
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, errs)
 }
 
 func (i *Identity) clone() Component {

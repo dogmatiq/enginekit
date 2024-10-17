@@ -5,6 +5,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/test"
@@ -47,7 +48,7 @@ func TestProcess_Identity(t *testing.T) {
 		}{
 			{
 				"no identity",
-				`process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: no identity is configured`,
+				`process:ProcessMessageHandlerStub is invalid: no identity is configured`,
 				&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Routes(
@@ -59,7 +60,7 @@ func TestProcess_Identity(t *testing.T) {
 			},
 			{
 				"invalid identity",
-				`process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`process:ProcessMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
 				&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("name", "non-uuid")
@@ -72,7 +73,7 @@ func TestProcess_Identity(t *testing.T) {
 			},
 			{
 				"multiple identities",
-				`process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
+				`process:ProcessMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
 				&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -142,7 +143,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesCommand route",
-				`process is invalid: unexpected route: route:handles-command(pkg.SomeCommandType)`,
+				`process is invalid: unexpected route: route:handles-command:SomeCommandType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
@@ -152,7 +153,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected RecordsEvent route",
-				`process is invalid: unexpected route: route:records-event(pkg.SomeEventType)`,
+				`process is invalid: unexpected route: route:records-event:SomeEventType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
@@ -233,6 +234,116 @@ func TestProcess_Interface(t *testing.T) {
 	)
 }
 
+func TestProcess_render(t *testing.T) {
+	cases := []renderTestCase{
+		{
+			Name:             "complete",
+			ExpectDescriptor: `process:ProcessMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesEvent[EventStub[TypeA]](),
+						dogma.ExecutesCommand[CommandStub[TypeA]](),
+						dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+					)
+				},
+			}),
+		},
+		{
+			Name:             "disabled",
+			ExpectDescriptor: `process:ProcessMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`disabled valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesEvent[EventStub[TypeA]](),
+						dogma.ExecutesCommand[CommandStub[TypeA]](),
+					)
+					c.Disable()
+				},
+			}),
+		},
+		{
+			Name:             "no runtime type information",
+			ExpectDescriptor: `process:SomeProcess`,
+			ExpectDetails: multiline(
+				`valid process pkg.SomeProcess (runtime type unavailable)`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-event route for pkg.SomeEvent (runtime type unavailable)`,
+				`  - valid executes-command route for pkg.SomeCommand (runtime type unavailable)`,
+			),
+			Component: configbuilder.
+				Process().
+				SetSourceTypeName("pkg.SomeProcess").
+				SetDisabled(false).
+				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+					b.SetName("name")
+					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				}).
+				BuildRoute(func(b *configbuilder.RouteBuilder) {
+					b.SetRouteType(HandlesEventRouteType)
+					b.SetMessageTypeName("pkg.SomeEvent")
+				}).
+				BuildRoute(func(b *configbuilder.RouteBuilder) {
+					b.SetRouteType(ExecutesCommandRouteType)
+					b.SetMessageTypeName("pkg.SomeCommand")
+				}).
+				Done(),
+		},
+		{
+			Name:             "invalid",
+			ExpectDescriptor: `process:ProcessMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`invalid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
+				`  - expected at least one "handles-event" route`,
+				`  - expected at least one "executes-command" route`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+			),
+			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				},
+			}),
+		},
+		{
+			Name:             "invalid sub-component",
+			ExpectDescriptor: `process:ProcessMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
+				`  - invalid identity name/non-uuid`,
+				`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Identity("name", "non-uuid")
+					c.Routes(
+						dogma.HandlesEvent[EventStub[TypeA]](),
+						dogma.ExecutesCommand[CommandStub[TypeA]](),
+					)
+				},
+			}),
+		},
+	}
+
+	runRenderTests(t, cases)
+}
+
 func TestProcess_validation(t *testing.T) {
 	cases := []validationTestCase{
 		{
@@ -250,7 +361,7 @@ func TestProcess_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:   "missing implementations",
+			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Process{
 				AsConfigured: ProcessAsConfigured{
@@ -283,13 +394,13 @@ func TestProcess_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithRuntimeValues() option",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid:` +
-				"\n" + `- missing implementation: dogma.ProcessMessageHandler value is not available` +
-				"\n" + `- route:handles-event(github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available` +
-				"\n" + `- route:executes-command(github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]) is invalid: missing implementation: message.Type value is not available`,
+			Name: "no runtime type information using WithRuntimeTypes() option",
+			Expect: `process:ProcessMessageHandlerStub is invalid:` +
+				"\n" + `- dogma.ProcessMessageHandler value is not available` +
+				"\n" + `- route:handles-event:EventStub[TypeA] is invalid: message.Type value is not available` +
+				"\n" + `- route:executes-command:CommandStub[TypeA] is invalid: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithRuntimeValues(),
+				WithRuntimeTypes(),
 			},
 			Component: &Process{
 				AsConfigured: ProcessAsConfigured{
@@ -332,7 +443,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name: "unconfigured process",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid:` +
+			Expect: `process:ProcessMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
 				"\n" + `- expected at least one "handles-event" route` +
 				"\n" + `- expected at least one "executes-command" route`,
@@ -340,7 +451,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process identity must be valid",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("name", "non-uuid")
@@ -353,7 +464,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must not have multiple identities",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8, identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:bar/ee316cdb-894c-454e-91dd-ec0cc4531c42`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8, identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:bar/ee316cdb-894c-454e-91dd-ec0cc4531c42`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -368,7 +479,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must handle at least one event type",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: expected at least one "handles-event" route`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: expected at least one "handles-event" route`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -381,7 +492,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must execute at least one command type",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: expected at least one "executes-command" route`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: expected at least one "executes-command" route`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -394,7 +505,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must not have multiple routes for the same event type",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: multiple "handles-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: multiple "handles-event" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -408,7 +519,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must not have multiple routes for the same command type",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: multiple "executes-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: multiple "executes-command" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -422,7 +533,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must not have multiple routes for the same timeout type",
-			Expect: `process:github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub is invalid: multiple "schedules-timeout" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: multiple "schedules-timeout" routes are configured for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

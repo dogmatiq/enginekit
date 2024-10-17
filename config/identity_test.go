@@ -8,16 +8,13 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-func TestIdentity_String(t *testing.T) {
-	cases := []struct {
-		Name     string
-		Want     string
-		Identity *Identity
-	}{
+func TestIdentity_render(t *testing.T) {
+	cases := []renderTestCase{
 		{
-			"valid, canonical",
-			`identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
-			&Identity{
+			Name:             "valid",
+			ExpectDescriptor: `identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			ExpectDetails:    `valid identity name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			Component: &Identity{
 				AsConfigured: IdentityAsConfigured{
 					Name: optional.Some("name"),
 					Key:  optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
@@ -25,9 +22,64 @@ func TestIdentity_String(t *testing.T) {
 			},
 		},
 		{
-			"valid, non-canonical",
-			`identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
-			&Identity{
+			Name:             "empty",
+			ExpectDescriptor: `identity`,
+			ExpectDetails:    `incomplete identity ?/?`,
+			Component:        &Identity{},
+		},
+		{
+			Name:             "missing name",
+			ExpectDescriptor: `identity:?/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			ExpectDetails:    `incomplete identity ?/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			Component: &Identity{
+				AsConfigured: IdentityAsConfigured{
+					Key: optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+				},
+			},
+		},
+		{
+			Name:             "invalid name",
+			ExpectDescriptor: `identity:"\b"/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			ExpectDetails: multiline(
+				`invalid identity "\b"/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+				`  - invalid name ("\b"), expected a non-empty, printable UTF-8 string with no whitespace`,
+			),
+			Component: &Identity{
+				AsConfigured: IdentityAsConfigured{
+					Name: optional.Some("\b"),
+					Key:  optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+				},
+			},
+		},
+		{
+			Name:             "missing key",
+			ExpectDescriptor: `identity:name/?`,
+			ExpectDetails:    `incomplete identity name/?`,
+			Component: &Identity{
+				AsConfigured: IdentityAsConfigured{
+					Name: optional.Some("name"),
+				},
+			},
+		},
+		{
+			Name:             "invalid key",
+			ExpectDescriptor: `identity:name/key`,
+			ExpectDetails: multiline(
+				`invalid identity name/key`,
+				`  - invalid key ("key"), expected an RFC 4122/9562 UUID`,
+			),
+			Component: &Identity{
+				AsConfigured: IdentityAsConfigured{
+					Name: optional.Some("name"),
+					Key:  optional.Some("key"),
+				},
+			},
+		},
+		{
+			Name:             "non-canonical key",
+			ExpectDescriptor: `identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			ExpectDetails:    `valid identity name/2DA5EEC5-374E-4716-B1C7-F24ABD8DF57F (non-canonical)`,
+			Component: &Identity{
 				AsConfigured: IdentityAsConfigured{
 					Name: optional.Some("name"),
 					Key:  optional.Some("2DA5EEC5-374E-4716-B1C7-F24ABD8DF57F"),
@@ -35,99 +87,20 @@ func TestIdentity_String(t *testing.T) {
 			},
 		},
 		{
-			"valid with name containing non-ASCII characters",
-			`identity:😀/79f63053-1ca6-4537-974f-dd0121eb5195`,
-			&Identity{
+			Name:             "speculative",
+			ExpectDescriptor: `identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			ExpectDetails:    `valid speculative identity name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
+			Component: &Identity{
 				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some("😀"),
-					Key:  optional.Some("79f63053-1ca6-4537-974f-dd0121eb5195"),
-				},
-			},
-		},
-		{
-			"empty",
-			`identity`,
-			&Identity{},
-		},
-		{
-			"empty name",
-			`identity:""/c79d01bb-b289-4e5d-b2fd-9779f33b3a19`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some(""),
-					Key:  optional.Some("c79d01bb-b289-4e5d-b2fd-9779f33b3a19"),
-				},
-			},
-		},
-		{
-			"missing name",
-			`identity:""/c79d01bb-b289-4e5d-b2fd-9779f33b3a19`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Key: optional.Some("c79d01bb-b289-4e5d-b2fd-9779f33b3a19"),
-				},
-			},
-		},
-		{
-			"name containing spaces",
-			`identity:"the name"/c405f1e2-b309-4a43-84bf-5a1f8e7656b8`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some("the name"),
-					Key:  optional.Some("c405f1e2-b309-4a43-84bf-5a1f8e7656b8"),
-				},
-			},
-		},
-		{
-			"name containing non-printable characters",
-			`identity:"name\n"/79f63053-1ca6-4537-974f-dd0121eb5195`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some("name\n"),
-					Key:  optional.Some("79f63053-1ca6-4537-974f-dd0121eb5195"),
-				},
-			},
-		},
-		{
-			"empty key",
-			`identity:name/""`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some("name"),
-					Key:  optional.Some(""),
-				},
-			},
-		},
-		{
-			"missing key",
-			`identity:name/""`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some("name"),
-				},
-			},
-		},
-		{
-			"non-UUID key",
-			`identity:name/_b4ac052-68b1-4877-974e-c437aceb7f3f`,
-			&Identity{
-				AsConfigured: IdentityAsConfigured{
-					Name: optional.Some("name"),
-					Key:  optional.Some("_b4ac052-68b1-4877-974e-c437aceb7f3f"),
+					Name:     optional.Some("name"),
+					Key:      optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+					Fidelity: Speculative,
 				},
 			},
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.Name, func(t *testing.T) {
-			got := c.Identity.String()
-
-			if got != c.Want {
-				t.Fatalf("unexpected string: got %q, want %q", got, c.Want)
-			}
-		})
-	}
+	runRenderTests(t, cases)
 }
 
 func TestIdentity_validation(t *testing.T) {

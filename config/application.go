@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
@@ -30,10 +31,6 @@ type ApplicationAsConfigured struct {
 // [dogma.Application] implementation.
 type Application struct {
 	AsConfigured ApplicationAsConfigured
-}
-
-func (a *Application) String() string {
-	return renderEntity("application", a, a.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -90,6 +87,18 @@ func (a *Application) RouteSet() RouteSet {
 	}
 
 	return set
+}
+
+func (a *Application) String() string {
+	return RenderDescriptor(a)
+}
+
+func (a *Application) renderDescriptor(ren *renderer.Renderer) {
+	renderEntityDescriptor(ren, "application", a.AsConfigured.Source)
+}
+
+func (a *Application) renderDetails(*renderer.Renderer) {
+	panic("not implemented")
 }
 
 func (a *Application) identities() []*Identity {
@@ -169,7 +178,7 @@ func reportRouteConflicts(ctx *normalizationContext, app *Application) {
 
 	for i, h1 := range app.AsConfigured.Handlers {
 		for _, r1 := range h1.routes() {
-			k1, ok := r1.key()
+			k1, ok := routeKeyOf(r1)
 			if !ok {
 				continue
 			}
@@ -180,7 +189,7 @@ func reportRouteConflicts(ctx *normalizationContext, app *Application) {
 
 			for j, h2 := range app.AsConfigured.Handlers[i+1:] {
 				for _, r2 := range h2.routes() {
-					k2, ok := r2.key()
+					k2, ok := routeKeyOf(r2)
 					if !ok {
 						continue
 					}

@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/dogmatiq/enginekit/enginetest/stubs"
@@ -46,8 +47,21 @@ func Expect(
 		got,
 		options...,
 	); diff != "" {
-		t.Log(failMessage)
-		t.Fatal(diff)
+		w := &strings.Builder{}
+
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "===", failMessage, "===")
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "--- got ---")
+		fmt.Fprintln(w, got)
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "--- want ---")
+		fmt.Fprintln(w, want)
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "--- diff ---")
+		fmt.Fprintln(w, diff)
+
+		t.Fatal(w.String())
 	}
 }
 
@@ -60,6 +74,8 @@ func ExpectPanic(
 	t.Helper()
 
 	defer func() {
+		t.Helper()
+
 		got := recover()
 
 		Expect(

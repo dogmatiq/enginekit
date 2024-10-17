@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
@@ -14,6 +15,9 @@ type Component interface {
 	// Fidelity returns information about how well the configuration represents
 	// the actual configuration that would be used at runtime.
 	Fidelity() Fidelity
+
+	renderDescriptor(*renderer.Renderer)
+	renderDetails(*renderer.Renderer)
 
 	clone() Component
 	normalize(*normalizationContext)
@@ -63,11 +67,6 @@ const (
 	// exact match for the actual configuration that would be used at runtime.
 	Immaculate Fidelity = 0
 
-	// Speculative is a [Fidelity] flag that indicates that the [Component] is
-	// only present in the configuration under certain conditions, and that
-	// those conditions could not be evaluated at configuration time.
-	Speculative Fidelity = 1 << iota
-
 	// Incomplete is a [Fidelity] flag that indicates that the [Component] has
 	// some configuration that could not be resolved accurately at configuration
 	// time.
@@ -77,7 +76,12 @@ const (
 	//
 	// Its absence means that all of the _available_ configuration logic was
 	// applied; it does not imply that all _mandatory_ configuration is present.
-	Incomplete
+	Incomplete Fidelity = 1 << iota
+
+	// Speculative is a [Fidelity] flag that indicates that the [Component] is
+	// only present in the configuration under certain conditions, and that
+	// those conditions could not be evaluated at configuration time.
+	Speculative
 )
 
 var (

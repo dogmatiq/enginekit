@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -31,10 +32,6 @@ type AggregateAsConfigured struct {
 // [dogma.AggregateMessageHandler] implementation.
 type Aggregate struct {
 	AsConfigured AggregateAsConfigured
-}
-
-func (h *Aggregate) String() string {
-	return renderEntity("aggregate", h, h.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -73,6 +70,26 @@ func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Aggregate) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Aggregate) renderDescriptor(ren *renderer.Renderer) {
+	renderEntityDescriptor(ren, "aggregate", h.AsConfigured.Source)
+}
+
+func (h *Aggregate) renderDetails(ren *renderer.Renderer) {
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+}
+
+func (h *Aggregate) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Aggregate) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Aggregate) clone() Component {
 	clone := &Aggregate{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -82,14 +99,11 @@ func (h *Aggregate) clone() Component {
 
 func (h *Aggregate) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-}
 
-func (h *Aggregate) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalize(ctx, h.AsConfigured.Routes...)
+	}
 
-func (h *Aggregate) routes() []*Route {
-	return h.AsConfigured.Routes
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

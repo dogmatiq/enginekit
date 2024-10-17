@@ -4,10 +4,10 @@ package config
 // [MustNormalize].
 type NormalizeOption func(*normalizationOptions)
 
-// WithRuntimeValues is a [NormalizeOption] that requires all application,
+// WithRuntimeTypes is a [NormalizeOption] that requires all application,
 // handler and message implementations to be available in order to consider the
 // configuration valid.
-func WithRuntimeValues() NormalizeOption {
+func WithRuntimeTypes() NormalizeOption {
 	return func(o *normalizationOptions) {
 		o.RequireValues = true
 	}

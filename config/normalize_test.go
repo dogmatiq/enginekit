@@ -18,8 +18,12 @@ func runValidationTests(
 	t *testing.T,
 	cases []validationTestCase,
 ) {
+	t.Helper()
+
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
+			t.Helper()
+
 			var got string
 			if _, err := Normalize(c.Component, c.Options...); err != nil {
 				got = err.Error()

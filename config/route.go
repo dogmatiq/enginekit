@@ -1,11 +1,10 @@
 package config
 
 import (
-	"cmp"
 	"reflect"
-	"strings"
 
 	"github.com/dogmatiq/enginekit/collections/maps"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
@@ -52,22 +51,42 @@ func (r *Route) Fidelity() Fidelity {
 }
 
 func (r *Route) String() string {
-	w := &strings.Builder{}
+	return RenderDescriptor(r)
+}
 
-	w.WriteString("route")
+func (r *Route) renderDescriptor(ren *renderer.Renderer) {
+	ren.Print("route")
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
-		w.WriteByte(':')
-		w.WriteString(rt.String())
+		ren.Print(":", rt.String())
 	}
 
 	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
-		w.WriteByte('(')
-		w.WriteString(mt)
-		w.WriteByte(')')
+		ren.Print(":", typename.Unqualified(mt))
+	}
+}
+
+func (r *Route) renderDetails(ren *renderer.Renderer) {
+	f, errs := validate(r)
+
+	renderFidelity(ren, f, errs)
+
+	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
+		ren.Print(rt.String(), " ")
 	}
 
-	return w.String()
+	ren.Print("route")
+
+	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
+		ren.Print(" for ", mt)
+
+		if !r.AsConfigured.MessageType.IsPresent() {
+			ren.Print(" (runtime type unavailable)")
+		}
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, errs)
 }
 
 func (r *Route) clone() Component {
@@ -94,35 +113,20 @@ func (r *Route) normalize(ctx *normalizationContext) {
 
 		actualTypeName := typename.Get(messageType.ReflectType())
 		if typeNameOK && typeName != actualTypeName {
-			ctx.Fail(TypeNameMismatchError{actualTypeName, typeName})
+			ctx.Fail(TypeNameMismatchError{typeName, actualTypeName})
 		}
 
 		r.AsConfigured.MessageTypeName = optional.Some(actualTypeName)
 	} else if ctx.Options.RequireValues {
-		ctx.Fail(ImplementationUnavailableError{reflect.TypeFor[message.Type]()})
+		ctx.Fail(RuntimeValueUnavailableError{reflect.TypeFor[message.Type]()})
 	}
 }
 
-// routeKey is the components of a [Route] that uniquely identify it.
-type routeKey struct {
-	RouteType       RouteType
-	MessageTypeName string
-}
-
-func (k routeKey) Compare(x routeKey) int {
-	if c := cmp.Compare(k.RouteType, x.RouteType); c != 0 {
-		return c
-	}
-	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
-}
-
-func (r *Route) key() (routeKey, bool) {
-	rt, rtOK := r.AsConfigured.RouteType.TryGet()
-	mt, mtOK := r.AsConfigured.MessageTypeName.TryGet()
-	return routeKey{rt, mt}, rtOK && mtOK
-}
-
-func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
+func reportRouteErrors(
+	ctx *normalizationContext,
+	h Handler,
+	routes []*Route,
+) {
 	var (
 		capabilities = h.HandlerType().RouteCapabilities()
 		missing      maps.Ordered[RouteType, MissingRequiredRouteError]
@@ -136,8 +140,6 @@ func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
 	}
 
 	for _, r := range routes {
-		normalize(ctx, r)
-
 		if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
 				ctx.Fail(UnexpectedRouteError{r})
@@ -146,7 +148,7 @@ func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
 			}
 		}
 
-		if k, ok := r.key(); ok {
+		if k, ok := routeKeyOf(r); ok {
 			duplicate.Update(
 				k,
 				func(err *DuplicateRouteError) {

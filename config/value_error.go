@@ -5,28 +5,28 @@ import (
 	"reflect"
 )
 
-// ImplementationUnavailableError indicates that a [Value] is invalid
-// because it does not contain some runtime value or type information and the
-// [WithRuntimeValues] option was specified during normalization.
-type ImplementationUnavailableError struct {
+// RuntimeValueUnavailableError indicates that a [Value] is invalid because it
+// does not contain some runtime value or type information and the
+// [WithRuntimeTypes] option was specified during normalization.
+type RuntimeValueUnavailableError struct {
 	MissingType reflect.Type
 }
 
-func (e ImplementationUnavailableError) Error() string {
-	return fmt.Sprintf("missing implementation: %s value is not available", e.MissingType)
+func (e RuntimeValueUnavailableError) Error() string {
+	return fmt.Sprintf("%s value is not available", e.MissingType)
 }
 
-// TypeNameMismatchError indicates that the type name specified in some
-// [Component] does not match the name of the actual type it refers to.
+// TypeNameMismatchError indicates that the type name reported in some
+// [Component] does not match the name of runtime type that it refers to.
 type TypeNameMismatchError struct {
-	ExpectedTypeName   string
-	UnexpectedTypeName string
+	ReportedTypeName string
+	RuntimeTypeName  string
 }
 
 func (e TypeNameMismatchError) Error() string {
 	return fmt.Sprintf(
-		"type name mismatch: implementation is %q, but the type name is reported as %q",
-		e.ExpectedTypeName,
-		e.UnexpectedTypeName,
+		"type name mismatch: %s does not match the runtime type (%s)",
+		e.ReportedTypeName,
+		e.RuntimeTypeName,
 	)
 }

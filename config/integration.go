@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -31,10 +32,6 @@ type IntegrationAsConfigured struct {
 // [dogma.IntegrationMessageHandler] implementation.
 type Integration struct {
 	AsConfigured IntegrationAsConfigured
-}
-
-func (h *Integration) String() string {
-	return renderEntity("integration", h, h.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -73,6 +70,26 @@ func (h *Integration) Interface() dogma.IntegrationMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Integration) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Integration) renderDescriptor(ren *renderer.Renderer) {
+	renderEntityDescriptor(ren, "integration", h.AsConfigured.Source)
+}
+
+func (h *Integration) renderDetails(ren *renderer.Renderer) {
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+}
+
+func (h *Integration) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Integration) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Integration) clone() Component {
 	clone := &Integration{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -82,14 +99,11 @@ func (h *Integration) clone() Component {
 
 func (h *Integration) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-}
 
-func (h *Integration) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalize(ctx, h.AsConfigured.Routes...)
+	}
 
-func (h *Integration) routes() []*Route {
-	return h.AsConfigured.Routes
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

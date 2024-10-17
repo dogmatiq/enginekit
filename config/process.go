@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
@@ -31,10 +32,6 @@ type ProcessAsConfigured struct {
 // [dogma.ProcessMessageHandler] implementation.
 type Process struct {
 	AsConfigured ProcessAsConfigured
-}
-
-func (h *Process) String() string {
-	return renderEntity("process", h, h.AsConfigured.Source)
 }
 
 // Identity returns the entity's identity.
@@ -73,6 +70,26 @@ func (h *Process) Interface() dogma.ProcessMessageHandler {
 	return h.AsConfigured.Source.Value.Get()
 }
 
+func (h *Process) String() string {
+	return RenderDescriptor(h)
+}
+
+func (h *Process) renderDescriptor(ren *renderer.Renderer) {
+	renderEntityDescriptor(ren, "process", h.AsConfigured.Source)
+}
+
+func (h *Process) renderDetails(ren *renderer.Renderer) {
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+}
+
+func (h *Process) identities() []*Identity {
+	return h.AsConfigured.Identities
+}
+
+func (h *Process) routes() []*Route {
+	return h.AsConfigured.Routes
+}
+
 func (h *Process) clone() Component {
 	clone := &Process{h.AsConfigured}
 	cloneInPlace(&clone.AsConfigured.Identities)
@@ -82,14 +99,11 @@ func (h *Process) clone() Component {
 
 func (h *Process) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
-}
 
-func (h *Process) identities() []*Identity {
-	return h.AsConfigured.Identities
-}
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalize(ctx, h.AsConfigured.Routes...)
+	}
 
-func (h *Process) routes() []*Route {
-	return h.AsConfigured.Routes
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

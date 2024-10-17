@@ -78,8 +78,8 @@ func (h *Process) renderDescriptor(ren *renderer.Renderer) {
 	renderEntityDescriptor(ren, "process", h.AsConfigured.Source)
 }
 
-func (h *Process) renderDetails(*renderer.Renderer) {
-	panic("not implemented")
+func (h *Process) renderDetails(ren *renderer.Renderer) {
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
 }
 
 func (h *Process) identities() []*Identity {
@@ -99,7 +99,11 @@ func (h *Process) clone() Component {
 
 func (h *Process) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalize(ctx, h.AsConfigured.Routes...)
+
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalize(ctx, h.AsConfigured.Routes...)
+	}
+
 	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

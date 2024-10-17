@@ -281,19 +281,20 @@ func TestIntegration_render(t *testing.T) {
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 				`  - valid handles-command route for pkg.SomeCommand (runtime type unavailable)`,
 			),
-			Component: configbuilder.
-				Integration().
-				SetSourceTypeName("pkg.SomeIntegration").
-				SetDisabled(false).
-				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+			Component: configbuilder.Integration(func(b *configbuilder.IntegrationBuilder) {
+				b.SetSourceTypeName("pkg.SomeIntegration")
+				b.SetDisabled(false)
+
+				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")
 					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-				}).
-				BuildRoute(func(b *configbuilder.RouteBuilder) {
+				})
+
+				b.Route(func(b *configbuilder.RouteBuilder) {
 					b.SetRouteType(HandlesCommandRouteType)
 					b.SetMessageTypeName("pkg.SomeCommand")
-				}).
-				Done(),
+				})
+			}),
 		},
 		{
 			Name:             "empty",

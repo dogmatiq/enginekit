@@ -6,74 +6,63 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// Integration returns an [IntegrationBuilder] that builds a new [config.Integration].
-func Integration() *IntegrationBuilder {
-	return &IntegrationBuilder{}
+// Integration returns a new [config.Integration] as configured by fn.
+func Integration(fn func(*IntegrationBuilder)) *config.Integration {
+	x := &IntegrationBuilder{}
+	fn(x)
+	return x.Done()
 }
 
 // IntegrationBuilder constructs a [config.Integration].
 type IntegrationBuilder struct {
-	target   config.Integration
-	appendTo *[]config.Handler
+	target config.Integration
 }
 
 // SetSourceTypeName sets the source of the configuration.
-func (b *IntegrationBuilder) SetSourceTypeName(typeName string) *IntegrationBuilder {
+func (b *IntegrationBuilder) SetSourceTypeName(typeName string) {
 	setSourceTypeName(&b.target.AsConfigured.Source, typeName)
-	return b
 }
 
 // SetSource sets the source of the configuration.
-func (b *IntegrationBuilder) SetSource(h dogma.IntegrationMessageHandler) *IntegrationBuilder {
+func (b *IntegrationBuilder) SetSource(h dogma.IntegrationMessageHandler) {
 	setSource(&b.target.AsConfigured.Source, h)
-	return b
 }
 
-// AddIdentity returns an [IdentityBuilder] that adds a [config.Identity] to the
+// Identity calls fn which configures a [config.Identity] that is added to the
 // handler.
-func (b *IntegrationBuilder) AddIdentity() *IdentityBuilder {
-	return &IdentityBuilder{appendTo: &b.target.AsConfigured.Identities}
-}
-
-// BuildIdentity calls fn which configures a [config.Identity] that is added to
-// the handler.
-func (b *IntegrationBuilder) BuildIdentity(fn func(*IdentityBuilder)) *IntegrationBuilder {
-	x := b.AddIdentity()
+func (b *IntegrationBuilder) Identity(fn func(*IdentityBuilder)) {
+	x := &IdentityBuilder{}
 	fn(x)
-	x.Done()
-	return b
+	b.target.AsConfigured.Identities = append(
+		b.target.AsConfigured.Identities,
+		x.Done(),
+	)
 }
 
-// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
-func (b *IntegrationBuilder) AddRoute() *RouteBuilder {
-	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
-}
-
-// BuildRoute calls fn which configures a [config.Route] that is added to the
+// Route calls fn which configures a [config.Route] that is added to the
 // handler.
-func (b *IntegrationBuilder) BuildRoute(fn func(*RouteBuilder)) *IntegrationBuilder {
-	x := b.AddRoute()
+func (b *IntegrationBuilder) Route(fn func(*RouteBuilder)) {
+	x := &RouteBuilder{}
 	fn(x)
-	x.Done()
-	return b
+	b.target.AsConfigured.Routes = append(
+		b.target.AsConfigured.Routes,
+		x.Done(),
+	)
 }
 
 // SetDisabled sets whether the handler is disabled or not.
-func (b *IntegrationBuilder) SetDisabled(disabled bool) *IntegrationBuilder {
+func (b *IntegrationBuilder) SetDisabled(disabled bool) {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)
-	return b
 }
 
 // Edit calls fn, which can apply arbitrary changes to the handler.
-func (b *IntegrationBuilder) Edit(fn func(*config.IntegrationAsConfigured)) *IntegrationBuilder {
+func (b *IntegrationBuilder) Edit(fn func(*config.IntegrationAsConfigured)) {
 	fn(&b.target.AsConfigured)
-	return b
 }
 
 // UpdateFidelity merges f with the current fidelity of the handler.
-func (b *IntegrationBuilder) UpdateFidelity(f config.Fidelity) *IntegrationBuilder {
+func (b *IntegrationBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
-	return b
 }
 
 // Done completes the configuration of the handler.
@@ -85,11 +74,6 @@ func (b *IntegrationBuilder) Done() *config.Integration {
 		if !b.target.AsConfigured.IsDisabled.IsPresent() {
 			panic("handler must be known to be enabled or disabled, or be marked as incomplete")
 		}
-	}
-
-	if b.appendTo != nil {
-		*b.appendTo = append(*b.appendTo, &b.target)
-		b.appendTo = nil
 	}
 
 	return &b.target

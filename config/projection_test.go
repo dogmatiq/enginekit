@@ -297,20 +297,21 @@ func TestProjection_render(t *testing.T) {
 				`  - valid handles-event route for pkg.SomeEvent (runtime type unavailable)`,
 				`  - broadcast delivery policy (runtime type unavailable)`,
 			),
-			Component: configbuilder.
-				Projection().
-				SetSourceTypeName("pkg.SomeProjection").
-				SetDisabled(false).
-				SetDeliveryPolicyTypeName("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy").
-				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+			Component: configbuilder.Projection(func(b *configbuilder.ProjectionBuilder) {
+				b.SetSourceTypeName("pkg.SomeProjection")
+				b.SetDisabled(false)
+				b.SetDeliveryPolicyTypeName("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy")
+
+				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")
 					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-				}).
-				BuildRoute(func(b *configbuilder.RouteBuilder) {
+				})
+
+				b.Route(func(b *configbuilder.RouteBuilder) {
 					b.SetRouteType(HandlesEventRouteType)
 					b.SetMessageTypeName("pkg.SomeEvent")
-				}).
-				Done(),
+				})
+			}),
 		},
 		{
 			Name:             "empty",

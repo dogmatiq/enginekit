@@ -6,74 +6,63 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// Process returns an [ProcessBuilder] that builds a new [config.Process].
-func Process() *ProcessBuilder {
-	return &ProcessBuilder{}
+// Process returns a new [config.Process] as configured by fn.
+func Process(fn func(*ProcessBuilder)) *config.Process {
+	x := &ProcessBuilder{}
+	fn(x)
+	return x.Done()
 }
 
 // ProcessBuilder constructs a [config.Process].
 type ProcessBuilder struct {
-	target   config.Process
-	appendTo *[]config.Handler
+	target config.Process
 }
 
 // SetSourceTypeName sets the source of the configuration.
-func (b *ProcessBuilder) SetSourceTypeName(typeName string) *ProcessBuilder {
+func (b *ProcessBuilder) SetSourceTypeName(typeName string) {
 	setSourceTypeName(&b.target.AsConfigured.Source, typeName)
-	return b
 }
 
 // SetSource sets the source of the configuration.
-func (b *ProcessBuilder) SetSource(h dogma.ProcessMessageHandler) *ProcessBuilder {
+func (b *ProcessBuilder) SetSource(h dogma.ProcessMessageHandler) {
 	setSource(&b.target.AsConfigured.Source, h)
-	return b
 }
 
-// AddIdentity returns an [IdentityBuilder] that adds a [config.Identity] to the
+// Identity calls fn which configures a [config.Identity] that is added to the
 // handler.
-func (b *ProcessBuilder) AddIdentity() *IdentityBuilder {
-	return &IdentityBuilder{appendTo: &b.target.AsConfigured.Identities}
-}
-
-// BuildIdentity calls fn which configures a [config.Identity] that is added to
-// the handler.
-func (b *ProcessBuilder) BuildIdentity(fn func(*IdentityBuilder)) *ProcessBuilder {
-	x := b.AddIdentity()
+func (b *ProcessBuilder) Identity(fn func(*IdentityBuilder)) {
+	x := &IdentityBuilder{}
 	fn(x)
-	x.Done()
-	return b
+	b.target.AsConfigured.Identities = append(
+		b.target.AsConfigured.Identities,
+		x.Done(),
+	)
 }
 
-// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
-func (b *ProcessBuilder) AddRoute() *RouteBuilder {
-	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
-}
-
-// BuildRoute calls fn which configures a [config.Route] that is added to the
+// Route calls fn which configures a [config.Route] that is added to the
 // handler.
-func (b *ProcessBuilder) BuildRoute(fn func(*RouteBuilder)) *ProcessBuilder {
-	x := b.AddRoute()
+func (b *ProcessBuilder) Route(fn func(*RouteBuilder)) {
+	x := &RouteBuilder{}
 	fn(x)
-	x.Done()
-	return b
+	b.target.AsConfigured.Routes = append(
+		b.target.AsConfigured.Routes,
+		x.Done(),
+	)
 }
 
 // SetDisabled sets whether the handler is disabled or not.
-func (b *ProcessBuilder) SetDisabled(disabled bool) *ProcessBuilder {
+func (b *ProcessBuilder) SetDisabled(disabled bool) {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)
-	return b
 }
 
 // Edit calls fn, which can apply arbitrary changes to the handler.
-func (b *ProcessBuilder) Edit(fn func(*config.ProcessAsConfigured)) *ProcessBuilder {
+func (b *ProcessBuilder) Edit(fn func(*config.ProcessAsConfigured)) {
 	fn(&b.target.AsConfigured)
-	return b
 }
 
 // UpdateFidelity merges f with the current fidelity of the handler.
-func (b *ProcessBuilder) UpdateFidelity(f config.Fidelity) *ProcessBuilder {
+func (b *ProcessBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
-	return b
 }
 
 // Done completes the configuration of the handler.
@@ -85,11 +74,6 @@ func (b *ProcessBuilder) Done() *config.Process {
 		if !b.target.AsConfigured.IsDisabled.IsPresent() {
 			panic("handler must be known to be enabled or disabled, or be marked as incomplete")
 		}
-	}
-
-	if b.appendTo != nil {
-		*b.appendTo = append(*b.appendTo, &b.target)
-		b.appendTo = nil
 	}
 
 	return &b.target

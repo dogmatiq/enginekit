@@ -10,19 +10,20 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// Route returns an [RouteBuilder] that builds a new [config.Route].
-func Route() *RouteBuilder {
-	return &RouteBuilder{}
+// Route returns a new [config.Route] as configured by fn.
+func Route(fn func(*RouteBuilder)) *config.Route {
+	x := &RouteBuilder{}
+	fn(x)
+	return x.Done()
 }
 
 // RouteBuilder constructs a [config.Route].
 type RouteBuilder struct {
-	target   config.Route
-	appendTo *[]*config.Route
+	target config.Route
 }
 
 // SetRoute populates the route type and message type of the route from r.
-func (b *RouteBuilder) SetRoute(r dogma.Route) *RouteBuilder {
+func (b *RouteBuilder) SetRoute(r dogma.Route) {
 	configure := func(
 		rt config.RouteType,
 		t reflect.Type,
@@ -48,39 +49,32 @@ func (b *RouteBuilder) SetRoute(r dogma.Route) *RouteBuilder {
 	default:
 		b.target.AsConfigured.Fidelity |= config.Incomplete
 	}
-
-	return b
 }
 
 // SetRouteType sets the route type of the route.
-func (b *RouteBuilder) SetRouteType(t config.RouteType) *RouteBuilder {
+func (b *RouteBuilder) SetRouteType(t config.RouteType) {
 	b.target.AsConfigured.RouteType = optional.Some(t)
-	return b
 }
 
 // SetMessageTypeName sets the message type name of the route.
-func (b *RouteBuilder) SetMessageTypeName(name string) *RouteBuilder {
+func (b *RouteBuilder) SetMessageTypeName(name string) {
 	b.target.AsConfigured.MessageTypeName = optional.Some(name)
-	return b
 }
 
 // SetMessageType sets the message type of the route.
-func (b *RouteBuilder) SetMessageType(t message.Type) *RouteBuilder {
+func (b *RouteBuilder) SetMessageType(t message.Type) {
 	b.target.AsConfigured.MessageTypeName = optional.Some(typename.Get(t.ReflectType()))
 	b.target.AsConfigured.MessageType = optional.Some(t)
-	return b
 }
 
 // Edit calls fn, which can apply arbitrary changes to the identity.
-func (b *RouteBuilder) Edit(fn func(*config.RouteAsConfigured)) *RouteBuilder {
+func (b *RouteBuilder) Edit(fn func(*config.RouteAsConfigured)) {
 	fn(&b.target.AsConfigured)
-	return b
 }
 
 // UpdateFidelity merges f with the current fidelity of the identity.
-func (b *RouteBuilder) UpdateFidelity(f config.Fidelity) *RouteBuilder {
+func (b *RouteBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
-	return b
 }
 
 // Done completes the configuration of the identity.
@@ -92,11 +86,6 @@ func (b *RouteBuilder) Done() *config.Route {
 		if !b.target.AsConfigured.MessageTypeName.IsPresent() {
 			panic("route must have a message type name or be marked as incomplete")
 		}
-	}
-
-	if b.appendTo != nil {
-		*b.appendTo = append(*b.appendTo, &b.target)
-		b.appendTo = nil
 	}
 
 	return &b.target

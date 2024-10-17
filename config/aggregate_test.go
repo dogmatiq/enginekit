@@ -292,23 +292,25 @@ func TestAggregate_render(t *testing.T) {
 				`  - valid handles-command route for pkg.SomeCommand (runtime type unavailable)`,
 				`  - valid records-event route for pkg.SomeEvent (runtime type unavailable)`,
 			),
-			Component: configbuilder.
-				Aggregate().
-				SetSourceTypeName("pkg.SomeAggregate").
-				SetDisabled(false).
-				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+			Component: configbuilder.Aggregate(func(b *configbuilder.AggregateBuilder) {
+				b.SetSourceTypeName("pkg.SomeAggregate")
+				b.SetDisabled(false)
+
+				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")
 					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-				}).
-				BuildRoute(func(b *configbuilder.RouteBuilder) {
+				})
+
+				b.Route(func(b *configbuilder.RouteBuilder) {
 					b.SetRouteType(HandlesCommandRouteType)
 					b.SetMessageTypeName("pkg.SomeCommand")
-				}).
-				BuildRoute(func(b *configbuilder.RouteBuilder) {
+				})
+
+				b.Route(func(b *configbuilder.RouteBuilder) {
 					b.SetRouteType(RecordsEventRouteType)
 					b.SetMessageTypeName("pkg.SomeEvent")
-				}).
-				Done(),
+				})
+			}),
 		},
 		{
 			Name:             "empty",

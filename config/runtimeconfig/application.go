@@ -9,16 +9,16 @@ import (
 // FromApplication returns a new [config.Application] that represents the
 // configuration of the given [dogma.Application].
 func FromApplication(app dogma.Application) *config.Application {
-	b := configbuilder.Application()
-
-	if app == nil {
-		b.UpdateFidelity(config.Incomplete)
-	} else {
-		b.SetSource(app)
-		app.Configure(&applicationConfigurer{b})
-	}
-
-	return b.Done()
+	return configbuilder.Application(
+		func(b *configbuilder.ApplicationBuilder) {
+			if app == nil {
+				b.UpdateFidelity(config.Incomplete)
+			} else {
+				b.SetSource(app)
+				app.Configure(&applicationConfigurer{b})
+			}
+		},
+	)
 }
 
 type applicationConfigurer struct {
@@ -26,50 +26,32 @@ type applicationConfigurer struct {
 }
 
 func (c *applicationConfigurer) Identity(name, key string) {
-	c.b.
-		AddIdentity().
-		SetName(name).
-		SetKey(key).
-		Done()
+	c.b.Identity(func(b *configbuilder.IdentityBuilder) {
+		b.SetName(name)
+		b.SetKey(key)
+	})
 }
 
 func (c *applicationConfigurer) RegisterAggregate(h dogma.AggregateMessageHandler, _ ...dogma.RegisterAggregateOption) {
-	c.b.BuildAggregate(
-		func(b *configbuilder.AggregateBuilder) {
-			b.SetSource(h)
-			b.SetDisabled(false)
-			h.Configure(&aggregateConfigurer{b})
-		},
-	)
+	c.b.Aggregate(func(b *configbuilder.AggregateBuilder) {
+		buildAggregate(b, h)
+	})
 }
 
 func (c *applicationConfigurer) RegisterProcess(h dogma.ProcessMessageHandler, _ ...dogma.RegisterProcessOption) {
-	c.b.BuildProcess(
-		func(b *configbuilder.ProcessBuilder) {
-			b.SetSource(h)
-			b.SetDisabled(false)
-			h.Configure(&processConfigurer{b})
-		},
-	)
+	c.b.Process(func(b *configbuilder.ProcessBuilder) {
+		buildProcess(b, h)
+	})
 }
 
 func (c *applicationConfigurer) RegisterIntegration(h dogma.IntegrationMessageHandler, _ ...dogma.RegisterIntegrationOption) {
-	c.b.BuildIntegration(
-		func(b *configbuilder.IntegrationBuilder) {
-			b.SetSource(h)
-			b.SetDisabled(false)
-			h.Configure(&integrationConfigurer{b})
-		},
-	)
+	c.b.Integration(func(b *configbuilder.IntegrationBuilder) {
+		buildIntegration(b, h)
+	})
 }
 
 func (c *applicationConfigurer) RegisterProjection(h dogma.ProjectionMessageHandler, _ ...dogma.RegisterProjectionOption) {
-	c.b.BuildProjection(
-		func(b *configbuilder.ProjectionBuilder) {
-			b.SetSource(h)
-			b.SetDisabled(false)
-			b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
-			h.Configure(&projectionConfigurer{b})
-		},
-	)
+	c.b.Projection(func(b *configbuilder.ProjectionBuilder) {
+		buildProjection(b, h)
+	})
 }

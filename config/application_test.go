@@ -243,14 +243,15 @@ func TestApplication_render(t *testing.T) {
 				`valid application pkg.SomeApplication (runtime type unavailable)`,
 				`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
 			),
-			Component: configbuilder.
-				Application().
-				SetSourceTypeName("pkg.SomeApplication").
-				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
-					b.SetName("app")
-					b.SetKey("c85acb36-e47b-4ef6-b46b-64d847a853b7")
-				}).
-				Done(),
+			Component: configbuilder.Application(
+				func(b *configbuilder.ApplicationBuilder) {
+					b.SetSourceTypeName("pkg.SomeApplication")
+					b.Identity(func(b *configbuilder.IdentityBuilder) {
+						b.SetName("app")
+						b.SetKey("c85acb36-e47b-4ef6-b46b-64d847a853b7")
+					})
+				},
+			),
 		},
 		{
 			Name:             "empty",

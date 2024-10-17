@@ -9,45 +9,30 @@ import (
 // FromProjection returns a new [config.Projection] that represents the
 // configuration of the given [dogma.ProjectionMessageHandler].
 func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
-	b := configbuilder.Projection()
+	return configbuilder.Projection(func(b *configbuilder.ProjectionBuilder) {
+		if h == nil {
+			b.UpdateFidelity(config.Incomplete)
+		} else {
+			buildProjection(b, h)
+		}
+	})
+}
 
-	if h == nil {
-		b.UpdateFidelity(config.Incomplete)
-	} else {
-		b.SetDisabled(false)
-		b.SetSource(h)
-		b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
-		h.Configure(&projectionConfigurer{b})
-	}
-
-	return b.Done()
+func buildProjection(b *configbuilder.ProjectionBuilder, h dogma.ProjectionMessageHandler) {
+	b.SetDisabled(false)
+	b.SetSource(h)
+	b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
+	h.Configure(&projectionConfigurer{
+		handlerConfigurer[dogma.ProjectionRoute]{b},
+		b,
+	})
 }
 
 type projectionConfigurer struct {
+	handlerConfigurer[dogma.ProjectionRoute]
 	b *configbuilder.ProjectionBuilder
-}
-
-func (c *projectionConfigurer) Identity(name, key string) {
-	c.b.
-		AddIdentity().
-		SetName(name).
-		SetKey(key).
-		Done()
-}
-
-func (c *projectionConfigurer) Routes(routes ...dogma.ProjectionRoute) {
-	for _, r := range routes {
-		c.b.
-			AddRoute().
-			SetRoute(r).
-			Done()
-	}
 }
 
 func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {
 	c.b.SetDeliveryPolicy(p)
-}
-
-func (c *projectionConfigurer) Disable(...dogma.DisableOption) {
-	c.b.SetDisabled(true)
 }

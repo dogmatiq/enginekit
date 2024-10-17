@@ -9,40 +9,17 @@ import (
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
 func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
-	b := configbuilder.Integration()
-
-	if h == nil {
-		b.UpdateFidelity(config.Incomplete)
-	} else {
-		b.SetDisabled(false)
-		b.SetSource(h)
-		h.Configure(&integrationConfigurer{b})
-	}
-
-	return b.Done()
+	return configbuilder.Integration(func(b *configbuilder.IntegrationBuilder) {
+		if h == nil {
+			b.UpdateFidelity(config.Incomplete)
+		} else {
+			buildIntegration(b, h)
+		}
+	})
 }
 
-type integrationConfigurer struct {
-	b *configbuilder.IntegrationBuilder
-}
-
-func (c *integrationConfigurer) Identity(name, key string) {
-	c.b.
-		AddIdentity().
-		SetName(name).
-		SetKey(key).
-		Done()
-}
-
-func (c *integrationConfigurer) Routes(routes ...dogma.IntegrationRoute) {
-	for _, r := range routes {
-		c.b.
-			AddRoute().
-			SetRoute(r).
-			Done()
-	}
-}
-
-func (c *integrationConfigurer) Disable(...dogma.DisableOption) {
-	c.b.SetDisabled(true)
+func buildIntegration(b *configbuilder.IntegrationBuilder, h dogma.IntegrationMessageHandler) {
+	b.SetDisabled(false)
+	b.SetSource(h)
+	h.Configure(&handlerConfigurer[dogma.IntegrationRoute]{b})
 }

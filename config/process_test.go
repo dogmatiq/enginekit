@@ -286,23 +286,25 @@ func TestProcess_render(t *testing.T) {
 				`  - valid handles-event route for pkg.SomeEvent (runtime type unavailable)`,
 				`  - valid executes-command route for pkg.SomeCommand (runtime type unavailable)`,
 			),
-			Component: configbuilder.
-				Process().
-				SetSourceTypeName("pkg.SomeProcess").
-				SetDisabled(false).
-				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+			Component: configbuilder.Process(func(b *configbuilder.ProcessBuilder) {
+				b.SetSourceTypeName("pkg.SomeProcess")
+				b.SetDisabled(false)
+
+				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")
 					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-				}).
-				BuildRoute(func(b *configbuilder.RouteBuilder) {
+				})
+
+				b.Route(func(b *configbuilder.RouteBuilder) {
 					b.SetRouteType(HandlesEventRouteType)
 					b.SetMessageTypeName("pkg.SomeEvent")
-				}).
-				BuildRoute(func(b *configbuilder.RouteBuilder) {
+				})
+
+				b.Route(func(b *configbuilder.RouteBuilder) {
 					b.SetRouteType(ExecutesCommandRouteType)
 					b.SetMessageTypeName("pkg.SomeCommand")
-				}).
-				Done(),
+				})
+			}),
 		},
 		{
 			Name:             "empty",

@@ -6,74 +6,63 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// Aggregate returns an [AggregateBuilder] that builds a new [config.Aggregate].
-func Aggregate() *AggregateBuilder {
-	return &AggregateBuilder{}
+// Aggregate returns a new [config.AggregateX] as configured by fn.
+func Aggregate(fn func(*AggregateBuilder)) *config.Aggregate {
+	x := &AggregateBuilder{}
+	fn(x)
+	return x.Done()
 }
 
 // AggregateBuilder constructs a [config.Aggregate].
 type AggregateBuilder struct {
-	target   config.Aggregate
-	appendTo *[]config.Handler
+	target config.Aggregate
 }
 
 // SetSourceTypeName sets the source of the configuration.
-func (b *AggregateBuilder) SetSourceTypeName(typeName string) *AggregateBuilder {
+func (b *AggregateBuilder) SetSourceTypeName(typeName string) {
 	setSourceTypeName(&b.target.AsConfigured.Source, typeName)
-	return b
 }
 
 // SetSource sets the source of the configuration.
-func (b *AggregateBuilder) SetSource(h dogma.AggregateMessageHandler) *AggregateBuilder {
+func (b *AggregateBuilder) SetSource(h dogma.AggregateMessageHandler) {
 	setSource(&b.target.AsConfigured.Source, h)
-	return b
 }
 
-// AddIdentity returns an [IdentityBuilder] that adds a [config.Identity] to the
+// Identity calls fn which configures a [config.Identity] that is added to the
 // handler.
-func (b *AggregateBuilder) AddIdentity() *IdentityBuilder {
-	return &IdentityBuilder{appendTo: &b.target.AsConfigured.Identities}
-}
-
-// BuildIdentity calls fn which configures a [config.Identity] that is added to
-// the handler.
-func (b *AggregateBuilder) BuildIdentity(fn func(*IdentityBuilder)) *AggregateBuilder {
-	x := b.AddIdentity()
+func (b *AggregateBuilder) Identity(fn func(*IdentityBuilder)) {
+	x := &IdentityBuilder{}
 	fn(x)
-	x.Done()
-	return b
+	b.target.AsConfigured.Identities = append(
+		b.target.AsConfigured.Identities,
+		x.Done(),
+	)
 }
 
-// AddRoute returns a [RouteBuilder] that adds a [config.Route] to the handler.
-func (b *AggregateBuilder) AddRoute() *RouteBuilder {
-	return &RouteBuilder{appendTo: &b.target.AsConfigured.Routes}
-}
-
-// BuildRoute calls fn which configures a [config.Route] that is added to the
+// Route calls fn which configures a [config.Route] that is added to the
 // handler.
-func (b *AggregateBuilder) BuildRoute(fn func(*RouteBuilder)) *AggregateBuilder {
-	x := b.AddRoute()
+func (b *AggregateBuilder) Route(fn func(*RouteBuilder)) {
+	x := &RouteBuilder{}
 	fn(x)
-	x.Done()
-	return b
+	b.target.AsConfigured.Routes = append(
+		b.target.AsConfigured.Routes,
+		x.Done(),
+	)
 }
 
 // SetDisabled sets whether the handler is disabled or not.
-func (b *AggregateBuilder) SetDisabled(disabled bool) *AggregateBuilder {
+func (b *AggregateBuilder) SetDisabled(disabled bool) {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)
-	return b
 }
 
 // Edit calls fn, which can apply arbitrary changes to the handler.
-func (b *AggregateBuilder) Edit(fn func(*config.AggregateAsConfigured)) *AggregateBuilder {
+func (b *AggregateBuilder) Edit(fn func(*config.AggregateAsConfigured)) {
 	fn(&b.target.AsConfigured)
-	return b
 }
 
 // UpdateFidelity merges f with the current fidelity of the handler.
-func (b *AggregateBuilder) UpdateFidelity(f config.Fidelity) *AggregateBuilder {
+func (b *AggregateBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
-	return b
 }
 
 // Done completes the configuration of the handler.
@@ -85,11 +74,6 @@ func (b *AggregateBuilder) Done() *config.Aggregate {
 		if !b.target.AsConfigured.IsDisabled.IsPresent() {
 			panic("handler must be known to be enabled or disabled, or be marked as incomplete")
 		}
-	}
-
-	if b.appendTo != nil {
-		*b.appendTo = append(*b.appendTo, &b.target)
-		b.appendTo = nil
 	}
 
 	return &b.target

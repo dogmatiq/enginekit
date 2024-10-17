@@ -70,15 +70,13 @@ func renderEntityDescriptor[T any](
 	label string,
 	src Value[T],
 ) {
-	typeName := typename.Unqualified(
-		src.TypeName.Get(),
-	)
+	ren.Print(label)
 
-	ren.Print(
-		label,
-		":",
-		strings.TrimPrefix(typeName, "*"),
-	)
+	if typeName, ok := src.TypeName.TryGet(); ok {
+		typeName = typename.Unqualified(typeName)
+		typeName = strings.TrimPrefix(typeName, "*")
+		ren.Print(":", typeName)
+	}
 }
 
 func renderFidelity(r *renderer.Renderer, f Fidelity, errs []error) {

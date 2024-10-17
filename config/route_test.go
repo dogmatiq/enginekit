@@ -85,13 +85,13 @@ func TestRoute_render(t *testing.T) {
 		},
 		{
 			Name:             "empty",
-			ExpectDescriptor: `route:?:?`,
+			ExpectDescriptor: `route`,
 			ExpectDetails:    `incomplete route`,
 			Component:        &Route{},
 		},
 		{
 			Name:             "missing route type",
-			ExpectDescriptor: `route:?:CommandStub[TypeA]`,
+			ExpectDescriptor: `route:CommandStub[TypeA]`,
 			ExpectDetails:    `incomplete route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 			Component: &Route{
 				AsConfigured: RouteAsConfigured{
@@ -102,7 +102,7 @@ func TestRoute_render(t *testing.T) {
 		},
 		{
 			Name:             "missing message type name",
-			ExpectDescriptor: `route:handles-command:?`,
+			ExpectDescriptor: `route:handles-command`,
 			ExpectDetails:    `incomplete handles-command route`,
 			Component: &Route{
 				AsConfigured: RouteAsConfigured{

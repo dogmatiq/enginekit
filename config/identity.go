@@ -41,9 +41,36 @@ func (i *Identity) String() string {
 }
 
 func (i *Identity) renderDescriptor(ren *renderer.Renderer) {
-	ren.Print("identity:")
-	clone, _ := Normalize(i)
-	clone.renderNameAndKey(ren)
+	ren.Print("identity")
+
+	name, nameOK := i.AsConfigured.Name.TryGet()
+	key, keyOK := i.AsConfigured.Key.TryGet()
+
+	if !nameOK && !keyOK {
+		return
+	}
+
+	ren.Print(":")
+
+	if !nameOK {
+		ren.Print("?")
+	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
+		ren.Print(strconv.Quote(name))
+	} else {
+		ren.Print(name)
+	}
+
+	ren.Print("/")
+
+	if !keyOK {
+		ren.Print("?")
+	} else if uuid, err := uuidpb.Parse(key); err == nil {
+		ren.Print(uuid.AsString())
+	} else if !isPrintableIdentifier(key) || strings.Contains(key, `"`) {
+		ren.Print(strconv.Quote(key))
+	} else {
+		ren.Print(key)
+	}
 }
 
 func (i *Identity) renderDetails(ren *renderer.Renderer) {
@@ -51,21 +78,7 @@ func (i *Identity) renderDetails(ren *renderer.Renderer) {
 
 	renderFidelity(ren, f, errs)
 	ren.Print("identity ")
-	i.renderNameAndKey(ren)
 
-	if key, ok := i.AsConfigured.Key.TryGet(); ok {
-		if uuid, err := uuidpb.Parse(key); err == nil {
-			if uuid.AsString() != key {
-				ren.Print(" (non-canonical)")
-			}
-		}
-	}
-
-	ren.Print("\n")
-	renderErrors(ren, errs)
-}
-
-func (i *Identity) renderNameAndKey(ren *renderer.Renderer) {
 	if name, ok := i.AsConfigured.Name.TryGet(); !ok {
 		ren.Print("?")
 	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
@@ -83,6 +96,17 @@ func (i *Identity) renderNameAndKey(ren *renderer.Renderer) {
 	} else {
 		ren.Print(key)
 	}
+
+	if key, ok := i.AsConfigured.Key.TryGet(); ok {
+		if uuid, err := uuidpb.Parse(key); err == nil {
+			if uuid.AsString() != key {
+				ren.Print(" (non-canonical)")
+			}
+		}
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, errs)
 }
 
 func (i *Identity) clone() Component {

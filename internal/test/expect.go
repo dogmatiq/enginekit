@@ -60,6 +60,8 @@ func ExpectPanic(
 	t.Helper()
 
 	defer func() {
+		t.Helper()
+
 		got := recover()
 
 		Expect(

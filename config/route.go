@@ -55,20 +55,14 @@ func (r *Route) String() string {
 }
 
 func (r *Route) renderDescriptor(ren *renderer.Renderer) {
-	ren.Print("route:")
+	ren.Print("route")
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
-		ren.Print(rt.String())
-	} else {
-		ren.Print("?")
+		ren.Print(":", rt.String())
 	}
 
-	ren.Print(":")
-
 	if mt, ok := r.AsConfigured.MessageTypeName.TryGet(); ok {
-		ren.Print(typename.Unqualified(mt))
-	} else {
-		ren.Print("?")
+		ren.Print(":", typename.Unqualified(mt))
 	}
 }
 

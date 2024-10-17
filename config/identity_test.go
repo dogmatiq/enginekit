@@ -23,7 +23,7 @@ func TestIdentity_render(t *testing.T) {
 		},
 		{
 			Name:             "empty",
-			ExpectDescriptor: `identity:?/?`,
+			ExpectDescriptor: `identity`,
 			ExpectDetails:    `incomplete identity ?/?`,
 			Component:        &Identity{},
 		},

@@ -16,8 +16,12 @@ type renderTestCase struct {
 }
 
 func runRenderTests(t *testing.T, cases []renderTestCase) {
+	t.Helper()
+
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
+			t.Helper()
+
 			test.Expect(
 				t,
 				"unexpected descriptor",

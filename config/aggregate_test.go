@@ -141,7 +141,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`aggregate is invalid: unexpected route: route:executes-command:SomeCommandType`,
+				`aggregate is invalid: unexpected executes-command route for pkg.SomeCommandType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -151,7 +151,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`aggregate is invalid: unexpected route: route:handles-event:SomeEventType`,
+				`aggregate is invalid: unexpected handles-event route for pkg.SomeEventType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
@@ -161,7 +161,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`aggregate is invalid: unexpected route: route:schedules-timeout:SomeTimeoutType`,
+				`aggregate is invalid: unexpected schedules-timeout route for pkg.SomeTimeoutType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -311,12 +311,23 @@ func TestAggregate_render(t *testing.T) {
 				Done(),
 		},
 		{
+			Name:             "empty",
+			ExpectDescriptor: `aggregate`,
+			ExpectDetails: multiline(
+				`incomplete aggregate`,
+				`  - no identity is configured`,
+				`  - no "handles-command" routes are configured`,
+				`  - no "records-event" routes are configured`,
+			),
+			Component: &Aggregate{},
+		},
+		{
 			Name:             "invalid",
 			ExpectDescriptor: `aggregate:AggregateMessageHandlerStub`,
 			ExpectDetails: multiline(
 				`invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-				`  - expected at least one "handles-command" route`,
-				`  - expected at least one "records-event" route`,
+				`  - no "handles-command" routes are configured`,
+				`  - no "records-event" routes are configured`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 			),
 			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
@@ -441,8 +452,8 @@ func TestAggregate_validation(t *testing.T) {
 			Name: "nil aggregate",
 			Expect: `aggregate is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-command" route` +
-				"\n" + `- expected at least one "records-event" route` +
+				"\n" + `- no "handles-command" routes are configured` +
+				"\n" + `- no "records-event" routes are configured` +
 				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromAggregate(nil),
 		},
@@ -450,8 +461,8 @@ func TestAggregate_validation(t *testing.T) {
 			Name: "unconfigured aggregate",
 			Expect: `aggregate:AggregateMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-command" route` +
-				"\n" + `- expected at least one "records-event" route`,
+				"\n" + `- no "handles-command" routes are configured` +
+				"\n" + `- no "records-event" routes are configured`,
 			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{}),
 		},
 		{
@@ -484,7 +495,7 @@ func TestAggregate_validation(t *testing.T) {
 		},
 		{
 			Name:   "aggregate must handle at least one command type",
-			Expect: `aggregate:AggregateMessageHandlerStub is invalid: expected at least one "handles-command" route`,
+			Expect: `aggregate:AggregateMessageHandlerStub is invalid: no "handles-command" routes are configured`,
 			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -497,7 +508,7 @@ func TestAggregate_validation(t *testing.T) {
 		},
 		{
 			Name:   "aggregate must record at least one event type",
-			Expect: `aggregate:AggregateMessageHandlerStub is invalid: expected at least one "records-event" route`,
+			Expect: `aggregate:AggregateMessageHandlerStub is invalid: no "records-event" routes are configured`,
 			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

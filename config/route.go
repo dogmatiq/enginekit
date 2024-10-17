@@ -142,7 +142,7 @@ func reportRouteErrors(
 	for _, r := range routes {
 		if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
-				ctx.Fail(UnexpectedRouteError{r})
+				ctx.Fail(UnexpectedRouteTypeError{r})
 			} else {
 				missing.Remove(rt)
 			}

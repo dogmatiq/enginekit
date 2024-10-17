@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
@@ -15,17 +16,25 @@ type MissingRequiredRouteError struct {
 }
 
 func (e MissingRequiredRouteError) Error() string {
-	return fmt.Sprintf("expected at least one %q route", e.RouteType)
+	return fmt.Sprintf("no %q routes are configured", e.RouteType)
 }
 
-// UnexpectedRouteError indicates that a [Handler] is configured with a [Route]
+// UnexpectedRouteTypeError indicates that a [Handler] is configured with a [Route]
 // with a [RouteType] that is not allowed for that handler type.
-type UnexpectedRouteError struct {
+type UnexpectedRouteTypeError struct {
 	UnexpectedRoute *Route
 }
 
-func (e UnexpectedRouteError) Error() string {
-	return fmt.Sprintf("unexpected route: %s", e.UnexpectedRoute)
+func (e UnexpectedRouteTypeError) Error() string {
+	w := &strings.Builder{}
+
+	fmt.Fprintf(w, "unexpected %s route", e.UnexpectedRoute.RouteType())
+
+	if name, ok := e.UnexpectedRoute.AsConfigured.MessageTypeName.TryGet(); ok {
+		fmt.Fprintf(w, " for %s", name)
+	}
+
+	return w.String()
 }
 
 // DuplicateRouteError indicates that a [Handler] is configured with multiple

@@ -116,11 +116,13 @@ func renderHandlerDetails[T any](
 
 	renderFidelity(ren, f, err)
 	ren.Print(h.HandlerType().String())
-	ren.Print(" ")
-	ren.Print(src.TypeName.Get())
 
-	if !src.Value.IsPresent() {
-		ren.Print(" (runtime type unavailable)")
+	if typeName, ok := src.TypeName.TryGet(); ok {
+		ren.Print(" ", typeName)
+
+		if !src.Value.IsPresent() {
+			ren.Print(" (runtime type unavailable)")
+		}
 	}
 
 	ren.Print("\n")

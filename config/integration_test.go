@@ -137,7 +137,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected ExecutesCommand route",
-				`integration is invalid: unexpected route: route:executes-command:SomeCommandType`,
+				`integration is invalid: unexpected executes-command route for pkg.SomeCommandType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
@@ -147,7 +147,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesEvent route",
-				`integration is invalid: unexpected route: route:handles-event:SomeEventType`,
+				`integration is invalid: unexpected handles-event route for pkg.SomeEventType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesEventRouteType),
@@ -157,7 +157,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected SchedulesTimeout route",
-				`integration is invalid: unexpected route: route:schedules-timeout:SomeTimeoutType`,
+				`integration is invalid: unexpected schedules-timeout route for pkg.SomeTimeoutType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
@@ -296,11 +296,21 @@ func TestIntegration_render(t *testing.T) {
 				Done(),
 		},
 		{
+			Name:             "empty",
+			ExpectDescriptor: `integration`,
+			ExpectDetails: multiline(
+				`incomplete integration`,
+				`  - no identity is configured`,
+				`  - no "handles-command" routes are configured`,
+			),
+			Component: &Integration{},
+		},
+		{
 			Name:             "invalid",
 			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
 			ExpectDetails: multiline(
 				`invalid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
-				`  - expected at least one "handles-command" route`,
+				`  - no "handles-command" routes are configured`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 			),
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
@@ -409,7 +419,7 @@ func TestIntegration_validation(t *testing.T) {
 			Name: "nil integration",
 			Expect: `integration is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-command" route` +
+				"\n" + `- no "handles-command" routes are configured` +
 				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromIntegration(nil),
 		},
@@ -417,7 +427,7 @@ func TestIntegration_validation(t *testing.T) {
 			Name: "unconfigured integration",
 			Expect: `integration:IntegrationMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-command" route`,
+				"\n" + `- no "handles-command" routes are configured`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{}),
 		},
 		{
@@ -448,7 +458,7 @@ func TestIntegration_validation(t *testing.T) {
 		},
 		{
 			Name:   "integration must handle at least one command type",
-			Expect: `integration:IntegrationMessageHandlerStub is invalid: expected at least one "handles-command" route`,
+			Expect: `integration:IntegrationMessageHandlerStub is invalid: no "handles-command" routes are configured`,
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

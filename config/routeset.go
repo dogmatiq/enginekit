@@ -233,7 +233,7 @@ func (f routeSetFilters) TestMessage(t message.Type, routes map[RouteType]map[Ha
 
 func buildRouteSet(ctx *normalizationContext, h Handler) RouteSet {
 	routes := clone(h.routes())
-	normalize(ctx, routes...)
+	normalizeChildren(ctx, routes)
 	reportRouteErrors(ctx, h, routes)
 
 	set := RouteSet{}

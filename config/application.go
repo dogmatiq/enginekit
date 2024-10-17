@@ -57,7 +57,7 @@ func (a *Application) Interface() dogma.Application {
 // It panics if the handlers are incomplete or invalid.
 func (a *Application) Handlers() []Handler {
 	handlers := clone(a.AsConfigured.Handlers)
-	normalize(strictContext(a), handlers...)
+	normalizeChildren(strictContext(a), handlers)
 	return handlers
 }
 
@@ -97,8 +97,34 @@ func (a *Application) renderDescriptor(ren *renderer.Renderer) {
 	renderEntityDescriptor(ren, "application", a.AsConfigured.Source)
 }
 
-func (a *Application) renderDetails(*renderer.Renderer) {
-	panic("not implemented")
+func (a *Application) renderDetails(ren *renderer.Renderer) {
+	f, err := validate(a)
+
+	renderFidelity(ren, f, err)
+	ren.Print("application")
+
+	if typeName, ok := a.AsConfigured.Source.TypeName.TryGet(); ok {
+		ren.Print(" ", typeName)
+
+		if !a.AsConfigured.Source.Value.IsPresent() {
+			ren.Print(" (runtime type unavailable)")
+		}
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, err)
+
+	for _, i := range a.AsConfigured.Identities {
+		ren.IndentBullet()
+		i.renderDetails(ren)
+		ren.Dedent()
+	}
+
+	for _, h := range a.AsConfigured.Handlers {
+		ren.IndentBullet()
+		h.renderDetails(ren)
+		ren.Dedent()
+	}
 }
 
 func (a *Application) identities() []*Identity {
@@ -114,9 +140,11 @@ func (a *Application) clone() Component {
 
 func (a *Application) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &a.AsConfigured.Source, &a.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, a.AsConfigured.Identities)
-	normalize(ctx, a.AsConfigured.Handlers...)
 
+	normalizeChildren(ctx, a.AsConfigured.Identities)
+	normalizeChildren(ctx, a.AsConfigured.Handlers)
+
+	reportIdentityErrors(ctx, a.AsConfigured.Identities)
 	reportIdentityConflicts(ctx, a)
 	reportRouteConflicts(ctx, a)
 }

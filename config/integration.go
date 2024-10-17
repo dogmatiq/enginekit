@@ -100,10 +100,9 @@ func (h *Integration) clone() Component {
 func (h *Integration) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 
-	if !ctx.Options.Shallow {
-		normalizeIdentities(ctx, h.AsConfigured.Identities)
-		normalize(ctx, h.AsConfigured.Routes...)
-	}
+	normalizeChildren(ctx, h.AsConfigured.Identities)
+	normalizeChildren(ctx, h.AsConfigured.Routes)
 
+	reportIdentityErrors(ctx, h.AsConfigured.Identities)
 	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

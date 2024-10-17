@@ -1,6 +1,8 @@
 package config
 
-import "slices"
+import (
+	"slices"
+)
 
 // Normalize returns a normalized copy of the given component.
 //
@@ -32,7 +34,11 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 	return norm
 }
 
-func normalize[T Component](ctx *normalizationContext, components ...T) {
+func normalizeChildren[T Component](ctx *normalizationContext, components []T) {
+	if ctx.Options.Shallow {
+		return
+	}
+
 	for _, c := range components {
 		childCtx := ctx.NewChild(c)
 		c.normalize(childCtx)

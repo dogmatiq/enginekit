@@ -143,7 +143,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected HandlesCommand route",
-				`process is invalid: unexpected route: route:handles-command:SomeCommandType`,
+				`process is invalid: unexpected handles-command route for pkg.SomeCommandType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(HandlesCommandRouteType),
@@ -153,7 +153,7 @@ func TestProcess_RouteSet(t *testing.T) {
 			},
 			{
 				"unexpected RecordsEvent route",
-				`process is invalid: unexpected route: route:records-event:SomeEventType`,
+				`process is invalid: unexpected records-event route for pkg.SomeEventType`,
 				&Route{
 					AsConfigured: RouteAsConfigured{
 						RouteType:       optional.Some(RecordsEventRouteType),
@@ -305,12 +305,23 @@ func TestProcess_render(t *testing.T) {
 				Done(),
 		},
 		{
+			Name:             "empty",
+			ExpectDescriptor: `process`,
+			ExpectDetails: multiline(
+				`incomplete process`,
+				`  - no identity is configured`,
+				`  - no "handles-event" routes are configured`,
+				`  - no "executes-command" routes are configured`,
+			),
+			Component: &Process{},
+		},
+		{
 			Name:             "invalid",
 			ExpectDescriptor: `process:ProcessMessageHandlerStub`,
 			ExpectDetails: multiline(
 				`invalid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
-				`  - expected at least one "handles-event" route`,
-				`  - expected at least one "executes-command" route`,
+				`  - no "handles-event" routes are configured`,
+				`  - no "executes-command" routes are configured`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 			),
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
@@ -436,8 +447,8 @@ func TestProcess_validation(t *testing.T) {
 			Name: "nil process",
 			Expect: `process is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-event" route` +
-				"\n" + `- expected at least one "executes-command" route` +
+				"\n" + `- no "handles-event" routes are configured` +
+				"\n" + `- no "executes-command" routes are configured` +
 				"\n" + `- could not evaluate entire configuration`,
 			Component: runtimeconfig.FromProcess(nil),
 		},
@@ -445,8 +456,8 @@ func TestProcess_validation(t *testing.T) {
 			Name: "unconfigured process",
 			Expect: `process:ProcessMessageHandlerStub is invalid:` +
 				"\n" + `- no identity is configured` +
-				"\n" + `- expected at least one "handles-event" route` +
-				"\n" + `- expected at least one "executes-command" route`,
+				"\n" + `- no "handles-event" routes are configured` +
+				"\n" + `- no "executes-command" routes are configured`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{}),
 		},
 		{
@@ -479,7 +490,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must handle at least one event type",
-			Expect: `process:ProcessMessageHandlerStub is invalid: expected at least one "handles-event" route`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: no "handles-event" routes are configured`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
@@ -492,7 +503,7 @@ func TestProcess_validation(t *testing.T) {
 		},
 		{
 			Name:   "process must execute at least one command type",
-			Expect: `process:ProcessMessageHandlerStub is invalid: expected at least one "executes-command" route`,
+			Expect: `process:ProcessMessageHandlerStub is invalid: no "executes-command" routes are configured`,
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")

@@ -151,7 +151,8 @@ func isPrintableIdentifier(n string) bool {
 
 func buildIdentity(ctx *normalizationContext, identities []*Identity) *identitypb.Identity {
 	identities = clone(identities)
-	normalizeIdentities(ctx, identities)
+	normalizeChildren(ctx, identities)
+	reportIdentityErrors(ctx, identities)
 
 	id := identities[0].AsConfigured
 
@@ -161,9 +162,7 @@ func buildIdentity(ctx *normalizationContext, identities []*Identity) *identityp
 	}
 }
 
-func normalizeIdentities(ctx *normalizationContext, identities []*Identity) {
-	normalize(ctx, identities...)
-
+func reportIdentityErrors(ctx *normalizationContext, identities []*Identity) {
 	if len(identities) == 0 {
 		ctx.Fail(MissingIdentityError{})
 	} else if len(identities) > 1 {

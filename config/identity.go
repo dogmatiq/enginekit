@@ -2,6 +2,7 @@ package config
 
 import (
 	"strconv"
+	"strings"
 	"unicode"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
@@ -40,30 +41,48 @@ func (i *Identity) String() string {
 }
 
 func (i *Identity) renderDescriptor(ren *renderer.Renderer) {
-	ren.Print("identity")
-
-	name, nameOK := i.AsConfigured.Name.TryGet()
-	key, keyOK := i.AsConfigured.Key.TryGet()
-
-	if !nameOK && !keyOK {
-		return
-	}
-
-	if !isPrintableIdentifier(name) {
-		name = strconv.Quote(name)
-	}
-
-	if norm, err := uuidpb.Parse(key); err == nil {
-		key = norm.AsString()
-	} else if !isPrintableIdentifier(key) {
-		key = strconv.Quote(key)
-	}
-
-	ren.Print(":", name, "/", key)
+	ren.Print("identity:")
+	clone, _ := Normalize(i)
+	clone.renderNameAndKey(ren)
 }
 
-func (i *Identity) renderDetails(*renderer.Renderer) {
-	panic("not implemented")
+func (i *Identity) renderDetails(ren *renderer.Renderer) {
+	f, errs := validate(i)
+
+	renderFidelity(ren, f, errs)
+	ren.Print("identity ")
+	i.renderNameAndKey(ren)
+
+	if key, ok := i.AsConfigured.Key.TryGet(); ok {
+		if uuid, err := uuidpb.Parse(key); err == nil {
+			if uuid.AsString() != key {
+				ren.Print(" (non-canonical)")
+			}
+		}
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, errs)
+}
+
+func (i *Identity) renderNameAndKey(ren *renderer.Renderer) {
+	if name, ok := i.AsConfigured.Name.TryGet(); !ok {
+		ren.Print("?")
+	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
+		ren.Print(strconv.Quote(name))
+	} else {
+		ren.Print(name)
+	}
+
+	ren.Print("/")
+
+	if key, ok := i.AsConfigured.Key.TryGet(); !ok {
+		ren.Print("?")
+	} else if !isPrintableIdentifier(key) || strings.Contains(key, `"`) {
+		ren.Print(strconv.Quote(key))
+	} else {
+		ren.Print(key)
+	}
 }
 
 func (i *Identity) clone() Component {

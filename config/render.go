@@ -36,16 +36,16 @@ func RenderDetails(c Component) string {
 // information available. It may or may not consist of information from an
 // [Identity] component.
 func WriteDescriptor(w io.Writer, c Component) (int, error) {
-	p := &renderer.Renderer{Target: w}
-	c.renderDescriptor(p)
-	return p.Done()
+	r := &renderer.Renderer{Target: w}
+	c.renderDescriptor(r)
+	return r.Done()
 }
 
 // WriteDetails writes a detailed human-readable description of c to w.
 func WriteDetails(w io.Writer, c Component) (int, error) {
-	p := &renderer.Renderer{Target: w}
-	c.renderDetails(p)
-	return p.Done()
+	r := &renderer.Renderer{Target: w}
+	c.renderDetails(r)
+	return r.Done()
 }
 
 // renderList returns a human-readable list of items.
@@ -90,5 +90,27 @@ func renderEntityDescriptor[T any](
 
 	if desc != "" {
 		ren.Print(":", desc)
+	}
+}
+
+func renderFidelity(r *renderer.Renderer, f Fidelity, errs []error) {
+	if f&Incomplete != 0 {
+		r.Print("incomplete ")
+	} else if len(errs) == 0 {
+		r.Print("valid ")
+	} else {
+		r.Print("invalid ")
+	}
+
+	if f&Speculative != 0 {
+		r.Print("speculative ")
+	}
+}
+
+func renderErrors(r *renderer.Renderer, errs []error) {
+	for _, err := range errs {
+		r.IndentBullet()
+		r.Print(err.Error(), "\n")
+		r.Dedent()
 	}
 }

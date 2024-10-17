@@ -75,17 +75,7 @@ func (r *Route) renderDescriptor(ren *renderer.Renderer) {
 func (r *Route) renderDetails(ren *renderer.Renderer) {
 	f, errs := validate(r)
 
-	if f&Speculative != 0 {
-		ren.Print("speculative ")
-	}
-
-	if f&Incomplete != 0 {
-		ren.Print("incomplete ")
-	} else if len(errs) == 0 {
-		ren.Print("valid ")
-	} else {
-		ren.Print("invalid ")
-	}
+	renderFidelity(ren, f, errs)
 
 	if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 		ren.Print(rt.String(), " ")
@@ -102,14 +92,7 @@ func (r *Route) renderDetails(ren *renderer.Renderer) {
 	}
 
 	ren.Print("\n")
-
-	if len(errs) != 0 {
-		for _, err := range errs {
-			ren.IndentBullet()
-			ren.Print(err.Error(), "\n")
-			ren.Dedent()
-		}
-	}
+	renderErrors(ren, errs)
 }
 
 func (r *Route) clone() Component {

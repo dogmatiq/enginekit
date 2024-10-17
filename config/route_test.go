@@ -140,6 +140,18 @@ func TestRoute_render(t *testing.T) {
 				},
 			},
 		},
+		{
+			Name:             "speculative",
+			ExpectDescriptor: `route:handles-command:SomeCommand`,
+			ExpectDetails:    `valid speculative handles-command route for pkg.SomeCommand (runtime type unavailable)`,
+			Component: &Route{
+				AsConfigured: RouteAsConfigured{
+					RouteType:       optional.Some(HandlesCommandRouteType),
+					MessageTypeName: optional.Some("pkg.SomeCommand"),
+					Fidelity:        Speculative,
+				},
+			},
+		},
 	}
 
 	runRenderTestCases(t, cases)

@@ -258,7 +258,7 @@ func TestProjection_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:   "missing implementations",
+			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Projection{
 				AsConfigured: ProjectionAsConfigured{
@@ -288,13 +288,13 @@ func TestProjection_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithRuntimeValues() option",
+			Name: "no runtime type information using WithRuntimeTypes() option",
 			Expect: `projection:ProjectionMessageHandlerStub is invalid:` +
 				"\n" + `- dogma.ProjectionMessageHandler value is not available` +
 				"\n" + `- dogma.ProjectionDeliveryPolicy value is not available` +
 				"\n" + `- route:handles-event:EventStub[TypeA] is invalid: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithRuntimeValues(),
+				WithRuntimeTypes(),
 			},
 			Component: &Projection{
 				AsConfigured: ProjectionAsConfigured{

@@ -122,7 +122,11 @@ func (r *Route) normalize(ctx *normalizationContext) {
 	}
 }
 
-func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
+func reportRouteErrors(
+	ctx *normalizationContext,
+	h Handler,
+	routes []*Route,
+) {
 	var (
 		capabilities = h.HandlerType().RouteCapabilities()
 		missing      maps.Ordered[RouteType, MissingRequiredRouteError]
@@ -136,8 +140,6 @@ func normalizeRoutes(ctx *normalizationContext, h Handler, routes []*Route) {
 	}
 
 	for _, r := range routes {
-		normalize(ctx, r)
-
 		if rt, ok := r.AsConfigured.RouteType.TryGet(); ok {
 			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
 				ctx.Fail(UnexpectedRouteError{r})

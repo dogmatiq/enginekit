@@ -100,5 +100,6 @@ func (h *Process) clone() Component {
 func (h *Process) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+	normalize(ctx, h.AsConfigured.Routes...)
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

@@ -295,6 +295,38 @@ func TestIntegration_render(t *testing.T) {
 				}).
 				Done(),
 		},
+		{
+			Name:             "invalid",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`invalid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - expected at least one "handles-command" route`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				},
+			}),
+		},
+		{
+			Name:             "invalid sub-component",
+			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`  - invalid identity name/non-uuid`,
+				`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+			),
+			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "non-uuid")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+					)
+				},
+			}),
+		},
 	}
 
 	runRenderTests(t, cases)
@@ -315,7 +347,7 @@ func TestIntegration_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:   "missing implementations",
+			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{
@@ -342,12 +374,12 @@ func TestIntegration_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithRuntimeValues() option",
+			Name: "no runtime type information using WithRuntimeTypes() option",
 			Expect: `integration:IntegrationMessageHandlerStub is invalid:` +
 				"\n" + `- dogma.IntegrationMessageHandler value is not available` +
 				"\n" + `- route:handles-command:CommandStub[TypeA] is invalid: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithRuntimeValues(),
+				WithRuntimeTypes(),
 			},
 			Component: &Integration{
 				AsConfigured: IntegrationAsConfigured{

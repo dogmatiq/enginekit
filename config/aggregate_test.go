@@ -257,7 +257,7 @@ func TestAggregate_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:   "missing implementations",
+			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Aggregate{
 				AsConfigured: AggregateAsConfigured{
@@ -290,13 +290,13 @@ func TestAggregate_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithRuntimeValues() option",
+			Name: "no runtime type information using WithRuntimeTypes() option",
 			Expect: `aggregate:AggregateMessageHandlerStub is invalid:` +
 				"\n" + `- dogma.AggregateMessageHandler value is not available` +
 				"\n" + `- route:handles-command:CommandStub[TypeA] is invalid: message.Type value is not available` +
 				"\n" + `- route:records-event:EventStub[TypeA] is invalid: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithRuntimeValues(),
+				WithRuntimeTypes(),
 			},
 			Component: &Aggregate{
 				AsConfigured: AggregateAsConfigured{

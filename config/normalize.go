@@ -34,9 +34,9 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 
 func normalize[T Component](ctx *normalizationContext, components ...T) {
 	for _, c := range components {
-		ctx = ctx.NewChild(c)
-		c.normalize(ctx)
-		reportFidelityErrors(ctx, c)
+		childCtx := ctx.NewChild(c)
+		c.normalize(childCtx)
+		reportFidelityErrors(childCtx, c)
 	}
 }
 

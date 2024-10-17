@@ -250,7 +250,7 @@ func TestProcess_validation(t *testing.T) {
 			}),
 		},
 		{
-			Name:   "missing implementations",
+			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Process{
 				AsConfigured: ProcessAsConfigured{
@@ -283,13 +283,13 @@ func TestProcess_validation(t *testing.T) {
 			},
 		},
 		{
-			Name: "missing implementations using WithRuntimeValues() option",
+			Name: "no runtime type information using WithRuntimeTypes() option",
 			Expect: `process:ProcessMessageHandlerStub is invalid:` +
 				"\n" + `- dogma.ProcessMessageHandler value is not available` +
 				"\n" + `- route:handles-event:EventStub[TypeA] is invalid: message.Type value is not available` +
 				"\n" + `- route:executes-command:CommandStub[TypeA] is invalid: message.Type value is not available`,
 			Options: []NormalizeOption{
-				WithRuntimeValues(),
+				WithRuntimeTypes(),
 			},
 			Component: &Process{
 				AsConfigured: ProcessAsConfigured{

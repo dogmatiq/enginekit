@@ -7,7 +7,7 @@ import (
 
 // RuntimeValueUnavailableError indicates that a [Value] is invalid because it
 // does not contain some runtime value or type information and the
-// [WithRuntimeValues] option was specified during normalization.
+// [WithRuntimeTypes] option was specified during normalization.
 type RuntimeValueUnavailableError struct {
 	MissingType reflect.Type
 }

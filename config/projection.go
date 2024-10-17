@@ -108,10 +108,12 @@ func (h *Projection) clone() Component {
 func (h *Projection) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
 	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+	normalize(ctx, h.AsConfigured.Routes...)
 
 	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
 		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
 		h.AsConfigured.DeliveryPolicy = optional.Some(p)
 	}
+
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

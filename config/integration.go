@@ -129,6 +129,8 @@ func (h *Integration) normalize(ctx *normalizationContext) {
 
 	if !ctx.Options.Shallow {
 		normalizeIdentities(ctx, h.AsConfigured.Identities)
-		normalizeRoutes(ctx, h, h.AsConfigured.Routes)
+		normalize(ctx, h.AsConfigured.Routes...)
 	}
+
+	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

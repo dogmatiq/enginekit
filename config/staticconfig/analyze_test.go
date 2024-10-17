@@ -4,40 +4,32 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/dogmatiq/aureus"
+	"github.com/dogmatiq/enginekit/config"
 	. "github.com/dogmatiq/enginekit/config/staticconfig"
-	"golang.org/x/tools/go/packages"
-	// . "github.com/dogmatiq/enginekit/enginetest/stubs"
 )
 
 func TestAnalyzer(t *testing.T) {
 	aureus.Run(
 		t,
 		func(w io.Writer, in aureus.Content, out aureus.ContentMetaData) error {
-			pkg := strings.TrimSuffix(
-				filepath.Base(in.File),
-				filepath.Ext(in.File),
-			)
-
 			// Make a temporary directory to write the Go source code.
 			//
-			// The name is based on the input file name rather than using a
-			// random temporary directory, otherwise the test output would be
-			// non-deterministic.
+			// The name is static so that the the test output is deterministic.
 			//
 			// Additionally, creating the directory within the repository allows
 			// the test code to use this repo's go.mod file, ensuring the
 			// statically analyzed code uses the same versions of Dogma, etc.
 			dir := filepath.Join(
 				filepath.Dir(in.File),
-				pkg,
+				"pkg",
 			)
-			if err := os.MkdirAll(dir, 0700); err != nil {
+			if err := os.Mkdir(dir, 0700); err != nil {
 				return err
 			}
+
 			defer os.RemoveAll(dir)
 
 			if err := os.WriteFile(
@@ -48,42 +40,31 @@ func TestAnalyzer(t *testing.T) {
 				return err
 			}
 
-			defer func() {
-				if e := recover(); e != nil {
-					if _, err := io.WriteString(
-						w,
-						e.(packages.Error).Msg+"\n",
-					); err != nil {
-						panic(err)
-					}
-				}
-			}()
-
-			result := FromDir(dir)
+			result := LoadAndAnalyze(dir)
 
 			if len(result.Applications) == 0 {
-				_, err := io.WriteString(w, "(no applications found)\n")
-				return err
+				if _, err := io.WriteString(w, "(no applications found)\n"); err != nil {
+					return err
+				}
 			}
 
-			// noise := []string{
-			// 	"github.com/dogmatiq/configkit/static/testdata/" + pkg + ".",
-			// 	"github.com/dogmatiq/enginekit/enginetest/stubs.",
-			// }
+			for err := range result.Errors() {
+				if _, err := io.WriteString(w, err.Error()+"\n"); err != nil {
+					return err
+				}
+			}
 
-			// for i, app := range apps {
-			// 	s := configkit.ToString(app)
-			// 	for _, p := range noise {
-			// 		s = strings.ReplaceAll(s, p, "")
-			// 	}
+			for i, app := range result.Applications {
+				if i > 0 {
+					if _, err := io.WriteString(w, "\n"); err != nil {
+						return err
+					}
+				}
 
-			// 	if i > 0 {
-			// 		s = "\n" + s
-			// 	}
-			// 	if _, err := io.WriteString(w, s); err != nil {
-			// 		return err
-			// 	}
-			// }
+				if _, err := config.WriteDetails(w, app); err != nil {
+					return err
+				}
+			}
 
 			return nil
 		},

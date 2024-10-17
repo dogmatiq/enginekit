@@ -5,6 +5,7 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	. "github.com/dogmatiq/enginekit/internal/test"
@@ -241,6 +242,113 @@ func TestProjection_Interface(t *testing.T) {
 		cfg.Interface(),
 		h,
 	)
+}
+
+func TestProjection_render(t *testing.T) {
+	cases := []renderTestCase{
+		{
+			Name:             "complete",
+			ExpectDescriptor: `projection:ProjectionMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - broadcast delivery policy`,
+			),
+			Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesEvent[EventStub[TypeA]](),
+					)
+					c.DeliveryPolicy(
+						dogma.BroadcastProjectionDeliveryPolicy{
+							PrimaryFirst: true,
+						},
+					)
+				},
+			}),
+		},
+		{
+			Name:             "disabled",
+			ExpectDescriptor: `projection:ProjectionMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`disabled valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - unicast delivery policy`,
+			),
+			Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesEvent[EventStub[TypeA]](),
+					)
+					c.Disable()
+				},
+			}),
+		},
+		{
+			Name:             "no runtime type information",
+			ExpectDescriptor: `projection:SomeProjection`,
+			ExpectDetails: multiline(
+				`valid projection pkg.SomeProjection (runtime type unavailable)`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - valid handles-event route for pkg.SomeEvent (runtime type unavailable)`,
+				`  - broadcast delivery policy (runtime type unavailable)`,
+			),
+			Component: configbuilder.
+				Projection().
+				SetSourceTypeName("pkg.SomeProjection").
+				SetDisabled(false).
+				SetDeliveryPolicyTypeName("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy").
+				BuildIdentity(func(b *configbuilder.IdentityBuilder) {
+					b.SetName("name")
+					b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				}).
+				BuildRoute(func(b *configbuilder.RouteBuilder) {
+					b.SetRouteType(HandlesEventRouteType)
+					b.SetMessageTypeName("pkg.SomeEvent")
+				}).
+				Done(),
+		},
+		{
+			Name:             "invalid",
+			ExpectDescriptor: `projection:ProjectionMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`invalid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
+				`  - expected at least one "handles-event" route`,
+				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				`  - unicast delivery policy`,
+			),
+			Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+				},
+			}),
+		},
+		{
+			Name:             "invalid sub-component",
+			ExpectDescriptor: `projection:ProjectionMessageHandlerStub`,
+			ExpectDetails: multiline(
+				`valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
+				`  - invalid identity name/non-uuid`,
+				`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - unicast delivery policy`,
+			),
+			Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
+				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
+					c.Identity("name", "non-uuid")
+					c.Routes(
+						dogma.HandlesEvent[EventStub[TypeA]](),
+					)
+				},
+			}),
+		},
+	}
+
+	runRenderTests(t, cases)
 }
 
 func TestProjection_validation(t *testing.T) {

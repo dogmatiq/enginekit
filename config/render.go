@@ -7,6 +7,7 @@ import (
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
+	"github.com/dogmatiq/enginekit/optional"
 )
 
 // RenderDescriptor returns a one-line human-readable description of c.
@@ -65,20 +66,6 @@ func renderList[T any](items []T) string {
 	return s
 }
 
-func renderEntityDescriptor[T any](
-	ren *renderer.Renderer,
-	label string,
-	src Value[T],
-) {
-	ren.Print(label)
-
-	if typeName, ok := src.TypeName.TryGet(); ok {
-		typeName = typename.Unqualified(typeName)
-		typeName = strings.TrimPrefix(typeName, "*")
-		ren.Print(":", typeName)
-	}
-}
-
 func renderFidelity(r *renderer.Renderer, f Fidelity, errs []error) {
 	if f&Incomplete != 0 {
 		r.Print("incomplete ")
@@ -98,5 +85,56 @@ func renderErrors(r *renderer.Renderer, errs []error) {
 		r.IndentBullet()
 		r.Print(err.Error(), "\n")
 		r.Dedent()
+	}
+}
+
+func renderEntityDescriptor[T any](
+	ren *renderer.Renderer,
+	label string,
+	src Value[T],
+) {
+	ren.Print(label)
+
+	if typeName, ok := src.TypeName.TryGet(); ok {
+		typeName = typename.Unqualified(typeName)
+		typeName = strings.TrimPrefix(typeName, "*")
+		ren.Print(":", typeName)
+	}
+}
+
+func renderHandlerDetails[T any](
+	ren *renderer.Renderer,
+	h Handler,
+	src Value[T],
+	isDisabled optional.Optional[bool],
+) {
+	f, err := validate(h)
+
+	if d, ok := isDisabled.TryGet(); ok && d {
+		ren.Print("disabled ")
+	}
+
+	renderFidelity(ren, f, err)
+	ren.Print(h.HandlerType().String())
+	ren.Print(" ")
+	ren.Print(src.TypeName.Get())
+
+	if !src.Value.IsPresent() {
+		ren.Print(" (runtime type unavailable)")
+	}
+
+	ren.Print("\n")
+	renderErrors(ren, err)
+
+	for _, i := range h.identities() {
+		ren.IndentBullet()
+		i.renderDetails(ren)
+		ren.Dedent()
+	}
+
+	for _, r := range h.routes() {
+		ren.IndentBullet()
+		r.renderDetails(ren)
+		ren.Dedent()
 	}
 }

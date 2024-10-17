@@ -79,34 +79,7 @@ func (h *Integration) renderDescriptor(ren *renderer.Renderer) {
 }
 
 func (h *Integration) renderDetails(ren *renderer.Renderer) {
-	f, err := validate(h)
-
-	if d, ok := h.AsConfigured.IsDisabled.TryGet(); ok && d {
-		ren.Print("disabled ")
-	}
-
-	renderFidelity(ren, f, err)
-	ren.Print("integration ")
-	ren.Print(h.AsConfigured.Source.TypeName.Get())
-
-	if !h.AsConfigured.Source.Value.IsPresent() {
-		ren.Print(" (runtime type unavailable)")
-	}
-
-	ren.Print("\n")
-	renderErrors(ren, err)
-
-	for _, i := range h.AsConfigured.Identities {
-		ren.IndentBullet()
-		i.renderDetails(ren)
-		ren.Dedent()
-	}
-
-	for _, r := range h.AsConfigured.Routes {
-		ren.IndentBullet()
-		r.renderDetails(ren)
-		ren.Dedent()
-	}
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
 }
 
 func (h *Integration) identities() []*Identity {

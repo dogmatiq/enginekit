@@ -78,8 +78,8 @@ func (h *Aggregate) renderDescriptor(ren *renderer.Renderer) {
 	renderEntityDescriptor(ren, "aggregate", h.AsConfigured.Source)
 }
 
-func (h *Aggregate) renderDetails(*renderer.Renderer) {
-	panic("not implemented")
+func (h *Aggregate) renderDetails(ren *renderer.Renderer) {
+	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
 }
 
 func (h *Aggregate) identities() []*Identity {
@@ -99,7 +99,11 @@ func (h *Aggregate) clone() Component {
 
 func (h *Aggregate) normalize(ctx *normalizationContext) {
 	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-	normalizeIdentities(ctx, h.AsConfigured.Identities)
-	normalize(ctx, h.AsConfigured.Routes...)
+
+	if !ctx.Options.Shallow {
+		normalizeIdentities(ctx, h.AsConfigured.Identities)
+		normalize(ctx, h.AsConfigured.Routes...)
+	}
+
 	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
 }

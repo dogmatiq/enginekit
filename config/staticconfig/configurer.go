@@ -1,62 +1,38 @@
 package staticconfig
 
 import (
-	"go/constant"
 	"go/types"
 	"iter"
+	"os"
 
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"golang.org/x/tools/go/ssa"
 )
+
+type configurerCall struct {
+	*ssa.CallCommon
+
+	Fidelity config.Fidelity
+}
 
 // analyzeConfigurerCalls analyzes the calls to the "configurer" that is passed
 // to t's "Configure()" method.
 //
 // Any calls that are not recognized are yielded.
-func findConfigurerCalls(ctx *context, t types.Type) iter.Seq[*ssa.CallCommon] {
+func findConfigurerCalls(ctx *context, t types.Type) iter.Seq[configurerCall] {
 	configure := ctx.LookupMethod(t, "Configure")
 	return findConfigurerCallsInFunc(configure, 1)
 }
 
-func analyzeIdentityCall(
-	b configbuilder.EntityBuilder,
-	call *ssa.CallCommon,
-) {
-	b.Identity(func(b *configbuilder.IdentityBuilder) {
-		if name, ok := call.Args[0].(*ssa.Const); ok {
-			b.SetName(constant.StringVal(name.Value))
-		} else {
-			b.UpdateFidelity(config.Incomplete)
-		}
-
-		if key, ok := call.Args[1].(*ssa.Const); ok {
-			b.SetKey(constant.StringVal(key.Value))
-		} else {
-			b.UpdateFidelity(config.Incomplete)
-		}
-	})
-}
-
-// indices refers to the positions of arguments that are the configurer. If none
-// are provided it defaults to [1]. This accounts for the most common case where
-// fn is the Configure() method on an application or handler. In this case the
-// first parameter is the receiver, so the second parameter is the configurer
-// itself.
-
-// The instantiatedTypes map is used to store the types that have been
-// instantiated in the function. This is necessary because the SSA
-// representation of a function does not include type information for the
-// arguments, so we need to track this information ourselves. The keys are the
-// names of the type parameters and the values are the concrete types that have
-// been instantiated.
-
-// findConfigurerCallsInFunc yields all call to methods on the Dogma application or
-// handler "configurer" within the given function.
+// findConfigurerCallsInFunc yields all call to methods on the Dogma application
+// or handler "configurer" within the given function.
+//
+// indices is a list of the positions of parameters to fn that are the
+// configurer.
 func findConfigurerCallsInFunc(
 	fn *ssa.Function,
 	indices ...int,
-) iter.Seq[*ssa.CallCommon] {
+) iter.Seq[configurerCall] {
 	isConfigurerCall := func(call *ssa.CallCommon) bool {
 		for _, i := range indices {
 			if call.Value == fn.Params[i] {
@@ -66,8 +42,15 @@ func findConfigurerCallsInFunc(
 		return false
 	}
 
-	return func(yield func(*ssa.CallCommon) bool) {
+	fn.WriteTo(os.Stdout)
+
+	return func(yield func(configurerCall) bool) {
 		for _, block := range fn.Blocks {
+			var f config.Fidelity
+			if isConditional(fn, block) {
+				f |= config.Speculative
+			}
+
 			for _, inst := range block.Instrs {
 				inst, ok := inst.(*ssa.Call)
 				if !ok {
@@ -78,21 +61,42 @@ func findConfigurerCallsInFunc(
 
 				if isConfigurerCall(call) {
 					// We've found a direct call to a method on the configurer.
-					if !yield(call) {
+					if !yield(configurerCall{call, f}) {
 						return
 					}
-					// } else {
-					// 	// We've found a call to some other function or method. We need
-					// 	// to analyse the instructions within *that* function to see if
-					// 	// *it* makes any calls to the configurer.
-					// 	if !e.yieldIndirectCalls(call, yield) {
-					// 		return false
-					// 	}
 				}
 			}
 		}
-
 	}
+}
+
+// isConditional returns true if there is any control flow path through fn that
+// does NOT pass through b.
+func isConditional(fn *ssa.Function, b *ssa.BasicBlock) bool {
+	return !isInevitable(fn.Blocks[0], b)
+}
+
+// isInevitable returns true if all paths out of "from" pass through "to".
+func isInevitable(from, to *ssa.BasicBlock) bool {
+	if from == to {
+		return true
+	}
+
+	if len(from.Succs) == 0 {
+		return false
+	}
+
+	for _, succ := range from.Succs {
+		if succ == from {
+			continue
+		}
+
+		if !isInevitable(succ, to) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // func (e *entity) yieldIndirectCalls(

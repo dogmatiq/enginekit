@@ -46,6 +46,11 @@ func findConfigurerCallsInFunc(
 
 	return func(yield func(configurerCall) bool) {
 		for _, block := range fn.Blocks {
+			if block.Index > 0 && len(block.Preds) == 0 {
+				// Skip unreachable blocks.
+				continue
+			}
+
 			var f config.Fidelity
 			if isConditional(fn, block) {
 				f |= config.Speculative

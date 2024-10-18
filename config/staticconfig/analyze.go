@@ -86,9 +86,7 @@ func Analyze(pkgs []*packages.Package) Analysis {
 	ctx := &context{}
 	ctx.Program, ctx.Packages = ssautil.AllPackages(
 		pkgs,
-		0,
-		// ssa.SanityCheckFunctions, // TODO: document why this is necessary
-		// ssa.InstantiateGenerics // TODO: might this make some generic handling code easier?
+		ssa.InstantiateGenerics, // | ssa.SanityCheckFunctions, // TODO: document why this is necessary
 	)
 
 	ctx.Program.Build()

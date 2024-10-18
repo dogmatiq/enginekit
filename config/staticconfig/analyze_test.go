@@ -26,11 +26,16 @@ func TestAnalyzer(t *testing.T) {
 				filepath.Dir(in.File),
 				"pkg",
 			)
-			if err := os.Mkdir(dir, 0700); err != nil {
+			if err := os.MkdirAll(dir, 0700); err != nil {
 				return err
 			}
 
-			defer os.RemoveAll(dir)
+			defer func() {
+				err := os.RemoveAll(dir)
+				if err != nil {
+					t.Logf("failed to remove temporary directory: %v", err)
+				}
+			}()
 
 			if err := os.WriteFile(
 				filepath.Join(dir, "main.go"),

@@ -14,25 +14,9 @@ import (
 // to t's "Configure()" method.
 //
 // Any calls that are not recognized are yielded.
-func analyzeEntity(
-	ctx *context,
-	b configbuilder.EntityBuilder,
-	t types.Type,
-) iter.Seq[*ssa.CallCommon] {
-	return func(yield func(*ssa.CallCommon) bool) {
-		configure := ctx.LookupMethod(t, "Configure")
-
-		for call := range findConfigurerCalls(configure, 1) {
-			switch call.Method.Name() {
-			case "Identity":
-				analyzeIdentityCall(b, call)
-			default:
-				if !yield(call) {
-					return
-				}
-			}
-		}
-	}
+func findConfigurerCalls(ctx *context, t types.Type) iter.Seq[*ssa.CallCommon] {
+	configure := ctx.LookupMethod(t, "Configure")
+	return findConfigurerCallsInFunc(configure, 1)
 }
 
 func analyzeIdentityCall(
@@ -67,9 +51,9 @@ func analyzeIdentityCall(
 // names of the type parameters and the values are the concrete types that have
 // been instantiated.
 
-// findConfigurerCalls yields all call to methods on the Dogma application or
+// findConfigurerCallsInFunc yields all call to methods on the Dogma application or
 // handler "configurer" within the given function.
-func findConfigurerCalls(
+func findConfigurerCallsInFunc(
 	fn *ssa.Function,
 	indices ...int,
 ) iter.Seq[*ssa.CallCommon] {

@@ -1,4 +1,4 @@
-# Conditional identity
+# Unconditional identity after conditional statement
 
 This test verifies that the static analyzer includes information about an
 entity's identity even if it appears after (but not within) a conditional

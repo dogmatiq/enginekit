@@ -11,8 +11,8 @@ import (
 // analyzeApplication analyzes t, which must be an implementation of
 // [dogma.Application].
 func analyzeApplication(ctx *context, t types.Type) {
-	ctx.Applications = append(
-		ctx.Applications,
+	ctx.Analysis.Applications = append(
+		ctx.Analysis.Applications,
 		configbuilder.Application(
 			func(b *configbuilder.ApplicationBuilder) {
 				b.SetSourceTypeName(typename.OfStatic(t))

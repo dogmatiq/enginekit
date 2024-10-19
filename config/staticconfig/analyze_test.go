@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/dogmatiq/aureus"
@@ -15,27 +16,14 @@ func TestAnalyzer(t *testing.T) {
 	aureus.Run(
 		t,
 		func(w io.Writer, in aureus.Content, out aureus.ContentMetaData) error {
-			// Make a temporary directory to write the Go source code.
-			//
-			// The name is static so that the the test output is deterministic.
-			//
-			// Additionally, creating the directory within the repository allows
-			// the test code to use this repo's go.mod file, ensuring the
-			// statically analyzed code uses the same versions of Dogma, etc.
-			dir := filepath.Join(
-				filepath.Dir(in.File),
-				"pkg",
-			)
-			if err := os.MkdirAll(dir, 0700); err != nil {
+			// Create a temporary directory to write the Go source code, but
+			// create it within this Go module so that it uses the same version
+			// of Dogma, etc.
+			dir, err := os.MkdirTemp(filepath.Dir(in.File), "aureus-")
+			if err != nil {
 				return err
 			}
-
-			defer func() {
-				err := os.RemoveAll(dir)
-				if err != nil {
-					t.Logf("failed to remove temporary directory: %v", err)
-				}
-			}()
+			defer os.RemoveAll(dir)
 
 			if err := os.WriteFile(
 				filepath.Join(dir, "main.go"),
@@ -66,7 +54,18 @@ func TestAnalyzer(t *testing.T) {
 					}
 				}
 
-				if _, err := config.WriteDetails(w, app); err != nil {
+				// Render the details of the application.
+				details := config.RenderDetails(app)
+
+				// Remove the random portion of the temporary directory name
+				// so that the test output is deterministic.
+				details = strings.ReplaceAll(
+					details,
+					"/"+filepath.Base(dir)+".",
+					".",
+				)
+
+				if _, err := io.WriteString(w, details); err != nil {
 					return err
 				}
 			}

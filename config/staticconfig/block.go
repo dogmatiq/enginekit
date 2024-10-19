@@ -17,6 +17,7 @@ func walkReachable(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 			if _, ok := yielded[b]; ok {
 				return true
 			}
+
 			yielded[b] = struct{}{}
 
 			if !yield(b) {
@@ -59,10 +60,10 @@ func reachableSuccessors(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 	}
 }
 
-// isConditional returns true if there is any control flow path through fn that
-// does NOT pass through b.
-func isConditional(fn *ssa.Function, b *ssa.BasicBlock) bool {
-	return !isInevitable(fn.Blocks[0], b)
+// isConditional returns true if there is any control flow path through the
+// function that does NOT pass through b.
+func isConditional(b *ssa.BasicBlock) bool {
+	return !isInevitable(b.Parent().Blocks[0], b)
 }
 
 // isInevitable returns true if all paths out of "from" pass through "to".

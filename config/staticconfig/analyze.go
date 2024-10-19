@@ -163,7 +163,7 @@ func packageOf(t types.Type) *types.Package {
 func analyzeType(ctx *context, m *ssa.Type) {
 	t := m.Type()
 
-	if types.IsInterface(t) {
+	if isAbstract(t) {
 		// We're only interested in concrete types; otherwise there's nothing to
 		// analyze!
 		return

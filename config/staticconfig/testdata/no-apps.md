@@ -48,3 +48,23 @@ type App interface {
     Configure(c dogma.ApplicationConfigurer)
 }
 ```
+
+## Uninstantiated generic application
+
+We can't analyze this code because the application is generic and not
+instantiated, meaning that we have no concrete type for `T`. We _could_ chose a
+compatible type for `T` and analyze the result of instantiating the generic
+type, but the assumption is that the reason the type is generic is because the
+application is intended to be used with multiple types.
+
+```go au:input
+package app
+
+import "github.com/dogmatiq/dogma"
+
+type App[T any] struct{}
+
+func (App[T]) Configure(c dogma.ApplicationConfigurer) {
+    c.Identity("app", "8a6baab1-ee64-402e-a081-e43f4bebc243")
+}
+```

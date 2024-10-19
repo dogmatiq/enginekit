@@ -3,12 +3,12 @@
 This test ensures that the static analyzer includes Dogma applications that have
 no handlers.
 
-```au:output au:group="non-pointer"
+```au:output
 valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid identity app/8a6baab1-ee64-402e-a081-e43f4bebc243
 ```
 
-```go au:input au:group="non-pointer"
+```go au:input
 package app
 
 import "github.com/dogmatiq/dogma"

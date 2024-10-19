@@ -41,3 +41,18 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 	}
 }
 ```
+
+## In defer that is never scheduled
+
+```go au:input
+package app
+
+import "github.com/dogmatiq/dogma"
+
+type App struct {}
+
+func (a App) Configure(c dogma.ApplicationConfigurer) {
+	panic("prevent defer")
+	defer c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
+}
+```

@@ -135,3 +135,20 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 	}
 }
 ```
+
+## Deferred
+
+```go au:input
+package app
+
+import "math/rand"
+import "github.com/dogmatiq/dogma"
+
+type App struct {}
+
+func (a App) Configure(c dogma.ApplicationConfigurer) {
+	if rand.Int() == 0 {
+		defer c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
+	}
+}
+```

@@ -16,12 +16,14 @@ import (
 // Analysis encapsulates the results of static analysis.
 type Analysis struct {
 	Applications []*config.Application
+	Artifacts    Artifacts
+}
 
-	Artifacts struct {
-		Packages    []*packages.Package
-		SSAProgram  *ssa.Program
-		SSAPackages []*ssa.Package
-	}
+// Artifacts contains the intermediate results of the analysis.
+type Artifacts struct {
+	Packages    []*packages.Package
+	SSAProgram  *ssa.Program
+	SSAPackages []*ssa.Package
 }
 
 // Errors returns a sequence of errors that occurred during analysis, not
@@ -83,23 +85,26 @@ func LoadAndAnalyze(dir string) Analysis {
 // The packages must have be loaded from source syntax using the [packages.Load]
 // function using [PackagesLoadMode], at a minimum.
 func Analyze(pkgs []*packages.Package) Analysis {
-	ctx := &context{}
-	ctx.Program, ctx.Packages = ssautil.AllPackages(
+	prog, ssaPackages := ssautil.AllPackages(
 		pkgs,
 		ssa.InstantiateGenerics, // | ssa.SanityCheckFunctions, // TODO: document why this is necessary
 	)
 
-	ctx.Program.Build()
+	prog.Build()
 
-	res := Analysis{
-		Artifacts: struct {
-			Packages    []*packages.Package
-			SSAProgram  *ssa.Program
-			SSAPackages []*ssa.Package
-		}{
-			pkgs,
-			ctx.Program,
-			ctx.Packages,
+	ctx := &context{
+		Program:  prog,
+		Packages: ssaPackages,
+		Analysis: &Analysis{
+			Artifacts: struct {
+				Packages    []*packages.Package
+				SSAProgram  *ssa.Program
+				SSAPackages []*ssa.Package
+			}{
+				pkgs,
+				prog,
+				ssaPackages,
+			},
 		},
 	}
 
@@ -107,7 +112,7 @@ func Analyze(pkgs []*packages.Package) Analysis {
 		// If the dogma package is not found as an import, none of the packages
 		// can possibly have types that implement [dogma.Application] because
 		// doing so requires referring to [dogma.ApplicationConfigurer].
-		return res
+		return *ctx.Analysis
 	}
 
 	for _, pkg := range ctx.Packages {
@@ -125,11 +130,9 @@ func Analyze(pkgs []*packages.Package) Analysis {
 		}
 	}
 
-	res.Applications = ctx.Applications
-
 	// Ensure the applications are in a deterministic order.
 	slices.SortFunc(
-		res.Applications,
+		ctx.Analysis.Applications,
 		func(a, b *config.Application) int {
 			return cmp.Compare(
 				a.String(),
@@ -138,7 +141,7 @@ func Analyze(pkgs []*packages.Package) Analysis {
 		},
 	)
 
-	return res
+	return *ctx.Analysis
 }
 
 // packageOf returns the package in which t is declared.

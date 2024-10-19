@@ -18,8 +18,6 @@ type context struct {
 	}
 
 	Analysis *Analysis
-
-	IsConfigurer func(ssa.Value) bool
 }
 
 // findDogma updates ctx with information about the Dogma package.
@@ -55,16 +53,4 @@ func (c *context) LookupMethod(t types.Type, name string) *ssa.Function {
 		panic(fmt.Sprintf("method not found: %s.%s", t, name))
 	}
 	return fn
-}
-
-func (c *context) NewChild(
-	isConfigurer func(ssa.Value) bool,
-) *context {
-	return &context{
-		Program:      c.Program,
-		Packages:     c.Packages,
-		Dogma:        c.Dogma,
-		Analysis:     c.Analysis,
-		IsConfigurer: isConfigurer,
-	}
 }

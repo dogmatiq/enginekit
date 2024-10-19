@@ -17,7 +17,7 @@ func analyzeApplication(ctx *context, t types.Type) {
 			func(b *configbuilder.ApplicationBuilder) {
 				b.SetSourceTypeName(typename.OfStatic(t))
 
-				for call := range findConfigurerCalls(ctx, t) {
+				for call := range findConfigurerCalls(ctx, b, t) {
 					switch call.Method.Name() {
 					case "Identity":
 						analyzeIdentityCall(b, call)

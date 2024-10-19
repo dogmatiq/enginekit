@@ -5,8 +5,30 @@ import (
 	"iter"
 
 	"github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"golang.org/x/tools/go/ssa"
 )
+
+// configureContext is a specialization of [context] that is used when analyzing
+// a Configure() method.
+type configureContext struct {
+	*context
+
+	Builder           configbuilder.EntityBuilder
+	ConfigurerIndices []int
+}
+
+func (c *configureContext) IsConfigurer(v ssa.Value) bool {
+	params := v.Parent().Params
+
+	for _, i := range c.ConfigurerIndices {
+		if v == params[i] {
+			return true
+		}
+	}
+
+	return false
+}
 
 type configurerCall struct {
 	*ssa.CallCommon
@@ -18,17 +40,23 @@ type configurerCall struct {
 // to t's "Configure()" method.
 //
 // Any calls that are not recognized are yielded.
-func findConfigurerCalls(ctx *context, t types.Type) iter.Seq[configurerCall] {
+func findConfigurerCalls(
+	ctx *context,
+	b configbuilder.EntityBuilder,
+	t types.Type,
+) iter.Seq[configurerCall] {
 	configure := ctx.LookupMethod(t, "Configure")
 
-	ctx = ctx.NewChild(
-		func(v ssa.Value) bool {
-			return v == configure.Params[1]
-		},
-	)
-
 	return func(yield func(configurerCall) bool) {
-		emitConfigurerCallsInFunc(ctx, configure, yield)
+		emitConfigurerCallsInFunc(
+			&configureContext{
+				context:           ctx,
+				Builder:           b,
+				ConfigurerIndices: []int{1},
+			},
+			configure,
+			yield,
+		)
 	}
 }
 
@@ -38,7 +66,7 @@ func findConfigurerCalls(ctx *context, t types.Type) iter.Seq[configurerCall] {
 // indices is a list of the positions of parameters to fn that are the
 // configurer.
 func emitConfigurerCallsInFunc(
-	ctx *context,
+	ctx *configureContext,
 	fn *ssa.Function,
 	yield func(configurerCall) bool,
 ) bool {
@@ -58,7 +86,7 @@ func emitConfigurerCallsInFunc(
 }
 
 func emitConfigurerCallsInInstruction(
-	ctx *context,
+	ctx *configureContext,
 	inst ssa.Instruction,
 	yield func(configurerCall) bool,
 ) bool {
@@ -71,7 +99,7 @@ func emitConfigurerCallsInInstruction(
 }
 
 func emitConfigurerCallsInCallInstruction(
-	ctx *context,
+	ctx *configureContext,
 	call ssa.CallInstruction,
 	yield func(configurerCall) bool,
 ) bool {
@@ -82,6 +110,7 @@ func emitConfigurerCallsInCallInstruction(
 		// concrete type. If it's not a call to a method on the configurer,
 		// there's nothing more we can analyze.
 		if !ctx.IsConfigurer(com.Value) {
+			ctx.Builder.UpdateFidelity(config.Incomplete)
 			return true
 		}
 
@@ -104,6 +133,11 @@ func emitConfigurerCallsInCallInstruction(
 	// inside a context, or assigned to a field within the entity struct.
 	fn := com.StaticCallee()
 
+	if fn == nil {
+		ctx.Builder.UpdateFidelity(config.Incomplete)
+		return true
+	}
+
 	// Check at which argument indices the configurer is passed to the function.
 	var indices []int
 	for i, arg := range com.Args {
@@ -118,17 +152,11 @@ func emitConfigurerCallsInCallInstruction(
 	}
 
 	return emitConfigurerCallsInFunc(
-		ctx.NewChild(
-			func(v ssa.Value) bool {
-				for _, i := range indices {
-					if v == fn.Params[i] {
-						return true
-					}
-				}
-
-				return false
-			},
-		),
+		&configureContext{
+			context:           ctx.context,
+			Builder:           ctx.Builder,
+			ConfigurerIndices: indices,
+		},
 		fn,
 		yield,
 	)

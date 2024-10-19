@@ -4,7 +4,7 @@ This test verifies that the static analyzer includes an entity's identity, even
 if it cannot determine the values used.
 
 ```au:output
-valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata/pkg.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - incomplete identity ?/?
 ```
 

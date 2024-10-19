@@ -4,7 +4,7 @@ This test verifies that the static analyzer excludes information about an
 entity's identity if it appears in an unreachable branch.
 
 ```au:output
-invalid application github.com/dogmatiq/enginekit/config/staticconfig/testdata/pkg.App (runtime type unavailable)
+invalid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - no identity is configured
 ```
 

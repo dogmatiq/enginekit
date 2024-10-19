@@ -6,7 +6,7 @@ no handlers.
 ## With non-pointer receiver
 
 ```au:output au:group="non-pointer"
-valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata/pkg.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid identity app/8a6baab1-ee64-402e-a081-e43f4bebc243
 ```
 

@@ -20,88 +20,116 @@ type configurerCall struct {
 // Any calls that are not recognized are yielded.
 func findConfigurerCalls(ctx *context, t types.Type) iter.Seq[configurerCall] {
 	configure := ctx.LookupMethod(t, "Configure")
-	return findConfigurerCallsInFunc(configure, 1)
+
+	ctx = ctx.NewChild(
+		func(v ssa.Value) bool {
+			return v == configure.Params[1]
+		},
+	)
+
+	return func(yield func(configurerCall) bool) {
+		emitConfigurerCallsInFunc(ctx, configure, yield)
+	}
 }
 
-// findConfigurerCallsInFunc yields all call to methods on the Dogma application
+// emitConfigurerCallsInFunc yields all call to methods on the Dogma application
 // or handler "configurer" within the given function.
 //
 // indices is a list of the positions of parameters to fn that are the
 // configurer.
-func findConfigurerCallsInFunc(
+func emitConfigurerCallsInFunc(
+	ctx *context,
 	fn *ssa.Function,
-	indices ...int,
-) iter.Seq[configurerCall] {
-	isConfigurerCall := func(call *ssa.CallCommon) bool {
-		for _, i := range indices {
-			if call.Value == fn.Params[i] {
-				return true
-			}
-		}
-		return false
+	yield func(configurerCall) bool,
+) bool {
+	if len(fn.Blocks) == 0 {
+		return true
 	}
 
-	return func(yield func(configurerCall) bool) {
-		for block := range walkReachable(fn.Blocks[0]) {
-			var f config.Fidelity
-			if isConditional(fn, block) {
-				f |= config.Speculative
-			}
-
-			for _, inst := range block.Instrs {
-				inst, ok := inst.(*ssa.Call)
-				if !ok {
-					continue
-				}
-
-				call := inst.Common()
-
-				if isConfigurerCall(call) {
-					// We've found a direct call to a method on the configurer.
-					if !yield(configurerCall{call, f}) {
-						return
-					}
-				}
+	for block := range walkReachable(fn.Blocks[0]) {
+		for _, inst := range block.Instrs {
+			if !emitConfigurerCallsInInstruction(ctx, inst, yield) {
+				return false
 			}
 		}
+	}
+
+	return true
+}
+
+func emitConfigurerCallsInInstruction(
+	ctx *context,
+	inst ssa.Instruction,
+	yield func(configurerCall) bool,
+) bool {
+	switch inst := inst.(type) {
+	case ssa.CallInstruction:
+		return emitConfigurerCallsInCallInstruction(ctx, inst, yield)
+	default:
+		return true
 	}
 }
 
-// func (e *entity) yieldIndirectCalls(
-// 	call *ssa.CallCommon,
-// 	yield func(*ssa.CallCommon) bool,
-// ) bool {
-// 	// com := call.Common()
+func emitConfigurerCallsInCallInstruction(
+	ctx *context,
+	call ssa.CallInstruction,
+	yield func(configurerCall) bool,
+) bool {
+	com := call.Common()
 
-// 	// var indices []int
-// 	// for i, arg := range com.Args {
-// 	// 	if _, ok := configurers[arg]; ok {
-// 	// 		indices = append(indices, i)
-// 	// 	}
-// 	// }
+	if com.IsInvoke() {
+		// We're invoking a method on an interface, that is, we don't know the
+		// concrete type. If it's not a call to a method on the configurer,
+		// there's nothing more we can analyze.
+		if !ctx.IsConfigurer(com.Value) {
+			return true
+		}
 
-// 	// if len(indices) == 0 {
-// 	// 	return nil
-// 	// }
+		// We've found a direct call to a method on the configurer.
+		var f config.Fidelity
+		if isConditional(call.Block()) {
+			f |= config.Speculative
+		}
 
-// 	// if com.IsInvoke() {
-// 	// 	t, ok := instantiatedTypes[com.Value.Type().String()]
-// 	// 	if !ok {
-// 	// 		// If we cannot find any instantiated types in mapping, most likely
-// 	// 		// we hit the interface method and cannot analyze any further.
-// 	// 		return nil
-// 	// 	}
+		return yield(configurerCall{com, f})
+	}
 
-// 	// 	return findConfigurerCalls(
-// 	// 		prog,
-// 	// 		prog.LookupMethod(t, com.Method.Pkg(), com.Method.Name()),
-// 	// 		instantiatedTypes,
-// 	// 		// don't pass indices here, as we are already in the method.
-// 	// 	)
-// 	// }
+	// We've found a call to some other function or method.
+	//
+	// If any of the parameters refer to the configurer, we need to analyze
+	// _that_ function.
+	//
+	// This is an native implementation. There are other ways that this function
+	// could gain access to the configurer. For example, it could be passed
+	// inside a context, or assigned to a field within the entity struct.
+	fn := com.StaticCallee()
 
-// 	return e.yieldCalls(
-// 		call.StaticCallee(),
-// 		yield,
-// 	)
-// }
+	// Check at which argument indices the configurer is passed to the function.
+	var indices []int
+	for i, arg := range com.Args {
+		if ctx.IsConfigurer(arg) {
+			indices = append(indices, i)
+		}
+	}
+
+	// Don't analyze fn if the configurer is not passed as an argument.
+	if len(indices) == 0 {
+		return true
+	}
+
+	return emitConfigurerCallsInFunc(
+		ctx.NewChild(
+			func(v ssa.Value) bool {
+				for _, i := range indices {
+					if v == fn.Params[i] {
+						return true
+					}
+				}
+
+				return false
+			},
+		),
+		fn,
+		yield,
+	)
+}

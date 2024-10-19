@@ -4,7 +4,7 @@ This test verifies that the static analyzer includes information about an
 entity's identity when it is defined within a conditional statement.
 
 ```au:output
-valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata/pkg.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid speculative identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 

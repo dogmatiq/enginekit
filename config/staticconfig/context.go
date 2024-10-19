@@ -1,9 +1,9 @@
 package staticconfig
 
 import (
+	"fmt"
 	"go/types"
 
-	"github.com/dogmatiq/enginekit/config"
 	"golang.org/x/tools/go/ssa"
 )
 
@@ -12,11 +12,14 @@ type context struct {
 	Packages []*ssa.Package
 
 	Dogma struct {
-		Package     *ssa.Package
-		Application *types.Interface
+		Package               *ssa.Package
+		Application           *types.Interface
+		ApplicationConfigurer *types.Interface
 	}
 
-	Applications []*config.Application
+	Analysis *Analysis
+
+	IsConfigurer func(ssa.Value) bool
 }
 
 // findDogma updates ctx with information about the Dogma package.
@@ -38,6 +41,7 @@ func findDogma(ctx *context) bool {
 
 		ctx.Dogma.Package = pkg
 		ctx.Dogma.Application = iface("Application")
+		ctx.Dogma.ApplicationConfigurer = iface("ApplicationConfigurer")
 
 		return true
 	}
@@ -45,10 +49,22 @@ func findDogma(ctx *context) bool {
 	return false
 }
 
-func (ctx *context) LookupMethod(t types.Type, name string) *ssa.Function {
-	fn := ctx.Program.LookupMethod(t, packageOf(t), name)
+func (c *context) LookupMethod(t types.Type, name string) *ssa.Function {
+	fn := c.Program.LookupMethod(t, packageOf(t), name)
 	if fn == nil {
-		panic("method not found")
+		panic(fmt.Sprintf("method not found: %s.%s", t, name))
 	}
 	return fn
+}
+
+func (c *context) NewChild(
+	isConfigurer func(ssa.Value) bool,
+) *context {
+	return &context{
+		Program:      c.Program,
+		Packages:     c.Packages,
+		Dogma:        c.Dogma,
+		Analysis:     c.Analysis,
+		IsConfigurer: isConfigurer,
+	}
 }

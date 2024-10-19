@@ -3,7 +3,6 @@ package staticconfig
 import (
 	"go/types"
 	"iter"
-	"os"
 
 	"github.com/dogmatiq/enginekit/config"
 	"golang.org/x/tools/go/ssa"
@@ -42,10 +41,8 @@ func findConfigurerCallsInFunc(
 		return false
 	}
 
-	fn.WriteTo(os.Stdout)
-
 	return func(yield func(configurerCall) bool) {
-		for _, block := range fn.Blocks {
+		for block := range walkReachable(fn.Blocks[0]) {
 			var f config.Fidelity
 			if isConditional(fn, block) {
 				f |= config.Speculative
@@ -68,35 +65,6 @@ func findConfigurerCallsInFunc(
 			}
 		}
 	}
-}
-
-// isConditional returns true if there is any control flow path through fn that
-// does NOT pass through b.
-func isConditional(fn *ssa.Function, b *ssa.BasicBlock) bool {
-	return !isInevitable(fn.Blocks[0], b)
-}
-
-// isInevitable returns true if all paths out of "from" pass through "to".
-func isInevitable(from, to *ssa.BasicBlock) bool {
-	if from == to {
-		return true
-	}
-
-	if len(from.Succs) == 0 {
-		return false
-	}
-
-	for _, succ := range from.Succs {
-		if succ == from {
-			continue
-		}
-
-		if !isInevitable(succ, to) {
-			return false
-		}
-	}
-
-	return true
 }
 
 // func (e *entity) yieldIndirectCalls(

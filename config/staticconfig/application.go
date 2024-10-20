@@ -21,16 +21,14 @@ func analyzeApplication(ctx *context, t types.Type) {
 					switch call.Method.Name() {
 					case "Identity":
 						analyzeIdentityCall(b, call)
-					// // case "RegisterAggregate":
-					// // 	analyzeRegisterAggregateCall(ctx, c)
-					// // case "RegisterProcess":
-					// // 	analyzeRegisterProcessCall(ctx, c)
-					// // case "RegisterIntegration":
-					// // 	analyzeRegisterIntegrationCall(ctx, c)
-					// // case "RegisterProjection":
-					// // 	analyzeRegisterProjectionCall(ctx, c)
-					// // case "Handlers":
-					// // 	panic("not implemented")
+					case "RegisterAggregate":
+						analyzeRegisterAggregateCall(b, call)
+					case "RegisterProcess":
+						analyzeRegisterProcessCall(b, call)
+					case "RegisterIntegration":
+						analyzeRegisterIntegrationCall(b, call)
+					case "RegisterProjection":
+						analyzeRegisterProjectionCall(b, call)
 					default:
 						b.UpdateFidelity(config.Incomplete)
 					}
@@ -38,46 +36,40 @@ func analyzeApplication(ctx *context, t types.Type) {
 			},
 		),
 	)
+}
 
-	// switch c.Common().Method.Name() {
-	// 	case "Identity":
-	// 		app.IdentityValue = analyzeIdentityCall(c)
-	// 	case "RegisterAggregate":
-	// 		addHandlerFromArguments(
-	// 			prog,
-	// 			dogmaPkg,
-	// 			dogmaPkg.AggregateMessageHandler,
-	// 			args,
-	// 			app.HandlersValue,
-	// 			configkit.AggregateHandlerType,
-	// 		)
-	// 	case "RegisterProcess":
-	// 		addHandlerFromArguments(
-	// 			prog,
-	// 			dogmaPkg,
-	// 			dogmaPkg.ProcessMessageHandler,
-	// 			args,
-	// 			app.HandlersValue,
-	// 			configkit.ProcessHandlerType,
-	// 		)
-	// 	case "RegisterProjection":
-	// 		addHandlerFromArguments(
-	// 			prog,
-	// 			dogmaPkg,
-	// 			dogmaPkg.ProjectionMessageHandler,
-	// 			args,
-	// 			app.HandlersValue,
-	// 			configkit.ProjectionHandlerType,
-	// 		)
-	// 	case "RegisterIntegration":
-	// 		addHandlerFromArguments(
-	// 			prog,
-	// 			dogmaPkg,
-	// 			dogmaPkg.IntegrationMessageHandler,
-	// 			args,
-	// 			app.HandlersValue,
-	// 			configkit.IntegrationHandlerType,
-	// 		)
-	// 	}
-	// }
+func analyzeRegisterAggregateCall(
+	b *configbuilder.ApplicationBuilder,
+	_ configurerCall,
+) {
+	b.Aggregate(func(b *configbuilder.AggregateBuilder) {
+		b.UpdateFidelity(config.Incomplete)
+	})
+}
+
+func analyzeRegisterProcessCall(
+	b *configbuilder.ApplicationBuilder,
+	_ configurerCall,
+) {
+	b.Process(func(b *configbuilder.ProcessBuilder) {
+		b.UpdateFidelity(config.Incomplete)
+	})
+}
+
+func analyzeRegisterIntegrationCall(
+	b *configbuilder.ApplicationBuilder,
+	_ configurerCall,
+) {
+	b.Integration(func(b *configbuilder.IntegrationBuilder) {
+		b.UpdateFidelity(config.Incomplete)
+	})
+}
+
+func analyzeRegisterProjectionCall(
+	b *configbuilder.ApplicationBuilder,
+	_ configurerCall,
+) {
+	b.Projection(func(b *configbuilder.ProjectionBuilder) {
+		b.UpdateFidelity(config.Incomplete)
+	})
 }

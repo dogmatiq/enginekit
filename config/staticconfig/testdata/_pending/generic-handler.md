@@ -3,7 +3,7 @@
 This test ensures that the static analyzer can recognize the type of a handler
 when it is used in instantiating a generic handler.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -61,7 +61,7 @@ func (a App) Configure(c ApplicationConfigurer) {
 
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (e522c782-48d2-4c47-a4c9-81e0d7cdeba0) App
 
     - integration <integration> (abc7c329-c9da-4161-a8e2-6ab45be2dd83) *InstantiatedIntegration

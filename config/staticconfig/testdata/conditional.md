@@ -3,14 +3,14 @@
 This test verifies that the static analyzer includes information about an
 entity's identity when it is defined within a conditional statement.
 
-```au:output
+```au:output au:group=matrix
 valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid speculative identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 
 ## If statement
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -27,7 +27,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## Else statement
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -45,7 +45,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## After conditional return
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -64,7 +64,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## After conditonal panic
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -83,7 +83,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## Switch statement
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -101,7 +101,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## For statement
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -118,7 +118,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## Select statement
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"
@@ -138,7 +138,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## Deferred
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "math/rand"

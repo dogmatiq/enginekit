@@ -3,7 +3,7 @@
 This test verifies that static analysis correctly parses `nil` routes inside
 Dogma Application handlers.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -43,7 +43,7 @@ func (IntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (c100edcc-6dcc-42ed-ac75-69eecb3d0ec4) App
 
     - integration <integration> (363039e5-2938-4b2c-9bec-dcb29dee2da1) IntegrationHandler

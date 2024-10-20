@@ -3,7 +3,7 @@
 This test verifies that static analysis correctly parses handles that have
 conditional routes within their bodies.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -56,7 +56,7 @@ func (IntegrationHandler) HandleCommand(
 
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (7e34538e-c407-4af8-8d3c-960e09cde98a) App
 
     - integration <integration> (92cce461-8d30-409b-8d5a-406f656cef2d) IntegrationHandler

@@ -3,12 +3,12 @@
 This test verifies that the static analyzer can discover the values within an
 entity's identity when they are sourced from non-literal constant expressions.
 
-```au:output
+```au:output au:group=matrix
 valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid identity app/d0de39ba-aaaf-43fd-8e8f-7c4e3be309ec
 ```
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

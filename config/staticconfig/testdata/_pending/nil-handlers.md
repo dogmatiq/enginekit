@@ -3,7 +3,7 @@
 This test ensures that the static analyzer ignores handlers that are `nil`, but
 still includes the application itself.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -20,6 +20,6 @@ func (App) Configure(c dogma.ApplicationConfigurer) {
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (0726ae0d-67e4-4a50-8a19-9f58eae38e51) App
 ```

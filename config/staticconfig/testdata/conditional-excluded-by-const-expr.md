@@ -1,16 +1,16 @@
-# Conditional w/ constant expression that excludes configuration
+# Conditional with constant expression that excludes configuration
 
 This test verifies that the static analyzer excludes information about an
 entity's identity if it appears in an unreachable branch.
 
-```au:output
+```au:output au:group=matrix
 invalid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - no identity is configured
 ```
 
 ## After conditional return
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -28,7 +28,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## Within conditional block
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -44,7 +44,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## In defer that is never scheduled
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

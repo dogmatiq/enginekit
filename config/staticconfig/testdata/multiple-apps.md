@@ -3,7 +3,7 @@
 This test verifies that the static analyzer discovers multiple Dogma application
 types defined within the same Go package.
 
-```au:output
+```au:output au:group=matrix
 valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.One (runtime type unavailable)
   - valid identity one/4fec74a1-6ed4-46f4-8417-01e0910be8f1
 
@@ -11,7 +11,7 @@ valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.Two
   - valid identity two/6e97d403-3cb8-4a59-a7ec-74e8e219a7bc
 ```
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

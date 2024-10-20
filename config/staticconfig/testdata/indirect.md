@@ -4,14 +4,14 @@ This test verifies that the static analyzer traverses into code called from the
 `Configure()` method if that method is given access to the
 `ApplicationConfigurer` interface.
 
-```au:output
+```au:output au:group=matrix
 valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 
 ## Method call
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -29,7 +29,7 @@ func (a App) setup(c dogma.ApplicationConfigurer) {
 
 ## Function call
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -47,7 +47,7 @@ func setup(c dogma.ApplicationConfigurer) {
 
 ## Generic function call
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -65,7 +65,7 @@ func setup[T dogma.ApplicationConfigurer](c T) {
 
 ## Deferred
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -83,7 +83,7 @@ This test guarantees that the identity configured in a separate goroutine is
 detected by the static analyzer, but this usage would like introduce a race
 condition in any real `ApplicationConfigurer` implementation.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

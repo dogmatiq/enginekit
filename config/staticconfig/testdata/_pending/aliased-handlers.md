@@ -3,7 +3,7 @@
 This test verifies that static analysis can correctly parse handlers that are
 declared as type aliases.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -52,7 +52,7 @@ func (IntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <handler-as-typealias> (1b828a1c-eba1-4e4c-88b8-e49f78ad15c7) App
 
     - integration <integration> (4d8cd3f5-21dc-475b-a8dc-80138adde3f2) IntegrationHandlerAlias

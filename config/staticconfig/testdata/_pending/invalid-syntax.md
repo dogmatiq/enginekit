@@ -3,7 +3,7 @@
 This test verifies that static analysis panics when it encounters incorrect
 syntax.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 // Even though this file has invalid syntax the import statements are still
@@ -17,6 +17,6 @@ import "github.com/dogmatiq/dogma"
 
 ```
 
-```au:output
+```au:output au:group=matrix
 expected declaration, found '<'
 ```

@@ -22,6 +22,8 @@ func OfStatic(t types.Type) string {
 	switch t := t.(type) {
 	case *types.Named:
 		return t.String()
+	case *types.Alias:
+		return t.String()
 	case *types.Pointer:
 		return "*" + OfStatic(t.Elem())
 	default:

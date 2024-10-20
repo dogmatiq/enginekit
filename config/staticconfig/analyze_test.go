@@ -18,10 +18,15 @@ func TestAnalyzer(t *testing.T) {
 		func(t *testing.T, in aureus.Input, out aureus.Output) error {
 			t.Parallel()
 
+			cwd, _ := os.Getwd()
+
 			// Create a temporary directory to write the Go source code, but
 			// create it within this Go module so that it uses the same version
 			// of Dogma, etc.
-			dir, err := os.MkdirTemp("testdata", "aureus-")
+			dir, err := os.MkdirTemp(
+				filepath.Join(cwd, "testdata"),
+				"aureus-",
+			)
 			if err != nil {
 				return err
 			}
@@ -43,14 +48,18 @@ func TestAnalyzer(t *testing.T) {
 
 			result := LoadAndAnalyze(dir)
 
-			if len(result.Applications) == 0 {
-				if _, err := io.WriteString(out, "(no applications found)\n"); err != nil {
+			for err := range result.Errors() {
+				message := err.Error()
+				message = strings.ReplaceAll(message, dir+"/", "")
+				message = strings.ReplaceAll(message, dir, "")
+
+				if _, err := io.WriteString(out, "ERROR: "+message+"\n"); err != nil {
 					return err
 				}
 			}
 
-			for err := range result.Errors() {
-				if _, err := io.WriteString(out, err.Error()+"\n"); err != nil {
+			if len(result.Applications) == 0 {
+				if _, err := io.WriteString(out, "(no applications found)\n"); err != nil {
 					return err
 				}
 			}

@@ -4,7 +4,7 @@ This test ensures that the static analyzer can recognized the type of a handler
 when it is registered using the value of a struct field, rather than constructed
 inline.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -38,7 +38,7 @@ func (Handler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (7468a57f-20f0-4d11-9aad-48fcd553a908) App
 
     - integration <integration> (195ede4a-3f26-4d19-a8fe-41b2a5f92d06) Handler

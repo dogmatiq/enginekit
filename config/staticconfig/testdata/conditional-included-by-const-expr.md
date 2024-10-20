@@ -1,17 +1,17 @@
-# Conditional w/ constant expression that includes configuration
+# Conditional with constant expression that includes configuration
 
 This test verifies that the static analyzer includes information about an
 entity's identity if it appears in a conditional block that is always executed.
 Note that the identity is not marked as "speculative".
 
-```au:output
+```au:output au:group=matrix
 valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
   - valid identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 
 ## After conditional return
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -29,7 +29,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## Within conditional block
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -45,7 +45,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
 
 ## In defer that is scheduled conditionally
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

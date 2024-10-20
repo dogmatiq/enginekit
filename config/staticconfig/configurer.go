@@ -105,15 +105,7 @@ func emitConfigurerCallsInCallInstruction(
 ) bool {
 	com := call.Common()
 
-	if com.IsInvoke() {
-		// We're invoking a method on an interface, that is, we don't know the
-		// concrete type. If it's not a call to a method on the configurer,
-		// there's nothing more we can analyze.
-		if !ctx.IsConfigurer(com.Value) {
-			ctx.Builder.UpdateFidelity(config.Incomplete)
-			return true
-		}
-
+	if com.IsInvoke() && ctx.IsConfigurer(com.Value) {
 		// We've found a direct call to a method on the configurer.
 		var f config.Fidelity
 		if isConditional(call.Block()) {
@@ -123,22 +115,17 @@ func emitConfigurerCallsInCallInstruction(
 		return yield(configurerCall{com, f})
 	}
 
-	// We've found a call to some other function or method.
+	// We've found a call to some function or method that does not belong to the
+	// configurer. If any of the arguments are the configurer we analyze the
+	// called function as well.
 	//
-	// If any of the parameters refer to the configurer, we need to analyze
-	// _that_ function.
+	// This is an quite naive implementation. There are other ways that the
+	// callee could gain access to the configurer. For example, it could be
+	// passed inside a context, or assigned to a field within the entity struct.
 	//
-	// This is an native implementation. There are other ways that this function
-	// could gain access to the configurer. For example, it could be passed
-	// inside a context, or assigned to a field within the entity struct.
-	fn := com.StaticCallee()
-
-	if fn == nil {
-		ctx.Builder.UpdateFidelity(config.Incomplete)
-		return true
-	}
-
-	// Check at which argument indices the configurer is passed to the function.
+	// First, we build a list of the indices of arguments that are the
+	// configurer. It doesn't make much sense, but the configurer could be
+	// passed in multiple positions.
 	var indices []int
 	for i, arg := range com.Args {
 		if ctx.IsConfigurer(arg) {
@@ -146,8 +133,17 @@ func emitConfigurerCallsInCallInstruction(
 		}
 	}
 
-	// Don't analyze fn if the configurer is not passed as an argument.
+	// If none of the arguments are the configurer, we can skip analyzing the
+	// callee. This prevents us from analyzing the entire program.
 	if len(indices) == 0 {
+		return true
+	}
+
+	// If we can't obtain the callee, this is a call to an interface method, or
+	// some other un-analyzable function.
+	fn := com.StaticCallee()
+	if fn == nil {
+		ctx.Builder.UpdateFidelity(config.Incomplete)
 		return true
 	}
 

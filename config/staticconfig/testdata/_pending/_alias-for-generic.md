@@ -3,11 +3,11 @@
 This test ensures that the static analyzer does not fail if it encounters a
 generic type that implements the `dogma.Application` interface.
 
-```au:output
+```au:output au:group=matrix
 (no applications found)
 ```
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

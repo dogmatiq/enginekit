@@ -3,7 +3,7 @@
 This test verifies that static analysis ignores unregistered routes in Dogma
 application handlers.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -50,7 +50,7 @@ func (IntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (f2c08525-623e-4c76-851c-3172953269e3) App
 
     - integration <integration> (ac391765-da58-4e7c-a478-e4725eb2b0e9) IntegrationHandler

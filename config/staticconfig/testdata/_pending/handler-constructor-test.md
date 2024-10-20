@@ -2,7 +2,7 @@
 
 This test verifies that static analysis correctly parses handler constructors.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -51,7 +51,7 @@ func (IntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <handler-constructor> (3bc3849b-abe0-4c4e-9db4-e48dc28c9a26) App
 
     - integration <integration> (099b5b8d-9e04-422f-bcc3-bb0d451158c7) IntegrationHandler

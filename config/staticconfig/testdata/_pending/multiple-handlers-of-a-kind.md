@@ -3,7 +3,7 @@
 This test verifies that static analysis can correctly parse multiple handlers of
 a same kind.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -83,7 +83,7 @@ func (SecondIntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <multiple-handlers-of-a-kind> (8961f548-1afc-4996-894c-956835c83199) App
 
     - integration <first-integration> (14cf2812-eead-43b3-9c9c-10db5b469e94) FirstIntegrationHandler

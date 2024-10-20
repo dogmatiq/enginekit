@@ -3,7 +3,7 @@
 This test verifies that static analysis correctly parses routes in handles that
 are dynamically populated.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -49,7 +49,7 @@ func (IntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <app> (3bc3849b-abe0-4c4e-9db4-e48dc28c9a26) App
 
     - integration <integration> (3a06b7da-1079-4e4b-a6a6-064c62241918) IntegrationHandler

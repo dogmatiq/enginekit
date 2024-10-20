@@ -3,19 +3,19 @@
 This test ensures that the static analyzer does not fail when the analyzed code
 does not contain any Dogma applications.
 
-```au:output
+```au:output au:group=matrix
 (no applications found)
 ```
 
 ## Empty package
 
-```go au:input
+```go au:input au:group=matrix
 package app
 ```
 
 ## Concrete type with similar structure to a dogma.Application
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import _ "github.com/dogmatiq/dogma"
@@ -37,7 +37,7 @@ type ApplicationConfigurer interface {
 
 ## Interface that is compatible with dogma.Application
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"
@@ -57,7 +57,7 @@ compatible type for `T` and analyze the result of instantiating the generic
 type, but the assumption is that the reason the type is generic is because the
 application is intended to be used with multiple types.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import "github.com/dogmatiq/dogma"

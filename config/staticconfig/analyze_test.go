@@ -15,41 +15,49 @@ import (
 func TestAnalyzer(t *testing.T) {
 	aureus.Run(
 		t,
-		func(w io.Writer, in aureus.Content, out aureus.ContentMetaData) error {
+		func(t *testing.T, in aureus.Input, out aureus.Output) error {
+			t.Parallel()
+
 			// Create a temporary directory to write the Go source code, but
 			// create it within this Go module so that it uses the same version
 			// of Dogma, etc.
-			dir, err := os.MkdirTemp(filepath.Dir(in.File), "aureus-")
+			dir, err := os.MkdirTemp("testdata", "aureus-")
 			if err != nil {
 				return err
 			}
 			defer os.RemoveAll(dir)
 
-			if err := os.WriteFile(
-				filepath.Join(dir, "main.go"),
-				[]byte(in.Data),
-				0600,
-			); err != nil {
+			f, err := os.Create(filepath.Join(dir, "main.go"))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			if _, err := io.Copy(f, in); err != nil {
+				return err
+			}
+
+			if err := f.Close(); err != nil {
 				return err
 			}
 
 			result := LoadAndAnalyze(dir)
 
 			if len(result.Applications) == 0 {
-				if _, err := io.WriteString(w, "(no applications found)\n"); err != nil {
+				if _, err := io.WriteString(out, "(no applications found)\n"); err != nil {
 					return err
 				}
 			}
 
 			for err := range result.Errors() {
-				if _, err := io.WriteString(w, err.Error()+"\n"); err != nil {
+				if _, err := io.WriteString(out, err.Error()+"\n"); err != nil {
 					return err
 				}
 			}
 
 			for i, app := range result.Applications {
 				if i > 0 {
-					if _, err := io.WriteString(w, "\n"); err != nil {
+					if _, err := io.WriteString(out, "\n"); err != nil {
 						return err
 					}
 				}
@@ -65,7 +73,7 @@ func TestAnalyzer(t *testing.T) {
 					".",
 				)
 
-				if _, err := io.WriteString(w, details); err != nil {
+				if _, err := io.WriteString(out, details); err != nil {
 					return err
 				}
 			}

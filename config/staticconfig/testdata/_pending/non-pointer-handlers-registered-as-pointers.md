@@ -3,7 +3,7 @@
 This test verifies that static analysis can correctly parse non-pointer handlers
 registered in a dogma application as pointers using 'address-of' operator.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -50,7 +50,7 @@ func (IntegrationHandler) HandleCommand(
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <non-pointer-handler-registered-as-pointer> (282653ad-9343-44f1-889e-a8b2b095b54b) App
 
     - integration <integration> (1425ca64-0448-4bfd-b18d-9fe63a95995f) *IntegrationHandler

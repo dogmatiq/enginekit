@@ -2,7 +2,7 @@
 
 This test verifies that static analysis correctly parses handler adaptors.
 
-```go au:input
+```go au:input au:group=matrix
 package app
 
 import (
@@ -49,7 +49,7 @@ func AdaptIntegration(PartialIntegrationMessageHandler) IntegrationMessageHandle
 }
 ```
 
-```au:output
+```au:output au:group=matrix
 application <adaptor-func> (f610eae4-f5d0-4eea-a9c9-6cbbfa9b2060) App
 
     - integration <integration> (099b5b8d-9e04-422f-bcc3-bb0d451158c7) IntegrationHandler

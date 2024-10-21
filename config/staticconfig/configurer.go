@@ -14,15 +14,14 @@ import (
 type configureContext struct {
 	*context
 
+	Func              *ssa.Function
 	Builder           configbuilder.EntityBuilder
 	ConfigurerIndices []int
 }
 
 func (c *configureContext) IsConfigurer(v ssa.Value) bool {
-	params := v.Parent().Params
-
 	for _, i := range c.ConfigurerIndices {
-		if v == params[i] {
+		if v == c.Func.Params[i] {
 			return true
 		}
 	}
@@ -51,6 +50,7 @@ func findConfigurerCalls(
 		emitConfigurerCallsInFunc(
 			&configureContext{
 				context:           ctx,
+				Func:              configure,
 				Builder:           b,
 				ConfigurerIndices: []int{1},
 			},
@@ -150,6 +150,7 @@ func emitConfigurerCallsInCallInstruction(
 	return emitConfigurerCallsInFunc(
 		&configureContext{
 			context:           ctx.context,
+			Func:              fn,
 			Builder:           ctx.Builder,
 			ConfigurerIndices: indices,
 		},

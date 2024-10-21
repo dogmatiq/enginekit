@@ -60,6 +60,35 @@ func reachableSuccessors(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 	}
 }
 
+func walkPredecessors(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
+	return func(yield func(*ssa.BasicBlock) bool) {
+		yielded := map[*ssa.BasicBlock]struct{}{}
+
+		var walk func(*ssa.BasicBlock) bool
+		walk = func(b *ssa.BasicBlock) bool {
+			if _, ok := yielded[b]; ok {
+				return true
+			}
+
+			yielded[b] = struct{}{}
+
+			if !yield(b) {
+				return false
+			}
+
+			for _, pred := range b.Preds {
+				if !walk(pred) {
+					return false
+				}
+			}
+
+			return true
+		}
+
+		walk(b)
+	}
+}
+
 // isConditional returns true if there is any control flow path through the
 // function that does NOT pass through b.
 func isConditional(b *ssa.BasicBlock) bool {

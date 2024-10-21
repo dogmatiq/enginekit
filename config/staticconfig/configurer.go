@@ -31,8 +31,8 @@ func (c *configureContext) IsConfigurer(v ssa.Value) bool {
 
 type configurerCall struct {
 	*ssa.CallCommon
-
-	Fidelity config.Fidelity
+	Instruction ssa.CallInstruction
+	Fidelity    config.Fidelity
 }
 
 // analyzeConfigurerCalls analyzes the calls to the "configurer" that is passed
@@ -112,7 +112,7 @@ func emitConfigurerCallsInCallInstruction(
 			f |= config.Speculative
 		}
 
-		return yield(configurerCall{com, f})
+		return yield(configurerCall{com, call, f})
 	}
 
 	// We've found a call to some function or method that does not belong to the

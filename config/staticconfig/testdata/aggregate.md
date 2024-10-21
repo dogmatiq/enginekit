@@ -18,14 +18,16 @@ package app
 import "github.com/dogmatiq/dogma"
 import "github.com/dogmatiq/enginekit/enginetest/stubs"
 
+var routes = []dogma.AggregateRoute{
+        dogma.HandlesCommand[stubs.CommandStub[stubs.TypeA]](),
+        dogma.RecordsEvent[stubs.EventStub[stubs.TypeA]](),
+}
+
 type Aggregate struct {}
 
 func (Aggregate) Configure(c dogma.AggregateConfigurer) {
     c.Identity("aggregate", "916e5e95-70c4-4823-9de2-0f7389d18b4f")
-    c.Routes(
-        dogma.HandlesCommand[stubs.CommandStub[stubs.TypeA]](),
-        dogma.RecordsEvent[stubs.EventStub[stubs.TypeA]](),
-    )
+    c.Routes(routes...)
     c.Disable()
 }
 

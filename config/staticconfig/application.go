@@ -8,9 +8,9 @@ import (
 	"github.com/dogmatiq/enginekit/internal/typename"
 )
 
-// analyzeApplication analyzes t, which must be an implementation of
+// analyzeApplicationType analyzes t, which must be an implementation of
 // [dogma.Application].
-func analyzeApplication(ctx *context, t types.Type) {
+func analyzeApplicationType(ctx *context, t types.Type) {
 	ctx.Analysis.Applications = append(
 		ctx.Analysis.Applications,
 		configbuilder.Application(

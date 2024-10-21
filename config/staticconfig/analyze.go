@@ -2,8 +2,6 @@ package staticconfig
 
 import (
 	"cmp"
-	"fmt"
-	"go/types"
 	"iter"
 	"slices"
 
@@ -87,7 +85,9 @@ func LoadAndAnalyze(dir string) Analysis {
 func Analyze(pkgs []*packages.Package) Analysis {
 	prog, ssaPackages := ssautil.AllPackages(
 		pkgs,
-		ssa.InstantiateGenerics, // | ssa.SanityCheckFunctions, // TODO: document why this is necessary
+		ssa.InstantiateGenerics| // Instantiate generic types so that we can analyze them.
+			ssa.SanityCheckFunctions, // TODO: document why this is necessary
+
 	)
 
 	prog.Build()
@@ -125,7 +125,7 @@ func Analyze(pkgs []*packages.Package) Analysis {
 
 		for _, m := range pkg.Members {
 			if t, ok := m.(*ssa.Type); ok {
-				analyzeType(ctx, t)
+				analyzeType(ctx, t.Type())
 			}
 		}
 	}
@@ -142,50 +142,4 @@ func Analyze(pkgs []*packages.Package) Analysis {
 	)
 
 	return *ctx.Analysis
-}
-
-// packageOf returns the package in which t is declared.
-//
-// It panics if t is not a named type or a pointer to a named type.
-func packageOf(t types.Type) *types.Package {
-	switch t := t.(type) {
-	case *types.Named:
-		return t.Obj().Pkg()
-	case *types.Alias:
-		return t.Obj().Pkg()
-	case *types.Pointer:
-		return packageOf(t.Elem())
-	default:
-		panic(fmt.Sprintf("cannot determine package for anonymous or built-in type %v", t))
-	}
-}
-
-func analyzeType(ctx *context, m *ssa.Type) {
-	t := m.Type()
-
-	if isAbstract(t) {
-		// We're only interested in concrete types; otherwise there's nothing to
-		// analyze!
-		return
-	}
-
-	// The sequence of the if-blocks below is important as a type
-	// implements an interface only if the methods in the interface's
-	// method set have non-pointer receivers. Hence the implementation
-	// check for the "raw" (non-pointer) type is made first.
-	//
-	// A pointer to the type, on the other hand, implements the
-	// interface regardless of whether pointer receivers are used or
-	// not.
-
-	if types.Implements(t, ctx.Dogma.Application) {
-		analyzeApplication(ctx, t)
-		return
-	}
-
-	p := types.NewPointer(t)
-	if types.Implements(p, ctx.Dogma.Application) {
-		analyzeApplication(ctx, p)
-		return
-	}
 }

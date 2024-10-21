@@ -32,7 +32,12 @@ func (b *IdentityBuilder) Edit(fn func(*config.IdentityAsConfigured)) {
 	fn(&b.target.AsConfigured)
 }
 
-// UpdateFidelity merges f with the current fidelity of the identity.
+// Fidelity returns the fidelity of the configuration.
+func (b *IdentityBuilder) Fidelity() config.Fidelity {
+	return b.target.AsConfigured.Fidelity
+}
+
+// UpdateFidelity merges f with the current fidelity of the configuration.
 func (b *IdentityBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
 }

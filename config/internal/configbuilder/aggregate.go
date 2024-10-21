@@ -50,6 +50,11 @@ func (b *AggregateBuilder) Route(fn func(*RouteBuilder)) {
 	)
 }
 
+// IsDisabled returns whether the handler is disabled or not.
+func (b *AggregateBuilder) IsDisabled() optional.Optional[bool] {
+	return b.target.AsConfigured.IsDisabled
+}
+
 // SetDisabled sets whether the handler is disabled or not.
 func (b *AggregateBuilder) SetDisabled(disabled bool) {
 	b.target.AsConfigured.IsDisabled = optional.Some(disabled)
@@ -60,7 +65,12 @@ func (b *AggregateBuilder) Edit(fn func(*config.AggregateAsConfigured)) {
 	fn(&b.target.AsConfigured)
 }
 
-// UpdateFidelity merges f with the current fidelity of the handler.
+// Fidelity returns the fidelity of the configuration.
+func (b *AggregateBuilder) Fidelity() config.Fidelity {
+	return b.target.AsConfigured.Fidelity
+}
+
+// UpdateFidelity merges f with the current fidelity of the configuration.
 func (b *AggregateBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
 }

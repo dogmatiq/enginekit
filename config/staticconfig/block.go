@@ -41,8 +41,8 @@ func walkReachable(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 func reachableSuccessors(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 	return func(yield func(*ssa.BasicBlock) bool) {
 		if branch, ok := b.Instrs[len(b.Instrs)-1].(*ssa.If); ok {
-			if v, ok := branch.Cond.(*ssa.Const); ok {
-				if constant.BoolVal(v.Value) {
+			if v := staticValue(branch.Cond); v != nil {
+				if constant.BoolVal(v) {
 					yield(b.Succs[0])
 				} else {
 					yield(b.Succs[1])

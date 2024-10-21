@@ -13,20 +13,28 @@ import (
 )
 
 func TestAnalyzer(t *testing.T) {
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a single directory for the Go source code used as Aureus test
+	// inputs.
+	//
+	// Since it's under the testdata directory it is ignored by Go's tooling,
+	// but it is still subject to the same go.mod file, and hence the same
+	// version of Dogma, etc.
+	outputDir := filepath.Join(cwd, "testdata", ".aureus")
+	if err := os.MkdirAll(outputDir, 0700); err != nil {
+		t.Fatal(err)
+	}
+
 	aureus.Run(
 		t,
 		func(t *testing.T, in aureus.Input, out aureus.Output) error {
 			t.Parallel()
 
-			cwd, _ := os.Getwd()
-
-			// Create a temporary directory to write the Go source code, but
-			// create it within this Go module so that it uses the same version
-			// of Dogma, etc.
-			dir, err := os.MkdirTemp(
-				filepath.Join(cwd, "testdata"),
-				"aureus-",
-			)
+			dir, err := os.MkdirTemp(outputDir, "aureus-")
 			if err != nil {
 				return err
 			}
@@ -48,20 +56,22 @@ func TestAnalyzer(t *testing.T) {
 
 			result := LoadAndAnalyze(dir)
 
+			hasErrors := false
 			for err := range result.Errors() {
+				hasErrors = true
+
 				message := err.Error()
 				message = strings.ReplaceAll(message, dir+"/", "")
 				message = strings.ReplaceAll(message, dir, "")
 
-				if _, err := io.WriteString(out, "ERROR: "+message+"\n"); err != nil {
+				if _, err := io.WriteString(out, message+"\n"); err != nil {
 					return err
 				}
 			}
 
-			if len(result.Applications) == 0 {
-				if _, err := io.WriteString(out, "(no applications found)\n"); err != nil {
-					return err
-				}
+			if !hasErrors && len(result.Applications) == 0 {
+				_, err := io.WriteString(out, "(no applications found)\n")
+				return err
 			}
 
 			for i, app := range result.Applications {

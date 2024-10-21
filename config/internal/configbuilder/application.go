@@ -87,7 +87,12 @@ func (b *ApplicationBuilder) Edit(fn func(*config.ApplicationAsConfigured)) {
 	fn(&b.target.AsConfigured)
 }
 
-// UpdateFidelity merges f with the current fidelity of the application.
+// Fidelity returns the fidelity of the configuration.
+func (b *ApplicationBuilder) Fidelity() config.Fidelity {
+	return b.target.AsConfigured.Fidelity
+}
+
+// UpdateFidelity merges f with the current fidelity of the configuration.
 func (b *ApplicationBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
 }

@@ -72,7 +72,12 @@ func (b *RouteBuilder) Edit(fn func(*config.RouteAsConfigured)) {
 	fn(&b.target.AsConfigured)
 }
 
-// UpdateFidelity merges f with the current fidelity of the identity.
+// Fidelity returns the fidelity of the configuration.
+func (b *RouteBuilder) Fidelity() config.Fidelity {
+	return b.target.AsConfigured.Fidelity
+}
+
+// UpdateFidelity merges f with the current fidelity of the configuration.
 func (b *RouteBuilder) UpdateFidelity(f config.Fidelity) {
 	b.target.AsConfigured.Fidelity |= f
 }

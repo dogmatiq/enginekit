@@ -4,7 +4,7 @@ This test verifies that the static analyzer can discover the values within an
 entity's identity when they are sourced from non-literal constant expressions.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
   - valid identity app/d0de39ba-aaaf-43fd-8e8f-7c4e3be309ec
 ```
 

@@ -5,7 +5,7 @@ entity's identity even if it appears after (but not within) a conditional
 statement.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig/testdata.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
   - valid identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 

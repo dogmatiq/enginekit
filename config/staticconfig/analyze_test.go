@@ -86,9 +86,10 @@ func TestAnalyzer(t *testing.T) {
 
 				// Remove the random portion of the temporary directory name
 				// so that the test output is deterministic.
+				rel, _ := filepath.Rel(cwd, dir)
 				details = strings.ReplaceAll(
 					details,
-					"/"+filepath.Base(dir)+".",
+					"/"+rel+".",
 					".",
 				)
 

@@ -40,8 +40,8 @@ func walkReachable(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 // reachableSuccessors yields the successors of b that are actually reachable.
 func reachableSuccessors(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 	return func(yield func(*ssa.BasicBlock) bool) {
-		if branch, ok := b.Instrs[len(b.Instrs)-1].(*ssa.If); ok {
-			if v := staticValue(branch.Cond); v != nil {
+		if inst, ok := transferOfControl[*ssa.If](b); ok {
+			if v := staticValue(inst.Cond); v != nil {
 				if constant.BoolVal(v) {
 					yield(b.Succs[0])
 				} else {
@@ -87,4 +87,14 @@ func isInevitable(from, to *ssa.BasicBlock) bool {
 	}
 
 	return true
+}
+
+// transferOfControl returns the last instruction in b, if it is of type T.
+func transferOfControl[T ssa.Instruction](b *ssa.BasicBlock) (inst T, ok bool) {
+	if len(b.Instrs) == 0 {
+		return inst, false
+	}
+
+	inst, ok = b.Instrs[len(b.Instrs)-1].(T)
+	return inst, ok
 }

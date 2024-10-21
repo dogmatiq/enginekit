@@ -74,7 +74,7 @@ func staticReturnValues(call *ssa.CallCommon) []constant.Value {
 	var results []constant.Value
 
 	for b := range walkReachable(fn.Blocks[0]) {
-		inst, ok := b.Instrs[len(b.Instrs)-1].(*ssa.Return)
+		inst, ok := transferOfControl[*ssa.Return](b)
 		if !ok {
 			continue
 		}

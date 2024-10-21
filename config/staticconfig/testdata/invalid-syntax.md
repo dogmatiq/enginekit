@@ -4,8 +4,7 @@ This test verifies that static analyzer does not fail catastrophically when the
 analyzed code does not compile.
 
 ```au:output au:group=matrix
-ERROR: main.go:10:1: expected declaration, found '<'
-(no applications found)
+main.go:10:1: expected declaration, found '<'
 ```
 
 ```go au:input au:group=matrix

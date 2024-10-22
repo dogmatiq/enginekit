@@ -5,7 +5,6 @@ import (
 
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
-	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"golang.org/x/tools/go/ssa"
 )
@@ -28,7 +27,7 @@ func analyzeHandler(
 				case "Identity":
 					analyzeIdentityCall(b, call)
 				case "Routes":
-					// analyzeRoutesCall(ctx, b, call)
+					analyzeRoutesCall(ctx, b, call)
 				case "Disable":
 					b.SetDisabled(true)
 				default:

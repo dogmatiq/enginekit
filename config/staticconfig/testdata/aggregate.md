@@ -8,8 +8,8 @@ valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime
   - valid identity app/0726ae0d-67e4-4a50-8a19-9f58eae38e51
   - disabled valid aggregate github.com/dogmatiq/enginekit/config/staticconfig.Aggregate (runtime type unavailable)
       - valid identity aggregate/916e5e95-70c4-4823-9de2-0f7389d18b4f
-      - incomplete route
-      - incomplete route
+      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
+      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
 ```
 
 ```go au:input au:group=matrix

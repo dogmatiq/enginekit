@@ -12,9 +12,14 @@ type context struct {
 	Packages []*ssa.Package
 
 	Dogma struct {
-		Package               *ssa.Package
-		Application           *types.Interface
-		ApplicationConfigurer *types.Interface
+		Package     *ssa.Package
+		Application *types.Interface
+
+		HandlesCommand   *types.Func
+		ExecutesCommand  *types.Func
+		HandlesEvent     *types.Func
+		RecordsEvent     *types.Func
+		SchedulesTimeout *types.Func
 	}
 
 	Analysis *Analysis
@@ -37,9 +42,20 @@ func findDogma(ctx *context) bool {
 				Underlying().(*types.Interface)
 		}
 
+		fn := func(n string) *types.Func {
+			return pkg.Pkg.
+				Scope().
+				Lookup(n).(*types.Func)
+		}
+
 		ctx.Dogma.Package = pkg
 		ctx.Dogma.Application = iface("Application")
-		ctx.Dogma.ApplicationConfigurer = iface("ApplicationConfigurer")
+
+		ctx.Dogma.HandlesCommand = fn("HandlesCommand")
+		ctx.Dogma.ExecutesCommand = fn("ExecutesCommand")
+		ctx.Dogma.HandlesEvent = fn("HandlesEvent")
+		ctx.Dogma.RecordsEvent = fn("RecordsEvent")
+		ctx.Dogma.SchedulesTimeout = fn("SchedulesTimeout")
 
 		return true
 	}

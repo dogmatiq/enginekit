@@ -1,7 +1,7 @@
 package optional_test
 
 import (
-	"strconv"
+	"fmt"
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/optional"
@@ -49,22 +49,32 @@ func TestNone(t *testing.T) {
 	}
 }
 
-func TestTransform(t *testing.T) {
-	v := Some(42)
-	u := Transform(v, strconv.Itoa)
+func TestFormat(t *testing.T) {
+	cases := []struct {
+		V    fmt.Formatter
+		Spec string
+		Want string
+	}{
+		{Some(42), "%v", "42"},
+		{Some(42), "%05d", "00042"},
+		{None[int](), "%v", "0"},
 
-	if !u.IsPresent() {
-		t.Fatal("expected transformed value to be present")
+		{Some(42), "%s", "%!s(int=42)"},
+		{None[int](), "%-30s", "optional.None[int]()          "},
+
+		{Some(42), "%#v", "optional.Some(42)"},
+		{Some[uint](42), "%#v", "optional.Some(0x2a)"},
+		{None[int](), "%#v", "optional.None[int]()"},
+
+		{Some(42), "%T", "optional.Optional[int]"},
+		{None[int](), "%T", "optional.Optional[int]"},
 	}
 
-	if x := u.Get(); x != "42" {
-		t.Fatalf("unexpected transformed value: got %v, want 'x42'", x)
-	}
-
-	v = None[int]()
-	u = Transform(v, strconv.Itoa)
-
-	if u.IsPresent() {
-		t.Fatal("expected transformed value to be absent")
+	for _, c := range cases {
+		t.Run(c.Spec, func(t *testing.T) {
+			if got := fmt.Sprintf(c.Spec, c.V); got != c.Want {
+				t.Fatalf("unexpected formatted value: got %q, want %q", got, c.Want)
+			}
+		})
 	}
 }

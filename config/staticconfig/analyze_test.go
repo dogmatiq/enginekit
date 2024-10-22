@@ -38,7 +38,9 @@ func TestAnalyzer(t *testing.T) {
 			if err != nil {
 				return err
 			}
-			defer os.RemoveAll(dir)
+			t.Cleanup(func() {
+				os.RemoveAll(dir)
+			})
 
 			f, err := os.Create(filepath.Join(dir, "main.go"))
 			if err != nil {

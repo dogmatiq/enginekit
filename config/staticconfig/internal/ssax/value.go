@@ -1,7 +1,6 @@
 package ssax
 
 import (
-	"fmt"
 	"go/constant"
 	"go/token"
 
@@ -19,14 +18,12 @@ func StaticValue(v ssa.Value) optional.Optional[ssa.Value] {
 
 	case ssa.Instruction:
 		values := staticValuesFromInstruction(v)
-
-		if len(values) == 1 {
-			fmt.Println("RESOLVED", values[0])
-			return values[0]
-		}
-
 		if len(values) > 1 {
 			panic("did not expect multiple values")
+		}
+
+		if len(values) == 1 {
+			return values[0]
 		}
 	}
 

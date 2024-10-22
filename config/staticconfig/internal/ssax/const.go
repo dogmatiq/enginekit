@@ -8,6 +8,15 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
+// IsZeroValue returns true if v is a constant value that represents the zero
+// value for its type.
+func IsZeroValue(v ssa.Value) bool {
+	if c, ok := Const(v).TryGet(); ok {
+		return c == nil
+	}
+	return false
+}
+
 // Const returns the singlar constant value of v if possible.
 func Const(v ssa.Value) optional.Optional[constant.Value] {
 	return optional.TryTransform(

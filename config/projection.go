@@ -70,7 +70,10 @@ func (h *Projection) IsDisabled() bool {
 
 // DeliveryPolicy returns the delivery policy for the handler.
 func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
-	return h.AsConfigured.DeliveryPolicy.Get().Value.Get()
+	if v, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
+		return v.Value.Get()
+	}
+	return dogma.UnicastProjectionDeliveryPolicy{}
 }
 
 // Interface returns the [dogma.ProjectionMessageHandler] instance that the
@@ -141,7 +144,5 @@ func (h *Projection) normalize(ctx *normalizationContext) {
 	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
 		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
 		h.AsConfigured.DeliveryPolicy = optional.Some(p)
-	} else {
-		h.AsConfigured.Fidelity |= Incomplete
 	}
 }

@@ -22,13 +22,25 @@ func analyzeApplicationType(ctx *context, t types.Type) {
 					case "Identity":
 						analyzeIdentityCall(b, call)
 					case "RegisterAggregate":
-						analyzeRegisterAggregateCall(b, call)
+						b.Aggregate(func(b *configbuilder.AggregateBuilder) {
+							b.UpdateFidelity(call.Fidelity)
+							analyzeAggregate(ctx, b, call.Args[0])
+						})
 					case "RegisterProcess":
-						analyzeRegisterProcessCall(b, call)
+						b.Process(func(b *configbuilder.ProcessBuilder) {
+							b.UpdateFidelity(call.Fidelity)
+							analyzeProcess(ctx, b, call.Args[0])
+						})
 					case "RegisterIntegration":
-						analyzeRegisterIntegrationCall(b, call)
+						b.Integration(func(b *configbuilder.IntegrationBuilder) {
+							b.UpdateFidelity(call.Fidelity)
+							analyzeIntegration(ctx, b, call.Args[0])
+						})
 					case "RegisterProjection":
-						analyzeRegisterProjectionCall(b, call)
+						b.Projection(func(b *configbuilder.ProjectionBuilder) {
+							b.UpdateFidelity(call.Fidelity)
+							analyzeProjection(ctx, b, call.Args[0])
+						})
 					default:
 						b.UpdateFidelity(config.Incomplete)
 					}
@@ -36,40 +48,4 @@ func analyzeApplicationType(ctx *context, t types.Type) {
 			},
 		),
 	)
-}
-
-func analyzeRegisterAggregateCall(
-	b *configbuilder.ApplicationBuilder,
-	_ configurerCall,
-) {
-	b.Aggregate(func(b *configbuilder.AggregateBuilder) {
-		b.UpdateFidelity(config.Incomplete)
-	})
-}
-
-func analyzeRegisterProcessCall(
-	b *configbuilder.ApplicationBuilder,
-	_ configurerCall,
-) {
-	b.Process(func(b *configbuilder.ProcessBuilder) {
-		b.UpdateFidelity(config.Incomplete)
-	})
-}
-
-func analyzeRegisterIntegrationCall(
-	b *configbuilder.ApplicationBuilder,
-	_ configurerCall,
-) {
-	b.Integration(func(b *configbuilder.IntegrationBuilder) {
-		b.UpdateFidelity(config.Incomplete)
-	})
-}
-
-func analyzeRegisterProjectionCall(
-	b *configbuilder.ApplicationBuilder,
-	_ configurerCall,
-) {
-	b.Projection(func(b *configbuilder.ProjectionBuilder) {
-		b.UpdateFidelity(config.Incomplete)
-	})
 }

@@ -2,15 +2,15 @@ package staticconfig
 
 import (
 	"go/token"
-	"go/types"
+	"iter"
 
+	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 	"golang.org/x/tools/go/ssa"
 )
 
 func findAllocation(v ssa.Value) (*ssa.Alloc, bool) {
-	// fmt.Println("***", v, reflect.TypeOf(v))
 	switch v := v.(type) {
 	case *ssa.Alloc:
 		return v, true
@@ -40,39 +40,40 @@ func isIndexOfArray(
 		}
 		return ssax.AsInt(v.Index).TryGet()
 	}
-
 	return 0, false
 }
 
 func resolveVariadic(
-	_ configbuilder.EntityBuilder,
+	b configbuilder.EntityBuilder,
 	call configurerCall,
-) ([]ssa.Value, bool) {
-	n := len(call.Args) - 1
-	variadics := call.Args[n]
-
-	array, ok := findAllocation(variadics)
-	if !ok {
-		return nil, false
-	}
-
-	size := array.Type().Underlying().(*types.Pointer).Elem().(*types.Array).Len()
-	result := make([]ssa.Value, size)
-
-	for b := range ssax.WalkDown(array.Block()) {
-		if !ssax.PathExists(b, call.Instruction.Block()) {
-			continue
+) iter.Seq[ssa.Value] {
+	return func(yield func(ssa.Value) bool) {
+		variadics := call.Args[len(call.Args)-1]
+		if ssax.IsZeroValue(variadics) {
+			return
 		}
 
-		for inst := range ssax.InstructionsBefore(b, call.Instruction) {
-			switch inst := inst.(type) {
-			case *ssa.Store:
-				if i, ok := isIndexOfArray(array, inst.Addr); ok {
-					result[i] = inst.Val
+		array, ok := findAllocation(variadics)
+		if !ok {
+			b.UpdateFidelity(config.Incomplete)
+			return
+		}
+
+		for b := range ssax.WalkDown(array.Block()) {
+			if !ssax.PathExists(b, call.Instruction.Block()) {
+				continue
+			}
+
+			for inst := range ssax.InstructionsBefore(b, call.Instruction) {
+				switch inst := inst.(type) {
+				case *ssa.Store:
+					if _, ok := isIndexOfArray(array, inst.Addr); ok {
+						if !yield(inst.Val) {
+							return
+						}
+					}
 				}
 			}
 		}
 	}
-
-	return result, true
 }

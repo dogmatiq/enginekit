@@ -12,13 +12,7 @@ func analyzeRoutesCall(
 	b configbuilder.HandlerBuilder,
 	call configurerCall,
 ) {
-	routes, ok := resolveVariadic(b, call)
-	if !ok {
-		b.UpdateFidelity(config.Incomplete)
-		return
-	}
-
-	for _, r := range routes {
+	for r := range resolveVariadic(b, call) {
 		b.Route(func(b *configbuilder.RouteBuilder) {
 			b.UpdateFidelity(call.Fidelity)
 			analyzeRoute(ctx, b, r)

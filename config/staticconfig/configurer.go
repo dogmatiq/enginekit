@@ -32,6 +32,7 @@ func (c *configureContext) IsConfigurer(v ssa.Value) bool {
 
 type configurerCall struct {
 	*ssa.CallCommon
+
 	Instruction ssa.CallInstruction
 	Fidelity    config.Fidelity
 }

@@ -1,10 +1,9 @@
 package staticconfig
 
 import (
-	"go/constant"
-
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
+	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 )
 
 func analyzeIdentityCall(
@@ -14,14 +13,14 @@ func analyzeIdentityCall(
 	b.Identity(func(b *configbuilder.IdentityBuilder) {
 		b.UpdateFidelity(call.Fidelity)
 
-		if name := staticValue(call.Args[0]); name != nil {
-			b.SetName(constant.StringVal(name))
+		if name, ok := ssax.AsString(call.Args[0]).TryGet(); ok {
+			b.SetName(name)
 		} else {
 			b.UpdateFidelity(config.Incomplete)
 		}
 
-		if key := staticValue(call.Args[1]); key != nil {
-			b.SetKey(constant.StringVal(key))
+		if key, ok := ssax.AsString(call.Args[1]).TryGet(); ok {
+			b.SetKey(key)
 		} else {
 			b.UpdateFidelity(config.Incomplete)
 		}

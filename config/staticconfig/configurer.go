@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
+	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 	"golang.org/x/tools/go/ssa"
 )
 
@@ -74,8 +75,8 @@ func emitConfigurerCallsInFunc(
 		return true
 	}
 
-	for block := range walkReachable(fn.Blocks[0]) {
-		for _, inst := range block.Instrs {
+	for b := range ssax.WalkDown(fn.Blocks[0]) {
+		for _, inst := range b.Instrs {
 			if !emitConfigurerCallsInInstruction(ctx, inst, yield) {
 				return false
 			}
@@ -108,7 +109,7 @@ func emitConfigurerCallsInCallInstruction(
 	if com.IsInvoke() && ctx.IsConfigurer(com.Value) {
 		// We've found a direct call to a method on the configurer.
 		var f config.Fidelity
-		if isConditional(call.Block()) {
+		if !ssax.IsUnconditional(call.Block()) {
 			f |= config.Speculative
 		}
 

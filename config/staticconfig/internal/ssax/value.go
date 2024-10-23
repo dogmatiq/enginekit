@@ -88,7 +88,7 @@ func staticValuesFromCall(
 	outputs := make([]optional.Optional[ssa.Value], n)
 	conflicting := make([]bool, n)
 
-	for b := range WalkDown(fn.Blocks[0]) {
+	for b := range WalkBlock(fn.Blocks[0]) {
 		ret, ok := Terminator[*ssa.Return](b).TryGet()
 		if !ok {
 			continue

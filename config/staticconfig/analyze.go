@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/go/ssa"
 	"golang.org/x/tools/go/ssa/ssautil"
@@ -123,9 +124,13 @@ func Analyze(pkgs []*packages.Package) Analysis {
 			continue
 		}
 
+		// Search through all members of the package to find types that
+		// implement [dogma.Application].
 		for _, m := range pkg.Members {
 			if t, ok := m.(*ssa.Type); ok {
-				analyzeType(ctx, t.Type())
+				if r, ok := ssax.Implements(t, ctx.Dogma.Application); ok {
+					analyzeApplicationType(ctx, r)
+				}
 			}
 		}
 	}

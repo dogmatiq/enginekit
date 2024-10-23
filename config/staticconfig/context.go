@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/types"
 
+	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 	"golang.org/x/tools/go/ssa"
 )
 
@@ -64,7 +65,7 @@ func resolveDogmaPackage(ctx *context) bool {
 }
 
 func (c *context) LookupMethod(t types.Type, name string) *ssa.Function {
-	fn := c.Program.LookupMethod(t, packageOf(t), name)
+	fn := c.Program.LookupMethod(t, ssax.Package(t), name)
 	if fn == nil {
 		panic(fmt.Sprintf("method not found: %s.%s", t, name))
 	}

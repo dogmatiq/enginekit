@@ -3,7 +3,7 @@ package staticconfig
 import (
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
-	"golang.org/x/tools/go/ssa"
+	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 )
 
 func analyzeHandler[T configbuilder.HandlerBuilder](
@@ -14,15 +14,16 @@ func analyzeHandler[T configbuilder.HandlerBuilder](
 	build(func(b T) {
 		b.UpdateFidelity(ctx.Fidelity)
 
-		inst, ok := ctx.Args[0].(*ssa.MakeInterface)
-		if !ok {
+		t := ssax.ConcreteType(ctx.Args[0])
+
+		if !t.IsPresent() {
 			b.UpdateFidelity(config.Incomplete)
 			return
 		}
 
 		analyzeEntity(
 			ctx.context,
-			inst.X.Type(),
+			t.Get(),
 			b,
 			func(ctx *configurerCallContext[T]) {
 				switch ctx.Method.Name() {

@@ -1,4 +1,4 @@
-# Iinstatiated generic application
+# Generic application instantiated via an alias
 
 This test ensures that the static analyzer finds an instantiated generic type
 that implements the `dogma.Application` interface.

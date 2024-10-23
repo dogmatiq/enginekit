@@ -61,7 +61,7 @@ func resolveVariadic(
 			return
 		}
 
-		for b := range ssax.WalkDown(array.Block()) {
+		for b := range ssax.WalkBlock(array.Block()) {
 			if !ssax.PathExists(b, inst.Block()) {
 				continue
 			}

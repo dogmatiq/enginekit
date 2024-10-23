@@ -8,18 +8,23 @@ import (
 
 // WalkFunc recursively yields all reachable blocks in the given function.
 func WalkFunc(fn *ssa.Function) iter.Seq[*ssa.BasicBlock] {
-	if len(fn.Blocks) == 0 {
-		return func(func(*ssa.BasicBlock) bool) {}
+	return func(yield func(*ssa.BasicBlock) bool) {
+		if len(fn.Blocks) != 0 {
+			for b := range WalkBlock(fn.Blocks[0]) {
+				if !yield(b) {
+					return
+				}
+			}
+		}
 	}
-	return WalkDown(fn.Blocks[0])
 }
 
-// WalkDown recursively yields b and all reachable successor blocks of b.
+// WalkBlock recursively yields b and all reachable successor blocks of b.
 //
 // A block is considered reachable if there is a control flow path from b to
 // that block that does not depend on a condition that is known to be false at
 // compile-time.
-func WalkDown(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
+func WalkBlock(b *ssa.BasicBlock) iter.Seq[*ssa.BasicBlock] {
 	return walk(b, DirectSuccessors)
 }
 
@@ -59,7 +64,7 @@ func PathExists(from, to *ssa.BasicBlock) bool {
 		panic("blocks are not in the same function")
 	}
 
-	for b := range WalkDown(from) {
+	for b := range WalkBlock(from) {
 		if b == to {
 			return true
 		}

@@ -3,7 +3,7 @@ module github.com/dogmatiq/enginekit
 go 1.23
 
 require (
-	github.com/dogmatiq/aureus v0.2.1
+	github.com/dogmatiq/aureus v0.2.2
 	github.com/dogmatiq/dapper v0.6.0
 	github.com/dogmatiq/dogma v0.15.0
 	github.com/dogmatiq/primo v0.3.1
@@ -16,7 +16,7 @@ require (
 
 require (
 	github.com/dogmatiq/jumble v0.1.0 // indirect
-	github.com/yuin/goldmark v1.7.4 // indirect
+	github.com/yuin/goldmark v1.7.8 // indirect
 	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect

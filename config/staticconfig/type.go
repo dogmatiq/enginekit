@@ -26,9 +26,9 @@ func isAbstract(t types.Type) bool {
 
 // analyzeType analyzes a type that was discovered within a package.
 //
-// THe currently implementation only looks for [dogma.Application]
-// implementations; handler implementations are ignored unless they are actually
-// used within an application.
+// The current implementation only looks for types that implement the
+// [dogma.Application] interface. Handler implementations are ignored unless
+// they are actually used within an application.
 func analyzeType(ctx *context, t types.Type) {
 	if isAbstract(t) {
 		// We're only interested in concrete types; otherwise there's nothing to

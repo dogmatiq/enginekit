@@ -7,15 +7,13 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
-func analyzeRoutesCall(
-	ctx *context,
-	b configbuilder.HandlerBuilder,
-	call configurerCall,
+func analyzeRoutes[T configbuilder.HandlerBuilder](
+	ctx *configurerCallContext[T],
 ) {
-	for r := range resolveVariadic(b, call) {
-		b.Route(func(b *configbuilder.RouteBuilder) {
-			b.UpdateFidelity(call.Fidelity)
-			analyzeRoute(ctx, b, r)
+	for r := range resolveVariadic(ctx.Builder, ctx.Instruction) {
+		ctx.Builder.Route(func(b *configbuilder.RouteBuilder) {
+			b.UpdateFidelity(ctx.Fidelity) // TODO: is this correct?
+			analyzeRoute(ctx.context, b, r)
 		})
 	}
 }

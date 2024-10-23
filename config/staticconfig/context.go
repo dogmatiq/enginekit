@@ -25,10 +25,10 @@ type context struct {
 	Analysis *Analysis
 }
 
-// findDogma updates ctx with information about the Dogma package.
+// resolveDogmaPackage updates ctx with information about the Dogma package.
 //
 // It returns false if the Dogma package has not been imported.
-func findDogma(ctx *context) bool {
+func resolveDogmaPackage(ctx *context) bool {
 	for _, pkg := range ctx.Program.AllPackages() {
 		if pkg.Pkg.Path() != "github.com/dogmatiq/dogma" {
 			continue

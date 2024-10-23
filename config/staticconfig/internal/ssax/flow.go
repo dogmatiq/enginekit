@@ -6,6 +6,14 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
+// WalkFunc recursively yields all reachable blocks in the given function.
+func WalkFunc(fn *ssa.Function) iter.Seq[*ssa.BasicBlock] {
+	if len(fn.Blocks) == 0 {
+		return func(func(*ssa.BasicBlock) bool) {}
+	}
+	return WalkDown(fn.Blocks[0])
+}
+
 // WalkDown recursively yields b and all reachable successor blocks of b.
 //
 // A block is considered reachable if there is a control flow path from b to

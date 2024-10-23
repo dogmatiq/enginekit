@@ -45,9 +45,11 @@ func isIndexOfArray(
 
 func resolveVariadic(
 	b configbuilder.EntityBuilder,
-	call configurerCall,
+	inst ssa.CallInstruction,
 ) iter.Seq[ssa.Value] {
 	return func(yield func(ssa.Value) bool) {
+		call := inst.Common()
+
 		variadics := call.Args[len(call.Args)-1]
 		if ssax.IsZeroValue(variadics) {
 			return
@@ -60,11 +62,11 @@ func resolveVariadic(
 		}
 
 		for b := range ssax.WalkDown(array.Block()) {
-			if !ssax.PathExists(b, call.Instruction.Block()) {
+			if !ssax.PathExists(b, inst.Block()) {
 				continue
 			}
 
-			for inst := range ssax.InstructionsBefore(b, call.Instruction) {
+			for inst := range ssax.InstructionsBefore(b, inst) {
 				switch inst := inst.(type) {
 				case *ssa.Store:
 					if _, ok := isIndexOfArray(array, inst.Addr); ok {

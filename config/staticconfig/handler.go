@@ -1,87 +1,68 @@
 package staticconfig
 
 import (
-	"iter"
-
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
-	"github.com/dogmatiq/enginekit/internal/typename"
 	"golang.org/x/tools/go/ssa"
 )
 
-func analyzeHandler(
-	ctx *context,
-	b configbuilder.HandlerBuilder,
-	h ssa.Value,
-) iter.Seq[configurerCall] {
-	return func(yield func(configurerCall) bool) {
-		switch inst := h.(type) {
-		default:
-			b.UpdateFidelity(config.Incomplete)
-		case *ssa.MakeInterface:
-			t := inst.X.Type()
-			b.SetSourceTypeName(typename.OfStatic(t))
+func analyzeHandler[T configbuilder.HandlerBuilder](
+	ctx *configurerCallContext[*configbuilder.ApplicationBuilder],
+	build func(func(T)),
+	analyze configurerCallAnalyzer[T],
+) {
+	build(func(b T) {
+		b.UpdateFidelity(ctx.Fidelity)
 
-			for call := range findConfigurerCalls(ctx, b, t) {
-				switch call.Method.Name() {
-				case "Identity":
-					analyzeIdentityCall(b, call)
+		inst, ok := ctx.Args[0].(*ssa.MakeInterface)
+		if !ok {
+			b.UpdateFidelity(config.Incomplete)
+			return
+		}
+
+		analyzeEntity(
+			ctx.context,
+			inst.X.Type(),
+			b,
+			func(ctx *configurerCallContext[T]) {
+				switch ctx.Method.Name() {
 				case "Routes":
-					analyzeRoutesCall(ctx, b, call)
+					analyzeRoutes(ctx)
+
 				case "Disable":
-					b.SetDisabled(true)
+					// TODO(jmalloc): f is lost in this case, so any handler
+					// that is _sometimes_ disabled will appear as always
+					// disabled, which is a bit non-sensical.
+					//
+					// It probably needs similar treatment to
+					// https://github.com/dogmatiq/enginekit/issues/55.
+					ctx.Builder.SetDisabled(true)
+
 				default:
-					if !yield(call) {
-						return
+					if analyze == nil {
+						ctx.Builder.UpdateFidelity(config.Incomplete)
+					} else {
+						analyze(ctx)
 					}
 				}
-			}
+			},
+		)
 
-			// If the handler wasn't disabled, and the configuration is NOT
-			// incomplete, we know that the handler is enabled.
-			if !b.IsDisabled().IsPresent() && b.Fidelity()&config.Incomplete == 0 {
-				b.SetDisabled(false)
-			}
+		// If the handler wasn't disabled, and the configuration is NOT
+		// incomplete, we know that the handler is enabled.
+		if !b.IsDisabled().IsPresent() && b.Fidelity()&config.Incomplete == 0 {
+			b.SetDisabled(false)
 		}
-	}
+	})
 }
 
-func analyzeAggregate(
-	ctx *context,
-	b *configbuilder.AggregateBuilder,
-	h ssa.Value,
+func analyzeProjectionConfigurerCall(
+	ctx *configurerCallContext[*configbuilder.ProjectionBuilder],
 ) {
-	for call := range analyzeHandler(ctx, b, h) {
-		b.UpdateFidelity(call.Fidelity)
-	}
-}
-
-func analyzeProcess(
-	ctx *context,
-	b *configbuilder.ProcessBuilder,
-	h ssa.Value,
-) {
-	for call := range analyzeHandler(ctx, b, h) {
-		b.UpdateFidelity(call.Fidelity)
-	}
-}
-
-func analyzeIntegration(
-	ctx *context,
-	b *configbuilder.IntegrationBuilder,
-	h ssa.Value,
-) {
-	for call := range analyzeHandler(ctx, b, h) {
-		b.UpdateFidelity(call.Fidelity)
-	}
-}
-
-func analyzeProjection(
-	ctx *context,
-	b *configbuilder.ProjectionBuilder,
-	h ssa.Value,
-) {
-	for call := range analyzeHandler(ctx, b, h) {
-		b.UpdateFidelity(call.Fidelity)
+	switch ctx.Method.Name() {
+	case "DeliveryPolicy":
+		panic("not implemented") // TODO
+	default:
+		ctx.Builder.UpdateFidelity(config.Incomplete)
 	}
 }

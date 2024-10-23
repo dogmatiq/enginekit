@@ -5,47 +5,36 @@ import (
 
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
-	"github.com/dogmatiq/enginekit/internal/typename"
 )
 
 // analyzeApplicationType analyzes t, which must be an implementation of
 // [dogma.Application].
 func analyzeApplicationType(ctx *context, t types.Type) {
-	ctx.Analysis.Applications = append(
-		ctx.Analysis.Applications,
-		configbuilder.Application(
-			func(b *configbuilder.ApplicationBuilder) {
-				b.SetSourceTypeName(typename.OfStatic(t))
-
-				for call := range findConfigurerCalls(ctx, b, t) {
-					switch call.Method.Name() {
-					case "Identity":
-						analyzeIdentityCall(b, call)
-					case "RegisterAggregate":
-						b.Aggregate(func(b *configbuilder.AggregateBuilder) {
-							b.UpdateFidelity(call.Fidelity)
-							analyzeAggregate(ctx, b, call.Args[0])
-						})
-					case "RegisterProcess":
-						b.Process(func(b *configbuilder.ProcessBuilder) {
-							b.UpdateFidelity(call.Fidelity)
-							analyzeProcess(ctx, b, call.Args[0])
-						})
-					case "RegisterIntegration":
-						b.Integration(func(b *configbuilder.IntegrationBuilder) {
-							b.UpdateFidelity(call.Fidelity)
-							analyzeIntegration(ctx, b, call.Args[0])
-						})
-					case "RegisterProjection":
-						b.Projection(func(b *configbuilder.ProjectionBuilder) {
-							b.UpdateFidelity(call.Fidelity)
-							analyzeProjection(ctx, b, call.Args[0])
-						})
-					default:
-						b.UpdateFidelity(config.Incomplete)
-					}
-				}
-			},
-		),
+	app := configbuilder.Application(
+		func(b *configbuilder.ApplicationBuilder) {
+			analyzeEntity(
+				ctx,
+				t,
+				b,
+				analyzeApplicationConfigurerCall,
+			)
+		},
 	)
+
+	ctx.Analysis.Applications = append(ctx.Analysis.Applications, app)
+}
+
+func analyzeApplicationConfigurerCall(ctx *configurerCallContext[*configbuilder.ApplicationBuilder]) {
+	switch ctx.Method.Name() {
+	case "RegisterAggregate":
+		analyzeHandler(ctx, ctx.Builder.Aggregate, nil)
+	case "RegisterProcess":
+		analyzeHandler(ctx, ctx.Builder.Process, nil)
+	case "RegisterIntegration":
+		analyzeHandler(ctx, ctx.Builder.Integration, nil)
+	case "RegisterProjection":
+		analyzeHandler(ctx, ctx.Builder.Projection, analyzeProjectionConfigurerCall)
+	default:
+		ctx.Builder.UpdateFidelity(config.Incomplete)
+	}
 }

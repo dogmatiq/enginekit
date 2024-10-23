@@ -108,7 +108,7 @@ func Analyze(pkgs []*packages.Package) Analysis {
 		},
 	}
 
-	if !findDogma(ctx) {
+	if !resolveDogmaPackage(ctx) {
 		// If the dogma package is not found as an import, none of the packages
 		// can possibly have types that implement [dogma.Application] because
 		// doing so requires referring to [dogma.ApplicationConfigurer].

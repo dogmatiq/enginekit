@@ -51,14 +51,15 @@ func (b *ProjectionBuilder) Route(fn func(*RouteBuilder)) {
 	)
 }
 
-// IsDisabled returns whether the handler is disabled or not.
-func (b *ProjectionBuilder) IsDisabled() optional.Optional[bool] {
-	return b.target.AsConfigured.IsDisabled
-}
-
-// SetDisabled sets whether the handler is disabled or not.
-func (b *ProjectionBuilder) SetDisabled(disabled bool) {
-	b.target.AsConfigured.IsDisabled = optional.Some(disabled)
+// Disable calls fn which configures a [config.Flag] that indicates whether the
+// handler is disabled.
+func (b *ProjectionBuilder) Disable(fn func(*FlagBuilder[config.Disabled])) {
+	x := &FlagBuilder[config.Disabled]{}
+	fn(x)
+	b.target.AsConfigured.DisabledFlags = append(
+		b.target.AsConfigured.DisabledFlags,
+		x.Done(),
+	)
 }
 
 // SetDeliveryPolicyTypeName sets the type name of the delivery policy.
@@ -110,9 +111,6 @@ func (b *ProjectionBuilder) Done() *config.Projection {
 	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
 		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
 			panic("handler must have a source or be marked as incomplete")
-		}
-		if !b.target.AsConfigured.IsDisabled.IsPresent() {
-			panic("handler must be known to be enabled or disabled, or be marked as incomplete")
 		}
 	}
 

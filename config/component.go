@@ -42,20 +42,6 @@ type Entity interface {
 	identities() []*Identity
 }
 
-// A Handler is a specialization of [Entity] that represents configuration of a
-// Dogma message handler.
-type Handler interface {
-	Entity
-
-	// HandlerType returns [HandlerType] of the handler.
-	HandlerType() HandlerType
-
-	// IsDisabled returns true if the handler was disabled via the configurer.
-	IsDisabled() bool
-
-	routes() []*Route
-}
-
 // Fidelity is a bit-field that describes how well a [Component] configuration
 // represents the actual configuration that would be used at runtime.
 //
@@ -85,15 +71,15 @@ const (
 )
 
 var (
+	_ Entity    = (*Application)(nil)
 	_ Component = (*Identity)(nil)
+
+	_ Handler   = (*Aggregate)(nil)
+	_ Handler   = (*Process)(nil)
+	_ Handler   = (*Integration)(nil)
+	_ Handler   = (*Projection)(nil)
 	_ Component = (*Route)(nil)
-
-	_ Entity = (*Application)(nil)
-
-	_ Handler = (*Aggregate)(nil)
-	_ Handler = (*Process)(nil)
-	_ Handler = (*Integration)(nil)
-	_ Handler = (*Projection)(nil)
+	_ Component = (*Flag[Label])(nil)
 )
 
 func clone[T Component](components []T) []T {

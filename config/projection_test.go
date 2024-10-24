@@ -273,10 +273,11 @@ func TestProjection_render(t *testing.T) {
 			Name:             "disabled",
 			ExpectDescriptor: `projection:ProjectionMessageHandlerStub`,
 			ExpectDetails: multiline(
-				`disabled valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
+				`valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				`  - unicast delivery policy`,
+				`  - valid disabled flag`,
 			),
 			Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
@@ -299,7 +300,6 @@ func TestProjection_render(t *testing.T) {
 			),
 			Component: configbuilder.Projection(func(b *configbuilder.ProjectionBuilder) {
 				b.SetSourceTypeName("pkg.SomeProjection")
-				b.SetDisabled(false)
 				b.SetDeliveryPolicyTypeName("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy")
 
 				b.Identity(func(b *configbuilder.IdentityBuilder) {

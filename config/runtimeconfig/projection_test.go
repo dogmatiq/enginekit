@@ -45,7 +45,6 @@ func TestFromProjection(t *testing.T) {
 								Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
 							},
 						),
-						IsDisabled: optional.Some(false),
 					},
 				}
 			},
@@ -100,7 +99,7 @@ func TestFromProjection(t *testing.T) {
 								),
 							},
 						),
-						IsDisabled: optional.Some(true),
+						DisabledFlags: config.FlagSet[config.Disabled]{{}},
 					},
 				}
 			},

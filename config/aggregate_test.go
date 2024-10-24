@@ -267,10 +267,11 @@ func TestAggregate_render(t *testing.T) {
 			Name:             "disabled",
 			ExpectDescriptor: `aggregate:AggregateMessageHandlerStub`,
 			ExpectDetails: multiline(
-				`disabled valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+				`valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				`  - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid disabled flag`,
 			),
 			Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
@@ -294,7 +295,6 @@ func TestAggregate_render(t *testing.T) {
 			),
 			Component: configbuilder.Aggregate(func(b *configbuilder.AggregateBuilder) {
 				b.SetSourceTypeName("pkg.SomeAggregate")
-				b.SetDisabled(false)
 
 				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")

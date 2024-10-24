@@ -19,7 +19,6 @@ func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
 }
 
 func buildIntegration(b *configbuilder.IntegrationBuilder, h dogma.IntegrationMessageHandler) {
-	b.SetDisabled(false)
 	b.SetSource(h)
 	h.Configure(&handlerConfigurer[dogma.IntegrationRoute]{b})
 }

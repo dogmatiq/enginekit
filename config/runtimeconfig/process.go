@@ -19,7 +19,6 @@ func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
 }
 
 func buildProcess(b *configbuilder.ProcessBuilder, h dogma.ProcessMessageHandler) {
-	b.SetDisabled(false)
 	b.SetSource(h)
 	h.Configure(&handlerConfigurer[dogma.ProcessRoute]{b})
 }

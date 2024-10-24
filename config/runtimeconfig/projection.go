@@ -19,7 +19,6 @@ func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
 }
 
 func buildProjection(b *configbuilder.ProjectionBuilder, h dogma.ProjectionMessageHandler) {
-	b.SetDisabled(false)
 	b.SetSource(h)
 	b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
 	h.Configure(&projectionConfigurer{

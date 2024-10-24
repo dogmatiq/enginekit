@@ -7,7 +7,6 @@ import (
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
-	"github.com/dogmatiq/enginekit/optional"
 )
 
 // RenderDescriptor returns a one-line human-readable description of c.
@@ -106,13 +105,8 @@ func renderHandlerDetails[T any](
 	ren *renderer.Renderer,
 	h Handler,
 	src Value[T],
-	isDisabled optional.Optional[bool],
 ) {
 	f, err := validate(h)
-
-	if d, ok := isDisabled.TryGet(); ok && d {
-		ren.Print("disabled ")
-	}
 
 	renderFidelity(ren, f, err)
 	ren.Print(h.HandlerType().String())
@@ -137,6 +131,12 @@ func renderHandlerDetails[T any](
 	for _, r := range h.routes() {
 		ren.IndentBullet()
 		r.renderDetails(ren)
+		ren.Dedent()
+	}
+
+	for _, f := range h.disabledFlags() {
+		ren.IndentBullet()
+		f.renderDetails(ren)
 		ren.Dedent()
 	}
 }

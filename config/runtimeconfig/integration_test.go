@@ -39,7 +39,6 @@ func TestFromIntegration(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 							Value:    optional.Some(h),
 						},
-						IsDisabled: optional.Some(false),
 					},
 				}
 			},
@@ -87,7 +86,7 @@ func TestFromIntegration(t *testing.T) {
 								},
 							},
 						},
-						IsDisabled: optional.Some(true),
+						DisabledFlags: config.FlagSet[config.Disabled]{{}},
 					},
 				}
 			},

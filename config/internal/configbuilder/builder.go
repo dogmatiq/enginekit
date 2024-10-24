@@ -2,7 +2,6 @@ package configbuilder
 
 import (
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/optional"
 )
 
 // ComponentBuilder is the interface shared by the builder types for all
@@ -37,16 +36,15 @@ type HandlerBuilder interface {
 	// handler.
 	Route(fn func(*RouteBuilder))
 
-	// IsDisabled returns whether the handler is disabled or not.
-	IsDisabled() optional.Optional[bool]
-
-	// SetDisabled sets whether the handler is disabled or not.
-	SetDisabled(disabled bool)
+	// Disable calls fn which configures a [config.Flag] that indicates whether
+	// the handler is disabled.
+	Disable(fn func(*FlagBuilder[config.Disabled]))
 }
 
 var (
 	_ ComponentBuilder = (*IdentityBuilder)(nil)
 	_ ComponentBuilder = (*RouteBuilder)(nil)
+	_ ComponentBuilder = (*FlagBuilder[config.Label])(nil)
 
 	_ EntityBuilder = (*ApplicationBuilder)(nil)
 

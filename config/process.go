@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
-	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
@@ -19,9 +18,8 @@ type ProcessAsConfigured struct {
 	// Routes is the list of routes configured on the handler.
 	Routes []*Route
 
-	// IsDisabled is true if the handler was disabled via the configurer, if
-	// known.
-	IsDisabled optional.Optional[bool]
+	// DisabledFlags represents calls to [dogma.AggregateConfigurer.Disable].
+	DisabledFlags FlagSet[Disabled]
 
 	// Fidelity describes the configuration's accuracy in comparison to the
 	// actual configuration that would be used at runtime.
@@ -61,7 +59,7 @@ func (h *Process) RouteSet() RouteSet {
 
 // IsDisabled returns true if the handler was disabled via the configurer.
 func (h *Process) IsDisabled() bool {
-	return h.AsConfigured.IsDisabled.Get()
+	return h.AsConfigured.DisabledFlags.resolve(h).Get()
 }
 
 // Interface returns the [dogma.ProcessMessageHandler] instance that the
@@ -79,7 +77,11 @@ func (h *Process) renderDescriptor(ren *renderer.Renderer) {
 }
 
 func (h *Process) renderDetails(ren *renderer.Renderer) {
-	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+	renderHandlerDetails(ren, h, h.AsConfigured.Source)
+}
+
+func (h *Process) disabledFlags() FlagSet[Disabled] {
+	return h.AsConfigured.DisabledFlags
 }
 
 func (h *Process) identities() []*Identity {

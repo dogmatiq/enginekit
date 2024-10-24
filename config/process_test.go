@@ -261,10 +261,11 @@ func TestProcess_render(t *testing.T) {
 			Name:             "disabled",
 			ExpectDescriptor: `process:ProcessMessageHandlerStub`,
 			ExpectDetails: multiline(
-				`disabled valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
+				`valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 				`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid disabled flag`,
 			),
 			Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
@@ -288,7 +289,6 @@ func TestProcess_render(t *testing.T) {
 			),
 			Component: configbuilder.Process(func(b *configbuilder.ProcessBuilder) {
 				b.SetSourceTypeName("pkg.SomeProcess")
-				b.SetDisabled(false)
 
 				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")

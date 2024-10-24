@@ -2,6 +2,7 @@ package runtimeconfig
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
@@ -25,5 +26,5 @@ func (c *handlerConfigurer[R]) Routes(routes ...R) {
 }
 
 func (c *handlerConfigurer[R]) Disable(...dogma.DisableOption) {
-	c.b.SetDisabled(true)
+	c.b.Disable(func(*configbuilder.FlagBuilder[config.Disabled]) {})
 }

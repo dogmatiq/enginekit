@@ -259,9 +259,10 @@ func TestIntegration_render(t *testing.T) {
 			Name:             "disabled",
 			ExpectDescriptor: `integration:IntegrationMessageHandlerStub`,
 			ExpectDetails: multiline(
-				`disabled valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
+				`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 				`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 				`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				`  - valid disabled flag`,
 			),
 			Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
@@ -283,7 +284,6 @@ func TestIntegration_render(t *testing.T) {
 			),
 			Component: configbuilder.Integration(func(b *configbuilder.IntegrationBuilder) {
 				b.SetSourceTypeName("pkg.SomeIntegration")
-				b.SetDisabled(false)
 
 				b.Identity(func(b *configbuilder.IdentityBuilder) {
 					b.SetName("name")

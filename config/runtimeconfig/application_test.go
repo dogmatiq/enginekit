@@ -82,7 +82,6 @@ func TestFromApplication(t *testing.T) {
 										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 										Value:    optional.Some(aggregate),
 									},
-									IsDisabled: optional.Some(false),
 								},
 							},
 							&config.Process{
@@ -91,7 +90,6 @@ func TestFromApplication(t *testing.T) {
 										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 										Value:    optional.Some(process),
 									},
-									IsDisabled: optional.Some(false),
 								},
 							},
 							&config.Integration{
@@ -100,7 +98,6 @@ func TestFromApplication(t *testing.T) {
 										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 										Value:    optional.Some(integration),
 									},
-									IsDisabled: optional.Some(false),
 								},
 							},
 							&config.Projection{
@@ -115,7 +112,6 @@ func TestFromApplication(t *testing.T) {
 											Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
 										},
 									),
-									IsDisabled: optional.Some(false),
 								},
 							},
 						},

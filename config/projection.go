@@ -20,9 +20,8 @@ type ProjectionAsConfigured struct {
 	// Routes is the list of routes configured on the handler.
 	Routes []*Route
 
-	// IsDisabled is true if the handler was disabled via the configurer, if
-	// known.
-	IsDisabled optional.Optional[bool]
+	// DisabledFlags represents calls to [dogma.AggregateConfigurer.Disable].
+	DisabledFlags FlagSet[Disabled]
 
 	// DeliveryPolicy is the delivery policy for the handler, if configured.
 	DeliveryPolicy optional.Optional[Value[dogma.ProjectionDeliveryPolicy]]
@@ -65,7 +64,7 @@ func (h *Projection) RouteSet() RouteSet {
 
 // IsDisabled returns true if the handler was disabled via the configurer.
 func (h *Projection) IsDisabled() bool {
-	return h.AsConfigured.IsDisabled.Get()
+	return h.AsConfigured.DisabledFlags.resolve(h).Get()
 }
 
 // DeliveryPolicy returns the delivery policy for the handler.
@@ -91,7 +90,7 @@ func (h *Projection) renderDescriptor(ren *renderer.Renderer) {
 }
 
 func (h *Projection) renderDetails(ren *renderer.Renderer) {
-	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+	renderHandlerDetails(ren, h, h.AsConfigured.Source)
 
 	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
 		// TODO: https://github.com/dogmatiq/enginekit/issues/55
@@ -115,6 +114,10 @@ func (h *Projection) renderDetails(ren *renderer.Renderer) {
 			ren.Print("\n")
 		}
 	}
+}
+
+func (h *Projection) disabledFlags() FlagSet[Disabled] {
+	return h.AsConfigured.DisabledFlags
 }
 
 func (h *Projection) identities() []*Identity {

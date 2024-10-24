@@ -20,6 +20,5 @@ func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
 
 func buildAggregate(b *configbuilder.AggregateBuilder, h dogma.AggregateMessageHandler) {
 	b.SetSource(h)
-	b.SetDisabled(false)
 	h.Configure(&handlerConfigurer[dogma.AggregateRoute]{b})
 }

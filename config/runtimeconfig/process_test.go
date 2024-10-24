@@ -39,7 +39,6 @@ func TestFromProcess(t *testing.T) {
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 							Value:    optional.Some(h),
 						},
-						IsDisabled: optional.Some(false),
 					},
 				}
 			},
@@ -95,7 +94,7 @@ func TestFromProcess(t *testing.T) {
 								},
 							},
 						},
-						IsDisabled: optional.Some(true),
+						DisabledFlags: config.FlagSet[config.Disabled]{{}},
 					},
 				}
 			},

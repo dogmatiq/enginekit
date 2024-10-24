@@ -23,7 +23,7 @@ func TestFromAggregate(t *testing.T) {
 			nil,
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					AsConfigured: config.AggregateAsConfigured{
+					Properties: config.AggregateProperties{
 						Fidelity: config.Incomplete,
 					},
 				}
@@ -34,7 +34,7 @@ func TestFromAggregate(t *testing.T) {
 			&AggregateMessageHandlerStub{},
 			func(h dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					AsConfigured: config.AggregateAsConfigured{
+					Properties: config.AggregateProperties{
 						Source: config.Value[dogma.AggregateMessageHandler]{
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 							Value:    optional.Some(h),
@@ -57,7 +57,7 @@ func TestFromAggregate(t *testing.T) {
 			},
 			func(app dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					AsConfigured: config.AggregateAsConfigured{
+					Properties: config.AggregateProperties{
 						Source: config.Value[dogma.AggregateMessageHandler]{
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 							Value:    optional.Some(app),

@@ -77,7 +77,7 @@ func TestFromApplication(t *testing.T) {
 						},
 						Handlers: []config.Handler{
 							&config.Aggregate{
-								AsConfigured: config.AggregateAsConfigured{
+								Properties: config.AggregateProperties{
 									Source: config.Value[dogma.AggregateMessageHandler]{
 										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 										Value:    optional.Some(aggregate),

@@ -56,8 +56,10 @@ func (f *Flag[L]) normalize(*normalizationContext) {
 type FlagSet[L Label] []*Flag[L]
 
 // resolve reports whether or not the flag is set, if definitively known.
-func (s FlagSet[L]) resolve(c Component) optional.Optional[bool] {
-	if c.Fidelity()&Incomplete != 0 {
+//
+// f is the fidelity of the component against which the flag is set.
+func (s FlagSet[L]) resolve(f Fidelity) optional.Optional[bool] {
+	if f&Incomplete != 0 {
 		return optional.None[bool]()
 	}
 

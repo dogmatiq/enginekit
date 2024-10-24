@@ -231,10 +231,13 @@ func (f routeSetFilters) TestMessage(t message.Type, routes map[RouteType]map[Ha
 	return true
 }
 
-func buildRouteSet(ctx *normalizationContext, h Handler) RouteSet {
+func buildRouteSet(
+	ctx *normalizationContext,
+	h Handler,
+) RouteSet {
 	routes := clone(h.routes())
 	normalizeChildren(ctx, routes)
-	reportRouteErrors(ctx, h, routes)
+	reportRouteErrors(ctx, routes, h.HandlerType().RouteCapabilities())
 
 	set := RouteSet{}
 

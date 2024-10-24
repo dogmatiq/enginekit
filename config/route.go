@@ -124,13 +124,12 @@ func (r *Route) normalize(ctx *normalizationContext) {
 
 func reportRouteErrors(
 	ctx *normalizationContext,
-	h Handler,
 	routes []*Route,
+	capabilities RouteCapabilities,
 ) {
 	var (
-		capabilities = h.HandlerType().RouteCapabilities()
-		missing      maps.Ordered[RouteType, MissingRequiredRouteError]
-		duplicate    maps.OrderedByKey[routeKey, DuplicateRouteError]
+		missing   maps.Ordered[RouteType, MissingRequiredRouteError]
+		duplicate maps.OrderedByKey[routeKey, DuplicateRouteError]
 	)
 
 	for rt, req := range capabilities.RouteTypes {

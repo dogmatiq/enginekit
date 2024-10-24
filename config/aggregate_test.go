@@ -174,7 +174,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Aggregate{
-					AsConfigured: AggregateAsConfigured{
+					Properties: AggregateAsConfigured{
 						Routes: []*Route{c.Route},
 					},
 				}
@@ -382,7 +382,7 @@ func TestAggregate_validation(t *testing.T) {
 			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Aggregate{
-				AsConfigured: AggregateAsConfigured{
+				Properties: AggregateAsConfigured{
 					Source: Value[dogma.AggregateMessageHandler]{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 					},
@@ -421,7 +421,7 @@ func TestAggregate_validation(t *testing.T) {
 				WithRuntimeTypes(),
 			},
 			Component: &Aggregate{
-				AsConfigured: AggregateAsConfigured{
+				Properties: AggregateAsConfigured{
 					Source: Value[dogma.AggregateMessageHandler]{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 					},

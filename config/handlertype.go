@@ -3,6 +3,7 @@ package config
 import (
 	"iter"
 
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/internal/enum"
 )
 
@@ -30,6 +31,25 @@ const (
 // HandlerTypes returns a sequence that yields all valid [HandlerType] values.
 func HandlerTypes() iter.Seq[HandlerType] {
 	return enum.Range(AggregateHandlerType, ProjectionHandlerType)
+}
+
+// HandlerTypeFor returns the [HandlerType] for the given type, or panics if T
+// is not a Dogma handler.
+func HandlerTypeFor[T any]() HandlerType {
+	var zero T
+
+	switch any(zero).(type) {
+	case dogma.AggregateMessageHandler:
+		return AggregateHandlerType
+	case dogma.IntegrationMessageHandler:
+		return IntegrationHandlerType
+	case dogma.ProcessMessageHandler:
+		return ProcessHandlerType
+	case dogma.ProjectionMessageHandler:
+		return ProjectionHandlerType
+	default:
+		panic("invalid handler type")
+	}
 }
 
 func (t HandlerType) String() string {

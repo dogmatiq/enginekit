@@ -19,12 +19,12 @@ type AggregateBuilder struct {
 
 // SetSourceTypeName sets the source of the configuration.
 func (b *AggregateBuilder) SetSourceTypeName(typeName string) {
-	setSourceTypeName(&b.target.AsConfigured.Source, typeName)
+	setSourceTypeName(&b.target.Properties.Source, typeName)
 }
 
 // SetSource sets the source of the configuration.
 func (b *AggregateBuilder) SetSource(h dogma.AggregateMessageHandler) {
-	setSource(&b.target.AsConfigured.Source, h)
+	setSource(&b.target.Properties.Source, h)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
@@ -32,8 +32,8 @@ func (b *AggregateBuilder) SetSource(h dogma.AggregateMessageHandler) {
 func (b *AggregateBuilder) Identity(fn func(*IdentityBuilder)) {
 	x := &IdentityBuilder{}
 	fn(x)
-	b.target.AsConfigured.Identities = append(
-		b.target.AsConfigured.Identities,
+	b.target.Properties.Identities = append(
+		b.target.Properties.Identities,
 		x.Done(),
 	)
 }
@@ -43,8 +43,8 @@ func (b *AggregateBuilder) Identity(fn func(*IdentityBuilder)) {
 func (b *AggregateBuilder) Route(fn func(*RouteBuilder)) {
 	x := &RouteBuilder{}
 	fn(x)
-	b.target.AsConfigured.Routes = append(
-		b.target.AsConfigured.Routes,
+	b.target.Properties.Routes = append(
+		b.target.Properties.Routes,
 		x.Done(),
 	)
 }
@@ -54,31 +54,31 @@ func (b *AggregateBuilder) Route(fn func(*RouteBuilder)) {
 func (b *AggregateBuilder) Disable(fn func(*FlagBuilder[config.Disabled])) {
 	x := &FlagBuilder[config.Disabled]{}
 	fn(x)
-	b.target.AsConfigured.DisabledFlags = append(
-		b.target.AsConfigured.DisabledFlags,
+	b.target.Properties.DisabledFlags = append(
+		b.target.Properties.DisabledFlags,
 		x.Done(),
 	)
 }
 
 // Edit calls fn, which can apply arbitrary changes to the handler.
-func (b *AggregateBuilder) Edit(fn func(*config.AggregateAsConfigured)) {
-	fn(&b.target.AsConfigured)
+func (b *AggregateBuilder) Edit(fn func(*config.AggregateProperties)) {
+	fn(&b.target.Properties)
 }
 
 // Fidelity returns the fidelity of the configuration.
 func (b *AggregateBuilder) Fidelity() config.Fidelity {
-	return b.target.AsConfigured.Fidelity
+	return b.target.Properties.Fidelity
 }
 
 // UpdateFidelity merges f with the current fidelity of the configuration.
 func (b *AggregateBuilder) UpdateFidelity(f config.Fidelity) {
-	b.target.AsConfigured.Fidelity |= f
+	b.target.Properties.Fidelity |= f
 }
 
 // Done completes the configuration of the handler.
 func (b *AggregateBuilder) Done() *config.Aggregate {
-	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
-		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
+	if b.target.Properties.Fidelity&config.Incomplete == 0 {
+		if !b.target.Properties.Source.TypeName.IsPresent() {
 			panic("handler must have a source or be marked as incomplete")
 		}
 	}

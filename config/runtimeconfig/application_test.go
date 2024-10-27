@@ -29,8 +29,10 @@ func TestFromApplication(t *testing.T) {
 			nil,
 			func(dogma.Application) *config.Application {
 				return &config.Application{
-					AsConfigured: config.ApplicationAsConfigured{
-						Fidelity: config.Incomplete,
+					EntityCommon: config.EntityCommon[dogma.Application]{
+						ComponentCommon: config.ComponentCommon{
+							ComponentFidelity: config.Incomplete,
+						},
 					},
 				}
 			},
@@ -40,11 +42,9 @@ func TestFromApplication(t *testing.T) {
 			&ApplicationStub{},
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
-					AsConfigured: config.ApplicationAsConfigured{
-						Source: config.Value[dogma.Application]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
-							Value:    optional.Some(app),
-						},
+					EntityCommon: config.EntityCommon[dogma.Application]{
+						SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
+						Source:         optional.Some(app),
 					},
 				}
 			},
@@ -62,56 +62,47 @@ func TestFromApplication(t *testing.T) {
 			},
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
-					AsConfigured: config.ApplicationAsConfigured{
-						Source: config.Value[dogma.Application]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
-							Value:    optional.Some(app),
-						},
-						Identities: []*config.Identity{
+					EntityCommon: config.EntityCommon[dogma.Application]{
+						ComponentCommon: config.ComponentCommon{},
+						IdentityComponents: []*config.Identity{
 							{
-								AsConfigured: config.IdentityAsConfigured{
-									Name: optional.Some("app"),
-									Key:  optional.Some("bed53df8-bf22-4502-be4b-64d56532d8be"),
+								Name: optional.Some("app"),
+								Key:  optional.Some("bed53df8-bf22-4502-be4b-64d56532d8be"),
+							},
+						},
+						SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
+						Source:         optional.Some(app),
+					},
+					HandlerComponents: []config.Handler{
+						&config.Aggregate{
+							HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
+								EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
+									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+									Source:         optional.Some(aggregate),
 								},
 							},
 						},
-						Handlers: []config.Handler{
-							&config.Aggregate{
-								AsConfigured: config.AggregateAsConfigured{
-									Source: config.Value[dogma.AggregateMessageHandler]{
-										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-										Value:    optional.Some(aggregate),
-									},
+						&config.Process{
+							HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
+								EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
+									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+									Source:         optional.Some(process),
 								},
 							},
-							&config.Process{
-								AsConfigured: config.ProcessAsConfigured{
-									Source: config.Value[dogma.ProcessMessageHandler]{
-										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-										Value:    optional.Some(process),
-									},
+						},
+						&config.Integration{
+							HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
+								EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
+									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+									Source:         optional.Some(integration),
 								},
 							},
-							&config.Integration{
-								AsConfigured: config.IntegrationAsConfigured{
-									Source: config.Value[dogma.IntegrationMessageHandler]{
-										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-										Value:    optional.Some(integration),
-									},
-								},
-							},
-							&config.Projection{
-								AsConfigured: config.ProjectionAsConfigured{
-									Source: config.Value[dogma.ProjectionMessageHandler]{
-										TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-										Value:    optional.Some(projection),
-									},
-									DeliveryPolicy: optional.Some(
-										config.Value[dogma.ProjectionDeliveryPolicy]{
-											TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
-											Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
-										},
-									),
+						},
+						&config.Projection{
+							HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
+								EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
+									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+									Source:         optional.Some(projection),
 								},
 							},
 						},

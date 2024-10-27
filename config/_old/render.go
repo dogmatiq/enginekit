@@ -3,10 +3,12 @@ package config
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/internal/typename"
+	"github.com/dogmatiq/enginekit/optional"
 )
 
 // RenderDescriptor returns a one-line human-readable description of c.
@@ -87,56 +89,62 @@ func renderErrors(r *renderer.Renderer, errs []error) {
 	}
 }
 
-func renderEntityDescriptor[T any](
-	ren *renderer.Renderer,
-	label string,
-	src Value[T],
-) {
-	ren.Print(label)
+func renderEntityDescriptor(r *renderer.Renderer, e QEntity) {
+	r.Print(strings.ToLower(reflect.TypeOf(e).Name()))
 
-	if typeName, ok := src.TypeName.TryGet(); ok {
+	if typeName, ok := e.CommonEntityProperties().TypeName.TryGet(); ok {
 		typeName = typename.Unqualified(typeName)
 		typeName = strings.TrimPrefix(typeName, "*")
-		ren.Print(":", typeName)
+		r.Print(":", typeName)
+	}
+}
+
+func renderEntityDetails[T any](
+	r *renderer.Renderer,
+	e QEntity,
+	src optional.Optional[T],
+) {
+	p := e.CommonEntityProperties()
+
+	f, err := validate(e)
+
+	renderFidelity(r, f, err)
+	r.Print(strings.ToLower(reflect.TypeOf(e).Name()))
+
+	if typeName, ok := p.TypeName.TryGet(); ok {
+		r.Print(" ", typeName)
+
+		if !src.IsPresent() {
+			r.Print(" (runtime type unavailable)")
+		}
+	}
+
+	r.Print("\n")
+	renderErrors(r, err)
+
+	for _, id := range p.IdentityComponents {
+		r.IndentBullet()
+		id.renderDetails(r)
+		r.Dedent()
 	}
 }
 
 func renderHandlerDetails[T any](
-	ren *renderer.Renderer,
+	r *renderer.Renderer,
 	h Handler,
-	src Value[T],
+	src optional.Optional[T],
 ) {
-	f, err := validate(h)
+	renderEntityDetails(r, h, src)
 
-	renderFidelity(ren, f, err)
-	ren.Print(h.HandlerType().String())
+	p := h.CommonHandlerProperties()
 
-	if typeName, ok := src.TypeName.TryGet(); ok {
-		ren.Print(" ", typeName)
-
-		if !src.Value.IsPresent() {
-			ren.Print(" (runtime type unavailable)")
-		}
+	for _, route := range p.RouteComponents {
+		r.IndentBullet()
+		route.renderDetails(r)
+		r.Dedent()
 	}
 
-	ren.Print("\n")
-	renderErrors(ren, err)
-
-	for _, i := range h.identities() {
-		ren.IndentBullet()
-		i.renderDetails(ren)
-		ren.Dedent()
-	}
-
-	for _, r := range h.routes() {
-		ren.IndentBullet()
-		r.renderDetails(ren)
-		ren.Dedent()
-	}
-
-	for _, f := range h.disabledFlags() {
-		ren.IndentBullet()
-		f.renderDetails(ren)
-		ren.Dedent()
-	}
+	r.IndentBullet()
+	p.DisabledFlag.renderDetails(r)
+	r.Dedent()
 }

@@ -10,6 +10,8 @@ import (
 	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
+	// "github.com/dogmatiq/enginekit/message"
+	// "github.com/dogmatiq/enginekit/optional"
 )
 
 func TestFromAggregate(t *testing.T) {
@@ -23,8 +25,12 @@ func TestFromAggregate(t *testing.T) {
 			nil,
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					AsConfigured: config.AggregateAsConfigured{
-						Fidelity: config.Incomplete,
+					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
+						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
+							ComponentCommon: config.ComponentCommon{
+								ComponentFidelity: config.Incomplete,
+							},
+						},
 					},
 				}
 			},
@@ -34,10 +40,10 @@ func TestFromAggregate(t *testing.T) {
 			&AggregateMessageHandlerStub{},
 			func(h dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					AsConfigured: config.AggregateAsConfigured{
-						Source: config.Value[dogma.AggregateMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-							Value:    optional.Some(h),
+					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
+						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
+							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+							Source:         optional.Some(h),
 						},
 					},
 				}
@@ -57,36 +63,34 @@ func TestFromAggregate(t *testing.T) {
 			},
 			func(app dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					AsConfigured: config.AggregateAsConfigured{
-						Source: config.Value[dogma.AggregateMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-							Value:    optional.Some(app),
-						},
-						Identities: []*config.Identity{
-							{
-								AsConfigured: config.IdentityAsConfigured{
+					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
+						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
+							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+							Source:         optional.Some(app),
+							IdentityComponents: []*config.Identity{
+								{
 									Name: optional.Some("aggregate"),
 									Key:  optional.Some("d9d75a75-7839-4b3e-a7e5-c8884b88ea57"),
 								},
 							},
 						},
-						Routes: []*config.Route{
+						RouteComponents: []*config.Route{
 							{
-								AsConfigured: config.RouteAsConfigured{
-									RouteType:       optional.Some(config.HandlesCommandRouteType),
-									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-									MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
-								},
+								RouteType:       optional.Some(config.HandlesCommandRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 							},
 							{
-								AsConfigured: config.RouteAsConfigured{
-									RouteType:       optional.Some(config.RecordsEventRouteType),
-									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-								},
+								RouteType:       optional.Some(config.RecordsEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},
 						},
-						DisabledFlags: config.FlagSet[config.Disabled]{{}},
+						DisabledFlag: config.Flag[config.Disabled]{
+							Modifications: []*config.FlagModification{
+								{Value: optional.Some(true)},
+							},
+						},
 					},
 				}
 			},

@@ -9,16 +9,16 @@ import (
 // FromIntegration returns a new [config.Integration] that represents the
 // configuration of the given [dogma.IntegrationMessageHandler].
 func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
-	return configbuilder.Integration(func(b *configbuilder.IntegrationBuilder) {
-		if h == nil {
-			b.UpdateFidelity(config.Incomplete)
-		} else {
+	return configbuilder.Integration(
+		func(b *configbuilder.IntegrationBuilder) {
 			buildIntegration(b, h)
-		}
-	})
+		},
+	)
 }
 
 func buildIntegration(b *configbuilder.IntegrationBuilder, h dogma.IntegrationMessageHandler) {
-	b.SetSource(h)
-	h.Configure(&handlerConfigurer[dogma.IntegrationRoute]{b})
+	if h != nil {
+		b.Source(h)
+		h.Configure(&handlerConfigurer[dogma.IntegrationRoute]{b})
+	}
 }

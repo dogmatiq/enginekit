@@ -9,8 +9,8 @@ type routeKey struct {
 }
 
 func routeKeyOf(r *Route) (routeKey, bool) {
-	rt, rtOK := r.AsConfigured.RouteType.TryGet()
-	mt, mtOK := r.AsConfigured.MessageTypeName.TryGet()
+	rt, rtOK := r.RouteType.TryGet()
+	mt, mtOK := r.MessageTypeName.TryGet()
 	return routeKey{rt, mt}, rtOK && mtOK
 }
 

@@ -129,10 +129,10 @@ func TestApplication_RouteSet(t *testing.T) {
 
 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
 		cfg := &Application{
-			AsConfigured: ApplicationAsConfigured{
+			X: XApplication{
 				Handlers: []Handler{
 					&Projection{
-						AsConfigured: ProjectionAsConfigured{
+						X: XProjection{
 							Routes: []*Route{
 								{},
 							},

@@ -1,97 +1,132 @@
 package config
 
 import (
-	"fmt"
-	"slices"
-
-	"github.com/dogmatiq/enginekit/config/internal/renderer"
+	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
-// A Component is some element of the configuration of a Dogma application.
+// Component is the "top-level" interface for the individual elements that form
+// a complete configuration of a Dogma application or handler.
 type Component interface {
-	fmt.Stringer
-
-	// Fidelity returns information about how well the configuration represents
-	// the actual configuration that would be used at runtime.
+	// Fidelity reports how faithfully the [Component] describes a complete
+	// configuration that can be used to execute an application.
 	Fidelity() Fidelity
 
-	renderDescriptor(*renderer.Renderer)
-	renderDetails(*renderer.Renderer)
-
-	clone() Component
-	normalize(*normalizationContext)
+	// Baggage is a collection of arbitrary data that is associated with the
+	// [Component] by whatever system produced the configuration.
+	Baggage() Baggage
 }
 
-// An Entity is a [Component] that represents the configuration of some
-// configurable Dogma entity; that is, any type with a Configure() method that
-// accepts one of the Dogma "configurer" interfaces.
+// An Entity is a [Component] that that represents the configuration of a Dogma
+// entity, which is a type that implements one of the following interfaces:
+//
+//   - [dogma.Application]
+//   - [dogma.AggregateMessageHandler]
+//   - [dogma.ProcessMessageHandler]
+//   - [dogma.IntegrationMessageHandler]
+//   - [dogma.ProjectionMessageHandler]
+//
+// See [Handler] for a more specific interface that represents the
+// configuration of a Dogma handler.
 type Entity interface {
 	Component
 
 	// Identity returns the entity's identity.
 	//
-	// It panics if no single valid identity is configured.
+	// It panics the configuration does not specify a singular valid identity.
 	Identity() *identitypb.Identity
 
 	// RouteSet returns the routes configured for the entity.
 	//
-	// It panics if the route configuration is incomplete or invalid.
+	// It panics if the configuration does not specify a complete set of valid
+	// routes for the entity and its constituents.
 	RouteSet() RouteSet
-
-	identities() []*Identity
 }
 
-// Fidelity is a bit-field that describes how well a [Component] configuration
-// represents the actual configuration that would be used at runtime.
-//
-// Importantly, it does not describe the validity of the configuration itself.
-type Fidelity int
+// A Handler is an [Entity] that represents the configuration of a Dogma
+// handler.
+type Handler interface {
+	Entity
 
-const (
-	// Immaculate is the [Fidelity] value that indicates the configuration is an
-	// exact match for the actual configuration that would be used at runtime.
-	Immaculate Fidelity = 0
+	// HandlerType returns [HandlerType] of the handler.
+	HandlerType() HandlerType
 
-	// Incomplete is a [Fidelity] flag that indicates that the [Component] has
-	// some configuration that could not be resolved accurately at configuration
-	// time.
+	// IsDisabled returns true if the handler is disabled.
 	//
-	// Most commonly this is occurs during static analysis of code that uses
-	// interfaces that cannot be followed statically.
-	//
-	// Its absence means that all of the _available_ configuration logic was
-	// applied; it does not imply that all _mandatory_ configuration is present.
-	Incomplete Fidelity = 1 << iota
-
-	// Speculative is a [Fidelity] flag that indicates that the [Component] is
-	// only present in the configuration under certain conditions, and that
-	// those conditions could not be evaluated at configuration time.
-	Speculative
-)
+	// It panics if the configuration does not specify unambiguously whether the
+	// handler is enabled or disabled.
+	IsDisabled() bool
+}
 
 var (
-	_ Entity    = (*Application)(nil)
 	_ Component = (*Identity)(nil)
 
-	_ Handler   = (*Aggregate)(nil)
-	_ Handler   = (*Process)(nil)
-	_ Handler   = (*Integration)(nil)
-	_ Handler   = (*Projection)(nil)
-	_ Component = (*Route)(nil)
-	_ Component = (*Flag[Label])(nil)
+	_ Component = (*FlagModification)(nil)
+
+	_ Entity = (*Application)(nil)
+
+	_ Handler = (*Aggregate)(nil)
+	_ Handler = (*Process)(nil)
+	_ Handler = (*Integration)(nil)
+	_ Handler = (*Projection)(nil)
+
+// _ Component = (*Route)(nil)
 )
 
-func clone[T Component](components []T) []T {
-	clones := slices.Clone(components)
-
-	for i, c := range components {
-		clones[i] = c.clone().(T)
-	}
-
-	return clones
+// ComponentCommon is a partial implementation of [Component].
+type ComponentCommon struct {
+	ComponentFidelity Fidelity
+	ComponentBaggage  Baggage
 }
 
-func cloneInPlace[T Component](components *[]T) {
-	*components = clone(*components)
+// Fidelity reports how faithfully the [Component] describes a complete
+// configuration that can be used to execute an application.
+func (c *ComponentCommon) Fidelity() Fidelity {
+	return c.ComponentFidelity
+}
+
+// Baggage returns a collection of arbitrary data that is associated with the
+// [Component] by whatever system produced the configuration.
+func (c *ComponentCommon) Baggage() Baggage {
+	return c.ComponentBaggage
+}
+
+// EntityCommon is a partial implementation of [Entity].
+type EntityCommon[T any] struct {
+	ComponentCommon
+
+	SourceTypeName     string
+	Source             optional.Optional[T]
+	IdentityComponents []*Identity
+}
+
+// Identity returns the entity's identity.
+//
+// It panics the configuration does not specify a singular valid identity.
+func (e *EntityCommon[T]) Identity() *identitypb.Identity {
+	panic("not implemented")
+}
+
+// HandlerCommon is a partial implementation of [Handler].
+type HandlerCommon[T any] struct {
+	EntityCommon[T]
+
+	RouteComponents []*Route
+	DisabledFlag    Flag[Disabled]
+}
+
+// RouteSet returns the routes configured for the entity.
+//
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
+func (h *HandlerCommon[T]) RouteSet() RouteSet {
+	panic("not implemented")
+}
+
+// IsDisabled returns true if the handler is disabled.
+//
+// It panics if the configuration does not specify unambiguously whether the
+// handler is enabled or disabled.
+func (h *HandlerCommon[T]) IsDisabled() bool {
+	panic("not implemented")
 }

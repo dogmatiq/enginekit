@@ -34,7 +34,7 @@ func MustNormalize[T Component](c T, options ...NormalizeOption) T {
 	return norm
 }
 
-func normalizeChildren[T Component](ctx *normalizationContext, components []T) {
+func normalizeChildren[T Component](ctx *normalizationContext, components ...T) {
 	if ctx.Options.Shallow {
 		return
 	}
@@ -48,13 +48,13 @@ func normalizeChildren[T Component](ctx *normalizationContext, components []T) {
 
 func validate[T Component](c T) (Fidelity, []error) {
 	ctx := shallowContext(c)
-	c = c.clone().(T)
+	c = clone(c)
 	c.normalize(ctx)
-	return c.Fidelity(), ctx.Errors
+	return c.CommonComponentProperties().Fidelity, ctx.Errors
 }
 
 func reportFidelityErrors(ctx *normalizationContext, c Component) {
-	f := c.Fidelity()
+	f := c.CommonComponentProperties().Fidelity
 
 	if f&Speculative != 0 {
 		ctx.Fail(SpeculativeError{})

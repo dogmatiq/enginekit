@@ -23,12 +23,8 @@ func TestFromIntegration(t *testing.T) {
 			nil,
 			func(dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
-					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							ComponentCommon: config.ComponentCommon{
-								ComponentFidelity: config.Incomplete,
-							},
-						},
+					X: config.XIntegration{
+						Fidelity: config.Incomplete,
 					},
 				}
 			},
@@ -38,10 +34,10 @@ func TestFromIntegration(t *testing.T) {
 			&IntegrationMessageHandlerStub{},
 			func(h dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
-					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-							Source:         optional.Some(h),
+					X: config.XIntegration{
+						Source: config.Value[dogma.IntegrationMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+							Value:    optional.Some(h),
 						},
 					},
 				}
@@ -61,34 +57,36 @@ func TestFromIntegration(t *testing.T) {
 			},
 			func(h dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
-					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
-							Source:         optional.Some(h),
-							IdentityComponents: []*config.Identity{
-								{
+					X: config.XIntegration{
+						Source: config.Value[dogma.IntegrationMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
+							Value:    optional.Some(h),
+						},
+						Identities: []*config.Identity{
+							{
+								AsConfigured: config.IdentityProperties{
 									Name: optional.Some("integration"),
 									Key:  optional.Some("51ffcb6f-171f-41a1-90e7-6fe1111649cd"),
 								},
 							},
 						},
-						RouteComponents: []*config.Route{
+						Routes: []*config.Route{
 							{
-								RouteType:       optional.Some(config.HandlesCommandRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								XRoute: config.XRoute{
+									RouteType:       optional.Some(config.HandlesCommandRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								},
 							},
 							{
-								RouteType:       optional.Some(config.RecordsEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								XRoute: config.XRoute{
+									RouteType:       optional.Some(config.RecordsEventRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								},
 							},
 						},
-						DisabledFlag: config.Flag[config.Disabled]{
-							Modifications: []*config.FlagModification{
-								{Value: optional.Some(true)},
-							},
-						},
+						DisabledFlags: config.Flag[config.Disabled]{{}},
 					},
 				}
 			},

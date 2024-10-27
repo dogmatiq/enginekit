@@ -10,21 +10,18 @@ import (
 // configuration of the given [dogma.ProjectionMessageHandler].
 func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
 	return configbuilder.Projection(func(b *configbuilder.ProjectionBuilder) {
-		if h == nil {
-			b.UpdateFidelity(config.Incomplete)
-		} else {
-			buildProjection(b, h)
-		}
+		buildProjection(b, h)
 	})
 }
 
 func buildProjection(b *configbuilder.ProjectionBuilder, h dogma.ProjectionMessageHandler) {
-	b.SetSource(h)
-	b.SetDeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
-	h.Configure(&projectionConfigurer{
-		handlerConfigurer[dogma.ProjectionRoute]{b},
-		b,
-	})
+	if h != nil {
+		b.Source(h)
+		h.Configure(&projectionConfigurer{
+			handlerConfigurer[dogma.ProjectionRoute]{b},
+			b,
+		})
+	}
 }
 
 type projectionConfigurer struct {
@@ -33,5 +30,9 @@ type projectionConfigurer struct {
 }
 
 func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {
-	c.b.SetDeliveryPolicy(p)
+	c.b.DeliveryPolicy(
+		func(b *configbuilder.ProjectionDeliveryPolicyBuilder) {
+			b.AsPerDeliveryPolicy(p)
+		},
+	)
 }

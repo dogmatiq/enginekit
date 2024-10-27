@@ -23,12 +23,8 @@ func TestFromProjection(t *testing.T) {
 			nil,
 			func(dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							ComponentCommon: config.ComponentCommon{
-								ComponentFidelity: config.Incomplete,
-							},
-						},
+					X: config.XProjection{
+						Fidelity: config.Incomplete,
 					},
 				}
 			},
@@ -38,11 +34,17 @@ func TestFromProjection(t *testing.T) {
 			&ProjectionMessageHandlerStub{},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Source:         optional.Some(h),
+					X: config.XProjection{
+						Source: config.Value[dogma.ProjectionMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+							Value:    optional.Some(h),
 						},
+						DeliveryPolicy: optional.Some(
+							config.Value[dogma.ProjectionDeliveryPolicy]{
+								TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
+								Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
+							},
+						),
 					},
 				}
 			},
@@ -65,35 +67,39 @@ func TestFromProjection(t *testing.T) {
 			},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
-							Source:         optional.Some(h),
-							IdentityComponents: []*config.Identity{
-								{
+					X: config.XProjection{
+						Source: config.Value[dogma.ProjectionMessageHandler]{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
+							Value:    optional.Some(h),
+						},
+						Identities: []*config.Identity{
+							{
+								AsConfigured: config.IdentityProperties{
 									Name: optional.Some("projection"),
 									Key:  optional.Some("050415ad-ce90-496f-8987-40467e5415e0"),
 								},
 							},
 						},
-						RouteComponents: []*config.Route{
+						Routes: []*config.Route{
 							{
-								RouteType:       optional.Some(config.HandlesEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								XRoute: config.XRoute{
+									RouteType:       optional.Some(config.HandlesEventRouteType),
+									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								},
 							},
 						},
-						DisabledFlag: config.Flag[config.Disabled]{
-							Modifications: []*config.FlagModification{
-								{Value: optional.Some(true)},
+						DeliveryPolicy: optional.Some(
+							config.Value[dogma.ProjectionDeliveryPolicy]{
+								TypeName: optional.Some("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy"),
+								Value: optional.Some[dogma.ProjectionDeliveryPolicy](
+									dogma.BroadcastProjectionDeliveryPolicy{
+										PrimaryFirst: true,
+									},
+								),
 							},
-						},
-					},
-					DeliveryPolicyComponents: []*config.ProjectionDeliveryPolicy{
-						{
-							DeliveryPolicyType:      optional.Some(config.BroadcastProjectionDeliveryPolicyType),
-							BroadcastToPrimaryFirst: optional.Some(true),
-						},
+						),
+						DisabledFlags: config.Flag[config.Disabled]{{}},
 					},
 				}
 			},

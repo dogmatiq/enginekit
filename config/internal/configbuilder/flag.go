@@ -1,29 +1,31 @@
 package configbuilder
 
-import "github.com/dogmatiq/enginekit/config"
+import (
+	"github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/optional"
+)
 
-// FlagBuilder constructs a [config.Flag].
-type FlagBuilder[L config.Label] struct {
-	target config.Flag[L]
+// Flag returns a new [config.FlagModification] as configured by fn.
+func Flag(fn func(*FlagBuilder)) *config.FlagModification {
+	x := &FlagBuilder{}
+	fn(x)
+	return x.Done()
 }
 
-// Fidelity returns the fidelity of the configuration.
-func (b *FlagBuilder[L]) Fidelity() config.Fidelity {
-	return b.target.Fidelity()
+// FlagBuilder constructs a [config.FlagModification].
+type FlagBuilder struct {
+	target config.FlagModification
 }
 
-// UpdateFidelity merges f into the fidelity of the configuration.
-func (b *FlagBuilder[L]) UpdateFidelity(f config.Fidelity) {
-	if f == config.Speculative {
-		b.target.IsSpeculative = true
-	}
-
-	if f != config.Immaculate {
-		panic("unsupported fidelity")
-	}
+// Value sets the value of the target [config.FlagModification].
+func (b *FlagBuilder) Value(v bool) {
+	b.target.Value = optional.Some(v)
 }
 
 // Done completes the configuration of the flag.
-func (b *FlagBuilder[L]) Done() *config.Flag[L] {
+func (b *FlagBuilder) Done() *config.FlagModification {
+	if !b.target.Value.IsPresent() {
+		b.target.ComponentFidelity |= config.Incomplete
+	}
 	return &b.target
 }

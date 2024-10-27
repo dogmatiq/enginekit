@@ -22,76 +22,68 @@ type RouteBuilder struct {
 	target config.Route
 }
 
-// SetRoute populates the route type and message type of the route from r.
-func (b *RouteBuilder) SetRoute(r dogma.Route) {
-	configure := func(
+// AsPerRoute configures the builder to use the same properties as r.
+func (b *RouteBuilder) AsPerRoute(r dogma.Route) {
+	set := func(
 		rt config.RouteType,
 		t reflect.Type,
 	) {
-		b.target.AsConfigured = config.RouteAsConfigured{
-			RouteType:       optional.Some(rt),
-			MessageTypeName: optional.Some(typename.Get(t)),
-			MessageType:     optional.Some(message.TypeFromReflect(t)),
-		}
+		b.target.RouteType = optional.Some(rt)
+		b.target.MessageTypeName = optional.Some(typename.Get(t))
+		b.target.MessageType = optional.Some(message.TypeFromReflect(t))
 	}
 
 	switch r := r.(type) {
 	case dogma.HandlesCommandRoute:
-		configure(config.HandlesCommandRouteType, r.Type)
+		set(config.HandlesCommandRouteType, r.Type)
 	case dogma.RecordsEventRoute:
-		configure(config.RecordsEventRouteType, r.Type)
+		set(config.RecordsEventRouteType, r.Type)
 	case dogma.HandlesEventRoute:
-		configure(config.HandlesEventRouteType, r.Type)
+		set(config.HandlesEventRouteType, r.Type)
 	case dogma.ExecutesCommandRoute:
-		configure(config.ExecutesCommandRouteType, r.Type)
+		set(config.ExecutesCommandRouteType, r.Type)
 	case dogma.SchedulesTimeoutRoute:
-		configure(config.SchedulesTimeoutRouteType, r.Type)
+		set(config.SchedulesTimeoutRouteType, r.Type)
 	default:
-		b.target.AsConfigured.Fidelity |= config.Incomplete
+		b.target.ComponentFidelity |= config.Incomplete
 	}
 }
 
-// SetRouteType sets the route type of the route.
-func (b *RouteBuilder) SetRouteType(t config.RouteType) {
-	b.target.AsConfigured.RouteType = optional.Some(t)
-}
+// // SetRouteType sets the route type of the route.
+// func (b *RouteBuilder) SetRouteType(t config.RouteType) {
+// 	b.target.XRoute.RouteType = optional.Some(t)
+// }
 
-// SetMessageTypeName sets the message type name of the route.
-func (b *RouteBuilder) SetMessageTypeName(name string) {
-	b.target.AsConfigured.MessageTypeName = optional.Some(name)
-}
+// // SetMessageTypeName sets the message type name of the route.
+// func (b *RouteBuilder) SetMessageTypeName(name string) {
+// 	b.target.XRoute.MessageTypeName = optional.Some(name)
+// }
 
-// SetMessageType sets the message type of the route.
-func (b *RouteBuilder) SetMessageType(t message.Type) {
-	b.target.AsConfigured.MessageTypeName = optional.Some(typename.Get(t.ReflectType()))
-	b.target.AsConfigured.MessageType = optional.Some(t)
-}
+// // SetMessageType sets the message type of the route.
+// func (b *RouteBuilder) SetMessageType(t message.Type) {
+// 	b.target.XRoute.MessageTypeName = optional.Some(typename.Get(t.ReflectType()))
+// 	b.target.XRoute.MessageType = optional.Some(t)
+// }
 
-// Edit calls fn, which can apply arbitrary changes to the identity.
-func (b *RouteBuilder) Edit(fn func(*config.RouteAsConfigured)) {
-	fn(&b.target.AsConfigured)
-}
+// // Edit calls fn, which can apply arbitrary changes to the identity.
+// func (b *RouteBuilder) Edit(fn func(*config.XRoute)) {
+// 	fn(&b.target.XRoute)
+// }
 
-// Fidelity returns the fidelity of the configuration.
-func (b *RouteBuilder) Fidelity() config.Fidelity {
-	return b.target.AsConfigured.Fidelity
-}
+// // Fidelity returns the fidelity of the configuration.
+// func (b *RouteBuilder) Fidelity() config.Fidelity {
+// 	return b.target.XRoute.Fidelity
+// }
 
-// UpdateFidelity merges f with the current fidelity of the configuration.
-func (b *RouteBuilder) UpdateFidelity(f config.Fidelity) {
-	b.target.AsConfigured.Fidelity |= f
-}
+// // UpdateFidelity merges f with the current fidelity of the configuration.
+// func (b *RouteBuilder) UpdateFidelity(f config.Fidelity) {
+// 	b.target.XRoute.Fidelity |= f
+// }
 
-// Done completes the configuration of the identity.
+// Done completes the configuration of the route.
 func (b *RouteBuilder) Done() *config.Route {
-	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
-		if !b.target.AsConfigured.RouteType.IsPresent() {
-			panic("route must have a route type or be marked as incomplete")
-		}
-		if !b.target.AsConfigured.MessageTypeName.IsPresent() {
-			panic("route must have a message type name or be marked as incomplete")
-		}
+	if !b.target.RouteType.IsPresent() || !b.target.MessageTypeName.IsPresent() {
+		b.target.ComponentFidelity |= config.Incomplete
 	}
-
 	return &b.target
 }

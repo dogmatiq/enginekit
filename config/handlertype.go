@@ -48,20 +48,20 @@ func (t HandlerType) RouteCapabilities() RouteCapabilities {
 	return RouteCapabilities{
 		MapByHandlerType(
 			t,
-			map[RouteType]RouteTypeCapability{
+			map[RouteType]RouteCapability{
 				HandlesCommandRouteType: RouteTypeRequired,
 				RecordsEventRouteType:   RouteTypeRequired,
 			},
-			map[RouteType]RouteTypeCapability{
+			map[RouteType]RouteCapability{
 				HandlesEventRouteType:     RouteTypeRequired,
 				ExecutesCommandRouteType:  RouteTypeRequired,
 				SchedulesTimeoutRouteType: RouteTypeAllowed,
 			},
-			map[RouteType]RouteTypeCapability{
+			map[RouteType]RouteCapability{
 				HandlesCommandRouteType: RouteTypeRequired,
 				RecordsEventRouteType:   RouteTypeAllowed,
 			},
-			map[RouteType]RouteTypeCapability{
+			map[RouteType]RouteCapability{
 				HandlesEventRouteType: RouteTypeRequired,
 			},
 		),

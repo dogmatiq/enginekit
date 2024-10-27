@@ -19,8 +19,8 @@ func (e MissingRequiredRouteError) Error() string {
 	return fmt.Sprintf("no %q routes are configured", e.RouteType)
 }
 
-// UnexpectedRouteTypeError indicates that a [Handler] is configured with a [Route]
-// with a [RouteType] that is not allowed for that handler type.
+// UnexpectedRouteTypeError indicates that a [Handler] is configured with a
+// [Route] with a [RouteType] that is not allowed for that handler type.
 type UnexpectedRouteTypeError struct {
 	UnexpectedRoute *Route
 }
@@ -28,9 +28,9 @@ type UnexpectedRouteTypeError struct {
 func (e UnexpectedRouteTypeError) Error() string {
 	w := &strings.Builder{}
 
-	fmt.Fprintf(w, "unexpected %s route", e.UnexpectedRoute.RouteType())
+	fmt.Fprintf(w, "unexpected %s route", e.UnexpectedRoute.RouteType.Get())
 
-	if name, ok := e.UnexpectedRoute.AsConfigured.MessageTypeName.TryGet(); ok {
+	if name, ok := e.UnexpectedRoute.MessageTypeName.TryGet(); ok {
 		fmt.Fprintf(w, " for %s", name)
 	}
 

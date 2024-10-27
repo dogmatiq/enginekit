@@ -139,7 +139,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 				"unexpected ExecutesCommand route",
 				`integration is invalid: unexpected executes-command route for pkg.SomeCommandType`,
 				&Route{
-					AsConfigured: RouteAsConfigured{
+					XRoute: XRoute{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
 						MessageTypeName: optional.Some("pkg.SomeCommandType"),
 					},
@@ -149,7 +149,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 				"unexpected HandlesEvent route",
 				`integration is invalid: unexpected handles-event route for pkg.SomeEventType`,
 				&Route{
-					AsConfigured: RouteAsConfigured{
+					XRoute: XRoute{
 						RouteType:       optional.Some(HandlesEventRouteType),
 						MessageTypeName: optional.Some("pkg.SomeEventType"),
 					},
@@ -159,7 +159,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 				"unexpected SchedulesTimeout route",
 				`integration is invalid: unexpected schedules-timeout route for pkg.SomeTimeoutType`,
 				&Route{
-					AsConfigured: RouteAsConfigured{
+					XRoute: XRoute{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
 						MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
 					},
@@ -170,7 +170,7 @@ func TestIntegration_RouteSet(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Integration{
-					AsConfigured: IntegrationAsConfigured{
+					X: XIntegration{
 						Routes: []*Route{c.Route},
 					},
 				}
@@ -361,13 +361,13 @@ func TestIntegration_validation(t *testing.T) {
 			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Integration{
-				AsConfigured: IntegrationAsConfigured{
+				X: XIntegration{
 					Source: Value[dogma.IntegrationMessageHandler]{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 					},
 					Identities: []*Identity{
 						{
-							AsConfigured: IdentityAsConfigured{
+							AsConfigured: IdentityProperties{
 								Name: optional.Some("name"),
 								Key:  optional.Some("494157ef-6f91-45ec-ab19-df61bb96210a"),
 							},
@@ -375,7 +375,7 @@ func TestIntegration_validation(t *testing.T) {
 					},
 					Routes: []*Route{
 						{
-							AsConfigured: RouteAsConfigured{
+							XRoute: XRoute{
 								RouteType:       optional.Some(HandlesCommandRouteType),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							},
@@ -393,13 +393,13 @@ func TestIntegration_validation(t *testing.T) {
 				WithRuntimeTypes(),
 			},
 			Component: &Integration{
-				AsConfigured: IntegrationAsConfigured{
+				X: XIntegration{
 					Source: Value[dogma.IntegrationMessageHandler]{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 					},
 					Identities: []*Identity{
 						{
-							AsConfigured: IdentityAsConfigured{
+							AsConfigured: IdentityProperties{
 								Name: optional.Some("name"),
 								Key:  optional.Some("494157ef-6f91-45ec-ab19-df61bb96210a"),
 							},
@@ -407,7 +407,7 @@ func TestIntegration_validation(t *testing.T) {
 					},
 					Routes: []*Route{
 						{
-							AsConfigured: RouteAsConfigured{
+							XRoute: XRoute{
 								RouteType:       optional.Some(HandlesCommandRouteType),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							},

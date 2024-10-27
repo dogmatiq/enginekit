@@ -17,71 +17,39 @@ type IntegrationBuilder struct {
 	target config.Integration
 }
 
-// SetSourceTypeName sets the source of the configuration.
-func (b *IntegrationBuilder) SetSourceTypeName(typeName string) {
-	setSourceTypeName(&b.target.AsConfigured.Source, typeName)
+// SourceTypeName sets the name of the concrete type that implements
+// [dogma.IntegrationMessageHandler].
+func (b *IntegrationBuilder) SourceTypeName(n string) {
+	setSourceTypeName(&b.target.EntityCommon, n)
 }
 
-// SetSource sets the source of the configuration.
-func (b *IntegrationBuilder) SetSource(h dogma.IntegrationMessageHandler) {
-	setSource(&b.target.AsConfigured.Source, h)
+// Source sets the source value to h.
+func (b *IntegrationBuilder) Source(h dogma.IntegrationMessageHandler) {
+	setSource(&b.target.EntityCommon, h)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
 // handler.
 func (b *IntegrationBuilder) Identity(fn func(*IdentityBuilder)) {
-	x := &IdentityBuilder{}
-	fn(x)
-	b.target.AsConfigured.Identities = append(
-		b.target.AsConfigured.Identities,
-		x.Done(),
-	)
+	b.target.IdentityComponents = append(b.target.IdentityComponents, Identity(fn))
 }
 
 // Route calls fn which configures a [config.Route] that is added to the
 // handler.
 func (b *IntegrationBuilder) Route(fn func(*RouteBuilder)) {
-	x := &RouteBuilder{}
-	fn(x)
-	b.target.AsConfigured.Routes = append(
-		b.target.AsConfigured.Routes,
-		x.Done(),
-	)
+	b.target.RouteComponents = append(b.target.RouteComponents, Route(fn))
 }
 
-// Disable calls fn which configures a [config.Flag] that indicates whether the
-// handler is disabled.
-func (b *IntegrationBuilder) Disable(fn func(*FlagBuilder[config.Disabled])) {
-	x := &FlagBuilder[config.Disabled]{}
-	fn(x)
-	b.target.AsConfigured.DisabledFlags = append(
-		b.target.AsConfigured.DisabledFlags,
-		x.Done(),
-	)
-}
-
-// Edit calls fn, which can apply arbitrary changes to the handler.
-func (b *IntegrationBuilder) Edit(fn func(*config.IntegrationAsConfigured)) {
-	fn(&b.target.AsConfigured)
-}
-
-// Fidelity returns the fidelity of the configuration.
-func (b *IntegrationBuilder) Fidelity() config.Fidelity {
-	return b.target.AsConfigured.Fidelity
-}
-
-// UpdateFidelity merges f with the current fidelity of the configuration.
-func (b *IntegrationBuilder) UpdateFidelity(f config.Fidelity) {
-	b.target.AsConfigured.Fidelity |= f
+// Disabled calls fn which configures a [config.FlagModification] that is added
+// to the handler's disabled flag.
+func (b *IntegrationBuilder) Disabled(fn func(*FlagBuilder)) {
+	b.target.DisabledFlag.Modifications = append(b.target.DisabledFlag.Modifications, Flag(fn))
 }
 
 // Done completes the configuration of the handler.
 func (b *IntegrationBuilder) Done() *config.Integration {
-	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
-		if !b.target.AsConfigured.Source.TypeName.IsPresent() {
-			panic("handler must have a source or be marked as incomplete")
-		}
+	if b.target.SourceTypeName == "" {
+		b.target.ComponentFidelity |= config.Incomplete
 	}
-
 	return &b.target
 }

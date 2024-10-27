@@ -143,30 +143,24 @@ func TestAggregate_RouteSet(t *testing.T) {
 				"unexpected ExecutesCommand route",
 				`aggregate is invalid: unexpected executes-command route for pkg.SomeCommandType`,
 				&Route{
-					AsConfigured: RouteAsConfigured{
-						RouteType:       optional.Some(ExecutesCommandRouteType),
-						MessageTypeName: optional.Some("pkg.SomeCommandType"),
-					},
+					RouteType:       optional.Some(ExecutesCommandRouteType),
+					MessageTypeName: optional.Some("pkg.SomeCommandType"),
 				},
 			},
 			{
 				"unexpected HandlesEvent route",
 				`aggregate is invalid: unexpected handles-event route for pkg.SomeEventType`,
 				&Route{
-					AsConfigured: RouteAsConfigured{
-						RouteType:       optional.Some(HandlesEventRouteType),
-						MessageTypeName: optional.Some("pkg.SomeEventType"),
-					},
+					RouteType:       optional.Some(HandlesEventRouteType),
+					MessageTypeName: optional.Some("pkg.SomeEventType"),
 				},
 			},
 			{
 				"unexpected SchedulesTimeout route",
 				`aggregate is invalid: unexpected schedules-timeout route for pkg.SomeTimeoutType`,
 				&Route{
-					AsConfigured: RouteAsConfigured{
-						RouteType:       optional.Some(SchedulesTimeoutRouteType),
-						MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
-					},
+					RouteType:       optional.Some(SchedulesTimeoutRouteType),
+					MessageTypeName: optional.Some("pkg.SomeTimeoutType"),
 				},
 			},
 		}
@@ -174,8 +168,8 @@ func TestAggregate_RouteSet(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Aggregate{
-					AsConfigured: AggregateAsConfigured{
-						Routes: []*Route{c.Route},
+					HandlerProperties: HandlerProperties{
+						RouteComponents: []*Route{c.Route},
 					},
 				}
 
@@ -219,27 +213,6 @@ func TestAggregate_IsDisabled(t *testing.T) {
 	if !cfg.IsDisabled() {
 		t.Fatal("expected handler to be disabled")
 	}
-}
-
-func TestAggregate_Interface(t *testing.T) {
-	h := &AggregateMessageHandlerStub{
-		ConfigureFunc: func(c dogma.AggregateConfigurer) {
-			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-			c.Routes(
-				dogma.HandlesCommand[CommandStub[TypeA]](),
-				dogma.RecordsEvent[EventStub[TypeA]](),
-			)
-		},
-	}
-
-	cfg := runtimeconfig.FromAggregate(h)
-
-	Expect(
-		t,
-		"unexpected result",
-		cfg.Interface(),
-		h,
-	)
 }
 
 func TestAggregate_render(t *testing.T) {
@@ -382,30 +355,24 @@ func TestAggregate_validation(t *testing.T) {
 			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Aggregate{
-				AsConfigured: AggregateAsConfigured{
-					Source: Value[dogma.AggregateMessageHandler]{
+				HandlerProperties: HandlerProperties{
+					EntityProperties: EntityProperties{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-					},
-					Identities: []*Identity{
-						{
-							AsConfigured: IdentityAsConfigured{
+						IdentityComponents: []*Identity{
+							{
 								Name: optional.Some("name"),
 								Key:  optional.Some("494157ef-6f91-45ec-ab19-df61bb96210a"),
 							},
 						},
 					},
-					Routes: []*Route{
+					RouteComponents: []*Route{
 						{
-							AsConfigured: RouteAsConfigured{
-								RouteType:       optional.Some(HandlesCommandRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							},
+							RouteType:       optional.Some(HandlesCommandRouteType),
+							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						},
 						{
-							AsConfigured: RouteAsConfigured{
-								RouteType:       optional.Some(RecordsEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							},
+							RouteType:       optional.Some(RecordsEventRouteType),
+							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						},
 					},
 				},
@@ -421,30 +388,24 @@ func TestAggregate_validation(t *testing.T) {
 				WithRuntimeTypes(),
 			},
 			Component: &Aggregate{
-				AsConfigured: AggregateAsConfigured{
-					Source: Value[dogma.AggregateMessageHandler]{
+				HandlerProperties: HandlerProperties{
+					EntityProperties: EntityProperties{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-					},
-					Identities: []*Identity{
-						{
-							AsConfigured: IdentityAsConfigured{
+						IdentityComponents: []*Identity{
+							{
 								Name: optional.Some("name"),
 								Key:  optional.Some("494157ef-6f91-45ec-ab19-df61bb96210a"),
 							},
 						},
 					},
-					Routes: []*Route{
+					RouteComponents: []*Route{
 						{
-							AsConfigured: RouteAsConfigured{
-								RouteType:       optional.Some(HandlesCommandRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							},
+							RouteType:       optional.Some(HandlesCommandRouteType),
+							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						},
 						{
-							AsConfigured: RouteAsConfigured{
-								RouteType:       optional.Some(RecordsEventRouteType),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-							},
+							RouteType:       optional.Some(RecordsEventRouteType),
+							MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						},
 					},
 				},

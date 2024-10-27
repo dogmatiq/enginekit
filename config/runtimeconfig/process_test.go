@@ -23,8 +23,12 @@ func TestFromProcess(t *testing.T) {
 			nil,
 			func(dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					AsConfigured: config.ProcessAsConfigured{
-						Fidelity: config.Incomplete,
+					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
+						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
+							ComponentCommon: config.ComponentCommon{
+								ComponentFidelity: config.Incomplete,
+							},
+						},
 					},
 				}
 			},
@@ -34,10 +38,10 @@ func TestFromProcess(t *testing.T) {
 			&ProcessMessageHandlerStub{},
 			func(h dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					AsConfigured: config.ProcessAsConfigured{
-						Source: config.Value[dogma.ProcessMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-							Value:    optional.Some(h),
+					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
+						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
+							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							Source:         optional.Some(h),
 						},
 					},
 				}
@@ -58,43 +62,39 @@ func TestFromProcess(t *testing.T) {
 			},
 			func(h dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					AsConfigured: config.ProcessAsConfigured{
-						Source: config.Value[dogma.ProcessMessageHandler]{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-							Value:    optional.Some(h),
-						},
-						Identities: []*config.Identity{
-							{
-								AsConfigured: config.IdentityAsConfigured{
+					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
+						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
+							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							Source:         optional.Some(h),
+							IdentityComponents: []*config.Identity{
+								{
 									Name: optional.Some("projection"),
 									Key:  optional.Some("050415ad-ce90-496f-8987-40467e5415e0"),
 								},
 							},
 						},
-						Routes: []*config.Route{
+						RouteComponents: []*config.Route{
 							{
-								AsConfigured: config.RouteAsConfigured{
-									RouteType:       optional.Some(config.HandlesEventRouteType),
-									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-								},
+								RouteType:       optional.Some(config.HandlesEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},
 							{
-								AsConfigured: config.RouteAsConfigured{
-									RouteType:       optional.Some(config.ExecutesCommandRouteType),
-									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-									MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
-								},
+								RouteType:       optional.Some(config.ExecutesCommandRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 							},
 							{
-								AsConfigured: config.RouteAsConfigured{
-									RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
-									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-									MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
-								},
+								RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
 							},
 						},
-						DisabledFlags: config.FlagSet[config.Disabled]{{}},
+						DisabledFlag: config.Flag[config.Disabled]{
+							Modifications: []*config.FlagModification{
+								{Value: optional.Some(true)},
+							},
+						},
 					},
 				}
 			},

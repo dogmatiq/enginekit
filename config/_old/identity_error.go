@@ -22,7 +22,7 @@ func (e InvalidIdentityKeyError) Error() string {
 	return fmt.Sprintf("invalid key (%q), expected an RFC 4122/9562 UUID", e.InvalidKey)
 }
 
-// MissingIdentityError indicates that an [Entity] has been configured without
+// MissingIdentityError indicates that an [QEntity] has been configured without
 // an [Identity].
 type MissingIdentityError struct{}
 
@@ -30,7 +30,7 @@ func (e MissingIdentityError) Error() string {
 	return "no identity is configured"
 }
 
-// MultipleIdentitiesError indicates that an [Entity] has been configured with
+// MultipleIdentitiesError indicates that an [QEntity] has been configured with
 // more than one [Identity].
 type MultipleIdentitiesError struct {
 	Identities []*Identity
@@ -43,10 +43,10 @@ func (e MultipleIdentitiesError) Error() string {
 	)
 }
 
-// IdentityNameConflictError indicates that more than one [Entity] within the
+// IdentityNameConflictError indicates that more than one [QEntity] within the
 // same [Application] is shares the same "name" element of an [Identity].
 type IdentityNameConflictError struct {
-	Entities        []Entity
+	Entities        []QEntity
 	ConflictingName string
 }
 
@@ -58,10 +58,10 @@ func (e IdentityNameConflictError) Error() string {
 	)
 }
 
-// IdentityKeyConflictError indicates that more than one [Entity] within the
+// IdentityKeyConflictError indicates that more than one [QEntity] within the
 // same [Application] is shares the same "key" element of an [Identity].
 type IdentityKeyConflictError struct {
-	Entities       []Entity
+	Entities       []QEntity
 	ConflictingKey string
 }
 

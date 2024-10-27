@@ -1,20 +1,42 @@
 package config
 
-// A Handler is a specialization of [Entity] that represents configuration of a
-// Dogma message handler.
-type Handler interface {
-	Entity
+import (
+	"github.com/dogmatiq/dogma"
+)
 
-	// HandlerType returns [HandlerType] of the handler.
-	HandlerType() HandlerType
+// Disabled is the [Symbol] for a [Flag] that indicates whether or not a
+// [Handler] has been disabled.
+type Disabled struct{ symbol }
 
-	// IsDisabled returns true if the handler was disabled via the configurer.
-	IsDisabled() bool
-
-	disabledFlags() FlagSet[Disabled]
-	routes() []*Route
+// Aggregate is a [Handler] that represents the configuration of a
+// [dogma.AggregateMessageHandler].
+type Aggregate struct {
+	HandlerCommon[dogma.AggregateMessageHandler]
 }
 
-// Disabled is the label for a [Flag] that indicates that a [Handler] has been
-// disabled.
-type Disabled struct{ Label }
+// HandlerType returns the [HandlerType] of the handler.
+func (a *Aggregate) HandlerType() HandlerType {
+	return AggregateHandlerType
+}
+
+// Process is a [Handler] that represents the configuration of a
+// [dogma.ProcessMessageHandler].
+type Process struct {
+	HandlerCommon[dogma.ProcessMessageHandler]
+}
+
+// HandlerType returns the [HandlerType] of the handler.
+func (p *Process) HandlerType() HandlerType {
+	return ProcessHandlerType
+}
+
+// Integration is a [Handler] that represents the configuration of a
+// [dogma.IntegrationMessageHandler].
+type Integration struct {
+	HandlerCommon[dogma.IntegrationMessageHandler]
+}
+
+// HandlerType returns the [HandlerType] of the handler.
+func (i *Integration) HandlerType() HandlerType {
+	return IntegrationHandlerType
+}

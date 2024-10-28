@@ -1,6 +1,7 @@
 package configbuilder
 
 import (
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/optional"
@@ -12,8 +13,15 @@ type ComponentBuilder[T config.Component] interface {
 }
 
 // EntityBuilder an interface for builders that produce a [config.Entity].
-type EntityBuilder[T config.Entity] interface {
+type EntityBuilder[T config.Entity, E any] interface {
 	ComponentBuilder[T]
+
+	// SourceTypeName sets the name of the concrete type that implements the
+	// entity.
+	SourceTypeName(n string)
+
+	// Source sets the source value to h.
+	Source(E)
 
 	// Identity calls fn which configures a [config.Identity] that is added to
 	// the handler.
@@ -21,20 +29,20 @@ type EntityBuilder[T config.Entity] interface {
 }
 
 // HandlerBuilder an interface for builders that produce a [config.Handler].
-type HandlerBuilder[T config.Handler] interface {
-	EntityBuilder[T]
+type HandlerBuilder[T config.Handler, H any] interface {
+	EntityBuilder[T, H]
 }
 
 var (
 	_ ComponentBuilder[*config.Identity]         = (*IdentityBuilder)(nil)
 	_ ComponentBuilder[*config.FlagModification] = (*FlagBuilder)(nil)
 
-	_ EntityBuilder[*config.Application] = (*ApplicationBuilder)(nil)
+	_ EntityBuilder[*config.Application, dogma.Application] = (*ApplicationBuilder)(nil)
 
-	_ HandlerBuilder[*config.Aggregate]   = (*AggregateBuilder)(nil)
-	_ HandlerBuilder[*config.Process]     = (*ProcessBuilder)(nil)
-	_ HandlerBuilder[*config.Integration] = (*IntegrationBuilder)(nil)
-	_ HandlerBuilder[*config.Projection]  = (*ProjectionBuilder)(nil)
+	_ HandlerBuilder[*config.Aggregate, dogma.AggregateMessageHandler]     = (*AggregateBuilder)(nil)
+	_ HandlerBuilder[*config.Process, dogma.ProcessMessageHandler]         = (*ProcessBuilder)(nil)
+	_ HandlerBuilder[*config.Integration, dogma.IntegrationMessageHandler] = (*IntegrationBuilder)(nil)
+	_ HandlerBuilder[*config.Projection, dogma.ProjectionMessageHandler]   = (*ProjectionBuilder)(nil)
 
 	_ ComponentBuilder[*config.Route] = (*RouteBuilder)(nil)
 )

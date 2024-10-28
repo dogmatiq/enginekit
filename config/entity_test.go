@@ -1,9 +1,11 @@
 package config_test
 
 import (
+	"reflect"
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/constraints"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
@@ -11,13 +13,20 @@ import (
 )
 
 func testEntity[
-	T Entity,
-	B configbuilder.EntityBuilder[T],
+	T interface {
+		Entity
+		Interface() E
+	},
+	B configbuilder.EntityBuilder[T, E],
+	E constraints.Entity[C],
+	C constraints.Configurer,
 ](
 	t *testing.T,
 	build func(func(B)) T,
+	runtime func(E) T,
+	construct func(func(C)) E,
 ) {
-	t.Run("identity", func(t *testing.T) {
+	t.Run("func Identity()", func(t *testing.T) {
 		t.Run("it returns the normalized identity", func(t *testing.T) {
 			entity := build(
 				func(b B) {
@@ -78,6 +87,34 @@ func testEntity[
 				`entity has 2 identities`,
 				func() {
 					entity.Identity()
+				},
+			)
+		})
+	})
+
+	t.Run("func Interface()", func(t *testing.T) {
+		t.Run("it returns the source value", func(t *testing.T) {
+			want := construct(nil)
+			entity := runtime(want)
+
+			test.Expect(
+				t,
+				"unexpected source",
+				entity.Interface(),
+				want,
+			)
+		})
+
+		t.Run("it panics if the source value is not available", func(t *testing.T) {
+			entity := build(
+				func(b B) {},
+			)
+
+			test.ExpectPanic(
+				t,
+				reflect.TypeFor[E]().String()+` is unavailable`,
+				func() {
+					entity.Interface()
 				},
 			)
 		})

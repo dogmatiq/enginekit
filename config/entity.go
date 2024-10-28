@@ -63,6 +63,14 @@ func (e *EntityCommon[T]) Identity() *identitypb.Identity {
 	}
 }
 
+// Interface returns the entity represented by the configuration, if available.
+func (e *EntityCommon[T]) Interface() T {
+	if v, ok := e.Source.TryGet(); ok {
+		return v
+	}
+	panic(EntityUnavailableError{reflect.TypeFor[T]()})
+}
+
 func (e *EntityCommon[T]) String() string {
 	var w strings.Builder
 
@@ -127,4 +135,15 @@ func (e AmbiguouslyIdentifiedEntityError) Error() string {
 		"entity has %d identities",
 		len(e.Identities),
 	)
+}
+
+// EntityUnavailableError indicates that an [Entity] cannot produce the actual
+// entity value it represents because there is insufficient runtime type
+// information available.
+type EntityUnavailableError struct {
+	EntityType reflect.Type
+}
+
+func (e EntityUnavailableError) Error() string {
+	return fmt.Sprintf("%s is unavailable", e.EntityType)
 }

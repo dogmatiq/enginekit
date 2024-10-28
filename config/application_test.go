@@ -10,7 +10,14 @@ import (
 )
 
 func TestApplication(t *testing.T) {
-	testEntity(t, configbuilder.Application)
+	testEntity(
+		t,
+		configbuilder.Application,
+		runtimeconfig.FromApplication,
+		func(fn func(dogma.ApplicationConfigurer)) dogma.Application {
+			return &ApplicationStub{ConfigureFunc: fn}
+		},
+	)
 }
 
 // func TestApplication_RouteSet(t *testing.T) {

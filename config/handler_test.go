@@ -3,16 +3,31 @@ package config_test
 import (
 	"testing"
 
+	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/config/constraints"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
 func testHandler[
-	T Handler,
-	B configbuilder.EntityBuilder[T],
+	T interface {
+		Handler
+		Interface() H
+	},
+	B configbuilder.EntityBuilder[T, H],
+	H constraints.Handler[C, R],
+	C constraints.HandlerConfigurer[R],
+	R dogma.Route,
 ](
 	t *testing.T,
 	build func(func(B)) T,
+	runtime func(H) T,
+	construct func(func(C)) H,
 ) {
-	testEntity(t, build)
+	testEntity(
+		t,
+		build,
+		runtime,
+		construct,
+	)
 }

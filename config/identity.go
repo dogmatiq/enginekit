@@ -66,7 +66,7 @@ func (i *Identity) validate(ctx *validationContext) {
 	if k, ok := i.Key.TryGet(); ok {
 		if id, err := uuidpb.Parse(k); err != nil {
 			ctx.Fail(InvalidIdentityKeyError{k})
-		} else if ctx.Options.Normalize {
+		} else if ctx.Options().Normalize {
 			i.Key = optional.Some(id.AsString())
 		}
 	}

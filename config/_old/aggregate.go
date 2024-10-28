@@ -4,7 +4,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
 // Aggregate represents the (potentially invalid) configuration of a
@@ -15,13 +14,6 @@ type Aggregate struct {
 	// Source is the instance of the entity from which the configuration was
 	// sourced, if available.
 	Source optional.Optional[dogma.AggregateMessageHandler]
-}
-
-// Identity returns the entity's identity.
-//
-// It panics if no single valid identity is configured.
-func (h *Aggregate) Identity() *identitypb.Identity {
-	return resolveIdentity(h)
 }
 
 // HandlerType returns [HandlerType] of the handler.

@@ -6,55 +6,38 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// // ComponentBuilder is the interface shared by the builder types for all
-// // [config.Component] types.
-// type ComponentBuilder interface {
-// 	// // Fidelity returns the fidelity of the configuration.
-// 	// Fidelity() config.Fidelity
+// ComponentBuilder an interface for builders that produce a [config.Component].
+type ComponentBuilder[T config.Component] interface {
+	Done() T
+}
 
-// 	// // UpdateFidelity merges f into the fidelity of the configuration.
-// 	// UpdateFidelity(f config.Fidelity)
-// }
+// EntityBuilder an interface for builders that produce a [config.Entity].
+type EntityBuilder[T config.Entity] interface {
+	ComponentBuilder[T]
 
-// // EntityBuilder is a specialization of [ComponentBuilder] for building
-// // [config.QEntity] configuration.
-// type EntityBuilder interface {
-// 	ComponentBuilder
+	// Identity calls fn which configures a [config.Identity] that is added to
+	// the handler.
+	Identity(fn func(*IdentityBuilder))
+}
 
-// 	ConcreteTypeName(typeName string)
+// HandlerBuilder an interface for builders that produce a [config.Handler].
+type HandlerBuilder[T config.Handler] interface {
+	EntityBuilder[T]
+}
 
-// 	// Identity calls fn which configures a [config.Identity] that is added to
-// 	// the handler.
-// 	Identity(fn func(*IdentityBuilder))
-// }
+var (
+	_ ComponentBuilder[*config.Identity]         = (*IdentityBuilder)(nil)
+	_ ComponentBuilder[*config.FlagModification] = (*FlagBuilder)(nil)
 
-// // HandlerBuilder is a specialization of [EntityBuilder] for building
-// // [config.HandlerFor] configuration.
-// type HandlerBuilder interface {
-// 	EntityBuilder
+	_ EntityBuilder[*config.Application] = (*ApplicationBuilder)(nil)
 
-// 	// Route calls fn which configures a [config.Route] that is added to the
-// 	// handler.
-// 	// Route(fn func(*RouteBuilder))
+	_ HandlerBuilder[*config.Aggregate]   = (*AggregateBuilder)(nil)
+	_ HandlerBuilder[*config.Process]     = (*ProcessBuilder)(nil)
+	_ HandlerBuilder[*config.Integration] = (*IntegrationBuilder)(nil)
+	_ HandlerBuilder[*config.Projection]  = (*ProjectionBuilder)(nil)
 
-// 	// Disable calls fn which configures a [config.Flag] that indicates whether
-// 	// the handler is disabled.
-// 	// Disable(fn func(*FlagBuilder[config.IsDisabled]))
-// }
-
-// var (
-// 	_ ComponentBuilder = (*IdentityBuilder)(nil)
-// 	_ ComponentBuilder = (*FlagBuilder[config.IsDisabled])(nil)
-
-// 	_ EntityBuilder = (*ApplicationBuilder)(nil)
-
-// 	_ HandlerBuilder = (*AggregateBuilder)(nil)
-// 	_ HandlerBuilder = (*ProcessBuilder)(nil)
-// 	_ HandlerBuilder = (*IntegrationBuilder)(nil)
-// 	_ HandlerBuilder = (*ProjectionBuilder)(nil)
-
-// 	_ ComponentBuilder = (*RouteBuilder)(nil)
-// )
+	_ ComponentBuilder[*config.Route] = (*RouteBuilder)(nil)
+)
 
 func setSourceTypeName[T any](e *config.EntityCommon[T], n string) {
 	if n == "" {

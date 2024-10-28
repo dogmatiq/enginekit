@@ -5,6 +5,28 @@ import (
 	"strings"
 )
 
+// Validate returns an error if the configuration is invalid.
+func Validate(c Component, _ ...ValidateOption) error {
+	ctx := &validationContext{
+		component: c,
+	}
+
+	c.validate(ctx)
+
+	return ctx.error()
+}
+
+// ValidateOption changes the behavior of [Component.Validate].
+type ValidateOption func(*validationOptions)
+
+// Normalize is a [ValidateOption] that indicates causes the component to be
+// normalized in-place during validation.
+func Normalize() ValidateOption {
+	return func(o *validationOptions) {
+		o.Normalize = true
+	}
+}
+
 // InvalidComponentError indicates that a [Component] is invalid.
 type InvalidComponentError struct {
 	Component Component
@@ -45,33 +67,47 @@ func (e InvalidComponentError) Unwrap() []error {
 	return e.Causes
 }
 
-type validationContext struct {
-	Options struct {
-		Normalize bool
-	}
+type validationOptions struct {
+	Normalize bool
+}
 
+// validationContext carries the inputs and outputs of the component validation
+// process.
+//
+// A nil pointer to a validationContext is a valid context that behaves in
+// "strict mode", where errors are surfaced via a panic the moment they occur.
+type validationContext struct {
+	options   validationOptions
 	component Component
 	errors    []error
 	children  []*validationContext
 }
 
-func newValidationContext(c Component, _ []ValidateOption) *validationContext {
-	return &validationContext{
-		component: c,
-	}
-}
-
 func (c *validationContext) ValidateChild(child Component) {
-	ctx := &validationContext{
-		Options:   c.Options,
-		component: child,
+	var ctx *validationContext
+
+	if c != nil {
+		ctx = &validationContext{
+			options:   c.options,
+			component: child,
+		}
+		c.children = append(c.children, ctx)
 	}
 
-	c.children = append(c.children, ctx)
 	child.validate(ctx)
 }
 
+func (c *validationContext) Options() validationOptions {
+	if c != nil {
+		return c.options
+	}
+	return validationOptions{}
+}
+
 func (c *validationContext) Fail(err error) {
+	if c == nil {
+		panic(err)
+	}
 	c.errors = append(c.errors, err)
 }
 
@@ -92,11 +128,4 @@ func (c *validationContext) error() error {
 		Component: c.component,
 		Causes:    errors,
 	}
-}
-
-// Validate returns an error if the configuration is invalid.
-func Validate(c Component, options ...ValidateOption) error {
-	ctx := newValidationContext(c, options)
-	c.validate(ctx)
-	return ctx.error()
 }

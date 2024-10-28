@@ -18,9 +18,6 @@ type Component interface {
 	validate(ctx *validationContext)
 }
 
-// ValidateOption changes the behavior of [Component.Validate].
-type ValidateOption func()
-
 // ComponentCommon is a partial implementation of [Component].
 type ComponentCommon struct {
 	ComponentFidelity Fidelity

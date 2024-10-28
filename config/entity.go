@@ -9,6 +9,7 @@ import (
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 // An Entity is a [Component] that that represents the configuration of a Dogma
@@ -52,7 +53,14 @@ type EntityCommon[T any] struct {
 //
 // It panics the configuration does not specify a singular valid identity.
 func (e *EntityCommon[T]) Identity() *identitypb.Identity {
-	panic("not implemented")
+	e.validateIdentities(nil)
+
+	id := e.IdentityComponents[0]
+
+	return &identitypb.Identity{
+		Name: id.Name.Get(),
+		Key:  uuidpb.MustParse(id.Key.Get()),
+	}
 }
 
 func (e *EntityCommon[T]) String() string {
@@ -85,7 +93,10 @@ func (e *EntityCommon[T]) identities() []*Identity {
 
 func (e *EntityCommon[T]) validate(ctx *validationContext) {
 	e.ComponentCommon.validate(ctx)
+	e.validateIdentities(ctx)
+}
 
+func (e *EntityCommon[T]) validateIdentities(ctx *validationContext) {
 	if len(e.IdentityComponents) == 0 {
 		ctx.Fail(UnidentifiedEntityError{})
 	} else if len(e.IdentityComponents) > 1 {
@@ -102,7 +113,7 @@ func (e *EntityCommon[T]) validate(ctx *validationContext) {
 type UnidentifiedEntityError struct{}
 
 func (e UnidentifiedEntityError) Error() string {
-	return "no identity configured"
+	return "entity has no identity"
 }
 
 // AmbiguouslyIdentifiedEntityError indicates that an [Entity] has been
@@ -113,7 +124,7 @@ type AmbiguouslyIdentifiedEntityError struct {
 
 func (e AmbiguouslyIdentifiedEntityError) Error() string {
 	return fmt.Sprintf(
-		"identity is ambiguous, %d identities configured",
+		"entity has %d identities",
 		len(e.Identities),
 	)
 }

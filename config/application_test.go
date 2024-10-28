@@ -4,79 +4,14 @@ import (
 	"testing"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
-	// . "github.com/dogmatiq/enginekit/internal/test"
 )
 
-// func TestApplication_Identity(t *testing.T) {
-// 	t.Run("it returns the normalized identity", func(t *testing.T) {
-// 		app := &ApplicationStub{
-// 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 				c.Identity("name", "19CB98D5-DD17-4DAF-AE00-1B413B7B899A")
-// 			},
-// 		}
-
-// 		cfg := runtimeconfig.FromApplication(app)
-
-// 		Expect(
-// 			t,
-// 			"unexpected identity",
-// 			cfg.Identity(),
-// 			&identitypb.Identity{
-// 				Name: "name",
-// 				Key:  uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a"),
-// 			},
-// 		)
-// 	})
-
-// 	t.Run("it panics if there is no singular valid identity", func(t *testing.T) {
-// 		cases := []struct {
-// 			Name string
-// 			Want string
-// 			App  dogma.Application
-// 		}{
-// 			{
-// 				"no identity",
-// 				`application:ApplicationStub is invalid: no identity is configured`,
-// 				&ApplicationStub{},
-// 			},
-// 			{
-// 				"invalid identity",
-// 				`application:ApplicationStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
-// 				&ApplicationStub{
-// 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 						c.Identity("name", "non-uuid")
-// 					},
-// 				},
-// 			},
-// 			{
-// 				"multiple identities",
-// 				`application:ApplicationStub is invalid: multiple identities are configured: identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8 and identity:foo/63bd2756-2397-4cae-b33b-96e809b384d8`,
-// 				&ApplicationStub{
-// 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
-// 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
-// 					},
-// 				},
-// 			},
-// 		}
-
-// 		for _, c := range cases {
-// 			t.Run(c.Name, func(t *testing.T) {
-// 				cfg := runtimeconfig.FromApplication(c.App)
-
-// 				ExpectPanic(
-// 					t,
-// 					c.Want,
-// 					func() {
-// 						cfg.Identity()
-// 					},
-// 				)
-// 			})
-// 		}
-// 	})
-// }
+func TestApplication(t *testing.T) {
+	testEntity(t, configbuilder.Application)
+}
 
 // func TestApplication_RouteSet(t *testing.T) {
 // 	t.Run("it returns the normalized routes", func(t *testing.T) {
@@ -360,13 +295,13 @@ func TestApplication_validation(t *testing.T) {
 				Expect: multiline(
 					`application is invalid:`,
 					`- could not evaluate entire configuration`,
-					`- no identity configured`,
+					`- entity has no identity`,
 				),
 				Component: runtimeconfig.FromApplication(nil),
 			},
 			{
 				Name:      "unconfigured application",
-				Expect:    `application:ApplicationStub is invalid: no identity configured`,
+				Expect:    `application:ApplicationStub is invalid: entity has no identity`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{}),
 			},
 			{
@@ -380,7 +315,7 @@ func TestApplication_validation(t *testing.T) {
 			},
 			{
 				Name:   "application must not have multiple identities",
-				Expect: `application:ApplicationStub is invalid: identity is ambiguous, 3 identities configured`,
+				Expect: `application:ApplicationStub is invalid: entity has 3 identities`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")

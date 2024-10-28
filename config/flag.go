@@ -25,3 +25,7 @@ type FlagModification struct {
 
 	Value optional.Optional[bool]
 }
+
+func (m *FlagModification) String() string {
+	panic("not implemented")
+}

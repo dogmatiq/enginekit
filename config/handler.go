@@ -1,42 +1,149 @@
 package config
 
 import (
-	"github.com/dogmatiq/dogma"
+	"fmt"
+	"strings"
+
+	"github.com/dogmatiq/enginekit/collections/maps"
 )
+
+// A Handler is an [Entity] that represents the configuration of a Dogma
+// handler.
+type Handler interface {
+	Entity
+
+	// HandlerType returns [HandlerType] of the handler.
+	HandlerType() HandlerType
+
+	// IsDisabled returns true if the handler is disabled.
+	//
+	// It panics if the configuration does not specify unambiguously whether the
+	// handler is enabled or disabled.
+	IsDisabled() bool
+
+	routes() []*Route
+}
+
+// HandlerCommon is a partial implementation of [Handler].
+type HandlerCommon[T any] struct {
+	EntityCommon[T]
+
+	RouteComponents []*Route
+	DisabledFlag    Flag[Disabled]
+}
+
+// RouteSet returns the routes configured for the entity.
+//
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
+func (h *HandlerCommon[T]) RouteSet() RouteSet {
+	panic("not implemented")
+}
+
+// IsDisabled returns true if the handler is disabled.
+//
+// It panics if the configuration does not specify unambiguously whether the
+// handler is enabled or disabled.
+func (h *HandlerCommon[T]) IsDisabled() bool {
+	panic("not implemented")
+}
+
+func (h *HandlerCommon[T]) routes() []*Route {
+	return h.RouteComponents
+}
+
+func (h *HandlerCommon[T]) validate(ctx *validationContext, t HandlerType) {
+	h.EntityCommon.validate(ctx)
+
+	var (
+		capabilities = t.RouteCapabilities()
+		missing      maps.Ordered[RouteType, MissingRouteTypeError]
+		duplicate    maps.OrderedByKey[routeKey, DuplicateRouteError]
+	)
+
+	for rt, req := range capabilities.RouteTypes {
+		if req == RouteTypeRequired {
+			missing.Set(rt, MissingRouteTypeError{rt})
+		}
+	}
+
+	for _, r := range h.RouteComponents {
+		if rt, ok := r.RouteType.TryGet(); ok {
+			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
+				ctx.Fail(UnexpectedRouteTypeError{r})
+			} else {
+				missing.Remove(rt)
+			}
+		}
+
+		if k, ok := r.key(); ok {
+			duplicate.Update(
+				k,
+				func(err *DuplicateRouteError) {
+					err.RouteType = k.RouteType
+					err.MessageTypeName = k.MessageTypeName
+					err.DuplicateRoutes = append(err.DuplicateRoutes, r)
+				},
+			)
+		}
+	}
+
+	for err := range missing.Values() {
+		ctx.Fail(err)
+	}
+
+	for err := range duplicate.Values() {
+		if len(err.DuplicateRoutes) > 1 {
+			ctx.Fail(err)
+		}
+	}
+
+}
 
 // Disabled is the [Symbol] for a [Flag] that indicates whether or not a
 // [Handler] has been disabled.
 type Disabled struct{ symbol }
 
-// Aggregate is a [Handler] that represents the configuration of a
-// [dogma.AggregateMessageHandler].
-type Aggregate struct {
-	HandlerCommon[dogma.AggregateMessageHandler]
+// MissingRouteTypeError indicates that a [Handler] is missing one of its
+// required route types.
+type MissingRouteTypeError struct {
+	RouteType RouteType
 }
 
-// HandlerType returns the [HandlerType] of the handler.
-func (a *Aggregate) HandlerType() HandlerType {
-	return AggregateHandlerType
+func (e MissingRouteTypeError) Error() string {
+	return fmt.Sprintf("no %q routes configured", e.RouteType)
 }
 
-// Process is a [Handler] that represents the configuration of a
-// [dogma.ProcessMessageHandler].
-type Process struct {
-	HandlerCommon[dogma.ProcessMessageHandler]
+// UnexpectedRouteTypeError indicates that a [Handler] is configured with a
+// [Route] of a [RouteType] that is not allowed for that handler type.
+type UnexpectedRouteTypeError struct {
+	UnexpectedRoute *Route
 }
 
-// HandlerType returns the [HandlerType] of the handler.
-func (p *Process) HandlerType() HandlerType {
-	return ProcessHandlerType
+func (e UnexpectedRouteTypeError) Error() string {
+	w := &strings.Builder{}
+
+	fmt.Fprintf(w, "unexpected %s route", e.UnexpectedRoute.RouteType.Get())
+
+	if name, ok := e.UnexpectedRoute.MessageTypeName.TryGet(); ok {
+		fmt.Fprintf(w, " for %s", name)
+	}
+
+	return w.String()
 }
 
-// Integration is a [Handler] that represents the configuration of a
-// [dogma.IntegrationMessageHandler].
-type Integration struct {
-	HandlerCommon[dogma.IntegrationMessageHandler]
+// DuplicateRouteError indicates that a [Handler] is configured with multiple
+// routes for the same [message.Type].
+type DuplicateRouteError struct {
+	RouteType       RouteType
+	MessageTypeName string
+	DuplicateRoutes []*Route
 }
 
-// HandlerType returns the [HandlerType] of the handler.
-func (i *Integration) HandlerType() HandlerType {
-	return IntegrationHandlerType
+func (e DuplicateRouteError) Error() string {
+	return fmt.Sprintf(
+		"multiple %q routes configured for %s",
+		e.RouteType,
+		e.MessageTypeName,
+	)
 }

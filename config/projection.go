@@ -13,17 +13,13 @@ type Projection struct {
 }
 
 // HandlerType returns [HandlerType] of the handler.
-func (p *Projection) HandlerType() HandlerType {
+func (h *Projection) HandlerType() HandlerType {
 	return ProjectionHandlerType
 }
 
-// ProjectionDeliveryPolicy is a [Component] that represents the configuration
-// of a [dogma.ProjectionDeliveryPolicy].
-type ProjectionDeliveryPolicy struct {
-	ComponentCommon
-
-	DeliveryPolicyType      optional.Optional[ProjectionDeliveryPolicyType]
-	BroadcastToPrimaryFirst optional.Optional[bool]
+func (h *Projection) validate(ctx *validationContext) {
+	h.HandlerCommon.validate(ctx, h.HandlerType())
+	panic("not implemented")
 }
 
 // ProjectionDeliveryPolicyType is an enumeration of the different types of
@@ -40,3 +36,16 @@ const (
 	// [dogma.BroadcastProjectionDeliveryPolicy].
 	BroadcastProjectionDeliveryPolicyType
 )
+
+// ProjectionDeliveryPolicy is a [Component] that represents the configuration
+// of a [dogma.ProjectionDeliveryPolicy].
+type ProjectionDeliveryPolicy struct {
+	ComponentCommon
+
+	DeliveryPolicyType      optional.Optional[ProjectionDeliveryPolicyType]
+	BroadcastToPrimaryFirst optional.Optional[bool]
+}
+
+func (p *ProjectionDeliveryPolicy) String() string {
+	panic("not implemented")
+}

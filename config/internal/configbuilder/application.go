@@ -60,7 +60,7 @@ func (b *ApplicationBuilder) Projection(fn func(*ProjectionBuilder)) {
 
 // Done sanity checks the configuration and returns the completed component.
 func (b *ApplicationBuilder) Done() *config.Application {
-	if b.target.SourceTypeName == "" {
+	if !b.target.SourceTypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

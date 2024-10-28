@@ -48,7 +48,7 @@ func (b *IntegrationBuilder) Disabled(fn func(*FlagBuilder)) {
 
 // Done completes the configuration of the handler.
 func (b *IntegrationBuilder) Done() *config.Integration {
-	if b.target.SourceTypeName == "" {
+	if !b.target.SourceTypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

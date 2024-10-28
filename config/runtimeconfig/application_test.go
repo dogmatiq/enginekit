@@ -43,7 +43,7 @@ func TestFromApplication(t *testing.T) {
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
 					EntityCommon: config.EntityCommon[dogma.Application]{
-						SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
+						SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
 						Source:         optional.Some(app),
 					},
 				}
@@ -70,14 +70,14 @@ func TestFromApplication(t *testing.T) {
 								Key:  optional.Some("bed53df8-bf22-4502-be4b-64d56532d8be"),
 							},
 						},
-						SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub",
+						SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
 						Source:         optional.Some(app),
 					},
 					HandlerComponents: []config.Handler{
 						&config.Aggregate{
 							HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
 								EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
-									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 									Source:         optional.Some(aggregate),
 								},
 							},
@@ -85,7 +85,7 @@ func TestFromApplication(t *testing.T) {
 						&config.Process{
 							HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
 								EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
-									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 									Source:         optional.Some(process),
 								},
 							},
@@ -93,7 +93,7 @@ func TestFromApplication(t *testing.T) {
 						&config.Integration{
 							HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
 								EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 									Source:         optional.Some(integration),
 								},
 							},
@@ -101,7 +101,7 @@ func TestFromApplication(t *testing.T) {
 						&config.Projection{
 							HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
 								EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-									SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 									Source:         optional.Some(projection),
 								},
 							},

@@ -40,7 +40,7 @@ func TestFromProjection(t *testing.T) {
 				return &config.Projection{
 					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 							Source:         optional.Some(h),
 						},
 					},
@@ -67,7 +67,7 @@ func TestFromProjection(t *testing.T) {
 				return &config.Projection{
 					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 							Source:         optional.Some(h),
 							IdentityComponents: []*config.Identity{
 								{

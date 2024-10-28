@@ -42,7 +42,7 @@ func TestFromAggregate(t *testing.T) {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 							Source:         optional.Some(h),
 						},
 					},
@@ -65,7 +65,7 @@ func TestFromAggregate(t *testing.T) {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 							Source:         optional.Some(app),
 							IdentityComponents: []*config.Identity{
 								{

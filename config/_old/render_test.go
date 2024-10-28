@@ -1,7 +1,6 @@
 package config_test
 
 import (
-	"strings"
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/config"
@@ -44,8 +43,4 @@ func runRenderTests(t *testing.T, cases []renderTestCase) {
 			)
 		})
 	}
-}
-
-func multiline(lines ...string) string {
-	return strings.Join(lines, "\n")
 }

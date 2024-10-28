@@ -40,7 +40,7 @@ func TestFromProcess(t *testing.T) {
 				return &config.Process{
 					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 							Source:         optional.Some(h),
 						},
 					},
@@ -64,7 +64,7 @@ func TestFromProcess(t *testing.T) {
 				return &config.Process{
 					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 							Source:         optional.Some(h),
 							IdentityComponents: []*config.Identity{
 								{

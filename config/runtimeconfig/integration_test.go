@@ -40,7 +40,7 @@ func TestFromIntegration(t *testing.T) {
 				return &config.Integration{
 					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 							Source:         optional.Some(h),
 						},
 					},
@@ -63,7 +63,7 @@ func TestFromIntegration(t *testing.T) {
 				return &config.Integration{
 					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
 						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							SourceTypeName: "*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub",
+							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 							Source:         optional.Some(h),
 							IdentityComponents: []*config.Identity{
 								{

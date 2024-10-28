@@ -33,3 +33,13 @@ const (
 func (f Fidelity) Has(x Fidelity) bool {
 	return f&x != 0
 }
+
+// IncompleteComponentError indicates that a [Component] contains values that
+// could not be resolved at the time the configuration was built.
+//
+// See [Fidelity] for more information.
+type IncompleteComponentError struct{}
+
+func (e IncompleteComponentError) Error() string {
+	return "could not evaluate entire configuration"
+}

@@ -63,7 +63,7 @@ func setSourceTypeName[T any](e *config.EntityCommon[T], n string) {
 		panic("concrete type name must not be empty")
 	}
 
-	e.SourceTypeName = n
+	e.SourceTypeName = optional.Some(n)
 	e.Source = optional.None[T]()
 }
 
@@ -72,6 +72,6 @@ func setSource[T any](e *config.EntityCommon[T], v T) {
 		panic("runtime value must not be nil")
 	}
 
-	e.SourceTypeName = typename.Of(v)
+	e.SourceTypeName = optional.Some(typename.Of(v))
 	e.Source = optional.Some(v)
 }

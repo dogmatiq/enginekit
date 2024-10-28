@@ -55,7 +55,7 @@ func (b *ProjectionBuilder) DeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuil
 
 // Done completes the configuration of the handler.
 func (b *ProjectionBuilder) Done() *config.Projection {
-	if b.target.SourceTypeName == "" {
+	if !b.target.SourceTypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

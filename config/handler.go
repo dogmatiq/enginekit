@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/dogmatiq/enginekit/collections/maps"
+	"github.com/dogmatiq/enginekit/message"
 )
 
 // A Handler is an [Entity] that represents the configuration of a Dogma
@@ -32,14 +33,6 @@ type HandlerCommon[T any] struct {
 	DisabledFlag    Flag[Disabled]
 }
 
-// RouteSet returns the routes configured for the entity.
-//
-// It panics if the configuration does not specify a complete set of valid
-// routes for the entity and its constituents.
-func (h *HandlerCommon[T]) RouteSet() RouteSet {
-	panic("not implemented")
-}
-
 // IsDisabled returns true if the handler is disabled.
 //
 // It panics if the configuration does not specify unambiguously whether the
@@ -54,7 +47,10 @@ func (h *HandlerCommon[T]) routes() []*Route {
 
 func (h *HandlerCommon[T]) validate(ctx *validateContext, t HandlerType) {
 	h.EntityCommon.validate(ctx)
+	h.validateRoutes(ctx, t)
+}
 
+func (h *HandlerCommon[T]) validateRoutes(ctx *validateContext, t HandlerType) {
 	var (
 		capabilities = t.RouteCapabilities()
 		missing      maps.Ordered[RouteType, MissingRouteTypeError]
@@ -153,4 +149,40 @@ func (e DuplicateRouteError) Error() string {
 		e.RouteType,
 		e.MessageTypeName,
 	)
+}
+
+func routeSetForHandler(h Handler) RouteSet {
+	set := RouteSet{}
+
+	for _, r := range h.routes() {
+		rt, ok := r.RouteType.TryGet()
+		if !ok {
+			continue
+		}
+
+		mt, ok := r.MessageType.TryGet()
+		if !ok {
+			continue
+		}
+
+		if set.byMessageType == nil {
+			set.byMessageType = map[message.Type]map[RouteType]map[Handler]*Route{}
+		}
+
+		byRouteType, ok := set.byMessageType[mt]
+		if !ok {
+			byRouteType = map[RouteType]map[Handler]*Route{}
+			set.byMessageType[mt] = byRouteType
+		}
+
+		byHandler, ok := byRouteType[rt]
+		if !ok {
+			byHandler = map[Handler]*Route{}
+			byRouteType[rt] = byHandler
+		}
+
+		byHandler[h] = r
+	}
+
+	return set
 }

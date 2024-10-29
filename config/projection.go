@@ -17,6 +17,15 @@ func (h *Projection) HandlerType() HandlerType {
 	return ProjectionHandlerType
 }
 
+// RouteSet returns the routes configured for the entity.
+//
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
+func (h *Projection) RouteSet() RouteSet {
+	h.validateRoutes(nil, h.HandlerType())
+	return routeSetForHandler(h)
+}
+
 func (h *Projection) validate(ctx *validateContext) {
 	h.HandlerCommon.validate(ctx, h.HandlerType())
 	panic("not implemented")

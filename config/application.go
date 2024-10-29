@@ -19,14 +19,6 @@ type Application struct {
 	HandlerComponents []Handler
 }
 
-// RouteSet returns the routes configured for the entity.
-//
-// It panics if the configuration does not specify a complete set of valid
-// routes for the entity and its constituents.
-func (a *Application) RouteSet() RouteSet {
-	panic("not implemented")
-}
-
 // Handlers returns the list of handlers configured for the application.
 func (a *Application) Handlers() []Handler {
 	a.validateHandlers(nil)
@@ -45,6 +37,19 @@ func (a *Application) HandlerByName(name string) (Handler, bool) {
 	}
 
 	return nil, false
+}
+
+// RouteSet returns the routes configured for the entity.
+//
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
+func (a *Application) RouteSet() RouteSet {
+	var set RouteSet
+	for _, h := range a.Handlers() {
+		set.merge(h.RouteSet())
+	}
+
+	return set
 }
 
 func (a *Application) validate(ctx *validateContext) {

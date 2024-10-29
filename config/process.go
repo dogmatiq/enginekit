@@ -13,6 +13,15 @@ func (h *Process) HandlerType() HandlerType {
 	return ProcessHandlerType
 }
 
+// RouteSet returns the routes configured for the entity.
+//
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
+func (h *Process) RouteSet() RouteSet {
+	h.validateRoutes(nil, h.HandlerType())
+	return routeSetForHandler(h)
+}
+
 func (h *Process) validate(ctx *validateContext) {
 	h.HandlerCommon.validate(ctx, h.HandlerType())
 }

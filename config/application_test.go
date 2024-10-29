@@ -9,6 +9,7 @@ import (
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	"github.com/dogmatiq/enginekit/internal/test"
+	"github.com/dogmatiq/enginekit/message"
 )
 
 func TestApplication(t *testing.T) {
@@ -402,73 +403,73 @@ func TestApplication(t *testing.T) {
 			t.Fatal("did not expect handler to be found")
 		}
 	})
+
+	t.Run("func RouteSet()", func(t *testing.T) {
+		t.Run("it returns the union of the handler's route sets", func(t *testing.T) {
+			app := &ApplicationStub{
+				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+					c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
+					c.RegisterAggregate(&AggregateMessageHandlerStub{
+						ConfigureFunc: func(c dogma.AggregateConfigurer) {
+							c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
+							c.Routes(
+								dogma.HandlesCommand[CommandStub[TypeA]](),
+								dogma.RecordsEvent[EventStub[TypeA]](),
+								dogma.RecordsEvent[EventStub[TypeB]](),
+							)
+						},
+					})
+					c.RegisterProcess(&ProcessMessageHandlerStub{
+						ConfigureFunc: func(c dogma.ProcessConfigurer) {
+							c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
+							c.Routes(
+								dogma.HandlesEvent[EventStub[TypeB]](),
+								dogma.ExecutesCommand[CommandStub[TypeB]](),
+								dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+							)
+						},
+					})
+				},
+			}
+
+			entity := runtimeconfig.FromApplication(app)
+
+			test.Expect(
+				t,
+				"unexpected routes",
+				entity.RouteSet().MessageTypes(),
+				map[message.Type]RouteDirection{
+					message.TypeFor[CommandStub[TypeA]](): InboundDirection,
+					message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
+					message.TypeFor[EventStub[TypeB]]():   InboundDirection | OutboundDirection,
+					message.TypeFor[CommandStub[TypeB]](): OutboundDirection,
+					message.TypeFor[TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
+				},
+			)
+		})
+
+		// 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
+		// 		cfg := &Application{
+		// 			X: XApplication{
+		// 				Handlers: []Handler{
+		// 					&Projection{
+		// 						X: XProjection{
+		// 							Routes: []*Route{
+		// 								{},
+		// 							},
+		// 						},
+		// 					},
+		// 				},
+		// 			},
+		// 		}
+
+		// 		ExpectPanic(
+		// 			t,
+		// 			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
+		// 			func() {
+		// 				cfg.RouteSet()
+		// 			},
+		// 		)
+		// 	})
+	})
 }
-
-// func TestApplication_RouteSet(t *testing.T) {
-// 	t.Run("it returns the normalized routes", func(t *testing.T) {
-// 		app := &ApplicationStub{
-// 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 				c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
-// 				c.RegisterAggregate(&AggregateMessageHandlerStub{
-// 					ConfigureFunc: func(c dogma.AggregateConfigurer) {
-// 						c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
-// 						c.Routes(
-// 							dogma.HandlesCommand[CommandStub[TypeA]](),
-// 							dogma.RecordsEvent[EventStub[TypeA]](),
-// 							dogma.RecordsEvent[EventStub[TypeB]](),
-// 						)
-// 					},
-// 				})
-// 				c.RegisterProcess(&ProcessMessageHandlerStub{
-// 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
-// 						c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
-// 						c.Routes(
-// 							dogma.HandlesEvent[EventStub[TypeB]](),
-// 							dogma.ExecutesCommand[CommandStub[TypeB]](),
-// 							dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
-// 						)
-// 					},
-// 				})
-// 			},
-// 		}
-
-// 		cfg := runtimeconfig.FromApplication(app)
-
-// 		Expect(
-// 			t,
-// 			"unexpected routes",
-// 			cfg.RouteSet().MessageTypes(),
-// 			map[message.Type]RouteDirection{
-// 				message.TypeFor[CommandStub[TypeA]](): InboundDirection,
-// 				message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
-// 				message.TypeFor[EventStub[TypeB]]():   InboundDirection | OutboundDirection,
-// 				message.TypeFor[CommandStub[TypeB]](): OutboundDirection,
-// 				message.TypeFor[TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
-// 			},
-// 		)
-// 	})
-
-// 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
-// 		cfg := &Application{
-// 			X: XApplication{
-// 				Handlers: []Handler{
-// 					&Projection{
-// 						X: XProjection{
-// 							Routes: []*Route{
-// 								{},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		}
-
-// 		ExpectPanic(
-// 			t,
-// 			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
-// 			func() {
-// 				cfg.RouteSet()
-// 			},
-// 		)
-// 	})
-// }

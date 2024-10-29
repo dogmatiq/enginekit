@@ -27,8 +27,32 @@ func (a *Application) RouteSet() RouteSet {
 	panic("not implemented")
 }
 
+// Handlers returns the list of handlers configured for the application.
+func (a *Application) Handlers() []Handler {
+	a.validateHandlers(nil)
+	return a.HandlerComponents
+}
+
+// HandlerByName returns the [Handler] with the given name, or false if no such
+// handler has been configured.
+//
+// It panics if the handlers are incomplete or invalid.
+func (a *Application) HandlerByName(name string) (Handler, bool) {
+	for _, h := range a.Handlers() {
+		if h.Identity().Name == name {
+			return h, true
+		}
+	}
+
+	return nil, false
+}
+
 func (a *Application) validate(ctx *validateContext) {
 	a.EntityCommon.validate(ctx)
+	a.validateHandlers(ctx)
+}
+
+func (a *Application) validateHandlers(ctx *validateContext) {
 	detectIdentityConflicts(ctx, a)
 	detectRouteConflicts(ctx, a)
 

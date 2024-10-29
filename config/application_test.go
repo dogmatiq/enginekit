@@ -8,6 +8,7 @@ import (
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	"github.com/dogmatiq/enginekit/internal/test"
 )
 
 func TestApplication(t *testing.T) {
@@ -365,6 +366,42 @@ func TestApplication(t *testing.T) {
 			},
 		},
 	)
+
+	t.Run("func HandlerByName()", func(t *testing.T) {
+		h := &AggregateMessageHandlerStub{
+			ConfigureFunc: func(c dogma.AggregateConfigurer) {
+				c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf")
+				c.Routes(
+					dogma.HandlesCommand[CommandStub[TypeA]](),
+					dogma.RecordsEvent[EventStub[TypeA]](),
+				)
+			},
+		}
+
+		entity := runtimeconfig.FromApplication(&ApplicationStub{
+			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+				c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
+				c.RegisterAggregate(h)
+			},
+		})
+
+		if got, ok := entity.HandlerByName("name"); ok {
+			want := runtimeconfig.FromAggregate(h)
+
+			test.Expect(
+				t,
+				"unexpected handler",
+				got,
+				want,
+			)
+		} else {
+			t.Fatal("expected handler to be found")
+		}
+
+		if _, ok := entity.HandlerByName("unknown"); ok {
+			t.Fatal("did not expect handler to be found")
+		}
+	})
 }
 
 // func TestApplication_RouteSet(t *testing.T) {
@@ -434,50 +471,4 @@ func TestApplication(t *testing.T) {
 // 			},
 // 		)
 // 	})
-// }
-
-// func TestApplication_HandlerByName(t *testing.T) {
-// 	h := &AggregateMessageHandlerStub{
-// 		ConfigureFunc: func(c dogma.AggregateConfigurer) {
-// 			c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf")
-// 			c.Routes(
-// 				dogma.HandlesCommand[CommandStub[TypeA]](),
-// 				dogma.RecordsEvent[EventStub[TypeA]](),
-// 			)
-// 		},
-// 	}
-
-// 	app := &ApplicationStub{
-// 		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 			c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-// 			c.RegisterAggregate(h)
-// 		},
-// 	}
-
-// 	cfg := runtimeconfig.FromApplication(app)
-
-// 	if got, ok := cfg.HandlerByName("name"); ok {
-// 		want := runtimeconfig.FromAggregate(h)
-
-// 		Expect(
-// 			t,
-// 			"unexpected handler",
-// 			got,
-// 			want,
-// 		)
-// 	} else {
-// 		t.Fatal("expected handler to be found")
-// 	}
-
-// 	if _, ok := cfg.HandlerByName("unknown"); ok {
-// 		t.Fatal("did not expect handler to be found")
-// 	}
-// }
-
-// func TestApplication_render(t *testing.T) {
-// 	cases := []renderTestCase{
-
-// 	}
-
-// 	runRenderTests(t, cases)
 // }

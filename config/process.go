@@ -13,6 +13,6 @@ func (h *Process) HandlerType() HandlerType {
 	return ProcessHandlerType
 }
 
-func (h *Process) validate(ctx *validationContext) {
+func (h *Process) validate(ctx *validateContext) {
 	h.HandlerCommon.validate(ctx, h.HandlerType())
 }

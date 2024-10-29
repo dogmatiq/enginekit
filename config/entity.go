@@ -74,16 +74,7 @@ func (e *EntityCommon[T]) Interface() T {
 func (e *EntityCommon[T]) String() string {
 	var w strings.Builder
 
-	for i, r := range reflect.TypeFor[T]().Name() {
-		if r >= 'A' && r <= 'Z' {
-			if i != 0 {
-				break
-			}
-			w.WriteRune(r - 'A' + 'a')
-		} else {
-			w.WriteRune(r)
-		}
-	}
+	w.WriteString(entityClass[T]())
 
 	if typeName, ok := e.SourceTypeName.TryGet(); ok {
 		typeName = typename.Unqualified(typeName)
@@ -99,12 +90,12 @@ func (e *EntityCommon[T]) identities() []*Identity {
 	return e.IdentityComponents
 }
 
-func (e *EntityCommon[T]) validate(ctx *validationContext) {
+func (e *EntityCommon[T]) validate(ctx *validateContext) {
 	e.ComponentCommon.validate(ctx)
 	e.validateIdentities(ctx)
 }
 
-func (e *EntityCommon[T]) validateIdentities(ctx *validationContext) {
+func (e *EntityCommon[T]) validateIdentities(ctx *validateContext) {
 	if len(e.IdentityComponents) == 0 {
 		ctx.Fail(UnidentifiedEntityError{})
 	} else if len(e.IdentityComponents) > 1 {
@@ -113,6 +104,27 @@ func (e *EntityCommon[T]) validateIdentities(ctx *validationContext) {
 
 	for _, i := range e.IdentityComponents {
 		ctx.ValidateChild(i)
+	}
+}
+
+func (e *EntityCommon[T]) describe(ctx *describeContext) {
+	ctx.DescribeFidelity()
+	ctx.Print(entityClass[T]())
+
+	if typeName, ok := e.SourceTypeName.TryGet(); ok {
+		ctx.Print(" ")
+		ctx.Print(typeName)
+
+		if !e.Source.IsPresent() {
+			ctx.Print(" (value unavailable)")
+		}
+	}
+
+	ctx.Print("\n")
+	ctx.DescribeErrors()
+
+	for _, i := range e.IdentityComponents {
+		ctx.DescribeChild(i)
 	}
 }
 
@@ -146,4 +158,23 @@ type EntityUnavailableError struct {
 
 func (e EntityUnavailableError) Error() string {
 	return fmt.Sprintf("%s is unavailable", e.EntityType)
+}
+
+// entityClass returns the "class" of an entity, e.g. "application",
+// "aggregate", etc. based on the Dogma interface type.
+func entityClass[T any]() string {
+	var w strings.Builder
+
+	for i, r := range reflect.TypeFor[T]().Name() {
+		if r >= 'A' && r <= 'Z' {
+			if i != 0 {
+				break
+			}
+			w.WriteRune(r - 'A' + 'a')
+		} else {
+			w.WriteRune(r)
+		}
+	}
+
+	return w.String()
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/dogmatiq/dogma"
+	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
@@ -18,236 +19,8 @@ func TestApplication(t *testing.T) {
 			return &ApplicationStub{ConfigureFunc: fn}
 		},
 	)
-}
 
-// func TestApplication_RouteSet(t *testing.T) {
-// 	t.Run("it returns the normalized routes", func(t *testing.T) {
-// 		app := &ApplicationStub{
-// 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 				c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
-// 				c.RegisterAggregate(&AggregateMessageHandlerStub{
-// 					ConfigureFunc: func(c dogma.AggregateConfigurer) {
-// 						c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
-// 						c.Routes(
-// 							dogma.HandlesCommand[CommandStub[TypeA]](),
-// 							dogma.RecordsEvent[EventStub[TypeA]](),
-// 							dogma.RecordsEvent[EventStub[TypeB]](),
-// 						)
-// 					},
-// 				})
-// 				c.RegisterProcess(&ProcessMessageHandlerStub{
-// 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
-// 						c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
-// 						c.Routes(
-// 							dogma.HandlesEvent[EventStub[TypeB]](),
-// 							dogma.ExecutesCommand[CommandStub[TypeB]](),
-// 							dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
-// 						)
-// 					},
-// 				})
-// 			},
-// 		}
-
-// 		cfg := runtimeconfig.FromApplication(app)
-
-// 		Expect(
-// 			t,
-// 			"unexpected routes",
-// 			cfg.RouteSet().MessageTypes(),
-// 			map[message.Type]RouteDirection{
-// 				message.TypeFor[CommandStub[TypeA]](): InboundDirection,
-// 				message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
-// 				message.TypeFor[EventStub[TypeB]]():   InboundDirection | OutboundDirection,
-// 				message.TypeFor[CommandStub[TypeB]](): OutboundDirection,
-// 				message.TypeFor[TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
-// 			},
-// 		)
-// 	})
-
-// 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
-// 		cfg := &Application{
-// 			X: XApplication{
-// 				Handlers: []Handler{
-// 					&Projection{
-// 						X: XProjection{
-// 							Routes: []*Route{
-// 								{},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		}
-
-// 		ExpectPanic(
-// 			t,
-// 			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
-// 			func() {
-// 				cfg.RouteSet()
-// 			},
-// 		)
-// 	})
-// }
-
-// func TestApplication_Interface(t *testing.T) {
-// 	app := &ApplicationStub{
-// 		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-// 		},
-// 	}
-
-// 	cfg := runtimeconfig.FromApplication(app)
-
-// 	Expect(
-// 		t,
-// 		"unexpected result",
-// 		cfg.Interface(),
-// 		app,
-// 	)
-// }
-
-// func TestApplication_HandlerByName(t *testing.T) {
-// 	h := &AggregateMessageHandlerStub{
-// 		ConfigureFunc: func(c dogma.AggregateConfigurer) {
-// 			c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf")
-// 			c.Routes(
-// 				dogma.HandlesCommand[CommandStub[TypeA]](),
-// 				dogma.RecordsEvent[EventStub[TypeA]](),
-// 			)
-// 		},
-// 	}
-
-// 	app := &ApplicationStub{
-// 		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 			c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-// 			c.RegisterAggregate(h)
-// 		},
-// 	}
-
-// 	cfg := runtimeconfig.FromApplication(app)
-
-// 	if got, ok := cfg.HandlerByName("name"); ok {
-// 		want := runtimeconfig.FromAggregate(h)
-
-// 		Expect(
-// 			t,
-// 			"unexpected handler",
-// 			got,
-// 			want,
-// 		)
-// 	} else {
-// 		t.Fatal("expected handler to be found")
-// 	}
-
-// 	if _, ok := cfg.HandlerByName("unknown"); ok {
-// 		t.Fatal("did not expect handler to be found")
-// 	}
-// }
-
-// func TestApplication_render(t *testing.T) {
-// 	cases := []renderTestCase{
-// 		{
-// 			Name:             "complete",
-// 			ExpectDescriptor: `application:ApplicationStub`,
-// 			ExpectDetails: multiline(
-// 				`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
-// 				`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
-// 				`  - valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-// 				`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
-// 				`      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-// 				`      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-// 			),
-// 			Component: runtimeconfig.FromApplication(&ApplicationStub{
-// 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 					c.Identity("app", "c85acb36-e47b-4ef6-b46b-64d847a853b7")
-
-// 					c.RegisterAggregate(&AggregateMessageHandlerStub{
-// 						ConfigureFunc: func(c dogma.AggregateConfigurer) {
-// 							c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
-// 							c.Routes(
-// 								dogma.HandlesCommand[CommandStub[TypeA]](),
-// 								dogma.RecordsEvent[EventStub[TypeA]](),
-// 							)
-// 						},
-// 					})
-// 				},
-// 			}),
-// 		},
-// 		{
-// 			Name:             "no runtime type information",
-// 			ExpectDescriptor: `application:SomeApplication`,
-// 			ExpectDetails: multiline(
-// 				`valid application pkg.SomeApplication (runtime type unavailable)`,
-// 				`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
-// 			),
-// 			Component: configbuilder.Application(
-// 				func(b *configbuilder.ApplicationBuilder) {
-// 					b.SetSourceTypeName("pkg.SomeApplication")
-// 					b.Identity(func(b *configbuilder.IdentityBuilder) {
-// 						b.SetName("app")
-// 						b.SetKey("c85acb36-e47b-4ef6-b46b-64d847a853b7")
-// 					})
-// 				},
-// 			),
-// 		},
-// 		{
-// 			Name:             "empty",
-// 			ExpectDescriptor: `application`,
-// 			ExpectDetails: multiline(
-// 				`incomplete application`,
-// 				`  - no identity is configured`,
-// 			),
-// 			Component: &Application{},
-// 		},
-// 		{
-// 			Name:             "invalid",
-// 			ExpectDescriptor: `application:ApplicationStub`,
-// 			ExpectDetails: multiline(
-// 				`invalid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
-// 				`  - multiple identities are configured: identity:app/19cb98d5-dd17-4daf-ae00-1b413b7b899a and identity:app/89864744-89c5-4a80-a2bf-90aaebc467ba`,
-// 				`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-// 				`  - valid identity app/89864744-89c5-4a80-a2bf-90aaebc467ba`,
-// 			),
-// 			Component: runtimeconfig.FromApplication(&ApplicationStub{
-// 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 					c.Identity("app", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-// 					c.Identity("app", "89864744-89c5-4a80-a2bf-90aaebc467ba")
-// 				},
-// 			}),
-// 		},
-// 		{
-// 			Name:             "invalid sub-component",
-// 			ExpectDescriptor: `application:ApplicationStub`,
-// 			ExpectDetails: multiline(
-// 				`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
-// 				`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-// 				`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-// 				`      - no "records-event" routes are configured`,
-// 				`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
-// 				`      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-// 			),
-// 			Component: runtimeconfig.FromApplication(&ApplicationStub{
-// 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-// 					c.Identity("app", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-
-// 					c.RegisterAggregate(&AggregateMessageHandlerStub{
-// 						ConfigureFunc: func(c dogma.AggregateConfigurer) {
-// 							c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
-// 							c.Routes(
-// 								dogma.HandlesCommand[CommandStub[TypeA]](),
-// 							)
-// 						},
-// 					})
-// 				},
-// 			}),
-// 		},
-// 	}
-
-// 	runRenderTests(t, cases)
-// }
-
-func TestApplication_validation(t *testing.T) {
-	runValidationTests(
+	testValidate(
 		t,
 		validationTestCases{
 			{
@@ -477,4 +250,234 @@ func TestApplication_validation(t *testing.T) {
 			},
 		},
 	)
+
+	testDescribe(
+		t,
+		renderTestCases{
+			{
+				Name:  "complete",
+				Short: `application:ApplicationStub`,
+				Long: multiline(
+					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
+					`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
+					`  - valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+					`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
+					`      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				),
+				Component: runtimeconfig.FromApplication(&ApplicationStub{
+					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+						c.Identity("app", "c85acb36-e47b-4ef6-b46b-64d847a853b7")
+
+						c.RegisterAggregate(&AggregateMessageHandlerStub{
+							ConfigureFunc: func(c dogma.AggregateConfigurer) {
+								c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
+								c.Routes(
+									dogma.HandlesCommand[CommandStub[TypeA]](),
+									dogma.RecordsEvent[EventStub[TypeA]](),
+								)
+							},
+						})
+					},
+				}),
+			},
+			{
+				Name:  "no runtime type information",
+				Short: `application:SomeApplication`,
+				Long: multiline(
+					`valid application pkg.SomeApplication (value unavailable)`,
+					`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
+				),
+				Component: configbuilder.Application(
+					func(b *configbuilder.ApplicationBuilder) {
+						b.SourceTypeName("pkg.SomeApplication")
+						b.Identity(func(b *configbuilder.IdentityBuilder) {
+							b.Name("app")
+							b.Key("c85acb36-e47b-4ef6-b46b-64d847a853b7")
+						})
+					},
+				),
+			},
+			{
+				Name:  "empty",
+				Short: `application`,
+				Long: multiline(
+					`invalid application`,
+					`  - entity has no identity`,
+				),
+				Component: &Application{},
+			},
+			{
+				Name:  "invalid",
+				Short: `application:ApplicationStub`,
+				Long: multiline(
+					`invalid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
+					`  - entity has 2 identities`,
+					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+					`  - valid identity app/89864744-89c5-4a80-a2bf-90aaebc467ba`,
+				),
+				Component: runtimeconfig.FromApplication(&ApplicationStub{
+					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+						c.Identity("app", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+						c.Identity("app", "89864744-89c5-4a80-a2bf-90aaebc467ba")
+					},
+				}),
+			},
+			{
+				Name:  "invalid identity",
+				Short: `application:ApplicationStub`,
+				Long: multiline(
+					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
+					`  - invalid identity app/non-uuid`,
+					`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				),
+				Component: runtimeconfig.FromApplication(&ApplicationStub{
+					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+						c.Identity("app", "non-uuid")
+					},
+				}),
+			},
+			{
+				Name:  "invalid handler",
+				Short: `application:ApplicationStub`,
+				Long: multiline(
+					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
+					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+					`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+					`      - no "records-event" routes configured`,
+					`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
+					`      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				),
+				Component: runtimeconfig.FromApplication(&ApplicationStub{
+					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+						c.Identity("app", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+
+						c.RegisterAggregate(&AggregateMessageHandlerStub{
+							ConfigureFunc: func(c dogma.AggregateConfigurer) {
+								c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
+								c.Routes(
+									dogma.HandlesCommand[CommandStub[TypeA]](),
+								)
+							},
+						})
+					},
+				}),
+			},
+		},
+	)
 }
+
+// func TestApplication_RouteSet(t *testing.T) {
+// 	t.Run("it returns the normalized routes", func(t *testing.T) {
+// 		app := &ApplicationStub{
+// 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+// 				c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
+// 				c.RegisterAggregate(&AggregateMessageHandlerStub{
+// 					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+// 						c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
+// 						c.Routes(
+// 							dogma.HandlesCommand[CommandStub[TypeA]](),
+// 							dogma.RecordsEvent[EventStub[TypeA]](),
+// 							dogma.RecordsEvent[EventStub[TypeB]](),
+// 						)
+// 					},
+// 				})
+// 				c.RegisterProcess(&ProcessMessageHandlerStub{
+// 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
+// 						c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
+// 						c.Routes(
+// 							dogma.HandlesEvent[EventStub[TypeB]](),
+// 							dogma.ExecutesCommand[CommandStub[TypeB]](),
+// 							dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+// 						)
+// 					},
+// 				})
+// 			},
+// 		}
+
+// 		cfg := runtimeconfig.FromApplication(app)
+
+// 		Expect(
+// 			t,
+// 			"unexpected routes",
+// 			cfg.RouteSet().MessageTypes(),
+// 			map[message.Type]RouteDirection{
+// 				message.TypeFor[CommandStub[TypeA]](): InboundDirection,
+// 				message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
+// 				message.TypeFor[EventStub[TypeB]]():   InboundDirection | OutboundDirection,
+// 				message.TypeFor[CommandStub[TypeB]](): OutboundDirection,
+// 				message.TypeFor[TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
+// 			},
+// 		)
+// 	})
+
+// 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
+// 		cfg := &Application{
+// 			X: XApplication{
+// 				Handlers: []Handler{
+// 					&Projection{
+// 						X: XProjection{
+// 							Routes: []*Route{
+// 								{},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		ExpectPanic(
+// 			t,
+// 			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
+// 			func() {
+// 				cfg.RouteSet()
+// 			},
+// 		)
+// 	})
+// }
+
+// func TestApplication_HandlerByName(t *testing.T) {
+// 	h := &AggregateMessageHandlerStub{
+// 		ConfigureFunc: func(c dogma.AggregateConfigurer) {
+// 			c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf")
+// 			c.Routes(
+// 				dogma.HandlesCommand[CommandStub[TypeA]](),
+// 				dogma.RecordsEvent[EventStub[TypeA]](),
+// 			)
+// 		},
+// 	}
+
+// 	app := &ApplicationStub{
+// 		ConfigureFunc: func(c dogma.ApplicationConfigurer) {
+// 			c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
+// 			c.RegisterAggregate(h)
+// 		},
+// 	}
+
+// 	cfg := runtimeconfig.FromApplication(app)
+
+// 	if got, ok := cfg.HandlerByName("name"); ok {
+// 		want := runtimeconfig.FromAggregate(h)
+
+// 		Expect(
+// 			t,
+// 			"unexpected handler",
+// 			got,
+// 			want,
+// 		)
+// 	} else {
+// 		t.Fatal("expected handler to be found")
+// 	}
+
+// 	if _, ok := cfg.HandlerByName("unknown"); ok {
+// 		t.Fatal("did not expect handler to be found")
+// 	}
+// }
+
+// func TestApplication_render(t *testing.T) {
+// 	cases := []renderTestCase{
+
+// 	}
+
+// 	runRenderTests(t, cases)
+// }

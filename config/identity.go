@@ -56,7 +56,7 @@ func (i *Identity) String() string {
 	return w.String()
 }
 
-func (i *Identity) validate(ctx *validationContext) {
+func (i *Identity) validate(ctx *validateContext) {
 	i.ComponentCommon.validate(ctx)
 
 	if n, ok := i.Name.TryGet(); ok && !isPrintable(n) {
@@ -70,6 +70,40 @@ func (i *Identity) validate(ctx *validationContext) {
 			i.Key = optional.Some(id.AsString())
 		}
 	}
+}
+
+func (i *Identity) describe(ctx *describeContext) {
+	ctx.DescribeFidelity()
+	ctx.Print("identity ")
+
+	if name, ok := i.Name.TryGet(); !ok {
+		ctx.Print("?")
+	} else if !isPrintable(name) || strings.Contains(name, `"`) {
+		ctx.Print(strconv.Quote(name))
+	} else {
+		ctx.Print(name)
+	}
+
+	ctx.Print("/")
+
+	if key, ok := i.Key.TryGet(); !ok {
+		ctx.Print("?")
+	} else if !isPrintable(key) || strings.Contains(key, `"`) {
+		ctx.Print(strconv.Quote(key))
+	} else {
+		ctx.Print(key)
+	}
+
+	if key, ok := i.Key.TryGet(); ok {
+		if uuid, err := uuidpb.Parse(key); err == nil {
+			if uuid.AsString() != key {
+				ctx.Print(" (non-canonical)")
+			}
+		}
+	}
+
+	ctx.Print("\n")
+	ctx.DescribeErrors()
 }
 
 // InvalidIdentityNameError indicates that the "name" element of an [Identity]

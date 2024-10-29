@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Component is the "top-level" interface for the individual elements that form
 // a complete configuration of a Dogma application or handler.
@@ -15,7 +17,8 @@ type Component interface {
 	// [Component] by whatever system produced the configuration.
 	Baggage() Baggage
 
-	validate(ctx *validationContext)
+	validate(*validateContext)
+	describe(*describeContext)
 }
 
 // ComponentCommon is a partial implementation of [Component].
@@ -36,7 +39,7 @@ func (c *ComponentCommon) Baggage() Baggage {
 	return c.ComponentBaggage
 }
 
-func (c *ComponentCommon) validate(ctx *validationContext) {
+func (c *ComponentCommon) validate(ctx *validateContext) {
 	if c.ComponentFidelity.Has(Incomplete) {
 		ctx.Fail(IncompleteComponentError{})
 	}

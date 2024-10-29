@@ -27,13 +27,21 @@ func (a *Application) RouteSet() RouteSet {
 	panic("not implemented")
 }
 
-func (a *Application) validate(ctx *validationContext) {
+func (a *Application) validate(ctx *validateContext) {
 	a.EntityCommon.validate(ctx)
 	detectIdentityConflicts(ctx, a)
 	detectRouteConflicts(ctx, a)
 
 	for _, h := range a.HandlerComponents {
 		ctx.ValidateChild(h)
+	}
+}
+
+func (a *Application) describe(ctx *describeContext) {
+	a.EntityCommon.describe(ctx)
+
+	for _, h := range a.HandlerComponents {
+		ctx.DescribeChild(h)
 	}
 }
 
@@ -90,7 +98,7 @@ func (e RouteConflictError) Error() string {
 
 // detectIdentityConflicts reports errors related to handlers that have
 // identities that conflict with other handlers or the application itself.
-func detectIdentityConflicts(ctx *validationContext, app *Application) {
+func detectIdentityConflicts(ctx *validateContext, app *Application) {
 	var (
 		byName = map[string][]Entity{}
 		byKey  = map[string][]Entity{}
@@ -138,7 +146,7 @@ func detectIdentityConflicts(ctx *validationContext, app *Application) {
 	}
 }
 
-func detectRouteConflicts(ctx *validationContext, app *Application) {
+func detectRouteConflicts(ctx *validateContext, app *Application) {
 	byKey := map[routeKey][]Handler{}
 
 	for _, h := range app.HandlerComponents {

@@ -17,7 +17,7 @@ func (h *Projection) HandlerType() HandlerType {
 	return ProjectionHandlerType
 }
 
-func (h *Projection) validate(ctx *validationContext) {
+func (h *Projection) validate(ctx *validateContext) {
 	h.HandlerCommon.validate(ctx, h.HandlerType())
 	panic("not implemented")
 }
@@ -47,5 +47,9 @@ type ProjectionDeliveryPolicy struct {
 }
 
 func (p *ProjectionDeliveryPolicy) String() string {
+	panic("not implemented")
+}
+
+func (p *ProjectionDeliveryPolicy) describe(*describeContext) {
 	panic("not implemented")
 }

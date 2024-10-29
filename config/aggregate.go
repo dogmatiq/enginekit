@@ -15,6 +15,6 @@ func (h *Aggregate) HandlerType() HandlerType {
 	return AggregateHandlerType
 }
 
-func (h *Aggregate) validate(ctx *validationContext) {
+func (h *Aggregate) validate(ctx *validateContext) {
 	h.HandlerCommon.validate(ctx, h.HandlerType())
 }

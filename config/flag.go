@@ -29,3 +29,7 @@ type FlagModification struct {
 func (m *FlagModification) String() string {
 	panic("not implemented")
 }
+
+func (m *FlagModification) describe(*describeContext) {
+	panic("not implemented")
+}

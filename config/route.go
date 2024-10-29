@@ -41,6 +41,27 @@ func (r *Route) key() (routeKey, bool) {
 	}, true
 }
 
+func (r *Route) describe(ctx *describeContext) {
+	ctx.DescribeFidelity()
+
+	if rt, ok := r.RouteType.TryGet(); ok {
+		ctx.Print(rt.String(), " ")
+	}
+
+	ctx.Print("route")
+
+	if mt, ok := r.MessageTypeName.TryGet(); ok {
+		ctx.Print(" for ", mt)
+
+		if !r.MessageType.IsPresent() {
+			ctx.Print(" (type unavailable)")
+		}
+	}
+
+	ctx.Print("\n")
+	ctx.DescribeErrors()
+}
+
 // routeKey is a [comparable] representation of a route's identity. No [Handler]
 // may have two routes with the same key.
 type routeKey struct {

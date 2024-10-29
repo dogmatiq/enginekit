@@ -13,6 +13,6 @@ func (h *Integration) HandlerType() HandlerType {
 	return IntegrationHandlerType
 }
 
-func (h *Integration) validate(ctx *validationContext) {
+func (h *Integration) validate(ctx *validateContext) {
 	h.HandlerCommon.validate(ctx, h.HandlerType())
 }

@@ -52,7 +52,7 @@ func (h *HandlerCommon[T]) routes() []*Route {
 	return h.RouteComponents
 }
 
-func (h *HandlerCommon[T]) validate(ctx *validationContext, t HandlerType) {
+func (h *HandlerCommon[T]) validate(ctx *validateContext, t HandlerType) {
 	h.EntityCommon.validate(ctx)
 
 	var (
@@ -97,7 +97,14 @@ func (h *HandlerCommon[T]) validate(ctx *validationContext, t HandlerType) {
 			ctx.Fail(err)
 		}
 	}
+}
 
+func (h *HandlerCommon[T]) describe(ctx *describeContext) {
+	h.EntityCommon.describe(ctx)
+
+	for _, r := range h.RouteComponents {
+		ctx.DescribeChild(r)
+	}
 }
 
 // Disabled is the [Symbol] for a [Flag] that indicates whether or not a

@@ -1,13 +1,16 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+	"iter"
 	"slices"
 	"strings"
 )
 
 // Validate returns an error if the configuration is invalid.
 func Validate(c Component, _ ...ValidateOption) error {
-	ctx := &validationContext{
+	ctx := &validateContext{
 		component: c,
 	}
 
@@ -36,7 +39,7 @@ type InvalidComponentError struct {
 func (e InvalidComponentError) Error() string {
 	var w strings.Builder
 
-	w.WriteString(e.Component.String())
+	fmt.Fprint(&w, e.Component)
 	w.WriteString(" is invalid")
 
 	if len(e.Causes) == 1 {
@@ -67,27 +70,69 @@ func (e InvalidComponentError) Unwrap() []error {
 	return e.Causes
 }
 
+// ErrorsByComponent returns the errors within err that are directly
+// associated with the given component.
+func ErrorsByComponent(c Component, err error) []error {
+	var matches []error
+
+	cerr, ok := err.(InvalidComponentError)
+	if !ok {
+		return nil
+	}
+
+	for _, err := range cerr.Unwrap() {
+		if nested, ok := err.(InvalidComponentError); ok {
+			matches = append(
+				matches,
+				ErrorsByComponent(c, nested)...,
+			)
+		} else if cerr.Component == c {
+			matches = append(matches, err)
+		}
+	}
+
+	return matches
+}
+
+func unwrap(err error) iter.Seq[error] {
+	type many interface {
+		Unwrap() []error
+	}
+
+	return func(yield func(error) bool) {
+		if err := errors.Unwrap(err); err != nil {
+			yield(err)
+		} else if err, ok := err.(many); ok {
+			for _, e := range err.Unwrap() {
+				if !yield(e) {
+					return
+				}
+			}
+		}
+	}
+}
+
 type validationOptions struct {
 	Normalize bool
 }
 
-// validationContext carries the inputs and outputs of the component validation
+// validateContext carries the inputs and outputs of the component validation
 // process.
 //
-// A nil pointer to a validationContext is a valid context that behaves in
+// A nil pointer to a validateContext is a valid context that behaves in
 // "strict mode", where errors are surfaced via a panic the moment they occur.
-type validationContext struct {
+type validateContext struct {
 	options   validationOptions
 	component Component
 	errors    []error
-	children  []*validationContext
+	children  []*validateContext
 }
 
-func (c *validationContext) ValidateChild(child Component) {
-	var ctx *validationContext
+func (c *validateContext) ValidateChild(child Component) {
+	var ctx *validateContext
 
 	if c != nil {
-		ctx = &validationContext{
+		ctx = &validateContext{
 			options:   c.options,
 			component: child,
 		}
@@ -97,21 +142,21 @@ func (c *validationContext) ValidateChild(child Component) {
 	child.validate(ctx)
 }
 
-func (c *validationContext) Options() validationOptions {
+func (c *validateContext) Options() validationOptions {
 	if c != nil {
 		return c.options
 	}
 	return validationOptions{}
 }
 
-func (c *validationContext) Fail(err error) {
+func (c *validateContext) Fail(err error) {
 	if c == nil {
 		panic(err)
 	}
 	c.errors = append(c.errors, err)
 }
 
-func (c *validationContext) error() error {
+func (c *validateContext) error() error {
 	errors := slices.Clone(c.errors)
 
 	for _, child := range c.children {

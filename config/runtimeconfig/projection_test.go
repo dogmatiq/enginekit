@@ -23,8 +23,8 @@ func TestFromProjection(t *testing.T) {
 			nil,
 			func(dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
 							ComponentCommon: config.ComponentCommon{
 								ComponentFidelity: config.Incomplete,
 							},
@@ -38,12 +38,12 @@ func TestFromProjection(t *testing.T) {
 			&ProjectionMessageHandlerStub{},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},
@@ -65,10 +65,9 @@ func TestFromProjection(t *testing.T) {
 			},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 							IdentityComponents: []*config.Identity{
 								{
 									Name: optional.Some("projection"),
@@ -95,6 +94,7 @@ func TestFromProjection(t *testing.T) {
 							BroadcastToPrimaryFirst: optional.Some(true),
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},

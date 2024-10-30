@@ -37,95 +37,21 @@ type Entity interface {
 	// routes for the entity and its constituents.
 	RouteSet() RouteSet
 
-	identities() []*Identity
+	// EntityProperties returns the properties common to all [Entity] types.
+	EntityProperties() *EntityCommon
 }
 
-// EntityCommon is a partial implementation of [Entity].
-type EntityCommon[T any] struct {
+// EntityCommon contains the properties common to all [Entity] types.
+type EntityCommon struct {
 	ComponentCommon
 
-	SourceTypeName     optional.Optional[string]
-	Source             optional.Optional[T]
+	TypeName           optional.Optional[string]
 	IdentityComponents []*Identity
 }
 
-// Identity returns the entity's identity.
-//
-// It panics the configuration does not specify a singular valid identity.
-func (e *EntityCommon[T]) Identity() *identitypb.Identity {
-	e.validateIdentities(nil)
-
-	id := e.IdentityComponents[0]
-
-	return &identitypb.Identity{
-		Name: id.Name.Get(),
-		Key:  uuidpb.MustParse(id.Key.Get()),
-	}
-}
-
-// Interface returns the entity represented by the configuration, if available.
-func (e *EntityCommon[T]) Interface() T {
-	if v, ok := e.Source.TryGet(); ok {
-		return v
-	}
-	panic(EntityUnavailableError{reflect.TypeFor[T]()})
-}
-
-func (e *EntityCommon[T]) String() string {
-	var w strings.Builder
-
-	w.WriteString(entityClass[T]())
-
-	if typeName, ok := e.SourceTypeName.TryGet(); ok {
-		typeName = typename.Unqualified(typeName)
-		typeName = strings.TrimPrefix(typeName, "*")
-		w.WriteByte(':')
-		w.WriteString(typeName)
-	}
-
-	return w.String()
-}
-
-func (e *EntityCommon[T]) identities() []*Identity {
-	return e.IdentityComponents
-}
-
-func (e *EntityCommon[T]) validate(ctx *validateContext) {
-	e.ComponentCommon.validate(ctx)
-	e.validateIdentities(ctx)
-}
-
-func (e *EntityCommon[T]) validateIdentities(ctx *validateContext) {
-	if len(e.IdentityComponents) == 0 {
-		ctx.Fail(UnidentifiedEntityError{})
-	} else if len(e.IdentityComponents) > 1 {
-		ctx.Fail(AmbiguouslyIdentifiedEntityError{slices.Clone(e.IdentityComponents)})
-	}
-
-	for _, i := range e.IdentityComponents {
-		ctx.ValidateChild(i)
-	}
-}
-
-func (e *EntityCommon[T]) describe(ctx *describeContext) {
-	ctx.DescribeFidelity()
-	ctx.Print(entityClass[T]())
-
-	if typeName, ok := e.SourceTypeName.TryGet(); ok {
-		ctx.Print(" ")
-		ctx.Print(typeName)
-
-		if !e.Source.IsPresent() {
-			ctx.Print(" (value unavailable)")
-		}
-	}
-
-	ctx.Print("\n")
-	ctx.DescribeErrors()
-
-	for _, i := range e.IdentityComponents {
-		ctx.DescribeChild(i)
-	}
+// EntityProperties returns the properties common to all [Entity] types.
+func (p *EntityCommon) EntityProperties() *EntityCommon {
+	return p
 }
 
 // UnidentifiedEntityError indicates that an [Entity] has been configured
@@ -160,21 +86,115 @@ func (e EntityUnavailableError) Error() string {
 	return fmt.Sprintf("%s is unavailable", e.EntityType)
 }
 
-// entityClass returns the "class" of an entity, e.g. "application",
-// "aggregate", etc. based on the Dogma interface type.
-func entityClass[T any]() string {
+func validateEntity[T any](
+	ctx *validateContext,
+	e Entity,
+	source optional.Optional[T],
+	funcs ...func(*validateContext),
+) {
+	validateComponent(
+		ctx,
+		func(ctx *validateContext) {
+			validateEntityIdentities(ctx, e)
+
+			for _, fn := range funcs {
+				fn(ctx)
+			}
+
+			typeName, hasTypeName := e.EntityProperties().TypeName.TryGet()
+			source, hasSource := source.TryGet()
+
+			if hasSource {
+				if !hasTypeName {
+					ctx.Malformed("Source is present, but TypeName is not")
+				} else if typeName != typename.Of(source) {
+					ctx.Malformed("TypeName does not match Source: %q != %q", typeName, typename.Of(source))
+				}
+			}
+		},
+	)
+}
+
+func validateEntityIdentities(ctx *validateContext, e Entity) {
+	identities := e.EntityProperties().IdentityComponents
+
+	if len(identities) == 0 {
+		ctx.Invalid(UnidentifiedEntityError{})
+	} else if len(identities) > 1 {
+		ctx.Invalid(AmbiguouslyIdentifiedEntityError{slices.Clone(identities)})
+	}
+
+	for _, i := range identities {
+		ctx.ValidateChild(i)
+	}
+}
+
+func resolveIdentity(e Entity) *identitypb.Identity {
+	validateEntityIdentities(newResolutionContext(e), e)
+	id := e.EntityProperties().IdentityComponents[0]
+
+	return &identitypb.Identity{
+		Name: id.Name.Get(),
+		Key:  uuidpb.MustParse(id.Key.Get()),
+	}
+}
+
+func resolveInterface[T any](e Entity, source optional.Optional[T]) T {
+	ctx := newResolutionContext(e)
+
+	v, ok := source.TryGet()
+
+	if !ok {
+		ctx.Invalid(EntityUnavailableError{reflect.TypeFor[T]()})
+	}
+
+	return v
+}
+
+func entityLabel(e Entity) string {
+	return strings.ToLower(
+		reflect.TypeOf(e).Elem().Name(),
+	)
+}
+
+func stringifyEntity(e Entity) string {
 	var w strings.Builder
 
-	for i, r := range reflect.TypeFor[T]().Name() {
-		if r >= 'A' && r <= 'Z' {
-			if i != 0 {
-				break
-			}
-			w.WriteRune(r - 'A' + 'a')
-		} else {
-			w.WriteRune(r)
-		}
+	w.WriteString(entityLabel(e))
+
+	if n, ok := e.EntityProperties().TypeName.TryGet(); ok {
+		n = typename.Unqualified(n)
+		n = strings.TrimPrefix(n, "*")
+		w.WriteByte(':')
+		w.WriteString(n)
 	}
 
 	return w.String()
+}
+
+func describeEntity[T any](
+	ctx *describeContext,
+	e Entity,
+	source optional.Optional[T],
+) {
+	ctx.DescribeFidelity()
+	ctx.Print(entityLabel(e))
+
+	p := e.EntityProperties()
+
+	if n, ok := p.TypeName.TryGet(); ok {
+		ctx.Print(" ")
+		ctx.Print(n)
+
+		if !source.IsPresent() {
+			ctx.Print(" (value unavailable)")
+		}
+	}
+
+	ctx.Print("\n")
+	ctx.DescribeErrors()
+
+	for _, i := range p.IdentityComponents {
+		ctx.DescribeChild(i)
+	}
 }

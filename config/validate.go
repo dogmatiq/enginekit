@@ -11,7 +11,7 @@ import (
 // Validate returns an error if the configuration is invalid.
 func Validate(c Component, _ ...ValidateOption) error {
 	ctx := &validateContext{
-		component: c,
+		Component: c,
 	}
 
 	c.validate(ctx)
@@ -114,46 +114,68 @@ func unwrap(err error) iter.Seq[error] {
 
 type validationOptions struct {
 	Normalize bool
+	Panic     bool
 }
 
 // validateContext carries the inputs and outputs of the component validation
 // process.
-//
-// A nil pointer to a validateContext is a valid context that behaves in
-// "strict mode", where errors are surfaced via a panic the moment they occur.
 type validateContext struct {
-	options   validationOptions
-	component Component
-	errors    []error
-	children  []*validateContext
+	Component Component
+	Options   validationOptions
+
+	errors   []error
+	parent   *validateContext
+	children []*validateContext
+}
+
+func newResolutionContext(c Component) *validateContext {
+	return &validateContext{
+		Component: c,
+		Options: validationOptions{
+			Panic: true,
+		},
+	}
+}
+
+func (c *validateContext) ForChild(child Component) *validateContext {
+	ctx := &validateContext{
+		Component: child,
+		Options:   c.Options,
+		parent:    c,
+	}
+	c.children = append(c.children, ctx)
+
+	return ctx
 }
 
 func (c *validateContext) ValidateChild(child Component) {
-	var ctx *validateContext
-
-	if c != nil {
-		ctx = &validateContext{
-			options:   c.options,
-			component: child,
-		}
-		c.children = append(c.children, ctx)
-	}
-
-	child.validate(ctx)
+	child.validate(c.ForChild(child))
 }
 
-func (c *validateContext) Options() validationOptions {
-	if c != nil {
-		return c.options
+func (c *validateContext) Invalid(err error) {
+	if !c.Options.Panic {
+		c.errors = append(c.errors, err)
+		return
 	}
-	return validationOptions{}
-}
 
-func (c *validateContext) Fail(err error) {
-	if c == nil {
+	if c.parent == nil {
 		panic(err)
 	}
-	c.errors = append(c.errors, err)
+
+	err = InvalidComponentError{
+		Component: c.Component,
+		Causes:    []error{err},
+	}
+
+	c.parent.Invalid(err)
+}
+
+func (c *validateContext) Malformed(format string, args ...any) {
+	panic(fmt.Sprintf(
+		"malformed configuration representation: there is a problem with the %T value, not necessarily the configuration it represents %s",
+		c.Component,
+		fmt.Sprintf(format, args...),
+	))
 }
 
 func (c *validateContext) error() error {
@@ -170,7 +192,7 @@ func (c *validateContext) error() error {
 	}
 
 	return InvalidComponentError{
-		Component: c.component,
+		Component: c.Component,
 		Causes:    errors,
 	}
 }

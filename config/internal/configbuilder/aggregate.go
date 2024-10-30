@@ -17,15 +17,15 @@ type AggregateBuilder struct {
 	target config.Aggregate
 }
 
-// SourceTypeName sets the name of the concrete type that implements
+// TypeName sets the name of the concrete type that implements
 // [dogma.AggregateMessageHandler].
-func (b *AggregateBuilder) SourceTypeName(n string) {
-	setSourceTypeName(&b.target.EntityCommon, n)
+func (b *AggregateBuilder) TypeName(n string) {
+	setTypeName(&b.target.TypeName, &b.target.Source, n)
 }
 
 // Source sets the source value to h.
 func (b *AggregateBuilder) Source(h dogma.AggregateMessageHandler) {
-	setSource(&b.target.EntityCommon, h)
+	setSource(&b.target.TypeName, &b.target.Source, h)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
@@ -48,7 +48,7 @@ func (b *AggregateBuilder) Disabled(fn func(*FlagBuilder)) {
 
 // Done completes the configuration of the handler.
 func (b *AggregateBuilder) Done() *config.Aggregate {
-	if !b.target.SourceTypeName.IsPresent() {
+	if !b.target.TypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

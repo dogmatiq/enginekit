@@ -6,22 +6,28 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/optional"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 // Application is an [Entity] that represents the configuration of a
 // [dogma.Application].
 type Application struct {
-	EntityCommon[dogma.Application]
-
-	// HandlerComponents is the set of [Handler] components that have been
-	// registered with the application.
+	EntityCommon
 	HandlerComponents []Handler
+	Source            optional.Optional[dogma.Application]
+}
+
+// Identity returns the entity's identity.
+//
+// It panics the configuration does not specify a singular valid identity.
+func (a *Application) Identity() *identitypb.Identity {
+	return resolveIdentity(a)
 }
 
 // Handlers returns the list of handlers configured for the application.
 func (a *Application) Handlers() []Handler {
-	a.validateHandlers(nil)
+	validateApplicationHandlers(newResolutionContext(a), a)
 	return a.HandlerComponents
 }
 
@@ -44,30 +50,43 @@ func (a *Application) HandlerByName(name string) (Handler, bool) {
 // It panics if the configuration does not specify a complete set of valid
 // routes for the entity and its constituents.
 func (a *Application) RouteSet() RouteSet {
+	ctx := newResolutionContext(a)
+	reportRouteConflicts(ctx, a)
+
 	var set RouteSet
-	for _, h := range a.Handlers() {
-		set.merge(h.RouteSet())
+	for _, h := range a.HandlerComponents {
+		set.merge(buildRouteSet(ctx.ForChild(h), h))
 	}
 
 	return set
 }
 
-func (a *Application) validate(ctx *validateContext) {
-	a.EntityCommon.validate(ctx)
-	a.validateHandlers(ctx)
+// Interface returns the [dogma.Application] that the entity represents.
+func (a *Application) Interface() dogma.Application {
+	return resolveInterface(a, a.Source)
 }
 
-func (a *Application) validateHandlers(ctx *validateContext) {
-	detectIdentityConflicts(ctx, a)
-	detectRouteConflicts(ctx, a)
+func (a *Application) String() string {
+	return stringifyEntity(a)
+}
 
-	for _, h := range a.HandlerComponents {
-		ctx.ValidateChild(h)
-	}
+func (a *Application) identities() []*Identity {
+	return a.IdentityComponents
+}
+
+func (a *Application) validate(ctx *validateContext) {
+	validateEntity(
+		ctx,
+		a,
+		a.Source,
+		func(ctx *validateContext) {
+			validateApplicationHandlers(ctx, a)
+		},
+	)
 }
 
 func (a *Application) describe(ctx *describeContext) {
-	a.EntityCommon.describe(ctx)
+	describeEntity(ctx, a, a.Source)
 
 	for _, h := range a.HandlerComponents {
 		ctx.DescribeChild(h)
@@ -125,9 +144,18 @@ func (e RouteConflictError) Error() string {
 	)
 }
 
-// detectIdentityConflicts reports errors related to handlers that have
+func validateApplicationHandlers(ctx *validateContext, app *Application) {
+	reportIdentityConflicts(ctx, app)
+	reportRouteConflicts(ctx, app)
+
+	for _, h := range app.HandlerComponents {
+		ctx.ValidateChild(h)
+	}
+}
+
+// reportIdentityConflicts reports errors related to handlers that have
 // identities that conflict with other handlers or the application itself.
-func detectIdentityConflicts(ctx *validateContext, app *Application) {
+func reportIdentityConflicts(ctx *validateContext, app *Application) {
 	var (
 		byName = map[string][]Entity{}
 		byKey  = map[string][]Entity{}
@@ -156,7 +184,7 @@ func detectIdentityConflicts(ctx *validateContext, app *Application) {
 	}
 
 	for _, h := range app.HandlerComponents {
-		for _, id := range h.identities() {
+		for _, id := range h.EntityProperties().IdentityComponents {
 			push(byKey, optional.Transform(id.Key, normalizeKey), h)
 			push(byName, id.Name, h)
 		}
@@ -164,22 +192,22 @@ func detectIdentityConflicts(ctx *validateContext, app *Application) {
 
 	for name, entities := range byName {
 		if len(entities) > 1 {
-			ctx.Fail(IdentityNameConflictError{name, entities})
+			ctx.Invalid(IdentityNameConflictError{name, entities})
 		}
 	}
 
 	for key, entities := range byKey {
 		if len(entities) > 1 {
-			ctx.Fail(IdentityKeyConflictError{key, entities})
+			ctx.Invalid(IdentityKeyConflictError{key, entities})
 		}
 	}
 }
 
-func detectRouteConflicts(ctx *validateContext, app *Application) {
+func reportRouteConflicts(ctx *validateContext, app *Application) {
 	byKey := map[routeKey][]Handler{}
 
 	for _, h := range app.HandlerComponents {
-		for _, r := range h.routes() {
+		for _, r := range h.HandlerProperties().RouteComponents {
 			if k, ok := r.key(); ok {
 				switch k.RouteType {
 				case HandlesCommandRouteType, RecordsEventRouteType:
@@ -194,7 +222,7 @@ func detectRouteConflicts(ctx *validateContext, app *Application) {
 
 	for key, handlers := range byKey {
 		if len(handlers) > 1 {
-			ctx.Fail(RouteConflictError{
+			ctx.Invalid(RouteConflictError{
 				key.RouteType,
 				key.MessageTypeName,
 				handlers,

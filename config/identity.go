@@ -57,19 +57,22 @@ func (i *Identity) String() string {
 }
 
 func (i *Identity) validate(ctx *validateContext) {
-	i.ComponentCommon.validate(ctx)
+	validateComponent(
+		ctx,
+		func(ctx *validateContext) {
+			if n, ok := i.Name.TryGet(); ok && !isPrintable(n) {
+				ctx.Invalid(InvalidIdentityNameError{n})
+			}
 
-	if n, ok := i.Name.TryGet(); ok && !isPrintable(n) {
-		ctx.Fail(InvalidIdentityNameError{n})
-	}
-
-	if k, ok := i.Key.TryGet(); ok {
-		if id, err := uuidpb.Parse(k); err != nil {
-			ctx.Fail(InvalidIdentityKeyError{k})
-		} else if ctx.Options().Normalize {
-			i.Key = optional.Some(id.AsString())
-		}
-	}
+			if k, ok := i.Key.TryGet(); ok {
+				if id, err := uuidpb.Parse(k); err != nil {
+					ctx.Invalid(InvalidIdentityKeyError{k})
+				} else if ctx.Options.Normalize {
+					i.Key = optional.Some(id.AsString())
+				}
+			}
+		},
+	)
 }
 
 func (i *Identity) describe(ctx *describeContext) {

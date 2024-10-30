@@ -168,7 +168,7 @@ func TestAggregate_RouteSet(t *testing.T) {
 		for _, c := range cases {
 			t.Run(c.Name, func(t *testing.T) {
 				cfg := &Aggregate{
-					HandlerProperties: HandlerProperties{
+					HandlerCommon: HandlerCommon{
 						RouteComponents: []*Route{c.Route},
 					},
 				}
@@ -355,8 +355,8 @@ func TestAggregate_validation(t *testing.T) {
 			Name:   "no runtime type information",
 			Expect: ``,
 			Component: &Aggregate{
-				HandlerProperties: HandlerProperties{
-					EntityProperties: EntityProperties{
+				HandlerCommon: HandlerCommon{
+					EntityCommon: EntityCommon{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 						IdentityComponents: []*Identity{
 							{
@@ -388,8 +388,8 @@ func TestAggregate_validation(t *testing.T) {
 				WithRuntimeTypes(),
 			},
 			Component: &Aggregate{
-				HandlerProperties: HandlerProperties{
-					EntityProperties: EntityProperties{
+				HandlerCommon: HandlerCommon{
+					EntityCommon: EntityCommon{
 						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 						IdentityComponents: []*Identity{
 							{

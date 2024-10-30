@@ -6,6 +6,7 @@ import (
 
 	"github.com/dogmatiq/enginekit/collections/maps"
 	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/enginekit/optional"
 )
 
 // A Handler is an [Entity] that represents the configuration of a Dogma
@@ -22,85 +23,21 @@ type Handler interface {
 	// handler is enabled or disabled.
 	IsDisabled() bool
 
-	routes() []*Route
+	// HandlerProperties returns the properties common to all [Handler] types.
+	HandlerProperties() *HandlerCommon
 }
 
-// HandlerCommon is a partial implementation of [Handler].
-type HandlerCommon[T any] struct {
-	EntityCommon[T]
+// HandlerCommon contains the properties common to all [Handler] types.
+type HandlerCommon struct {
+	EntityCommon
 
 	RouteComponents []*Route
 	DisabledFlag    Flag[Disabled]
 }
 
-// IsDisabled returns true if the handler is disabled.
-//
-// It panics if the configuration does not specify unambiguously whether the
-// handler is enabled or disabled.
-func (h *HandlerCommon[T]) IsDisabled() bool {
-	panic("not implemented")
-}
-
-func (h *HandlerCommon[T]) routes() []*Route {
-	return h.RouteComponents
-}
-
-func (h *HandlerCommon[T]) validate(ctx *validateContext, t HandlerType) {
-	h.EntityCommon.validate(ctx)
-	h.validateRoutes(ctx, t)
-}
-
-func (h *HandlerCommon[T]) validateRoutes(ctx *validateContext, t HandlerType) {
-	var (
-		capabilities = t.RouteCapabilities()
-		missing      maps.Ordered[RouteType, MissingRouteTypeError]
-		duplicate    maps.OrderedByKey[routeKey, DuplicateRouteError]
-	)
-
-	for rt, req := range capabilities.RouteTypes {
-		if req == RouteTypeRequired {
-			missing.Set(rt, MissingRouteTypeError{rt})
-		}
-	}
-
-	for _, r := range h.RouteComponents {
-		if rt, ok := r.RouteType.TryGet(); ok {
-			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
-				ctx.Fail(UnexpectedRouteTypeError{r})
-			} else {
-				missing.Remove(rt)
-			}
-		}
-
-		if k, ok := r.key(); ok {
-			duplicate.Update(
-				k,
-				func(err *DuplicateRouteError) {
-					err.RouteType = k.RouteType
-					err.MessageTypeName = k.MessageTypeName
-					err.DuplicateRoutes = append(err.DuplicateRoutes, r)
-				},
-			)
-		}
-	}
-
-	for err := range missing.Values() {
-		ctx.Fail(err)
-	}
-
-	for err := range duplicate.Values() {
-		if len(err.DuplicateRoutes) > 1 {
-			ctx.Fail(err)
-		}
-	}
-}
-
-func (h *HandlerCommon[T]) describe(ctx *describeContext) {
-	h.EntityCommon.describe(ctx)
-
-	for _, r := range h.RouteComponents {
-		ctx.DescribeChild(r)
-	}
+// HandlerProperties returns the properties common to all [Handler] types.
+func (p *HandlerCommon) HandlerProperties() *HandlerCommon {
+	return p
 }
 
 // Disabled is the [Symbol] for a [Flag] that indicates whether or not a
@@ -151,10 +88,84 @@ func (e DuplicateRouteError) Error() string {
 	)
 }
 
-func routeSetForHandler(h Handler) RouteSet {
+func validateHandler[T any](
+	ctx *validateContext,
+	h Handler,
+	source optional.Optional[T],
+	funcs ...func(*validateContext),
+) {
+	validateEntity(
+		ctx,
+		h,
+		source,
+		func(ctx *validateContext) {
+			validateHandlerRoutes(ctx, h)
+
+			for _, fn := range funcs {
+				fn(ctx)
+			}
+		},
+	)
+}
+
+func validateHandlerRoutes(ctx *validateContext, h Handler) {
+	var (
+		capabilities = h.HandlerType().RouteCapabilities()
+		missing      maps.Ordered[RouteType, MissingRouteTypeError]
+		duplicate    maps.OrderedByKey[routeKey, DuplicateRouteError]
+	)
+
+	for rt, req := range capabilities.RouteTypes {
+		if req == RouteTypeRequired {
+			missing.Set(rt, MissingRouteTypeError{rt})
+		}
+	}
+
+	for _, r := range h.HandlerProperties().RouteComponents {
+		ctx.ValidateChild(r)
+
+		if rt, ok := r.RouteType.TryGet(); ok {
+			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
+				ctx.Invalid(UnexpectedRouteTypeError{r})
+			} else {
+				missing.Remove(rt)
+			}
+		}
+
+		if k, ok := r.key(); ok {
+			duplicate.Update(
+				k,
+				func(err *DuplicateRouteError) {
+					err.RouteType = k.RouteType
+					err.MessageTypeName = k.MessageTypeName
+					err.DuplicateRoutes = append(err.DuplicateRoutes, r)
+				},
+			)
+		}
+	}
+
+	for err := range missing.Values() {
+		ctx.Invalid(err)
+	}
+
+	for err := range duplicate.Values() {
+		if len(err.DuplicateRoutes) > 1 {
+			ctx.Invalid(err)
+		}
+	}
+}
+
+func resolveRouteSet(h Handler) RouteSet {
+	ctx := newResolutionContext(h)
+	return buildRouteSet(ctx, h)
+}
+
+func buildRouteSet(ctx *validateContext, h Handler) RouteSet {
+	validateHandlerRoutes(ctx, h)
+
 	set := RouteSet{}
 
-	for _, r := range h.routes() {
+	for _, r := range h.HandlerProperties().RouteComponents {
 		rt, ok := r.RouteType.TryGet()
 		if !ok {
 			continue
@@ -185,4 +196,16 @@ func routeSetForHandler(h Handler) RouteSet {
 	}
 
 	return set
+}
+
+func describeHandler[T any](
+	ctx *describeContext,
+	h Handler,
+	source optional.Optional[T],
+) {
+	describeEntity(ctx, h, source)
+
+	for _, r := range h.HandlerProperties().RouteComponents {
+		ctx.DescribeChild(r)
+	}
 }

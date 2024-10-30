@@ -2,7 +2,10 @@ package config
 
 import (
 	"cmp"
+	"strings"
 
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
+	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -23,7 +26,21 @@ type Route struct {
 }
 
 func (r *Route) String() string {
-	panic("not implemented")
+	var w strings.Builder
+
+	w.WriteString("route")
+
+	if rt, ok := r.RouteType.TryGet(); ok {
+		w.WriteByte(':')
+		w.WriteString(rt.String())
+	}
+
+	if mt, ok := r.MessageTypeName.TryGet(); ok {
+		w.WriteByte(':')
+		w.WriteString(typename.Unqualified(mt))
+	}
+
+	return w.String()
 }
 
 func (r *Route) key() (routeKey, bool) {
@@ -39,6 +56,43 @@ func (r *Route) key() (routeKey, bool) {
 		RouteType:       r.RouteType.Get(),
 		MessageTypeName: r.MessageTypeName.Get(),
 	}, true
+}
+
+func (r *Route) validate(ctx *validateContext) {
+	validateComponent(
+		ctx,
+		func(ctx *validateContext) {
+			routeType, hasRouteType := r.RouteType.TryGet()
+			messageTypeName, hasMessageTypeName := r.MessageTypeName.TryGet()
+			messageType, hasMessageType := r.MessageType.TryGet()
+
+			if !hasRouteType {
+				ctx.Invalid(UnknownRouteTypeError{})
+			}
+
+			if !hasMessageTypeName {
+				ctx.Invalid(UnknownMessageTypeError{})
+			}
+
+			if hasMessageType {
+				if hasRouteType {
+					if routeType.MessageKind() != messageType.Kind() {
+						ctx.Invalid(MessageKindMismatchError{routeType, messageType})
+					}
+				}
+
+				if !hasMessageTypeName {
+					ctx.Malformed("MessageType is present, but MessageTypeName is not")
+				} else if messageTypeName != string(messageType.Name()) {
+					ctx.Malformed(
+						"MessageTypeName does not match MessageType: %q != %q",
+						messageTypeName,
+						messageType.Name(),
+					)
+				}
+			}
+		},
+	)
 }
 
 func (r *Route) describe(ctx *describeContext) {
@@ -74,4 +128,36 @@ func (k routeKey) Compare(x routeKey) int {
 		return c
 	}
 	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
+}
+
+// UnknownRouteTypeError indicates that a [Route] does not specify a
+// [RouteType].
+type UnknownRouteTypeError struct{}
+
+func (UnknownRouteTypeError) Error() string {
+	return "unknown route type"
+}
+
+// UnknownMessageTypeError indicates that a [Route] does not specify a message
+// type name.
+type UnknownMessageTypeError struct{}
+
+func (UnknownMessageTypeError) Error() string {
+	return "unknown message type"
+}
+
+// MessageKindMismatchError indicates that a [Route] refers to a [message.Type]
+// that has a different [message.Kind] than the route's [RouteType].
+type MessageKindMismatchError struct {
+	RouteType   RouteType
+	MessageType message.Type
+}
+
+func (e MessageKindMismatchError) Error() string {
+	return renderer.Inflect(
+		"unexpected message kind: %s is a %s, expected a %s",
+		typename.Get(e.MessageType.ReflectType()),
+		e.MessageType.Kind(),
+		e.RouteType.MessageKind(),
+	)
 }

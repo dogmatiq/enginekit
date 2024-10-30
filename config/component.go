@@ -13,35 +13,39 @@ type Component interface {
 	// configuration that can be used to execute an application.
 	Fidelity() Fidelity
 
-	// Baggage is a collection of arbitrary data that is associated with the
-	// [Component] by whatever system produced the configuration.
-	Baggage() Baggage
+	// ComponentProperties returns the properties common to all [Component] types.
+	ComponentProperties() *ComponentCommon
 
 	validate(*validateContext)
 	describe(*describeContext)
 }
 
-// ComponentCommon is a partial implementation of [Component].
+// ComponentCommon contains the properties common to all [Component] types.
 type ComponentCommon struct {
 	ComponentFidelity Fidelity
-	ComponentBaggage  Baggage
 }
 
 // Fidelity reports how faithfully the [Component] describes a complete
 // configuration that can be used to execute an application.
-func (c *ComponentCommon) Fidelity() Fidelity {
-	return c.ComponentFidelity
+func (p *ComponentCommon) Fidelity() Fidelity {
+	return p.ComponentFidelity
 }
 
-// Baggage returns a collection of arbitrary data that is associated with the
-// [Component] by whatever system produced the configuration.
-func (c *ComponentCommon) Baggage() Baggage {
-	return c.ComponentBaggage
+// ComponentProperties returns the properties common to all [Component] types.
+func (p *ComponentCommon) ComponentProperties() *ComponentCommon {
+	return p
 }
 
-func (c *ComponentCommon) validate(ctx *validateContext) {
-	if c.ComponentFidelity.Has(Incomplete) {
-		ctx.Fail(IncompleteComponentError{})
+func validateComponent(
+	ctx *validateContext,
+	funcs ...func(*validateContext),
+) {
+	for _, fn := range funcs {
+		fn(ctx)
+	}
+
+	if ctx.Component.Fidelity().Has(Incomplete) {
+		ctx.Invalid(IncompleteComponentError{})
 	}
 }
 

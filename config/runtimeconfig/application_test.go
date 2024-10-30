@@ -29,7 +29,7 @@ func TestFromApplication(t *testing.T) {
 			nil,
 			func(dogma.Application) *config.Application {
 				return &config.Application{
-					EntityCommon: config.EntityCommon[dogma.Application]{
+					EntityCommon: config.EntityCommon{
 						ComponentCommon: config.ComponentCommon{
 							ComponentFidelity: config.Incomplete,
 						},
@@ -42,10 +42,10 @@ func TestFromApplication(t *testing.T) {
 			&ApplicationStub{},
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
-					EntityCommon: config.EntityCommon[dogma.Application]{
-						SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
-						Source:         optional.Some(app),
+					EntityCommon: config.EntityCommon{
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
 					},
+					Source: optional.Some(app),
 				}
 			},
 		},
@@ -62,7 +62,7 @@ func TestFromApplication(t *testing.T) {
 			},
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
-					EntityCommon: config.EntityCommon[dogma.Application]{
+					EntityCommon: config.EntityCommon{
 						ComponentCommon: config.ComponentCommon{},
 						IdentityComponents: []*config.Identity{
 							{
@@ -70,43 +70,43 @@ func TestFromApplication(t *testing.T) {
 								Key:  optional.Some("bed53df8-bf22-4502-be4b-64d56532d8be"),
 							},
 						},
-						SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
-						Source:         optional.Some(app),
+						TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),
 					},
 					HandlerComponents: []config.Handler{
 						&config.Aggregate{
-							HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
-								EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
-									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-									Source:         optional.Some(aggregate),
+							HandlerCommon: config.HandlerCommon{
+								EntityCommon: config.EntityCommon{
+									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 								},
 							},
+							Source: optional.Some(aggregate),
 						},
 						&config.Process{
-							HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
-								EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
-									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-									Source:         optional.Some(process),
+							HandlerCommon: config.HandlerCommon{
+								EntityCommon: config.EntityCommon{
+									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 								},
 							},
+							Source: optional.Some(process),
 						},
 						&config.Integration{
-							HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-								EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-									Source:         optional.Some(integration),
+							HandlerCommon: config.HandlerCommon{
+								EntityCommon: config.EntityCommon{
+									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 								},
 							},
+							Source: optional.Some(integration),
 						},
 						&config.Projection{
-							HandlerCommon: config.HandlerCommon[dogma.ProjectionMessageHandler]{
-								EntityCommon: config.EntityCommon[dogma.ProjectionMessageHandler]{
-									SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-									Source:         optional.Some(projection),
+							HandlerCommon: config.HandlerCommon{
+								EntityCommon: config.EntityCommon{
+									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
 								},
 							},
+							Source: optional.Some(projection),
 						},
 					},
+					Source: optional.Some(app),
 				}
 			},
 		},

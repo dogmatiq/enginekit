@@ -23,8 +23,8 @@ func TestFromProcess(t *testing.T) {
 			nil,
 			func(dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
 							ComponentCommon: config.ComponentCommon{
 								ComponentFidelity: config.Incomplete,
 							},
@@ -38,12 +38,12 @@ func TestFromProcess(t *testing.T) {
 			&ProcessMessageHandlerStub{},
 			func(h dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},
@@ -62,10 +62,9 @@ func TestFromProcess(t *testing.T) {
 			},
 			func(h dogma.ProcessMessageHandler) *config.Process {
 				return &config.Process{
-					HandlerCommon: config.HandlerCommon[dogma.ProcessMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.ProcessMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
 							IdentityComponents: []*config.Identity{
 								{
 									Name: optional.Some("projection"),
@@ -96,6 +95,7 @@ func TestFromProcess(t *testing.T) {
 							},
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},

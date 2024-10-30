@@ -8,9 +8,9 @@ import (
 )
 
 type renderTestCases []struct {
-	Name        string
-	Short, Long string
-	Component   Component
+	Name                string
+	String, Description string
+	Component           Component
 }
 
 func testDescribe(t *testing.T, cases renderTestCases) {
@@ -27,7 +27,7 @@ func testDescribe(t *testing.T, cases renderTestCases) {
 					t,
 					"unexpected short string representation",
 					c.Component.String(),
-					c.Short,
+					c.String,
 				)
 
 				test.Expect(
@@ -37,7 +37,7 @@ func testDescribe(t *testing.T, cases renderTestCases) {
 						c.Component,
 						WithValidationResult(Validate(c.Component)),
 					),
-					c.Long+"\n",
+					c.Description+"\n",
 				)
 			})
 		}

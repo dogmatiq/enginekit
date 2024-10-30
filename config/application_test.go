@@ -26,8 +26,8 @@ func TestApplication(t *testing.T) {
 		t,
 		validationTestCases{
 			{
-				Name:   "application name may be shared with one of its handlers",
-				Expect: "",
+				Name:  "application name may be shared with one of its handlers",
+				Error: "",
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME NAME
@@ -44,8 +44,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "multiple processes may schedule the same type of timeout message",
-				Expect: "",
+				Name:  "multiple processes may schedule the same type of timeout message",
+				Error: "",
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -74,21 +74,21 @@ func TestApplication(t *testing.T) {
 			},
 			{
 				Name: "nil application",
-				Expect: multiline(
+				Error: multiline(
 					`application is invalid:`,
-					`- could not evaluate entire configuration`,
 					`- entity has no identity`,
+					`- could not evaluate entire configuration`,
 				),
 				Component: runtimeconfig.FromApplication(nil),
 			},
 			{
 				Name:      "unconfigured application",
-				Expect:    `application:ApplicationStub is invalid: entity has no identity`,
+				Error:     `application:ApplicationStub is invalid: entity has no identity`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{}),
 			},
 			{
-				Name:   "application identity must be valid",
-				Expect: `application:ApplicationStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				Name:  "application identity must be valid",
+				Error: `application:ApplicationStub is invalid: identity:name/non-uuid is invalid: invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "non-uuid")
@@ -96,8 +96,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "application must not have multiple identities",
-				Expect: `application:ApplicationStub is invalid: entity has 3 identities`,
+				Name:  "application must not have multiple identities",
+				Error: `application:ApplicationStub is invalid: entity has 3 identities`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -107,8 +107,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "application must not contain invalid handlers",
-				Expect: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no "handles-command" routes configured`,
+				Name:  "application must not contain invalid handlers",
+				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no "handles-command" routes configured`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -125,8 +125,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "application must not have the same identity key as one of its handlers",
-				Expect: `application:ApplicationStub is invalid: identity key "14769f7f-87fe-48dd-916e-5bcab6ba6aca" is shared by 2 entities`,
+				Name:  "application must not have the same identity key as one of its handlers",
+				Error: `application:ApplicationStub is invalid: identity key "14769f7f-87fe-48dd-916e-5bcab6ba6aca" is shared by 2 entities`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME IDENTITY KEY
@@ -143,8 +143,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "multiple handlers must not have the same identity name",
-				Expect: `application:ApplicationStub is invalid: identity name "handler" is shared by 2 entities`,
+				Name:  "multiple handlers must not have the same identity name",
+				Error: `application:ApplicationStub is invalid: identity name "handler" is shared by 2 entities`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -170,8 +170,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "multiple handlers must not have the same identity key",
-				Expect: `application:ApplicationStub is invalid: identity key "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db" is shared by 2 entities`,
+				Name:  "multiple handlers must not have the same identity key",
+				Error: `application:ApplicationStub is invalid: identity key "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db" is shared by 2 entities`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -197,8 +197,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "multiple handlers must not handle the same command type",
-				Expect: `application:ApplicationStub is invalid: handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is shared by 2 handlers`,
+				Name:  "multiple handlers must not handle the same command type",
+				Error: `application:ApplicationStub is invalid: handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is shared by 2 handlers`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -224,8 +224,8 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "multiple handlers must not record the same event type",
-				Expect: `application:ApplicationStub is invalid: records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is shared by 2 handlers`,
+				Name:  "multiple handlers must not record the same event type",
+				Error: `application:ApplicationStub is invalid: records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] is shared by 2 handlers`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -257,9 +257,9 @@ func TestApplication(t *testing.T) {
 		t,
 		renderTestCases{
 			{
-				Name:  "complete",
-				Short: `application:ApplicationStub`,
-				Long: multiline(
+				Name:   "complete",
+				String: `application:ApplicationStub`,
+				Description: multiline(
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
 					`  - valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
@@ -284,15 +284,15 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:  "no runtime type information",
-				Short: `application:SomeApplication`,
-				Long: multiline(
+				Name:   "no runtime type information",
+				String: `application:SomeApplication`,
+				Description: multiline(
 					`valid application pkg.SomeApplication (value unavailable)`,
 					`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
 				),
 				Component: configbuilder.Application(
 					func(b *configbuilder.ApplicationBuilder) {
-						b.SourceTypeName("pkg.SomeApplication")
+						b.TypeName("pkg.SomeApplication")
 						b.Identity(func(b *configbuilder.IdentityBuilder) {
 							b.Name("app")
 							b.Key("c85acb36-e47b-4ef6-b46b-64d847a853b7")
@@ -301,18 +301,18 @@ func TestApplication(t *testing.T) {
 				),
 			},
 			{
-				Name:  "empty",
-				Short: `application`,
-				Long: multiline(
+				Name:   "empty",
+				String: `application`,
+				Description: multiline(
 					`invalid application`,
 					`  - entity has no identity`,
 				),
 				Component: &Application{},
 			},
 			{
-				Name:  "invalid",
-				Short: `application:ApplicationStub`,
-				Long: multiline(
+				Name:   "invalid",
+				String: `application:ApplicationStub`,
+				Description: multiline(
 					`invalid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - entity has 2 identities`,
 					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
@@ -326,9 +326,9 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:  "invalid identity",
-				Short: `application:ApplicationStub`,
-				Long: multiline(
+				Name:   "invalid identity",
+				String: `application:ApplicationStub`,
+				Description: multiline(
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - invalid identity app/non-uuid`,
 					`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
@@ -340,9 +340,9 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:  "invalid handler",
-				Short: `application:ApplicationStub`,
-				Long: multiline(
+				Name:   "invalid handler",
+				String: `application:ApplicationStub`,
+				Description: multiline(
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
@@ -448,28 +448,26 @@ func TestApplication(t *testing.T) {
 			)
 		})
 
-		// 	t.Run("it panics if the routes are invalid", func(t *testing.T) {
-		// 		cfg := &Application{
-		// 			X: XApplication{
-		// 				Handlers: []Handler{
-		// 					&Projection{
-		// 						X: XProjection{
-		// 							Routes: []*Route{
-		// 								{},
-		// 							},
-		// 						},
-		// 					},
-		// 				},
-		// 			},
-		// 		}
+		t.Run("it panics if the routes are invalid", func(t *testing.T) {
+			entity := &Application{
+				HandlerComponents: []Handler{
+					&Projection{
+						HandlerCommon: HandlerCommon{
+							RouteComponents: []*Route{
+								{},
+							},
+						},
+					},
+				},
+			}
 
-		// 		ExpectPanic(
-		// 			t,
-		// 			`application is invalid: projection is invalid: route is invalid: could not evaluate entire configuration`,
-		// 			func() {
-		// 				cfg.RouteSet()
-		// 			},
-		// 		)
-		// 	})
+			test.ExpectPanic(
+				t,
+				`projection is invalid: route is invalid: unknown route type`,
+				func() {
+					entity.RouteSet()
+				},
+			)
+		})
 	})
 }

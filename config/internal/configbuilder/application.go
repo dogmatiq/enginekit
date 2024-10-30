@@ -17,15 +17,15 @@ type ApplicationBuilder struct {
 	target config.Application
 }
 
-// SourceTypeName sets the name of the concrete type that implements
+// TypeName sets the name of the concrete type that implements
 // [dogma.Application].
-func (b *ApplicationBuilder) SourceTypeName(n string) {
-	setSourceTypeName(&b.target.EntityCommon, n)
+func (b *ApplicationBuilder) TypeName(n string) {
+	setTypeName(&b.target.TypeName, &b.target.Source, n)
 }
 
 // Source sets the source value to app.
 func (b *ApplicationBuilder) Source(app dogma.Application) {
-	setSource(&b.target.EntityCommon, app)
+	setSource(&b.target.TypeName, &b.target.Source, app)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
@@ -60,7 +60,7 @@ func (b *ApplicationBuilder) Projection(fn func(*ProjectionBuilder)) {
 
 // Done sanity checks the configuration and returns the completed component.
 func (b *ApplicationBuilder) Done() *config.Application {
-	if !b.target.SourceTypeName.IsPresent() {
+	if !b.target.TypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

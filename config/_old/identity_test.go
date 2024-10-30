@@ -79,8 +79,8 @@ func TestIdentity_render(t *testing.T) {
 			ExpectDescriptor: `identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
 			ExpectDetails:    `valid speculative identity name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
 			Component: &Identity{
-				ComponentProperties: ComponentCommon{
-					Fidelity: Speculative,
+				ComponentCommon: ComponentCommon{
+					ComponentFidelity: Speculative,
 				},
 				Name: optional.Some("name"),
 				Key:  optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
@@ -118,8 +118,8 @@ func TestIdentity_validation(t *testing.T) {
 			Name:   "spectulative",
 			Expect: `identity:name/e6b691dd-731c-4c14-8e1c-1622381202dc is invalid: conditions for the component's inclusion in the configuration could not be evaluated`,
 			Component: &Identity{
-				ComponentProperties: ComponentCommon{
-					Fidelity: Speculative,
+				ComponentCommon: ComponentCommon{
+					ComponentFidelity: Speculative,
 				},
 				Name: optional.Some("name"),
 				Key:  optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
@@ -133,8 +133,8 @@ func TestIdentity_validation(t *testing.T) {
 				// both it's name and key be considered incomplete, but this
 				// allows us to represent a case where the name and key are
 				// build dynamically and we don't have the _entire_ string.
-				ComponentProperties: ComponentCommon{
-					Fidelity: Incomplete,
+				ComponentCommon: ComponentCommon{
+					ComponentFidelity: Incomplete,
 				},
 				Name: optional.Some("name"),
 				Key:  optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),

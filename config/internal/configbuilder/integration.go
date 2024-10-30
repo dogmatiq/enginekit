@@ -17,15 +17,15 @@ type IntegrationBuilder struct {
 	target config.Integration
 }
 
-// SourceTypeName sets the name of the concrete type that implements
+// TypeName sets the name of the concrete type that implements
 // [dogma.IntegrationMessageHandler].
-func (b *IntegrationBuilder) SourceTypeName(n string) {
-	setSourceTypeName(&b.target.EntityCommon, n)
+func (b *IntegrationBuilder) TypeName(n string) {
+	setTypeName(&b.target.TypeName, &b.target.Source, n)
 }
 
 // Source sets the source value to h.
 func (b *IntegrationBuilder) Source(h dogma.IntegrationMessageHandler) {
-	setSource(&b.target.EntityCommon, h)
+	setSource(&b.target.TypeName, &b.target.Source, h)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
@@ -48,7 +48,7 @@ func (b *IntegrationBuilder) Disabled(fn func(*FlagBuilder)) {
 
 // Done completes the configuration of the handler.
 func (b *IntegrationBuilder) Done() *config.Integration {
-	if !b.target.SourceTypeName.IsPresent() {
+	if !b.target.TypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

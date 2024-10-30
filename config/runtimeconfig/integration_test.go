@@ -23,8 +23,8 @@ func TestFromIntegration(t *testing.T) {
 			nil,
 			func(dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
-					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
 							ComponentCommon: config.ComponentCommon{
 								ComponentFidelity: config.Incomplete,
 							},
@@ -38,12 +38,12 @@ func TestFromIntegration(t *testing.T) {
 			&IntegrationMessageHandlerStub{},
 			func(h dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
-					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},
@@ -61,10 +61,9 @@ func TestFromIntegration(t *testing.T) {
 			},
 			func(h dogma.IntegrationMessageHandler) *config.Integration {
 				return &config.Integration{
-					HandlerCommon: config.HandlerCommon[dogma.IntegrationMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.IntegrationMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub"),
 							IdentityComponents: []*config.Identity{
 								{
 									Name: optional.Some("integration"),
@@ -90,6 +89,7 @@ func TestFromIntegration(t *testing.T) {
 							},
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},

@@ -10,7 +10,7 @@ import (
 
 type validationTestCases []struct {
 	Name      string
-	Expect    string
+	Error     string
 	Options   []ValidateOption
 	Component Component
 }
@@ -34,7 +34,7 @@ func testValidate(t *testing.T, cases validationTestCases) {
 					t,
 					"unexpected error",
 					got,
-					c.Expect,
+					c.Error,
 				)
 			})
 		}

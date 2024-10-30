@@ -17,15 +17,15 @@ type ProcessBuilder struct {
 	target config.Process
 }
 
-// SourceTypeName sets the name of the concrete type that implements
+// TypeName sets the name of the concrete type that implements
 // [dogma.ProcessMessageHandler].
-func (b *ProcessBuilder) SourceTypeName(n string) {
-	setSourceTypeName(&b.target.EntityCommon, n)
+func (b *ProcessBuilder) TypeName(n string) {
+	setTypeName(&b.target.TypeName, &b.target.Source, n)
 }
 
 // Source sets the source value to h.
 func (b *ProcessBuilder) Source(h dogma.ProcessMessageHandler) {
-	setSource(&b.target.EntityCommon, h)
+	setSource(&b.target.TypeName, &b.target.Source, h)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
@@ -48,7 +48,7 @@ func (b *ProcessBuilder) Disabled(fn func(*FlagBuilder)) {
 
 // Done completes the configuration of the handler.
 func (b *ProcessBuilder) Done() *config.Process {
-	if !b.target.SourceTypeName.IsPresent() {
+	if !b.target.TypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

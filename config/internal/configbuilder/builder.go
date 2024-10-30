@@ -16,9 +16,9 @@ type ComponentBuilder[T config.Component] interface {
 type EntityBuilder[T config.Entity, E any] interface {
 	ComponentBuilder[T]
 
-	// SourceTypeName sets the name of the concrete type that implements the
+	// TypeName sets the name of the concrete type that implements the
 	// entity.
-	SourceTypeName(n string)
+	TypeName(n string)
 
 	// Source sets the source value to h.
 	Source(E)
@@ -47,22 +47,30 @@ var (
 	_ ComponentBuilder[*config.Route] = (*RouteBuilder)(nil)
 )
 
-func setSourceTypeName[T any](e *config.EntityCommon[T], n string) {
+func setTypeName[T any](
+	typeName *optional.Optional[string],
+	source *optional.Optional[T],
+	n string,
+) {
 	if n == "" {
 		// TODO: validate that this is actually a well-formed fully-qualified
 		// type name, with optional asterisk prefix.
 		panic("concrete type name must not be empty")
 	}
 
-	e.SourceTypeName = optional.Some(n)
-	e.Source = optional.None[T]()
+	*typeName = optional.Some(n)
+	*source = optional.None[T]()
 }
 
-func setSource[T any](e *config.EntityCommon[T], v T) {
+func setSource[T any](
+	typeName *optional.Optional[string],
+	source *optional.Optional[T],
+	v T,
+) {
 	if any(v) == nil {
-		panic("runtime value must not be nil")
+		panic("source must not be nil")
 	}
 
-	e.SourceTypeName = optional.Some(typename.Of(v))
-	e.Source = optional.Some(v)
+	*typeName = optional.Some(typename.Of(v))
+	*source = optional.Some(v)
 }

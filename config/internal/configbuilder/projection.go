@@ -18,15 +18,15 @@ type ProjectionBuilder struct {
 	target config.Projection
 }
 
-// SourceTypeName sets the name of the concrete type that implements
+// TypeName sets the name of the concrete type that implements
 // [dogma.ProjectionMessageHandler].
-func (b *ProjectionBuilder) SourceTypeName(n string) {
-	setSourceTypeName(&b.target.EntityCommon, n)
+func (b *ProjectionBuilder) TypeName(n string) {
+	setTypeName(&b.target.TypeName, &b.target.Source, n)
 }
 
 // Source sets the source value to h.
 func (b *ProjectionBuilder) Source(h dogma.ProjectionMessageHandler) {
-	setSource(&b.target.EntityCommon, h)
+	setSource(&b.target.TypeName, &b.target.Source, h)
 }
 
 // Identity calls fn which configures a [config.Identity] that is added to the
@@ -55,7 +55,7 @@ func (b *ProjectionBuilder) DeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuil
 
 // Done completes the configuration of the handler.
 func (b *ProjectionBuilder) Done() *config.Projection {
-	if !b.target.SourceTypeName.IsPresent() {
+	if !b.target.TypeName.IsPresent() {
 		b.target.ComponentFidelity |= config.Incomplete
 	}
 	return &b.target

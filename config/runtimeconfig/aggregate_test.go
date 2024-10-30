@@ -25,8 +25,8 @@ func TestFromAggregate(t *testing.T) {
 			nil,
 			func(dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
 							ComponentCommon: config.ComponentCommon{
 								ComponentFidelity: config.Incomplete,
 							},
@@ -40,12 +40,12 @@ func TestFromAggregate(t *testing.T) {
 			&AggregateMessageHandlerStub{},
 			func(h dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-							Source:         optional.Some(h),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 						},
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},
@@ -63,10 +63,9 @@ func TestFromAggregate(t *testing.T) {
 			},
 			func(app dogma.AggregateMessageHandler) *config.Aggregate {
 				return &config.Aggregate{
-					HandlerCommon: config.HandlerCommon[dogma.AggregateMessageHandler]{
-						EntityCommon: config.EntityCommon[dogma.AggregateMessageHandler]{
-							SourceTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
-							Source:         optional.Some(app),
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
 							IdentityComponents: []*config.Identity{
 								{
 									Name: optional.Some("aggregate"),
@@ -92,6 +91,7 @@ func TestFromAggregate(t *testing.T) {
 							},
 						},
 					},
+					Source: optional.Some(app),
 				}
 			},
 		},

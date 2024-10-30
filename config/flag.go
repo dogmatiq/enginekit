@@ -30,6 +30,10 @@ func (m *FlagModification) String() string {
 	panic("not implemented")
 }
 
+func (m *FlagModification) validate(*validateContext) {
+	panic("not implemented")
+}
+
 func (m *FlagModification) describe(*describeContext) {
 	panic("not implemented")
 }

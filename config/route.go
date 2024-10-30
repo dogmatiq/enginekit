@@ -2,6 +2,7 @@ package config
 
 import (
 	"cmp"
+	"reflect"
 	"strings"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
@@ -89,6 +90,8 @@ func (r *Route) validate(ctx *validateContext) {
 				mt.Name(),
 			)
 		}
+	} else if ctx.Options.ForExecution {
+		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[message.Type]()})
 	}
 }
 

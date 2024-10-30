@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // Component is the "top-level" interface for the individual elements that form
@@ -46,6 +47,19 @@ func validateComponent(ctx *validateContext) {
 	if f.Has(Speculative) {
 		ctx.Invalid(SpeculativeComponentError{})
 	}
+}
+
+// ValueUnavailableError indicates that a [Component] cannot produce the actual
+// value it represents because there is insufficient runtime type information
+// available.
+//
+// See [ForExecution].
+type ValueUnavailableError struct {
+	Type reflect.Type
+}
+
+func (e ValueUnavailableError) Error() string {
+	return fmt.Sprintf("%s is unavailable", e.Type)
 }
 
 var (

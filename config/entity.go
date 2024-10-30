@@ -75,17 +75,6 @@ func (e AmbiguouslyIdentifiedEntityError) Error() string {
 	)
 }
 
-// EntityUnavailableError indicates that an [Entity] cannot produce the actual
-// entity value it represents because there is insufficient runtime type
-// information available.
-type EntityUnavailableError struct {
-	EntityType reflect.Type
-}
-
-func (e EntityUnavailableError) Error() string {
-	return fmt.Sprintf("%s is unavailable", e.EntityType)
-}
-
 func validateEntity[T any](
 	ctx *validateContext,
 	e Entity,
@@ -136,7 +125,7 @@ func resolveInterface[T any](e Entity, src optional.Optional[T]) T {
 	v, ok := src.TryGet()
 
 	if !ok {
-		ctx.Invalid(EntityUnavailableError{reflect.TypeFor[T]()})
+		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[T]()})
 	}
 
 	return v

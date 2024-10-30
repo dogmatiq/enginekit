@@ -22,11 +22,13 @@ func Validate(c Component, _ ...ValidateOption) error {
 // ValidateOption changes the behavior of [Component.Validate].
 type ValidateOption func(*validationOptions)
 
-// Normalize is a [ValidateOption] that indicates causes the component to be
-// normalized in-place during validation.
-func Normalize() ValidateOption {
+// ForExecution is a [ValidateOption] that requires all [Entity] and [Route]
+// components to have full runtime type and value information available, such
+// that the configuration can be used to execute an application on a Dogma
+// engine.
+func ForExecution() ValidateOption {
 	return func(o *validationOptions) {
-		o.Normalize = true
+		o.ForExecution = true
 	}
 }
 
@@ -113,8 +115,8 @@ func unwrap(err error) iter.Seq[error] {
 }
 
 type validationOptions struct {
-	Normalize bool
-	Panic     bool
+	ForExecution bool
+	Panic        bool
 }
 
 // validateContext carries the inputs and outputs of the component validation

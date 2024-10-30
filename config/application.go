@@ -75,14 +75,8 @@ func (a *Application) identities() []*Identity {
 }
 
 func (a *Application) validate(ctx *validateContext) {
-	validateEntity(
-		ctx,
-		a,
-		a.Source,
-		func(ctx *validateContext) {
-			validateApplicationHandlers(ctx, a)
-		},
-	)
+	validateEntity(ctx, a, a.Source)
+	validateApplicationHandlers(ctx, a)
 }
 
 func (a *Application) describe(ctx *describeContext) {

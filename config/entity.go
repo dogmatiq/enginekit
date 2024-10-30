@@ -89,30 +89,21 @@ func (e EntityUnavailableError) Error() string {
 func validateEntity[T any](
 	ctx *validateContext,
 	e Entity,
-	source optional.Optional[T],
-	funcs ...func(*validateContext),
+	src optional.Optional[T],
 ) {
-	validateComponent(
-		ctx,
-		func(ctx *validateContext) {
-			validateEntityIdentities(ctx, e)
+	validateComponent(ctx)
+	validateEntityIdentities(ctx, e)
 
-			for _, fn := range funcs {
-				fn(ctx)
-			}
+	n, hasN := e.EntityProperties().TypeName.TryGet()
+	s, hasS := src.TryGet()
 
-			typeName, hasTypeName := e.EntityProperties().TypeName.TryGet()
-			source, hasSource := source.TryGet()
-
-			if hasSource {
-				if !hasTypeName {
-					ctx.Malformed("Source is present, but TypeName is not")
-				} else if typeName != typename.Of(source) {
-					ctx.Malformed("TypeName does not match Source: %q != %q", typeName, typename.Of(source))
-				}
-			}
-		},
-	)
+	if hasS {
+		if !hasN {
+			ctx.Malformed("Source is present, but TypeName is not")
+		} else if n != typename.Of(s) {
+			ctx.Malformed("TypeName does not match Source: %q != %q", n, typename.Of(s))
+		}
+	}
 }
 
 func validateEntityIdentities(ctx *validateContext, e Entity) {
@@ -139,10 +130,10 @@ func resolveIdentity(e Entity) *identitypb.Identity {
 	}
 }
 
-func resolveInterface[T any](e Entity, source optional.Optional[T]) T {
+func resolveInterface[T any](e Entity, src optional.Optional[T]) T {
 	ctx := newResolutionContext(e)
 
-	v, ok := source.TryGet()
+	v, ok := src.TryGet()
 
 	if !ok {
 		ctx.Invalid(EntityUnavailableError{reflect.TypeFor[T]()})

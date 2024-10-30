@@ -43,3 +43,14 @@ type IncompleteComponentError struct{}
 func (e IncompleteComponentError) Error() string {
 	return "could not evaluate entire configuration"
 }
+
+// SpeculativeComponentError indicates that a [Component]'s inclusion in the
+// configuration is subject to some condition that could not be evaluated at the
+// time the configuration was built.
+//
+// See [Fidelity] for more information.
+type SpeculativeComponentError struct{}
+
+func (e SpeculativeComponentError) Error() string {
+	return "conditions for the component's inclusion in the configuration could not be evaluated"
+}

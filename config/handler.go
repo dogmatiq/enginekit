@@ -92,20 +92,9 @@ func validateHandler[T any](
 	ctx *validateContext,
 	h Handler,
 	source optional.Optional[T],
-	funcs ...func(*validateContext),
 ) {
-	validateEntity(
-		ctx,
-		h,
-		source,
-		func(ctx *validateContext) {
-			validateHandlerRoutes(ctx, h)
-
-			for _, fn := range funcs {
-				fn(ctx)
-			}
-		},
-	)
+	validateEntity(ctx, h, source)
+	validateHandlerRoutes(ctx, h)
 }
 
 func validateHandlerRoutes(ctx *validateContext, h Handler) {

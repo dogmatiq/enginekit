@@ -60,15 +60,8 @@ func (h *Projection) routes() []*Route {
 }
 
 func (h *Projection) validate(ctx *validateContext) {
-	validateHandler(
-		ctx,
-		h,
-		h.Source,
-		func(ctx *validateContext) {
-			// TODO: delivery policies
-			panic("not implemented")
-		},
-	)
+	validateHandler(ctx, h, h.Source)
+	panic("not implemented") // TODO: delivery policies
 }
 
 func (h *Projection) describe(ctx *describeContext) {

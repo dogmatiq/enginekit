@@ -76,8 +76,8 @@ func TestApplication(t *testing.T) {
 				Name: "nil application",
 				Error: multiline(
 					`application is invalid:`,
-					`- entity has no identity`,
 					`- could not evaluate entire configuration`,
+					`- entity has no identity`,
 				),
 				Component: runtimeconfig.FromApplication(nil),
 			},

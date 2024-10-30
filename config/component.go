@@ -36,16 +36,15 @@ func (p *ComponentCommon) ComponentProperties() *ComponentCommon {
 	return p
 }
 
-func validateComponent(
-	ctx *validateContext,
-	funcs ...func(*validateContext),
-) {
-	for _, fn := range funcs {
-		fn(ctx)
+func validateComponent(ctx *validateContext) {
+	f := ctx.Component.Fidelity()
+
+	if f.Has(Incomplete) {
+		ctx.Invalid(IncompleteComponentError{})
 	}
 
-	if ctx.Component.Fidelity().Has(Incomplete) {
-		ctx.Invalid(IncompleteComponentError{})
+	if f.Has(Speculative) {
+		ctx.Invalid(SpeculativeComponentError{})
 	}
 }
 

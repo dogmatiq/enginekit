@@ -59,40 +59,37 @@ func (r *Route) key() (routeKey, bool) {
 }
 
 func (r *Route) validate(ctx *validateContext) {
-	validateComponent(
-		ctx,
-		func(ctx *validateContext) {
-			routeType, hasRouteType := r.RouteType.TryGet()
-			messageTypeName, hasMessageTypeName := r.MessageTypeName.TryGet()
-			messageType, hasMessageType := r.MessageType.TryGet()
+	validateComponent(ctx)
 
-			if !hasRouteType {
-				ctx.Invalid(UnknownRouteTypeError{})
+	rt, hasRT := r.RouteType.TryGet()
+	mn, hasMN := r.MessageTypeName.TryGet()
+	mt, hasMT := r.MessageType.TryGet()
+
+	if !hasRT {
+		ctx.Invalid(UnknownRouteTypeError{})
+	}
+
+	if !hasMN {
+		ctx.Invalid(UnknownMessageTypeError{})
+	}
+
+	if hasMT {
+		if hasRT {
+			if rt.MessageKind() != mt.Kind() {
+				ctx.Invalid(MessageKindMismatchError{rt, mt})
 			}
+		}
 
-			if !hasMessageTypeName {
-				ctx.Invalid(UnknownMessageTypeError{})
-			}
-
-			if hasMessageType {
-				if hasRouteType {
-					if routeType.MessageKind() != messageType.Kind() {
-						ctx.Invalid(MessageKindMismatchError{routeType, messageType})
-					}
-				}
-
-				if !hasMessageTypeName {
-					ctx.Malformed("MessageType is present, but MessageTypeName is not")
-				} else if messageTypeName != string(messageType.Name()) {
-					ctx.Malformed(
-						"MessageTypeName does not match MessageType: %q != %q",
-						messageTypeName,
-						messageType.Name(),
-					)
-				}
-			}
-		},
-	)
+		if !hasMN {
+			ctx.Malformed("MessageType is present, but MessageTypeName is not")
+		} else if mn != string(mt.Name()) {
+			ctx.Malformed(
+				"MessageTypeName does not match MessageType: %q != %q",
+				mn,
+				mt.Name(),
+			)
+		}
+	}
 }
 
 func (r *Route) describe(ctx *describeContext) {

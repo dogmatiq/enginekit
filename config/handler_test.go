@@ -7,6 +7,7 @@ import (
 	. "github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/constraints"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
+	"github.com/dogmatiq/enginekit/internal/test"
 )
 
 func testHandler[
@@ -14,7 +15,7 @@ func testHandler[
 		Handler
 		Interface() H
 	},
-	B configbuilder.EntityBuilder[T, H],
+	B configbuilder.HandlerBuilder[T, H],
 	H constraints.Handler[C, R],
 	C constraints.HandlerConfigurer[R],
 	R dogma.Route,
@@ -31,9 +32,50 @@ func testHandler[
 		construct,
 	)
 
-	t.Run("func RouteSet()", func(t *testing.T) {
-	})
-
 	t.Run("func IsDisabled()", func(t *testing.T) {
+		t.Run("it returns false if the handler is not disabled", func(t *testing.T) {
+			handler := build(func(b B) {})
+
+			test.Expect(
+				t,
+				"unexpected flag value",
+				handler.IsDisabled(),
+				false,
+			)
+		})
+
+		t.Run("it returns true if the handler is disabled", func(t *testing.T) {
+			handler := build(func(b B) {
+				b.Disabled(
+					func(b *configbuilder.FlagBuilder) {
+						b.Value(true)
+					},
+				)
+			})
+
+			test.Expect(
+				t,
+				"unexpected flag value",
+				handler.IsDisabled(),
+				true,
+			)
+		})
+
+		t.Run("panics if the flag contains incomplete values", func(t *testing.T) {
+			handler := build(func(b B) {
+				b.Disabled(
+					func(b *configbuilder.FlagBuilder) {
+					},
+				)
+			})
+
+			test.ExpectPanic(
+				t,
+				`disabled flag is invalid: flag-modification:? is invalid: could not evaluate entire configuration`,
+				func() {
+					handler.IsDisabled()
+				},
+			)
+		})
 	})
 }

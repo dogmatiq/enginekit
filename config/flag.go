@@ -95,6 +95,10 @@ func (m *FlagModification) String() string {
 
 func (m *FlagModification) validate(ctx *validateContext) {
 	validateFidelity(ctx, m.Fidelity)
+
+	if ctx.Options.ForExecution && !m.Value.IsPresent() {
+		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[bool]()})
+	}
 }
 
 func (m *FlagModification) describe(ctx *describeContext) {

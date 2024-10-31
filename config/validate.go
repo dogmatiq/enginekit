@@ -138,6 +138,7 @@ func newResolutionContext(c Component) *validateContext {
 	return &validateContext{
 		Component: c,
 		Options: validationOptions{
+			ForExecution:   true,
 			PanicOnInvalid: true,
 		},
 	}

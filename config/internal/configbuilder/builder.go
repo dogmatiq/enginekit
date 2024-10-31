@@ -31,6 +31,14 @@ type EntityBuilder[T config.Entity, E any] interface {
 // HandlerBuilder an interface for builders that produce a [config.Handler].
 type HandlerBuilder[T config.Handler, H any] interface {
 	EntityBuilder[T, H]
+
+	// Route calls fn which configures a [config.Route] that is added to the
+	// handler.
+	Route(fn func(*RouteBuilder))
+
+	// Disabled calls fn which configures a [config.FlagModification] that is
+	// added to the handler's disabled flag.
+	Disabled(fn func(*FlagBuilder))
 }
 
 var (

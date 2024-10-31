@@ -8,6 +8,9 @@ import (
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/runtimeconfig"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	"github.com/dogmatiq/enginekit/internal/test"
+	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/enginekit/optional"
 )
 
 func TestAggregate(t *testing.T) {
@@ -356,4 +359,89 @@ func TestAggregate(t *testing.T) {
 			},
 		},
 	)
+
+	t.Run("func RouteSet()", func(t *testing.T) {
+		t.Run("it returns the normalized routes", func(t *testing.T) {
+			h := &AggregateMessageHandlerStub{
+				ConfigureFunc: func(c dogma.AggregateConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[CommandStub[TypeA]](),
+						dogma.RecordsEvent[EventStub[TypeA]](),
+					)
+				},
+			}
+
+			handler := runtimeconfig.FromAggregate(h)
+
+			test.Expect(
+				t,
+				"unexpected routes",
+				handler.RouteSet().MessageTypes(),
+				map[message.Type]RouteDirection{
+					message.TypeFor[CommandStub[TypeA]](): InboundDirection,
+					message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
+				},
+			)
+		})
+
+		t.Run("it panics if the routes are invalid", func(t *testing.T) {
+			cases := []struct {
+				Name  string
+				Want  string
+				Route *Route
+			}{
+				{
+					"empty route",
+					`route is invalid: unknown route type`,
+					&Route{},
+				},
+				{
+					"unexpected ExecutesCommand route",
+					`unsupported executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					&Route{
+						RouteType:       optional.Some(ExecutesCommandRouteType),
+						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+					},
+				},
+				{
+					"unexpected HandlesEvent route",
+					`unsupported handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					&Route{
+						RouteType:       optional.Some(HandlesEventRouteType),
+						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+					},
+				},
+				{
+					"unexpected SchedulesTimeout route",
+					`unsupported schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					&Route{
+						RouteType:       optional.Some(SchedulesTimeoutRouteType),
+						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
+					},
+				},
+			}
+
+			for _, c := range cases {
+				t.Run(c.Name, func(t *testing.T) {
+					cfg := &Aggregate{
+						HandlerCommon: HandlerCommon{
+							RouteComponents: []*Route{c.Route},
+						},
+					}
+
+					test.ExpectPanic(
+						t,
+						c.Want,
+						func() {
+							cfg.RouteSet()
+						},
+					)
+				})
+			}
+		})
+	})
 }

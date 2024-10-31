@@ -38,7 +38,7 @@ func (h *Aggregate) RouteSet() RouteSet {
 // It panics if the configuration does not specify unambiguously whether the
 // handler is enabled or disabled.
 func (h *Aggregate) IsDisabled() bool {
-	panic("not implemented")
+	return resolveIsDisabled(h)
 }
 
 // Interface returns the [dogma.Application] that the entity represents.

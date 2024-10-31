@@ -188,6 +188,19 @@ func buildRouteSet(ctx *validateContext, h Handler) RouteSet {
 	return set
 }
 
+func resolveIsDisabled(h Handler) bool {
+	p := h.HandlerProperties()
+
+	if len(p.DisabledFlag.Modifications) == 0 {
+		return false
+	}
+
+	ctx := newResolutionContext(h)
+	ctx.ValidateChild(&p.DisabledFlag)
+
+	return p.DisabledFlag.Get().Get()
+}
+
 func describeHandler[T any](
 	ctx *describeContext,
 	h Handler,

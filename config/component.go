@@ -64,6 +64,7 @@ func (e ValueUnavailableError) Error() string {
 
 var (
 	_ Component = (*Identity)(nil)
+	_ Component = (*Flag[struct{ symbol }])(nil)
 	_ Component = (*FlagModification)(nil)
 	_ Component = (*Route)(nil)
 

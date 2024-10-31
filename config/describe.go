@@ -90,6 +90,10 @@ func (ctx *describeContext) Print(str ...string) {
 	ctx.renderer.Print(str...)
 }
 
+func (ctx *describeContext) Printf(format string, args ...any) {
+	ctx.renderer.Printf(format, args...)
+}
+
 func (ctx *describeContext) DescribeFidelity() {
 	f := ctx.Component.Fidelity()
 

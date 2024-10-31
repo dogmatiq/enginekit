@@ -108,7 +108,7 @@ func TestApplication(t *testing.T) {
 			},
 			{
 				Name:  "application must not contain invalid handlers",
-				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no "handles-command" routes`,
+				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no handles-command routes`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -346,7 +346,7 @@ func TestApplication(t *testing.T) {
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-					`      - no "records-event" routes`,
+					`      - no records-event routes`,
 					`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
 					`      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),

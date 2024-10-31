@@ -51,7 +51,7 @@ type MissingRouteTypeError struct {
 }
 
 func (e MissingRouteTypeError) Error() string {
-	return fmt.Sprintf("no %q routes", e.RouteType)
+	return fmt.Sprintf("no %s routes", e.RouteType)
 }
 
 // UnsupportedRouteTypeError indicates that a [Handler] is configured with a
@@ -63,7 +63,7 @@ type UnsupportedRouteTypeError struct {
 func (e UnsupportedRouteTypeError) Error() string {
 	w := &strings.Builder{}
 
-	fmt.Fprintf(w, "unsupported %q route", e.UnexpectedRoute.RouteType.Get())
+	fmt.Fprintf(w, "unsupported %s route", e.UnexpectedRoute.RouteType.Get())
 
 	if name, ok := e.UnexpectedRoute.MessageTypeName.TryGet(); ok {
 		fmt.Fprintf(w, " for %s", name)
@@ -82,7 +82,7 @@ type DuplicateRouteError struct {
 
 func (e DuplicateRouteError) Error() string {
 	return fmt.Sprintf(
-		"multiple %q routes for %s",
+		"multiple %s routes for %s",
 		e.RouteType,
 		e.MessageTypeName,
 	)
@@ -95,6 +95,7 @@ func validateHandler[T any](
 ) {
 	validateEntity(ctx, h, source)
 	validateHandlerRoutes(ctx, h)
+	ctx.ValidateChild(&h.HandlerProperties().DisabledFlag)
 }
 
 func validateHandlerRoutes(ctx *validateContext, h Handler) {
@@ -194,7 +195,12 @@ func describeHandler[T any](
 ) {
 	describeEntity(ctx, h, source)
 
-	for _, r := range h.HandlerProperties().RouteComponents {
+	p := h.HandlerProperties()
+
+	for _, r := range p.RouteComponents {
 		ctx.DescribeChild(r)
 	}
+
+	ctx.DescribeChild(&p.DisabledFlag)
+
 }

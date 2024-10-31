@@ -49,7 +49,7 @@ func (b *AggregateBuilder) Disabled(fn func(*FlagBuilder)) {
 // Done completes the configuration of the handler.
 func (b *AggregateBuilder) Done() *config.Aggregate {
 	if !b.target.TypeName.IsPresent() {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target
 }

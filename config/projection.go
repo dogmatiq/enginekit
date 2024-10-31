@@ -86,7 +86,9 @@ const (
 // ProjectionDeliveryPolicy is a [Component] that represents the configuration
 // of a [dogma.ProjectionDeliveryPolicy].
 type ProjectionDeliveryPolicy struct {
-	ComponentCommon
+	// Fidelity reports how faithfully the [Component] describes a complete
+	// configuration that can be used to execute an application.
+	Fidelity Fidelity
 
 	DeliveryPolicyType      optional.Optional[ProjectionDeliveryPolicyType]
 	BroadcastToPrimaryFirst optional.Optional[bool]
@@ -96,10 +98,12 @@ func (p *ProjectionDeliveryPolicy) String() string {
 	panic("not implemented")
 }
 
-func (p *ProjectionDeliveryPolicy) validate(*validateContext) {
+func (p *ProjectionDeliveryPolicy) validate(ctx *validateContext) {
+	validateFidelity(ctx, p.Fidelity)
 	panic("not implemented")
 }
 
-func (p *ProjectionDeliveryPolicy) describe(*describeContext) {
+func (p *ProjectionDeliveryPolicy) describe(ctx *describeContext) {
+	describeFidelity(ctx, p.Fidelity)
 	panic("not implemented")
 }

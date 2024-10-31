@@ -35,7 +35,7 @@ func (b *IdentityBuilder) Key(key string) {
 // Done completes the configuration of the identity.
 func (b *IdentityBuilder) Done() *config.Identity {
 	if !b.target.Name.IsPresent() || !b.target.Key.IsPresent() {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target
 }

@@ -21,8 +21,7 @@ type symbol struct{}
 //
 // Each type of flag is uniquely identified by a [Symbol].
 type Flag[S Symbol] struct {
-	ComponentCommon
-
+	// Modifications is a list of points at which the flag value is modified.
 	Modifications []*FlagModification
 }
 
@@ -39,7 +38,7 @@ func (f *Flag[S]) Get() optional.Optional[bool] {
 	result := f.Modifications[0].Value
 
 	for _, m := range f.Modifications[1:] {
-		if !m.Fidelity().Has(Speculative) {
+		if !m.Fidelity.Has(Speculative) {
 			return optional.None[bool]()
 		}
 
@@ -52,8 +51,6 @@ func (f *Flag[S]) Get() optional.Optional[bool] {
 }
 
 func (f *Flag[S]) validate(ctx *validateContext) {
-	validateComponent(ctx)
-
 	for _, m := range f.Modifications {
 		ctx.ValidateChild(m)
 	}
@@ -81,8 +78,11 @@ func (f *Flag[S]) describe(ctx *describeContext) {
 // A FlagModification is a [Component] that represents a specific point at which
 // a flag is set or unset within the configuration.
 type FlagModification struct {
-	ComponentCommon
+	// Fidelity reports how faithfully the [Component] describes a complete
+	// configuration that can be used to execute an application.
+	Fidelity Fidelity
 
+	// Value is the boolean value to which the flag was set, if known.
 	Value optional.Optional[bool]
 }
 
@@ -93,11 +93,12 @@ func (m *FlagModification) String() string {
 	return "flag-modification:?"
 }
 
-func (m *FlagModification) validate(*validateContext) {
+func (m *FlagModification) validate(ctx *validateContext) {
+	validateFidelity(ctx, m.Fidelity)
 }
 
 func (m *FlagModification) describe(ctx *describeContext) {
-	ctx.DescribeFidelity()
+	describeFidelity(ctx, m.Fidelity)
 	ctx.Print("flag modification")
 
 	if v, ok := m.Value.TryGet(); ok {

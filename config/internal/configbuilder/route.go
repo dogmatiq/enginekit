@@ -45,7 +45,7 @@ func (b *RouteBuilder) AsPerRoute(r dogma.Route) {
 	case dogma.SchedulesTimeoutRoute:
 		set(config.SchedulesTimeoutRouteType, r.Type)
 	default:
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 }
 
@@ -69,7 +69,7 @@ func (b *RouteBuilder) MessageType(t message.Type) {
 // Done completes the configuration of the route.
 func (b *RouteBuilder) Done() *config.Route {
 	if !b.target.RouteType.IsPresent() || !b.target.MessageTypeName.IsPresent() {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target
 }

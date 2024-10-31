@@ -94,24 +94,6 @@ func (ctx *describeContext) Printf(format string, args ...any) {
 	ctx.renderer.Printf(format, args...)
 }
 
-func (ctx *describeContext) DescribeFidelity() {
-	f := ctx.Component.Fidelity()
-
-	if f&Incomplete != 0 {
-		ctx.Print("incomplete ")
-	} else if !ctx.options.ValidationResult.IsPresent() {
-		ctx.Print("unvalidated ")
-	} else if len(ctx.errors) == 0 {
-		ctx.Print("valid ")
-	} else {
-		ctx.Print("invalid ")
-	}
-
-	if f&Speculative != 0 {
-		ctx.Print("speculative ")
-	}
-}
-
 func (ctx *describeContext) DescribeErrors() {
 	for _, err := range ctx.errors {
 		ctx.renderer.IndentBullet()

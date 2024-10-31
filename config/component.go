@@ -10,43 +10,8 @@ import (
 type Component interface {
 	fmt.Stringer
 
-	// Fidelity reports how faithfully the [Component] describes a complete
-	// configuration that can be used to execute an application.
-	Fidelity() Fidelity
-
-	// ComponentProperties returns the properties common to all [Component] types.
-	ComponentProperties() *ComponentCommon
-
 	validate(*validateContext)
 	describe(*describeContext)
-}
-
-// ComponentCommon contains the properties common to all [Component] types.
-type ComponentCommon struct {
-	ComponentFidelity Fidelity
-}
-
-// Fidelity reports how faithfully the [Component] describes a complete
-// configuration that can be used to execute an application.
-func (p *ComponentCommon) Fidelity() Fidelity {
-	return p.ComponentFidelity
-}
-
-// ComponentProperties returns the properties common to all [Component] types.
-func (p *ComponentCommon) ComponentProperties() *ComponentCommon {
-	return p
-}
-
-func validateComponent(ctx *validateContext) {
-	f := ctx.Component.Fidelity()
-
-	if f.Has(Incomplete) {
-		ctx.Invalid(IncompleteComponentError{})
-	}
-
-	if f.Has(Speculative) {
-		ctx.Invalid(SpeculativeComponentError{})
-	}
 }
 
 // ValueUnavailableError indicates that a [Component] cannot produce the actual

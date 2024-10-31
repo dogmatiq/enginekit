@@ -25,7 +25,7 @@ func (b *FlagBuilder) Value(v bool) {
 // Done completes the configuration of the flag.
 func (b *FlagBuilder) Done() *config.FlagModification {
 	if !b.target.Value.IsPresent() {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target
 }

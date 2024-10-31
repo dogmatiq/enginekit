@@ -25,9 +25,7 @@ func TestFromIntegration(t *testing.T) {
 				return &config.Integration{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							ComponentCommon: config.ComponentCommon{
-								ComponentFidelity: config.Incomplete,
-							},
+							Fidelity: config.Incomplete,
 						},
 					},
 				}

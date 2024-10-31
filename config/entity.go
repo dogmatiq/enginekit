@@ -42,8 +42,7 @@ type Entity interface {
 
 // EntityCommon contains the properties common to all [Entity] types.
 type EntityCommon struct {
-	ComponentCommon
-
+	Fidelity           Fidelity
 	TypeName           optional.Optional[string]
 	IdentityComponents []*Identity
 }
@@ -76,7 +75,7 @@ func validateEntity[T any](
 	e Entity,
 	src optional.Optional[T],
 ) {
-	validateComponent(ctx)
+	validateFidelity(ctx, e.EntityProperties().Fidelity)
 	validateEntityIdentities(ctx, e)
 
 	n, hasN := e.EntityProperties().TypeName.TryGet()
@@ -155,10 +154,10 @@ func describeEntity[T any](
 	e Entity,
 	source optional.Optional[T],
 ) {
-	ctx.DescribeFidelity()
-	ctx.Print(entityLabel(e))
-
 	p := e.EntityProperties()
+
+	describeFidelity(ctx, p.Fidelity)
+	ctx.Print(entityLabel(e))
 
 	if n, ok := p.TypeName.TryGet(); ok {
 		ctx.Print(" ")

@@ -34,6 +34,32 @@ func (f Fidelity) Has(x Fidelity) bool {
 	return f&x != 0
 }
 
+func validateFidelity(ctx *validateContext, f Fidelity) {
+	if f.Has(Incomplete) {
+		ctx.Invalid(IncompleteComponentError{})
+	}
+
+	if f.Has(Speculative) {
+		ctx.Invalid(SpeculativeComponentError{})
+	}
+}
+
+func describeFidelity(ctx *describeContext, f Fidelity) {
+	if f&Incomplete != 0 {
+		ctx.Print("incomplete ")
+	} else if !ctx.options.ValidationResult.IsPresent() {
+		ctx.Print("unvalidated ")
+	} else if len(ctx.errors) == 0 {
+		ctx.Print("valid ")
+	} else {
+		ctx.Print("invalid ")
+	}
+
+	if f&Speculative != 0 {
+		ctx.Print("speculative ")
+	}
+}
+
 // IncompleteComponentError indicates that a [Component] contains values that
 // could not be resolved at the time the configuration was built.
 //

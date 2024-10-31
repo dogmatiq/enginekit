@@ -56,7 +56,7 @@ func (b *ProjectionBuilder) DeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuil
 // Done completes the configuration of the handler.
 func (b *ProjectionBuilder) Done() *config.Projection {
 	if !b.target.TypeName.IsPresent() {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target
 }
@@ -84,16 +84,16 @@ func (b *ProjectionDeliveryPolicyBuilder) AsPerDeliveryPolicy(p dogma.Projection
 		b.target.DeliveryPolicyType = optional.Some(config.BroadcastProjectionDeliveryPolicyType)
 		b.target.BroadcastToPrimaryFirst = optional.Some(p.PrimaryFirst)
 	default:
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 }
 
 // Done completes the configuration of the policy.
 func (b *ProjectionDeliveryPolicyBuilder) Done() *config.ProjectionDeliveryPolicy {
 	if t, ok := b.target.DeliveryPolicyType.TryGet(); !ok {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	} else if t == config.BroadcastProjectionDeliveryPolicyType && !b.target.BroadcastToPrimaryFirst.IsPresent() {
-		b.target.ComponentFidelity |= config.Incomplete
+		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target
 }

@@ -27,9 +27,7 @@ func TestFromAggregate(t *testing.T) {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							ComponentCommon: config.ComponentCommon{
-								ComponentFidelity: config.Incomplete,
-							},
+							Fidelity: config.Incomplete,
 						},
 					},
 				}

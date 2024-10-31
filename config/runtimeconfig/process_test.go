@@ -25,9 +25,7 @@ func TestFromProcess(t *testing.T) {
 				return &config.Process{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							ComponentCommon: config.ComponentCommon{
-								ComponentFidelity: config.Incomplete,
-							},
+							Fidelity: config.Incomplete,
 						},
 					},
 				}

@@ -30,9 +30,7 @@ func TestFromApplication(t *testing.T) {
 			func(dogma.Application) *config.Application {
 				return &config.Application{
 					EntityCommon: config.EntityCommon{
-						ComponentCommon: config.ComponentCommon{
-							ComponentFidelity: config.Incomplete,
-						},
+						Fidelity: config.Incomplete,
 					},
 				}
 			},
@@ -63,7 +61,6 @@ func TestFromApplication(t *testing.T) {
 			func(app dogma.Application) *config.Application {
 				return &config.Application{
 					EntityCommon: config.EntityCommon{
-						ComponentCommon: config.ComponentCommon{},
 						IdentityComponents: []*config.Identity{
 							{
 								Name: optional.Some("app"),

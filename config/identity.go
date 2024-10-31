@@ -13,10 +13,15 @@ import (
 // Identity is a [Component] that that represents the unique identity of an
 // [Entity].
 type Identity struct {
-	ComponentCommon
+	// Fidelity reports how faithfully the [Component] describes a complete
+	// configuration that can be used to execute an application.
+	Fidelity Fidelity
 
+	// Name is the name element of the identity.
 	Name optional.Optional[string]
-	Key  optional.Optional[string]
+
+	// Key is the key element of the identity.
+	Key optional.Optional[string]
 }
 
 func (i *Identity) String() string {
@@ -57,7 +62,7 @@ func (i *Identity) String() string {
 }
 
 func (i *Identity) validate(ctx *validateContext) {
-	validateComponent(ctx)
+	validateFidelity(ctx, i.Fidelity)
 
 	if n, ok := i.Name.TryGet(); ok && !isPrintable(n) {
 		ctx.Invalid(InvalidIdentityNameError{n})
@@ -71,7 +76,7 @@ func (i *Identity) validate(ctx *validateContext) {
 }
 
 func (i *Identity) describe(ctx *describeContext) {
-	ctx.DescribeFidelity()
+	describeFidelity(ctx, i.Fidelity)
 	ctx.Print("identity ")
 
 	if name, ok := i.Name.TryGet(); !ok {

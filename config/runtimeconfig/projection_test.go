@@ -25,9 +25,7 @@ func TestFromProjection(t *testing.T) {
 				return &config.Projection{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							ComponentCommon: config.ComponentCommon{
-								ComponentFidelity: config.Incomplete,
-							},
+							Fidelity: config.Incomplete,
 						},
 					},
 				}

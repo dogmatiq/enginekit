@@ -13,7 +13,9 @@ import (
 
 // Route represents the configuration of a [dogma.Route].
 type Route struct {
-	ComponentCommon
+	// Fidelity reports how faithfully the [Component] describes a complete
+	// configuration that can be used to execute an application.
+	Fidelity Fidelity
 
 	// RouteType is the type of route, if available.
 	RouteType optional.Optional[RouteType]
@@ -60,7 +62,7 @@ func (r *Route) key() (routeKey, bool) {
 }
 
 func (r *Route) validate(ctx *validateContext) {
-	validateComponent(ctx)
+	validateFidelity(ctx, r.Fidelity)
 
 	rt, hasRT := r.RouteType.TryGet()
 	mn, hasMN := r.MessageTypeName.TryGet()
@@ -96,7 +98,7 @@ func (r *Route) validate(ctx *validateContext) {
 }
 
 func (r *Route) describe(ctx *describeContext) {
-	ctx.DescribeFidelity()
+	describeFidelity(ctx, r.Fidelity)
 
 	if rt, ok := r.RouteType.TryGet(); ok {
 		ctx.Print(rt.String(), " ")

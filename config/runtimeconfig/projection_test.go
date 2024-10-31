@@ -88,8 +88,12 @@ func TestFromProjection(t *testing.T) {
 					},
 					DeliveryPolicyComponents: []*config.ProjectionDeliveryPolicy{
 						{
-							DeliveryPolicyType:      optional.Some(config.BroadcastProjectionDeliveryPolicyType),
-							BroadcastToPrimaryFirst: optional.Some(true),
+							DeliveryPolicyType: optional.Some(config.BroadcastProjectionDeliveryPolicyType),
+							Broadcast: struct {
+								PrimaryFirst optional.Optional[bool]
+							}{
+								optional.Some(true),
+							},
 						},
 					},
 					Source: optional.Some(h),

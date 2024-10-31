@@ -42,6 +42,32 @@ func (h *Projection) IsDisabled() bool {
 	return resolveIsDisabled(h)
 }
 
+// DeliveryPolicy returns the delivery policy for the handler.
+//
+// It returns the last delivery policy component that was configured, as each
+// call to [dogma.ProjectionConfigurer.DeliveryPolicy] replaces the previous
+// value.
+//
+// If no delivery policy has been configured, it returns
+// [dogma.UnicastProjectionDeliveryPolicy], which is the default.
+//
+// It panics if the configuration does not specify valid delivery policies.
+func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
+	ctx := newResolutionContext(h)
+	failIfIncomplete(ctx, h.Fidelity)
+
+	for _, p := range h.DeliveryPolicyComponents {
+		ctx.ValidateChild(p)
+	}
+
+	n := len(h.DeliveryPolicyComponents)
+	if n == 0 {
+		return dogma.UnicastProjectionDeliveryPolicy{}
+	}
+
+	return h.DeliveryPolicyComponents[n-1].Interface()
+}
+
 // Interface returns the [dogma.Application] that the entity represents.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return resolveInterface(h, h.Source)
@@ -61,49 +87,16 @@ func (h *Projection) routes() []*Route {
 
 func (h *Projection) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
-	panic("not implemented") // TODO: delivery policies
+
+	for _, p := range h.DeliveryPolicyComponents {
+		ctx.ValidateChild(p)
+	}
 }
 
 func (h *Projection) describe(ctx *describeContext) {
 	describeHandler(ctx, h, h.Source)
-}
 
-// ProjectionDeliveryPolicyType is an enumeration of the different types of
-// projection delivery policies.
-type ProjectionDeliveryPolicyType int
-
-const (
-	// UnicastProjectionDeliveryPolicyType is the [ProjectionDeliveryPolicyType]
-	// for [dogma.UnicastProjectionDeliveryPolicy].
-	UnicastProjectionDeliveryPolicyType ProjectionDeliveryPolicyType = iota
-
-	// BroadcastProjectionDeliveryPolicyType is the
-	// [ProjectionDeliveryPolicyType] for
-	// [dogma.BroadcastProjectionDeliveryPolicy].
-	BroadcastProjectionDeliveryPolicyType
-)
-
-// ProjectionDeliveryPolicy is a [Component] that represents the configuration
-// of a [dogma.ProjectionDeliveryPolicy].
-type ProjectionDeliveryPolicy struct {
-	// Fidelity reports how faithfully the [Component] describes a complete
-	// configuration that can be used to execute an application.
-	Fidelity Fidelity
-
-	DeliveryPolicyType      optional.Optional[ProjectionDeliveryPolicyType]
-	BroadcastToPrimaryFirst optional.Optional[bool]
-}
-
-func (p *ProjectionDeliveryPolicy) String() string {
-	panic("not implemented")
-}
-
-func (p *ProjectionDeliveryPolicy) validate(ctx *validateContext) {
-	validateFidelity(ctx, p.Fidelity)
-	panic("not implemented")
-}
-
-func (p *ProjectionDeliveryPolicy) describe(ctx *describeContext) {
-	describeFidelity(ctx, p.Fidelity)
-	panic("not implemented")
+	for _, p := range h.DeliveryPolicyComponents {
+		ctx.DescribeChild(p)
+	}
 }

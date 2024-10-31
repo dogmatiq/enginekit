@@ -30,6 +30,7 @@ func testEntity[
 		t.Run("it returns the normalized identity", func(t *testing.T) {
 			entity := build(
 				func(b B) {
+					b.TypeName("pkg.SomeEntity")
 					b.Identity(
 						func(b *configbuilder.IdentityBuilder) {
 							b.Name("name")
@@ -50,9 +51,33 @@ func testEntity[
 			)
 		})
 
+		t.Run("it panics if the entity is incomplete", func(t *testing.T) {
+			entity := build(
+				func(b B) {
+					// <-- MISSING TypeName
+					b.Identity(
+						func(b *configbuilder.IdentityBuilder) {
+							b.Name("name")
+							b.Key("19CB98D5-DD17-4DAF-AE00-1B413B7B899A")
+						},
+					)
+				},
+			)
+
+			test.ExpectPanic(
+				t,
+				"could not evaluate entire configuration",
+				func() {
+					entity.Identity()
+				},
+			)
+		})
+
 		t.Run("it panics if there is no identity", func(t *testing.T) {
 			entity := build(
-				func(b B) {},
+				func(b B) {
+					b.TypeName("pkg.SomeEntity")
+				},
 			)
 
 			test.ExpectPanic(
@@ -67,6 +92,7 @@ func testEntity[
 		t.Run("it panics if there are multiple identities", func(t *testing.T) {
 			entity := build(
 				func(b B) {
+					b.TypeName("pkg.SomeEntity")
 					b.Identity(
 						func(b *configbuilder.IdentityBuilder) {
 							b.Name("name1")

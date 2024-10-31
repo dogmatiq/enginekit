@@ -151,6 +151,7 @@ func resolveRouteSet(h Handler) RouteSet {
 }
 
 func buildRouteSet(ctx *validateContext, h Handler) RouteSet {
+	failIfIncomplete(ctx, h.HandlerProperties().Fidelity)
 	validateHandlerRoutes(ctx, h)
 
 	set := RouteSet{}
@@ -191,12 +192,13 @@ func buildRouteSet(ctx *validateContext, h Handler) RouteSet {
 func resolveIsDisabled(h Handler) bool {
 	p := h.HandlerProperties()
 
+	ctx := newResolutionContext(h)
+	failIfIncomplete(ctx, p.Fidelity)
+	ctx.ValidateChild(&p.DisabledFlag)
+
 	if len(p.DisabledFlag.Modifications) == 0 {
 		return false
 	}
-
-	ctx := newResolutionContext(h)
-	ctx.ValidateChild(&p.DisabledFlag)
 
 	return p.DisabledFlag.Get().Get()
 }

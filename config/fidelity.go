@@ -35,10 +35,17 @@ func (f Fidelity) Has(x Fidelity) bool {
 }
 
 func validateFidelity(ctx *validateContext, f Fidelity) {
+	failIfIncomplete(ctx, f)
+	failIfSpeculative(ctx, f)
+}
+
+func failIfIncomplete(ctx *validateContext, f Fidelity) {
 	if f.Has(Incomplete) {
 		ctx.Invalid(IncompleteComponentError{})
 	}
+}
 
+func failIfSpeculative(ctx *validateContext, f Fidelity) {
 	if f.Has(Speculative) {
 		ctx.Invalid(SpeculativeComponentError{})
 	}

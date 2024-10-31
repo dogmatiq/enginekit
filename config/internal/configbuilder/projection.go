@@ -82,17 +82,27 @@ func (b *ProjectionDeliveryPolicyBuilder) AsPerDeliveryPolicy(p dogma.Projection
 		b.target.DeliveryPolicyType = optional.Some(config.UnicastProjectionDeliveryPolicyType)
 	case dogma.BroadcastProjectionDeliveryPolicy:
 		b.target.DeliveryPolicyType = optional.Some(config.BroadcastProjectionDeliveryPolicyType)
-		b.target.BroadcastToPrimaryFirst = optional.Some(p.PrimaryFirst)
+		b.target.Broadcast.PrimaryFirst = optional.Some(p.PrimaryFirst)
 	default:
 		b.target.Fidelity |= config.Incomplete
 	}
 }
 
+// Type sets the type of the delivery policy.
+func (b *ProjectionDeliveryPolicyBuilder) Type(t config.ProjectionDeliveryPolicyType) {
+	b.target.DeliveryPolicyType = optional.Some(t)
+}
+
+// BroadcastToPrimaryFirst sets the value of the "broadcast to primary first"
+// property of a [config.BroadcastProjectionDeliveryPolicyType].
+func (b *ProjectionDeliveryPolicyBuilder) BroadcastToPrimaryFirst(v bool) {
+	b.target.DeliveryPolicyType = optional.Some(config.BroadcastProjectionDeliveryPolicyType)
+	b.target.Broadcast.PrimaryFirst = optional.Some(v)
+}
+
 // Done completes the configuration of the policy.
 func (b *ProjectionDeliveryPolicyBuilder) Done() *config.ProjectionDeliveryPolicy {
-	if t, ok := b.target.DeliveryPolicyType.TryGet(); !ok {
-		b.target.Fidelity |= config.Incomplete
-	} else if t == config.BroadcastProjectionDeliveryPolicyType && !b.target.BroadcastToPrimaryFirst.IsPresent() {
+	if !b.target.DeliveryPolicyType.IsPresent() {
 		b.target.Fidelity |= config.Incomplete
 	}
 	return &b.target

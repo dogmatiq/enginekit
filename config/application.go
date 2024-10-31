@@ -27,7 +27,10 @@ func (a *Application) Identity() *identitypb.Identity {
 
 // Handlers returns the list of handlers configured for the application.
 func (a *Application) Handlers() []Handler {
-	validateApplicationHandlers(newResolutionContext(a), a)
+	ctx := newResolutionContext(a)
+	failIfIncomplete(ctx, a.Fidelity)
+	validateApplicationHandlers(ctx, a)
+
 	return a.HandlerComponents
 }
 
@@ -51,6 +54,7 @@ func (a *Application) HandlerByName(name string) (Handler, bool) {
 // routes for the entity and its constituents.
 func (a *Application) RouteSet() RouteSet {
 	ctx := newResolutionContext(a)
+	failIfIncomplete(ctx, a.Fidelity)
 	reportRouteConflicts(ctx, a)
 
 	var set RouteSet

@@ -107,7 +107,10 @@ func validateEntityIdentities(ctx *validateContext, e Entity) {
 }
 
 func resolveIdentity(e Entity) *identitypb.Identity {
-	validateEntityIdentities(newResolutionContext(e), e)
+	ctx := newResolutionContext(e)
+	failIfIncomplete(ctx, e.EntityProperties().Fidelity)
+	validateEntityIdentities(ctx, e)
+
 	id := e.EntityProperties().IdentityComponents[0]
 
 	return &identitypb.Identity{
@@ -120,7 +123,6 @@ func resolveInterface[T any](e Entity, src optional.Optional[T]) T {
 	ctx := newResolutionContext(e)
 
 	v, ok := src.TryGet()
-
 	if !ok {
 		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[T]()})
 	}

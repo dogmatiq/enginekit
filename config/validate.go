@@ -134,6 +134,8 @@ type validateContext struct {
 	children []*validateContext
 }
 
+// newResolutionContext returns a [validateContext] that is configured to
+// perform strict validation and fail fast on error.
 func newResolutionContext(c Component) *validateContext {
 	return &validateContext{
 		Component: c,

@@ -280,80 +280,80 @@ func TestAggregate(t *testing.T) {
 					},
 				}),
 			},
-			// {
-			// 	Name:             "no runtime type information",
-			// 	String: `aggregate:SomeAggregate`,
-			// 	Description: multiline(
-			// 		`valid aggregate pkg.SomeAggregate (runtime type unavailable)`,
-			// 		`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-			// 		`  - valid handles-command route for pkg.SomeCommand (runtime type unavailable)`,
-			// 		`  - valid records-event route for pkg.SomeEvent (runtime type unavailable)`,
-			// 	),
-			// 	Component: configbuilder.Aggregate(func(b *configbuilder.AggregateBuilder) {
-			// 		b.SetSourceTypeName("pkg.SomeAggregate")
+			{
+				Name:   "no runtime values",
+				String: `aggregate:SomeAggregate`,
+				Description: multiline(
+					`valid aggregate pkg.SomeAggregate (value unavailable)`,
+					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+					`  - valid handles-command route for pkg.SomeCommand (type unavailable)`,
+					`  - valid records-event route for pkg.SomeEvent (type unavailable)`,
+				),
+				Component: configbuilder.Aggregate(func(b *configbuilder.AggregateBuilder) {
+					b.TypeName("pkg.SomeAggregate")
 
-			// 		b.Identity(func(b *configbuilder.IdentityBuilder) {
-			// 			b.SetName("name")
-			// 			b.SetKey("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-			// 		})
+					b.Identity(func(b *configbuilder.IdentityBuilder) {
+						b.Name("name")
+						b.Key("19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					})
 
-			// 		b.Route(func(b *configbuilder.RouteBuilder) {
-			// 			b.SetRouteType(HandlesCommandRouteType)
-			// 			b.SetMessageTypeName("pkg.SomeCommand")
-			// 		})
+					b.Route(func(b *configbuilder.RouteBuilder) {
+						b.RouteType(HandlesCommandRouteType)
+						b.MessageTypeName("pkg.SomeCommand")
+					})
 
-			// 		b.Route(func(b *configbuilder.RouteBuilder) {
-			// 			b.SetRouteType(RecordsEventRouteType)
-			// 			b.SetMessageTypeName("pkg.SomeEvent")
-			// 		})
-			// 	}),
-			// },
-			// {
-			// 	Name:             "empty",
-			// 	String: `aggregate`,
-			// 	Description: multiline(
-			// 		`incomplete aggregate`,
-			// 		`  - no identity is configured`,
-			// 		`  - no handles-command routes are configured`,
-			// 		`  - no records-event routes are configured`,
-			// 	),
-			// 	Component: &Aggregate{},
-			// },
-			// {
-			// 	Name:             "invalid",
-			// 	String: `aggregate:AggregateMessageHandlerStub`,
-			// 	Description: multiline(
-			// 		`invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-			// 		`  - no handles-command routes are configured`,
-			// 		`  - no records-event routes are configured`,
-			// 		`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-			// 	),
-			// 	Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
-			// 		ConfigureFunc: func(c dogma.AggregateConfigurer) {
-			// 			c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-			// 		},
-			// 	}),
-			// },
-			// {
-			// 	Name:             "invalid sub-component",
-			// 	String: `aggregate:AggregateMessageHandlerStub`,
-			// 	Description: multiline(
-			// 		`valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-			// 		`  - invalid identity name/non-uuid`,
-			// 		`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
-			// 		`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-			// 		`  - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-			// 	),
-			// 	Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
-			// 		ConfigureFunc: func(c dogma.AggregateConfigurer) {
-			// 			c.Identity("name", "non-uuid")
-			// 			c.Routes(
-			// 				dogma.HandlesCommand[CommandStub[TypeA]](),
-			// 				dogma.RecordsEvent[EventStub[TypeA]](),
-			// 			)
-			// 		},
-			// 	}),
-			// },
+					b.Route(func(b *configbuilder.RouteBuilder) {
+						b.RouteType(RecordsEventRouteType)
+						b.MessageTypeName("pkg.SomeEvent")
+					})
+				}),
+			},
+			{
+				Name:   "empty",
+				String: `aggregate`,
+				Description: multiline(
+					`invalid aggregate`,
+					`  - no identity`,
+					`  - no handles-command routes`,
+					`  - no records-event routes`,
+				),
+				Component: &Aggregate{},
+			},
+			{
+				Name:   "invalid",
+				String: `aggregate:AggregateMessageHandlerStub`,
+				Description: multiline(
+					`invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+					`  - no handles-command routes`,
+					`  - no records-event routes`,
+					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
+				),
+				Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					},
+				}),
+			},
+			{
+				Name:   "invalid sub-component",
+				String: `aggregate:AggregateMessageHandlerStub`,
+				Description: multiline(
+					`valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+					`  - invalid identity name/non-uuid`,
+					`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
+					`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				),
+				Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
+					ConfigureFunc: func(c dogma.AggregateConfigurer) {
+						c.Identity("name", "non-uuid")
+						c.Routes(
+							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.RecordsEvent[EventStub[TypeA]](),
+						)
+					},
+				}),
+			},
 		},
 	)
 }

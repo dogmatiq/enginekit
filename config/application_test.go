@@ -284,7 +284,7 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:   "no runtime type information",
+				Name:   "no runtime values",
 				String: `application:SomeApplication`,
 				Description: multiline(
 					`valid application pkg.SomeApplication (value unavailable)`,

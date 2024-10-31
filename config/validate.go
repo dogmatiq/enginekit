@@ -9,9 +9,13 @@ import (
 )
 
 // Validate returns an error if the configuration is invalid.
-func Validate(c Component, _ ...ValidateOption) error {
+func Validate(c Component, options ...ValidateOption) error {
 	ctx := &validateContext{
 		Component: c,
+	}
+
+	for _, opt := range options {
+		opt(&ctx.Options)
 	}
 
 	c.validate(ctx)
@@ -115,8 +119,8 @@ func unwrap(err error) iter.Seq[error] {
 }
 
 type validationOptions struct {
-	ForExecution bool
-	Panic        bool
+	ForExecution   bool
+	PanicOnInvalid bool
 }
 
 // validateContext carries the inputs and outputs of the component validation
@@ -134,7 +138,7 @@ func newResolutionContext(c Component) *validateContext {
 	return &validateContext{
 		Component: c,
 		Options: validationOptions{
-			Panic: true,
+			PanicOnInvalid: true,
 		},
 	}
 }
@@ -155,7 +159,7 @@ func (c *validateContext) ValidateChild(child Component) {
 }
 
 func (c *validateContext) Invalid(err error) {
-	if !c.Options.Panic {
+	if !c.Options.PanicOnInvalid {
 		c.errors = append(c.errors, err)
 		return
 	}

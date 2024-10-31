@@ -51,19 +51,19 @@ type MissingRouteTypeError struct {
 }
 
 func (e MissingRouteTypeError) Error() string {
-	return fmt.Sprintf("no %q routes configured", e.RouteType)
+	return fmt.Sprintf("no %q routes", e.RouteType)
 }
 
-// UnexpectedRouteTypeError indicates that a [Handler] is configured with a
+// UnsupportedRouteTypeError indicates that a [Handler] is configured with a
 // [Route] of a [RouteType] that is not allowed for that handler type.
-type UnexpectedRouteTypeError struct {
+type UnsupportedRouteTypeError struct {
 	UnexpectedRoute *Route
 }
 
-func (e UnexpectedRouteTypeError) Error() string {
+func (e UnsupportedRouteTypeError) Error() string {
 	w := &strings.Builder{}
 
-	fmt.Fprintf(w, "unexpected %s route", e.UnexpectedRoute.RouteType.Get())
+	fmt.Fprintf(w, "unsupported %q route", e.UnexpectedRoute.RouteType.Get())
 
 	if name, ok := e.UnexpectedRoute.MessageTypeName.TryGet(); ok {
 		fmt.Fprintf(w, " for %s", name)
@@ -82,7 +82,7 @@ type DuplicateRouteError struct {
 
 func (e DuplicateRouteError) Error() string {
 	return fmt.Sprintf(
-		"multiple %q routes configured for %s",
+		"multiple %q routes for %s",
 		e.RouteType,
 		e.MessageTypeName,
 	)
@@ -115,7 +115,7 @@ func validateHandlerRoutes(ctx *validateContext, h Handler) {
 
 		if rt, ok := r.RouteType.TryGet(); ok {
 			if capabilities.RouteTypes[rt] == RouteTypeDisallowed {
-				ctx.Invalid(UnexpectedRouteTypeError{r})
+				ctx.Invalid(UnsupportedRouteTypeError{r})
 			} else {
 				missing.Remove(rt)
 			}

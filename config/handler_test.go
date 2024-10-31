@@ -30,4 +30,10 @@ func testHandler[
 		runtime,
 		construct,
 	)
+
+	t.Run("func RouteSet()", func(t *testing.T) {
+	})
+
+	t.Run("func IsDisabled()", func(t *testing.T) {
+	})
 }

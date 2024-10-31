@@ -59,7 +59,7 @@ type ValueUnavailableError struct {
 }
 
 func (e ValueUnavailableError) Error() string {
-	return fmt.Sprintf("%s is unavailable", e.Type)
+	return fmt.Sprintf("%s value is unavailable", e.Type)
 }
 
 var (

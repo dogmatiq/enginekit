@@ -57,7 +57,7 @@ func testEntity[
 
 			test.ExpectPanic(
 				t,
-				`entity has no identity`,
+				`no identity`,
 				func() {
 					entity.Identity()
 				},
@@ -84,7 +84,7 @@ func testEntity[
 
 			test.ExpectPanic(
 				t,
-				`entity has 2 identities`,
+				`multiple identities`,
 				func() {
 					entity.Identity()
 				},
@@ -112,7 +112,7 @@ func testEntity[
 
 			test.ExpectPanic(
 				t,
-				reflect.TypeFor[E]().String()+` is unavailable`,
+				reflect.TypeFor[E]().String()+` value is unavailable`,
 				func() {
 					entity.Interface()
 				},

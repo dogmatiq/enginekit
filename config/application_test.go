@@ -77,13 +77,13 @@ func TestApplication(t *testing.T) {
 				Error: multiline(
 					`application is invalid:`,
 					`- could not evaluate entire configuration`,
-					`- entity has no identity`,
+					`- no identity`,
 				),
 				Component: runtimeconfig.FromApplication(nil),
 			},
 			{
 				Name:      "unconfigured application",
-				Error:     `application:ApplicationStub is invalid: entity has no identity`,
+				Error:     `application:ApplicationStub is invalid: no identity`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{}),
 			},
 			{
@@ -97,7 +97,7 @@ func TestApplication(t *testing.T) {
 			},
 			{
 				Name:  "application must not have multiple identities",
-				Error: `application:ApplicationStub is invalid: entity has 3 identities`,
+				Error: `application:ApplicationStub is invalid: multiple identities`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
@@ -108,7 +108,7 @@ func TestApplication(t *testing.T) {
 			},
 			{
 				Name:  "application must not contain invalid handlers",
-				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no "handles-command" routes configured`,
+				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no "handles-command" routes`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
@@ -305,7 +305,7 @@ func TestApplication(t *testing.T) {
 				String: `application`,
 				Description: multiline(
 					`invalid application`,
-					`  - entity has no identity`,
+					`  - no identity`,
 				),
 				Component: &Application{},
 			},
@@ -314,7 +314,7 @@ func TestApplication(t *testing.T) {
 				String: `application:ApplicationStub`,
 				Description: multiline(
 					`invalid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
-					`  - entity has 2 identities`,
+					`  - multiple identities`,
 					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid identity app/89864744-89c5-4a80-a2bf-90aaebc467ba`,
 				),
@@ -346,7 +346,7 @@ func TestApplication(t *testing.T) {
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
-					`      - no "records-event" routes configured`,
+					`      - no "records-event" routes`,
 					`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
 					`      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),

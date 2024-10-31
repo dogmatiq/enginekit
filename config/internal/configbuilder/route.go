@@ -49,36 +49,22 @@ func (b *RouteBuilder) AsPerRoute(r dogma.Route) {
 	}
 }
 
-// // SetRouteType sets the route type of the route.
-// func (b *RouteBuilder) SetRouteType(t config.RouteType) {
-// 	b.target.XRoute.RouteType = optional.Some(t)
-// }
+// RouteType sets the route type of the route.
+func (b *RouteBuilder) RouteType(t config.RouteType) {
+	b.target.RouteType = optional.Some(t)
+}
 
-// // SetMessageTypeName sets the message type name of the route.
-// func (b *RouteBuilder) SetMessageTypeName(name string) {
-// 	b.target.XRoute.MessageTypeName = optional.Some(name)
-// }
+// MessageTypeName sets the message type name of the route.
+func (b *RouteBuilder) MessageTypeName(name string) {
+	b.target.MessageTypeName = optional.Some(name)
+	b.target.MessageType = optional.None[message.Type]()
+}
 
-// // SetMessageType sets the message type of the route.
-// func (b *RouteBuilder) SetMessageType(t message.Type) {
-// 	b.target.XRoute.MessageTypeName = optional.Some(typename.Get(t.ReflectType()))
-// 	b.target.XRoute.MessageType = optional.Some(t)
-// }
-
-// // Edit calls fn, which can apply arbitrary changes to the identity.
-// func (b *RouteBuilder) Edit(fn func(*config.XRoute)) {
-// 	fn(&b.target.XRoute)
-// }
-
-// // Fidelity returns the fidelity of the configuration.
-// func (b *RouteBuilder) Fidelity() config.Fidelity {
-// 	return b.target.XRoute.Fidelity
-// }
-
-// // UpdateFidelity merges f with the current fidelity of the configuration.
-// func (b *RouteBuilder) UpdateFidelity(f config.Fidelity) {
-// 	b.target.XRoute.Fidelity |= f
-// }
+// MessageType sets the message type of the route.
+func (b *RouteBuilder) MessageType(t message.Type) {
+	b.target.MessageTypeName = optional.Some(typename.Get(t.ReflectType()))
+	b.target.MessageType = optional.Some(t)
+}
 
 // Done completes the configuration of the route.
 func (b *RouteBuilder) Done() *config.Route {

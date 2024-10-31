@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"reflect"
 	"slices"
 	"strings"
@@ -59,7 +58,7 @@ func (p *EntityCommon) EntityProperties() *EntityCommon {
 type UnidentifiedEntityError struct{}
 
 func (e UnidentifiedEntityError) Error() string {
-	return "entity has no identity"
+	return "no identity"
 }
 
 // AmbiguouslyIdentifiedEntityError indicates that an [Entity] has been
@@ -69,10 +68,7 @@ type AmbiguouslyIdentifiedEntityError struct {
 }
 
 func (e AmbiguouslyIdentifiedEntityError) Error() string {
-	return fmt.Sprintf(
-		"entity has %d identities",
-		len(e.Identities),
-	)
+	return "multiple identities"
 }
 
 func validateEntity[T any](
@@ -92,6 +88,8 @@ func validateEntity[T any](
 		} else if n != typename.Of(s) {
 			ctx.Malformed("TypeName does not match Source: %q != %q", n, typename.Of(s))
 		}
+	} else if ctx.Options.ForExecution {
+		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[T]()})
 	}
 }
 

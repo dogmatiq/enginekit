@@ -71,8 +71,8 @@ func TestAggregate(t *testing.T) {
 				Error: multiline(
 					`aggregate:SomeAggregate is invalid:`,
 					`- dogma.AggregateMessageHandler value is unavailable`,
-					`- route:handles-command:SomeCommand is invalid: message.Type value is unavailable`,
-					`- route:records-event:SomeEvent is invalid: message.Type value is unavailable`,
+					`- route:handles-command:SomeCommand is invalid: message type is unavailable`,
+					`- route:records-event:SomeEvent is invalid: message type is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -270,7 +270,7 @@ func TestAggregate(t *testing.T) {
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					`  - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - disabled flag set to true`,
+					`  - valid disabled flag, set to true`,
 				),
 				Component: runtimeconfig.FromAggregate(&AggregateMessageHandlerStub{
 					ConfigureFunc: func(c dogma.AggregateConfigurer) {
@@ -390,7 +390,7 @@ func TestAggregate(t *testing.T) {
 			}{
 				{
 					"empty route",
-					`route is invalid: unknown route type`,
+					`route is invalid: route type is unavailable`,
 					&Route{},
 				},
 				{

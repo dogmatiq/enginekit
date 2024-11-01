@@ -3,7 +3,6 @@ package configbuilder
 import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/optional"
 )
 
 // Projection returns a new [config.Projection] as configured by fn.
@@ -43,8 +42,8 @@ func (b *ProjectionBuilder) Route(fn func(*RouteBuilder)) {
 
 // Disabled calls fn which configures a [config.FlagModification] that is added
 // to the handler's disabled flag.
-func (b *ProjectionBuilder) Disabled(fn func(*FlagBuilder)) {
-	b.target.DisabledFlag.Modifications = append(b.target.DisabledFlag.Modifications, Flag(fn))
+func (b *ProjectionBuilder) Disabled(fn func(*FlagBuilder[config.Disabled])) {
+	b.target.DisabledFlags = append(b.target.DisabledFlags, Flag(fn))
 }
 
 // DeliveryPolicy calls fn which configures a [config.ProjectionDeliveryPolicy]
@@ -53,57 +52,17 @@ func (b *ProjectionBuilder) DeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuil
 	b.target.DeliveryPolicyComponents = append(b.target.DeliveryPolicyComponents, ProjectionDeliveryPolicy(fn))
 }
 
+// Partial marks the compomnent as partially configured.
+func (b *ProjectionBuilder) Partial() {
+	b.target.IsPartial = true
+}
+
+// Speculative marks the component as speculative.
+func (b *ProjectionBuilder) Speculative() {
+	b.target.IsSpeculative = true
+}
+
 // Done completes the configuration of the handler.
 func (b *ProjectionBuilder) Done() *config.Projection {
-	if !b.target.TypeName.IsPresent() {
-		b.target.Fidelity |= config.Incomplete
-	}
-	return &b.target
-}
-
-// ProjectionDeliveryPolicy returns a new [dogma.ProjectionDeliveryPolicy] as
-// configured by fn.
-func ProjectionDeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuilder)) *config.ProjectionDeliveryPolicy {
-	x := &ProjectionDeliveryPolicyBuilder{}
-	fn(x)
-	return x.Done()
-}
-
-// ProjectionDeliveryPolicyBuilder constructs a
-// [config.ProjectionDeliveryPolicy].
-type ProjectionDeliveryPolicyBuilder struct {
-	target config.ProjectionDeliveryPolicy
-}
-
-// AsPerDeliveryPolicy configures the builder to use the same properties as p.
-func (b *ProjectionDeliveryPolicyBuilder) AsPerDeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {
-	switch p := p.(type) {
-	case dogma.UnicastProjectionDeliveryPolicy:
-		b.target.DeliveryPolicyType = optional.Some(config.UnicastProjectionDeliveryPolicyType)
-	case dogma.BroadcastProjectionDeliveryPolicy:
-		b.target.DeliveryPolicyType = optional.Some(config.BroadcastProjectionDeliveryPolicyType)
-		b.target.Broadcast.PrimaryFirst = optional.Some(p.PrimaryFirst)
-	default:
-		b.target.Fidelity |= config.Incomplete
-	}
-}
-
-// Type sets the type of the delivery policy.
-func (b *ProjectionDeliveryPolicyBuilder) Type(t config.ProjectionDeliveryPolicyType) {
-	b.target.DeliveryPolicyType = optional.Some(t)
-}
-
-// BroadcastToPrimaryFirst sets the value of the "broadcast to primary first"
-// property of a [config.BroadcastProjectionDeliveryPolicyType].
-func (b *ProjectionDeliveryPolicyBuilder) BroadcastToPrimaryFirst(v bool) {
-	b.target.DeliveryPolicyType = optional.Some(config.BroadcastProjectionDeliveryPolicyType)
-	b.target.Broadcast.PrimaryFirst = optional.Some(v)
-}
-
-// Done completes the configuration of the policy.
-func (b *ProjectionDeliveryPolicyBuilder) Done() *config.ProjectionDeliveryPolicy {
-	if !b.target.DeliveryPolicyType.IsPresent() {
-		b.target.Fidelity |= config.Incomplete
-	}
 	return &b.target
 }

@@ -32,7 +32,7 @@ type HandlerCommon struct {
 	EntityCommon
 
 	RouteComponents []*Route
-	DisabledFlag    Flag[Disabled]
+	DisabledFlags   []*Flag[Disabled]
 }
 
 // HandlerProperties returns the properties common to all [Handler] types.
@@ -95,7 +95,10 @@ func validateHandler[T any](
 ) {
 	validateEntity(ctx, h, source)
 	validateHandlerRoutes(ctx, h)
-	ctx.ValidateChild(&h.HandlerProperties().DisabledFlag)
+
+	for _, f := range h.HandlerProperties().DisabledFlags {
+		ctx.ValidateChild(f)
+	}
 }
 
 func validateHandlerRoutes(ctx *validateContext, h Handler) {
@@ -146,12 +149,11 @@ func validateHandlerRoutes(ctx *validateContext, h Handler) {
 }
 
 func resolveRouteSet(h Handler) RouteSet {
-	ctx := newResolutionContext(h)
+	ctx := newResolutionContext(h, false)
 	return buildRouteSet(ctx, h)
 }
 
 func buildRouteSet(ctx *validateContext, h Handler) RouteSet {
-	failIfIncomplete(ctx, h.HandlerProperties().Fidelity)
 	validateHandlerRoutes(ctx, h)
 
 	set := RouteSet{}
@@ -192,15 +194,17 @@ func buildRouteSet(ctx *validateContext, h Handler) RouteSet {
 func resolveIsDisabled(h Handler) bool {
 	p := h.HandlerProperties()
 
-	ctx := newResolutionContext(h)
-	failIfIncomplete(ctx, p.Fidelity)
-	ctx.ValidateChild(&p.DisabledFlag)
+	ctx := newResolutionContext(h, false)
+	for _, r := range p.DisabledFlags {
+		ctx.ValidateChild(r)
+	}
 
-	if len(p.DisabledFlag.Modifications) == 0 {
+	n := len(p.DisabledFlags)
+	if n == 0 {
 		return false
 	}
 
-	return p.DisabledFlag.Get().Get()
+	return p.DisabledFlags[n-1].Value.Get()
 }
 
 func describeHandler[T any](
@@ -216,6 +220,7 @@ func describeHandler[T any](
 		ctx.DescribeChild(r)
 	}
 
-	ctx.DescribeChild(&p.DisabledFlag)
-
+	for _, f := range p.DisabledFlags {
+		ctx.DescribeChild(f)
+	}
 }

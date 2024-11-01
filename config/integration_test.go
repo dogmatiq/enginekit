@@ -65,7 +65,7 @@ func TestIntegration(t *testing.T) {
 				Error: multiline(
 					`integration:SomeIntegration is invalid:`,
 					`- dogma.IntegrationMessageHandler value is unavailable`,
-					`- route:handles-command:SomeCommand is invalid: message.Type value is unavailable`,
+					`- route:handles-command:SomeCommand is invalid: message type is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -227,7 +227,7 @@ func TestIntegration(t *testing.T) {
 					`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - disabled flag set to true`,
+					`  - valid disabled flag, set to true`,
 				),
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
@@ -337,7 +337,7 @@ func TestIntegration(t *testing.T) {
 			}{
 				{
 					"empty route",
-					`route is invalid: unknown route type`,
+					`route is invalid: route type is unavailable`,
 					&Route{},
 				},
 				{

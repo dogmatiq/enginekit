@@ -9,6 +9,8 @@ import (
 
 // ComponentBuilder an interface for builders that produce a [config.Component].
 type ComponentBuilder[T config.Component] interface {
+	Partial()
+	Speculative()
 	Done() T
 }
 
@@ -38,12 +40,12 @@ type HandlerBuilder[T config.Handler, H any] interface {
 
 	// Disabled calls fn which configures a [config.FlagModification] that is
 	// added to the handler's disabled flag.
-	Disabled(fn func(*FlagBuilder))
+	Disabled(fn func(*FlagBuilder[config.Disabled]))
 }
 
 var (
-	_ ComponentBuilder[*config.Identity]         = (*IdentityBuilder)(nil)
-	_ ComponentBuilder[*config.FlagModification] = (*FlagBuilder)(nil)
+	_ ComponentBuilder[*config.Identity]              = (*IdentityBuilder)(nil)
+	_ ComponentBuilder[*config.Flag[config.Disabled]] = (*FlagBuilder[config.Disabled])(nil)
 
 	_ EntityBuilder[*config.Application, dogma.Application] = (*ApplicationBuilder)(nil)
 

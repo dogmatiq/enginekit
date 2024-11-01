@@ -2,7 +2,6 @@ package config
 
 import (
 	"iter"
-	"reflect"
 	"strings"
 
 	"github.com/dogmatiq/dogma"
@@ -80,13 +79,10 @@ func MapByProjectionDeliveryPolicyType[T any](
 // ProjectionDeliveryPolicy is a [Component] that represents the configuration
 // of a [dogma.ProjectionDeliveryPolicy].
 type ProjectionDeliveryPolicy struct {
-	// Fidelity reports how faithfully the [Component] describes a complete
-	// configuration that can be used to execute an application.
-	Fidelity Fidelity
+	ComponentCommon
 
 	DeliveryPolicyType optional.Optional[ProjectionDeliveryPolicyType]
-
-	Broadcast struct {
+	Broadcast          struct {
 		PrimaryFirst optional.Optional[bool]
 	}
 }
@@ -94,8 +90,8 @@ type ProjectionDeliveryPolicy struct {
 // Interface returns the [dogma.ProjectionDeliveryPolicy] that the [Component]
 // describes.
 func (p *ProjectionDeliveryPolicy) Interface() dogma.ProjectionDeliveryPolicy {
-	ctx := newResolutionContext(p)
-	p.validateForExecution(ctx)
+	ctx := newResolutionContext(p, false)
+	p.validateProperties(ctx)
 
 	return MapByProjectionDeliveryPolicyType(
 		p.DeliveryPolicyType.Get(),
@@ -124,33 +120,28 @@ func (p *ProjectionDeliveryPolicy) String() string {
 }
 
 func (p *ProjectionDeliveryPolicy) validate(ctx *validateContext) {
-	validateFidelity(ctx, p.Fidelity)
-	p.validateForExecution(ctx)
+	validateComponent(ctx)
+	p.validateProperties(ctx)
 }
 
-func (p *ProjectionDeliveryPolicy) validateForExecution(ctx *validateContext) {
-	if !ctx.Options.ForExecution {
-		return
-	}
-
+func (p *ProjectionDeliveryPolicy) validateProperties(ctx *validateContext) {
 	if t, ok := p.DeliveryPolicyType.TryGet(); ok {
-		if t != BroadcastProjectionDeliveryPolicyType {
-			return
+		if ctx.Options.ForExecution {
+			if t == BroadcastProjectionDeliveryPolicyType {
+				if !p.Broadcast.PrimaryFirst.IsPresent() {
+					ctx.Absent("primary-first setting")
+				}
+			}
 		}
-
-		if p.Broadcast.PrimaryFirst.IsPresent() {
-			return
-		}
+	} else {
+		ctx.Absent("delivery policy type")
 	}
-
-	ctx.Invalid(ValueUnavailableError{reflect.TypeFor[dogma.ProjectionDeliveryPolicy]()})
 }
 
 func (p *ProjectionDeliveryPolicy) describe(ctx *describeContext) {
-	describeFidelity(ctx, p.Fidelity)
+	ctx.DescribeFidelity()
 
 	t, ok := p.DeliveryPolicyType.TryGet()
-
 	if ok {
 		ctx.Print(t.String(), " ")
 	}

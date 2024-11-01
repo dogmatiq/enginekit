@@ -463,7 +463,7 @@ func TestApplication(t *testing.T) {
 
 			test.ExpectPanic(
 				t,
-				`projection is invalid: route is invalid: unknown route type`,
+				`projection is invalid: route is invalid: route type is unavailable`,
 				func() {
 					entity.RouteSet()
 				},

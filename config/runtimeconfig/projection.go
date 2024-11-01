@@ -15,17 +15,19 @@ func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
 }
 
 func buildProjection(b *configbuilder.ProjectionBuilder, h dogma.ProjectionMessageHandler) {
-	if h != nil {
+	if h == nil {
+		b.Partial()
+	} else {
 		b.Source(h)
 		h.Configure(&projectionConfigurer{
-			handlerConfigurer[dogma.ProjectionRoute]{b},
+			newHandlerConfigurer[dogma.ProjectionRoute](b),
 			b,
 		})
 	}
 }
 
 type projectionConfigurer struct {
-	handlerConfigurer[dogma.ProjectionRoute]
+	*handlerConfigurer[dogma.ProjectionRoute, *config.Projection, dogma.ProjectionMessageHandler]
 	b *configbuilder.ProjectionBuilder
 }
 

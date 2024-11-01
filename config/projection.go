@@ -53,8 +53,7 @@ func (h *Projection) IsDisabled() bool {
 //
 // It panics if the configuration does not specify valid delivery policies.
 func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
-	ctx := newResolutionContext(h)
-	failIfIncomplete(ctx, h.Fidelity)
+	ctx := newResolutionContext(h, false)
 
 	for _, p := range h.DeliveryPolicyComponents {
 		ctx.ValidateChild(p)

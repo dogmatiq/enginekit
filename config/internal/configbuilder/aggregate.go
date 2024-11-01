@@ -42,14 +42,21 @@ func (b *AggregateBuilder) Route(fn func(*RouteBuilder)) {
 
 // Disabled calls fn which configures a [config.FlagModification] that is added
 // to the handler's disabled flag.
-func (b *AggregateBuilder) Disabled(fn func(*FlagBuilder)) {
-	b.target.DisabledFlag.Modifications = append(b.target.DisabledFlag.Modifications, Flag(fn))
+func (b *AggregateBuilder) Disabled(fn func(*FlagBuilder[config.Disabled])) {
+	b.target.DisabledFlags = append(b.target.DisabledFlags, Flag(fn))
+}
+
+// Partial marks the compomnent as partially configured.
+func (b *AggregateBuilder) Partial() {
+	b.target.IsPartial = true
+}
+
+// Speculative marks the component as speculative.
+func (b *AggregateBuilder) Speculative() {
+	b.target.IsSpeculative = true
 }
 
 // Done completes the configuration of the handler.
 func (b *AggregateBuilder) Done() *config.Aggregate {
-	if !b.target.TypeName.IsPresent() {
-		b.target.Fidelity |= config.Incomplete
-	}
 	return &b.target
 }

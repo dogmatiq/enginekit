@@ -42,7 +42,7 @@ type Entity interface {
 
 // EntityCommon contains the properties common to all [Entity] types.
 type EntityCommon struct {
-	Fidelity           Fidelity
+	ComponentCommon
 	TypeName           optional.Optional[string]
 	IdentityComponents []*Identity
 }
@@ -75,7 +75,7 @@ func validateEntity[T any](
 	e Entity,
 	src optional.Optional[T],
 ) {
-	validateFidelity(ctx, e.EntityProperties().Fidelity)
+	validateComponent(ctx)
 	validateEntityIdentities(ctx, e)
 
 	n, hasN := e.EntityProperties().TypeName.TryGet()
@@ -88,7 +88,7 @@ func validateEntity[T any](
 			ctx.Malformed("TypeName does not match Source: %q != %q", n, typename.Of(s))
 		}
 	} else if ctx.Options.ForExecution {
-		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[T]()})
+		ctx.Absent(reflect.TypeFor[T]().String() + " value")
 	}
 }
 
@@ -107,8 +107,7 @@ func validateEntityIdentities(ctx *validateContext, e Entity) {
 }
 
 func resolveIdentity(e Entity) *identitypb.Identity {
-	ctx := newResolutionContext(e)
-	failIfIncomplete(ctx, e.EntityProperties().Fidelity)
+	ctx := newResolutionContext(e, false)
 	validateEntityIdentities(ctx, e)
 
 	id := e.EntityProperties().IdentityComponents[0]
@@ -120,11 +119,11 @@ func resolveIdentity(e Entity) *identitypb.Identity {
 }
 
 func resolveInterface[T any](e Entity, src optional.Optional[T]) T {
-	ctx := newResolutionContext(e)
+	ctx := newResolutionContext(e, true)
 
 	v, ok := src.TryGet()
 	if !ok {
-		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[T]()})
+		ctx.Absent(reflect.TypeFor[T]().String() + " value")
 	}
 
 	return v
@@ -158,7 +157,7 @@ func describeEntity[T any](
 ) {
 	p := e.EntityProperties()
 
-	describeFidelity(ctx, p.Fidelity)
+	ctx.DescribeFidelity()
 	ctx.Print(entityLabel(e))
 
 	if n, ok := p.TypeName.TryGet(); ok {

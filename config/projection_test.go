@@ -70,8 +70,8 @@ func TestProjection(t *testing.T) {
 				Error: multiline(
 					`projection:SomeProjection is invalid:`,
 					`- dogma.ProjectionMessageHandler value is unavailable`,
-					`- route:handles-event:SomeEvent is invalid: message.Type value is unavailable`,
-					`- delivery-policy:broadcast is invalid: dogma.ProjectionDeliveryPolicy value is unavailable`,
+					`- route:handles-event:SomeEvent is invalid: message type is unavailable`,
+					`- delivery-policy:broadcast is invalid: primary-first setting is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -228,7 +228,7 @@ func TestProjection(t *testing.T) {
 					`valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - disabled flag set to true`,
+					`  - valid disabled flag, set to true`,
 				),
 				Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
@@ -336,7 +336,7 @@ func TestProjection(t *testing.T) {
 			}{
 				{
 					"empty route",
-					`route is invalid: unknown route type`,
+					`route is invalid: route type is unavailable`,
 					&Route{},
 				},
 				{
@@ -423,9 +423,11 @@ func TestProjection(t *testing.T) {
 			)
 		})
 
-		t.Run("it panics if the handler is incomplete", func(t *testing.T) {
+		t.Run("it panics if the handler is partially configured", func(t *testing.T) {
 			handler := configbuilder.Projection(
-				func(b *configbuilder.ProjectionBuilder) {},
+				func(b *configbuilder.ProjectionBuilder) {
+					b.Partial()
+				},
 			)
 
 			test.ExpectPanic(

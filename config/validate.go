@@ -136,14 +136,20 @@ type validateContext struct {
 
 // newResolutionContext returns a [validateContext] that is configured to
 // perform strict validation and fail fast on error.
-func newResolutionContext(c Component) *validateContext {
-	return &validateContext{
+func newResolutionContext(c Component, allowPartial bool) *validateContext {
+	ctx := &validateContext{
 		Component: c,
 		Options: validationOptions{
 			ForExecution:   true,
 			PanicOnInvalid: true,
 		},
 	}
+
+	if !allowPartial && c.ComponentProperties().IsPartial {
+		ctx.Invalid(PartialConfigurationError{})
+	}
+
+	return ctx
 }
 
 func (c *validateContext) ForChild(child Component) *validateContext {
@@ -177,6 +183,10 @@ func (c *validateContext) Invalid(err error) {
 	}
 
 	c.parent.Invalid(err)
+}
+
+func (c *validateContext) Absent(desc string) {
+	c.Invalid(ConfigurationUnavailableError{desc})
 }
 
 func (c *validateContext) Malformed(format string, args ...any) {

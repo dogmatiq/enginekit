@@ -2,7 +2,6 @@ package config
 
 import (
 	"cmp"
-	"reflect"
 	"strings"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
@@ -13,9 +12,7 @@ import (
 
 // Route represents the configuration of a [dogma.Route].
 type Route struct {
-	// Fidelity reports how faithfully the [Component] describes a complete
-	// configuration that can be used to execute an application.
-	Fidelity Fidelity
+	ComponentCommon
 
 	// RouteType is the type of route, if available.
 	RouteType optional.Optional[RouteType]
@@ -62,18 +59,18 @@ func (r *Route) key() (routeKey, bool) {
 }
 
 func (r *Route) validate(ctx *validateContext) {
-	validateFidelity(ctx, r.Fidelity)
+	validateComponent(ctx)
 
 	rt, hasRT := r.RouteType.TryGet()
 	mn, hasMN := r.MessageTypeName.TryGet()
 	mt, hasMT := r.MessageType.TryGet()
 
 	if !hasRT {
-		ctx.Invalid(UnknownRouteTypeError{})
+		ctx.Absent("route type")
 	}
 
 	if !hasMN {
-		ctx.Invalid(UnknownMessageTypeError{})
+		ctx.Absent("message type name")
 	}
 
 	if hasMT {
@@ -93,12 +90,12 @@ func (r *Route) validate(ctx *validateContext) {
 			)
 		}
 	} else if ctx.Options.ForExecution {
-		ctx.Invalid(ValueUnavailableError{reflect.TypeFor[message.Type]()})
+		ctx.Absent("message type")
 	}
 }
 
 func (r *Route) describe(ctx *describeContext) {
-	describeFidelity(ctx, r.Fidelity)
+	ctx.DescribeFidelity()
 
 	if rt, ok := r.RouteType.TryGet(); ok {
 		ctx.Print(rt.String(), " ")
@@ -130,22 +127,6 @@ func (k routeKey) Compare(x routeKey) int {
 		return c
 	}
 	return cmp.Compare(k.MessageTypeName, x.MessageTypeName)
-}
-
-// UnknownRouteTypeError indicates that a [Route] does not specify a
-// [RouteType].
-type UnknownRouteTypeError struct{}
-
-func (UnknownRouteTypeError) Error() string {
-	return "unknown route type"
-}
-
-// UnknownMessageTypeError indicates that a [Route] does not specify a message
-// type name.
-type UnknownMessageTypeError struct{}
-
-func (UnknownMessageTypeError) Error() string {
-	return "unknown message type"
 }
 
 // MessageKindMismatchError indicates that a [Route] refers to a [message.Type]

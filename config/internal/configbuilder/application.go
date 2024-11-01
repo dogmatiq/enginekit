@@ -58,10 +58,17 @@ func (b *ApplicationBuilder) Projection(fn func(*ProjectionBuilder)) {
 	b.target.HandlerComponents = append(b.target.HandlerComponents, Projection(fn))
 }
 
+// Partial marks the compomnent as partially configured.
+func (b *ApplicationBuilder) Partial() {
+	b.target.IsPartial = true
+}
+
+// Speculative marks the component as speculative.
+func (b *ApplicationBuilder) Speculative() {
+	b.target.IsSpeculative = true
+}
+
 // Done sanity checks the configuration and returns the completed component.
 func (b *ApplicationBuilder) Done() *config.Application {
-	if !b.target.TypeName.IsPresent() {
-		b.target.Fidelity |= config.Incomplete
-	}
 	return &b.target
 }

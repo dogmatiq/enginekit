@@ -34,9 +34,7 @@ func testHandler[
 
 	t.Run("func IsDisabled()", func(t *testing.T) {
 		t.Run("it returns false if the handler is not disabled", func(t *testing.T) {
-			handler := build(func(b B) {
-				b.TypeName("pkg.SomeHandler")
-			})
+			handler := build(func(b B) {})
 
 			test.Expect(
 				t,
@@ -48,9 +46,8 @@ func testHandler[
 
 		t.Run("it returns true if the handler is disabled", func(t *testing.T) {
 			handler := build(func(b B) {
-				b.TypeName("pkg.SomeHandler")
 				b.Disabled(
-					func(b *configbuilder.FlagBuilder) {
+					func(b *configbuilder.FlagBuilder[Disabled]) {
 						b.Value(true)
 					},
 				)
@@ -64,18 +61,18 @@ func testHandler[
 			)
 		})
 
-		t.Run("panics if the flag contains incomplete values", func(t *testing.T) {
+		t.Run("panics if the flag is partially configured", func(t *testing.T) {
 			handler := build(func(b B) {
-				b.TypeName("pkg.SomeHandler")
 				b.Disabled(
-					func(b *configbuilder.FlagBuilder) {
+					func(b *configbuilder.FlagBuilder[Disabled]) {
+						b.Partial()
 					},
 				)
 			})
 
 			test.ExpectPanic(
 				t,
-				`disabled flag is invalid: flag-modification:? is invalid: could not evaluate entire configuration`,
+				`flag:disabled is invalid: could not evaluate entire configuration`,
 				func() {
 					handler.IsDisabled()
 				},

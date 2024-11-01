@@ -27,7 +27,9 @@ func TestFromAggregate(t *testing.T) {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							Fidelity: config.Incomplete,
+							ComponentCommon: config.ComponentCommon{
+								IsPartial: true,
+							},
 						},
 					},
 				}
@@ -83,10 +85,8 @@ func TestFromAggregate(t *testing.T) {
 								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},
 						},
-						DisabledFlag: config.Flag[config.Disabled]{
-							Modifications: []*config.FlagModification{
-								{Value: optional.Some(true)},
-							},
+						DisabledFlags: []*config.Flag[config.Disabled]{
+							{Value: optional.Some(true)},
 						},
 					},
 					Source: optional.Some(app),

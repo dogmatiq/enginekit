@@ -13,9 +13,7 @@ import (
 // Identity is a [Component] that that represents the unique identity of an
 // [Entity].
 type Identity struct {
-	// Fidelity reports how faithfully the [Component] describes a complete
-	// configuration that can be used to execute an application.
-	Fidelity Fidelity
+	ComponentCommon
 
 	// Name is the name element of the identity.
 	Name optional.Optional[string]
@@ -62,45 +60,56 @@ func (i *Identity) String() string {
 }
 
 func (i *Identity) validate(ctx *validateContext) {
-	validateFidelity(ctx, i.Fidelity)
+	validateComponent(ctx)
 
-	if n, ok := i.Name.TryGet(); ok && !isPrintable(n) {
-		ctx.Invalid(InvalidIdentityNameError{n})
+	if n, ok := i.Name.TryGet(); ok {
+		if !isPrintable(n) {
+			ctx.Invalid(InvalidIdentityNameError{n})
+		}
+	} else {
+		ctx.Absent("name")
 	}
 
 	if k, ok := i.Key.TryGet(); ok {
 		if _, err := uuidpb.Parse(k); err != nil {
 			ctx.Invalid(InvalidIdentityKeyError{k})
 		}
+	} else {
+		ctx.Absent("key")
 	}
 }
 
 func (i *Identity) describe(ctx *describeContext) {
-	describeFidelity(ctx, i.Fidelity)
-	ctx.Print("identity ")
+	ctx.DescribeFidelity()
+	ctx.Print("identity")
 
-	if name, ok := i.Name.TryGet(); !ok {
-		ctx.Print("?")
-	} else if !isPrintable(name) || strings.Contains(name, `"`) {
-		ctx.Print(strconv.Quote(name))
-	} else {
-		ctx.Print(name)
-	}
+	n, hasN := i.Name.TryGet()
+	k, hasK := i.Key.TryGet()
 
-	ctx.Print("/")
+	if hasN || hasK {
+		ctx.Print(" ")
 
-	if key, ok := i.Key.TryGet(); !ok {
-		ctx.Print("?")
-	} else if !isPrintable(key) || strings.Contains(key, `"`) {
-		ctx.Print(strconv.Quote(key))
-	} else {
-		ctx.Print(key)
-	}
+		if !hasN {
+			ctx.Print("?")
+		} else if !isPrintable(n) || strings.Contains(n, `"`) {
+			ctx.Print(strconv.Quote(n))
+		} else {
+			ctx.Print(n)
+		}
 
-	if key, ok := i.Key.TryGet(); ok {
-		if uuid, err := uuidpb.Parse(key); err == nil {
-			if uuid.AsString() != key {
-				ctx.Print(" (non-canonical)")
+		ctx.Print("/")
+
+		if !hasK {
+			ctx.Print("?")
+		} else if !isPrintable(k) || strings.Contains(k, `"`) {
+			ctx.Print(strconv.Quote(k))
+		} else {
+			ctx.Print(k)
+
+			if uuid, err := uuidpb.Parse(k); err == nil {
+				if uuid.AsString() != k {
+					ctx.Print(" (non-canonical)")
+				}
 			}
 		}
 	}

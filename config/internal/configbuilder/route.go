@@ -45,7 +45,7 @@ func (b *RouteBuilder) AsPerRoute(r dogma.Route) {
 	case dogma.SchedulesTimeoutRoute:
 		set(config.SchedulesTimeoutRouteType, r.Type)
 	default:
-		b.target.Fidelity |= config.Incomplete
+		panic("unsupported route type")
 	}
 }
 
@@ -66,10 +66,17 @@ func (b *RouteBuilder) MessageType(t message.Type) {
 	b.target.MessageType = optional.Some(t)
 }
 
+// Partial marks the compomnent as partially configured.
+func (b *RouteBuilder) Partial() {
+	b.target.IsPartial = true
+}
+
+// Speculative marks the component as speculative.
+func (b *RouteBuilder) Speculative() {
+	b.target.IsSpeculative = true
+}
+
 // Done completes the configuration of the route.
 func (b *RouteBuilder) Done() *config.Route {
-	if !b.target.RouteType.IsPresent() || !b.target.MessageTypeName.IsPresent() {
-		b.target.Fidelity |= config.Incomplete
-	}
 	return &b.target
 }

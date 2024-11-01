@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"io"
 	"strings"
 
@@ -68,6 +69,35 @@ type describeContext struct {
 	errors   []error
 	renderer *renderer.Renderer
 	options  describeOptions
+}
+
+func hasError[T error](ctx *describeContext) bool {
+	for _, err := range ctx.errors {
+		var e T
+		if errors.As(err, &e) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (ctx *describeContext) DescribeFidelity() {
+	p := ctx.Component.ComponentProperties()
+
+	if p.IsPartial || hasError[PartialConfigurationError](ctx) || hasError[ConfigurationUnavailableError](ctx) {
+		ctx.Print("incomplete ")
+	} else if !ctx.options.ValidationResult.IsPresent() {
+		ctx.Print("unvalidated ")
+	} else if len(ctx.errors) == 0 {
+		ctx.Print("valid ")
+	} else {
+		ctx.Print("invalid ")
+	}
+
+	if p.IsSpeculative {
+		ctx.Print("speculative ")
+	}
 }
 
 func (ctx *describeContext) DescribeChild(c Component) {

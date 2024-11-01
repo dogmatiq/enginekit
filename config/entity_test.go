@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/config/constraints"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
+	"github.com/dogmatiq/enginekit/config/internal/constraints"
 	"github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"

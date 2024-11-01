@@ -5,8 +5,8 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/config"
-	"github.com/dogmatiq/enginekit/config/constraints"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
+	"github.com/dogmatiq/enginekit/config/internal/constraints"
 	"github.com/dogmatiq/enginekit/internal/test"
 )
 

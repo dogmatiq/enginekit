@@ -9,17 +9,18 @@ import (
 // FromProcess returns a new [config.Process] that represents the configuration
 // of the given [dogma.ProcessMessageHandler].
 func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
-	return configbuilder.Process(func(b *configbuilder.ProcessBuilder) {
-		if h == nil {
-			b.UpdateFidelity(config.Incomplete)
-		} else {
+	return configbuilder.Process(
+		func(b *configbuilder.ProcessBuilder) {
 			buildProcess(b, h)
-		}
-	})
+		},
+	)
 }
 
 func buildProcess(b *configbuilder.ProcessBuilder, h dogma.ProcessMessageHandler) {
-	b.SetDisabled(false)
-	b.SetSource(h)
-	h.Configure(&handlerConfigurer[dogma.ProcessRoute]{b})
+	if h == nil {
+		b.Partial()
+	} else {
+		b.Source(h)
+		h.Configure(newHandlerConfigurer[dogma.ProcessRoute](b))
+	}
 }

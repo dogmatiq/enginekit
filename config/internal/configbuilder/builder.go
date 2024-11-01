@@ -1,57 +1,86 @@
 package configbuilder
 
 import (
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
+	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/optional"
 )
 
-// ComponentBuilder is the interface shared by the builder types for all
-// [config.Component] types.
-type ComponentBuilder interface {
-	// Fidelity returns the fidelity of the configuration.
-	Fidelity() config.Fidelity
-
-	// UpdateFidelity merges f into the fidelity of the configuration.
-	UpdateFidelity(f config.Fidelity)
+// ComponentBuilder an interface for builders that produce a [config.Component].
+type ComponentBuilder[T config.Component] interface {
+	Partial()
+	Speculative()
+	Done() T
 }
 
-// EntityBuilder is a specialization of [ComponentBuilder] for building
-// [config.Entity] configuration.
-type EntityBuilder interface {
-	ComponentBuilder
+// EntityBuilder an interface for builders that produce a [config.Entity].
+type EntityBuilder[T config.Entity, E any] interface {
+	ComponentBuilder[T]
 
-	// SetSourceTypeName sets the source of the configuration.
-	SetSourceTypeName(typeName string)
+	// TypeName sets the name of the concrete type that implements the
+	// entity.
+	TypeName(n string)
+
+	// Source sets the source value to h.
+	Source(E)
 
 	// Identity calls fn which configures a [config.Identity] that is added to
 	// the handler.
 	Identity(fn func(*IdentityBuilder))
 }
 
-// HandlerBuilder is a specialization of [EntityBuilder] for building
-// [config.Handler] configuration.
-type HandlerBuilder interface {
-	EntityBuilder
+// HandlerBuilder an interface for builders that produce a [config.Handler].
+type HandlerBuilder[T config.Handler, H any] interface {
+	EntityBuilder[T, H]
 
 	// Route calls fn which configures a [config.Route] that is added to the
 	// handler.
 	Route(fn func(*RouteBuilder))
 
-	// IsDisabled returns whether the handler is disabled or not.
-	IsDisabled() optional.Optional[bool]
-
-	// SetDisabled sets whether the handler is disabled or not.
-	SetDisabled(disabled bool)
+	// Disabled calls fn which configures a [config.FlagModification] that is
+	// added to the handler's disabled flag.
+	Disabled(fn func(*FlagBuilder[config.Disabled]))
 }
 
 var (
-	_ ComponentBuilder = (*IdentityBuilder)(nil)
-	_ ComponentBuilder = (*RouteBuilder)(nil)
+	_ ComponentBuilder[*config.Identity]              = (*IdentityBuilder)(nil)
+	_ ComponentBuilder[*config.Flag[config.Disabled]] = (*FlagBuilder[config.Disabled])(nil)
 
-	_ EntityBuilder = (*ApplicationBuilder)(nil)
+	_ EntityBuilder[*config.Application, dogma.Application] = (*ApplicationBuilder)(nil)
 
-	_ HandlerBuilder = (*AggregateBuilder)(nil)
-	_ HandlerBuilder = (*ProcessBuilder)(nil)
-	_ HandlerBuilder = (*IntegrationBuilder)(nil)
-	_ HandlerBuilder = (*ProjectionBuilder)(nil)
+	_ HandlerBuilder[*config.Aggregate, dogma.AggregateMessageHandler]     = (*AggregateBuilder)(nil)
+	_ HandlerBuilder[*config.Process, dogma.ProcessMessageHandler]         = (*ProcessBuilder)(nil)
+	_ HandlerBuilder[*config.Integration, dogma.IntegrationMessageHandler] = (*IntegrationBuilder)(nil)
+	_ HandlerBuilder[*config.Projection, dogma.ProjectionMessageHandler]   = (*ProjectionBuilder)(nil)
+
+	_ ComponentBuilder[*config.Route] = (*RouteBuilder)(nil)
 )
+
+func setTypeName[T any](
+	typeName *optional.Optional[string],
+	source *optional.Optional[T],
+	n string,
+) {
+	if n == "" {
+		// TODO: validate that this is actually a well-formed fully-qualified
+		// type name, with optional asterisk prefix.
+		panic("concrete type name must not be empty")
+	}
+
+	*typeName = optional.Some(n)
+	*source = optional.None[T]()
+}
+
+func setSource[T any](
+	typeName *optional.Optional[string],
+	source *optional.Optional[T],
+	v T,
+) {
+	if any(v) == nil {
+		panic("source must not be nil")
+	}
+
+	*typeName = optional.Some(typename.Of(v))
+	*source = optional.Some(v)
+}

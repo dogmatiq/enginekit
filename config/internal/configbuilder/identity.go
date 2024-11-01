@@ -17,41 +17,32 @@ type IdentityBuilder struct {
 	target config.Identity
 }
 
-// SetName sets the name element of the identity.
-func (b *IdentityBuilder) SetName(name string) {
-	b.target.AsConfigured.Name = optional.Some(name)
+// TargetComponent returns the component that is being configured.
+func (b *IdentityBuilder) TargetComponent() config.Component {
+	return &b.target
 }
 
-// SetKey sets the key element of the identity.
-func (b *IdentityBuilder) SetKey(key string) {
-	b.target.AsConfigured.Key = optional.Some(key)
+// Name sets the name element of the identity.
+func (b *IdentityBuilder) Name(name string) {
+	b.target.Name = optional.Some(name)
 }
 
-// Edit calls fn, which can apply arbitrary changes to the identity.
-func (b *IdentityBuilder) Edit(fn func(*config.IdentityAsConfigured)) {
-	fn(&b.target.AsConfigured)
+// Key sets the key element of the identity.
+func (b *IdentityBuilder) Key(key string) {
+	b.target.Key = optional.Some(key)
 }
 
-// Fidelity returns the fidelity of the configuration.
-func (b *IdentityBuilder) Fidelity() config.Fidelity {
-	return b.target.AsConfigured.Fidelity
+// Partial marks the compomnent as partially configured.
+func (b *IdentityBuilder) Partial() {
+	b.target.IsPartial = true
 }
 
-// UpdateFidelity merges f with the current fidelity of the configuration.
-func (b *IdentityBuilder) UpdateFidelity(f config.Fidelity) {
-	b.target.AsConfigured.Fidelity |= f
+// Speculative marks the component as speculative.
+func (b *IdentityBuilder) Speculative() {
+	b.target.IsSpeculative = true
 }
 
 // Done completes the configuration of the identity.
 func (b *IdentityBuilder) Done() *config.Identity {
-	if b.target.AsConfigured.Fidelity&config.Incomplete == 0 {
-		if !b.target.AsConfigured.Name.IsPresent() {
-			panic("identity must have a name or be marked as incomplete")
-		}
-		if !b.target.AsConfigured.Key.IsPresent() {
-			panic("identity must have a key or be marked as incomplete")
-		}
-	}
-
 	return &b.target
 }

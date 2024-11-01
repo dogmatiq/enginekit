@@ -9,17 +9,18 @@ import (
 // FromAggregate returns a new [config.Aggregate] that represents the
 // configuration of the given [dogma.AggregateMessageHandler].
 func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
-	return configbuilder.Aggregate(func(b *configbuilder.AggregateBuilder) {
-		if h == nil {
-			b.UpdateFidelity(config.Incomplete)
-		} else {
+	return configbuilder.Aggregate(
+		func(b *configbuilder.AggregateBuilder) {
 			buildAggregate(b, h)
-		}
-	})
+		},
+	)
 }
 
 func buildAggregate(b *configbuilder.AggregateBuilder, h dogma.AggregateMessageHandler) {
-	b.SetSource(h)
-	b.SetDisabled(false)
-	h.Configure(&handlerConfigurer[dogma.AggregateRoute]{b})
+	if h == nil {
+		b.Partial()
+	} else {
+		b.Source(h)
+		h.Configure(newHandlerConfigurer[dogma.AggregateRoute](b))
+	}
 }

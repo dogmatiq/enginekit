@@ -1,141 +1,146 @@
 package config
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"unicode"
 
-	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
-// IdentityAsConfigured contains the raw unvalidated properties of an
-// [Identity].
-type IdentityAsConfigured struct {
-	// Name is the human-readable name of the entity, if available.
+// Identity is a [Component] that that represents the unique identity of an
+// [Entity].
+type Identity struct {
+	ComponentCommon
+
+	// Name is the name element of the identity.
 	Name optional.Optional[string]
 
-	// Key is the unique identifier for the entity, if available.
+	// Key is the key element of the identity.
 	Key optional.Optional[string]
-
-	// Fidelity describes the configuration's accuracy in comparison to the
-	// actual configuration that would be used at runtime.
-	Fidelity Fidelity
-}
-
-// Identity represents the (potentially invalid) identity of an entity.
-type Identity struct {
-	AsConfigured IdentityAsConfigured
-}
-
-// Fidelity returns information about how well the configuration represents
-// the actual configuration that would be used at runtime.
-func (i *Identity) Fidelity() Fidelity {
-	return i.AsConfigured.Fidelity
 }
 
 func (i *Identity) String() string {
-	return RenderDescriptor(i)
-}
+	var w strings.Builder
 
-func (i *Identity) renderDescriptor(ren *renderer.Renderer) {
-	ren.Print("identity")
+	w.WriteString("identity")
 
-	name, nameOK := i.AsConfigured.Name.TryGet()
-	key, keyOK := i.AsConfigured.Key.TryGet()
+	name, nameOK := i.Name.TryGet()
+	key, keyOK := i.Key.TryGet()
 
 	if !nameOK && !keyOK {
-		return
+		return w.String()
 	}
 
-	ren.Print(":")
+	w.WriteByte(':')
 
 	if !nameOK {
-		ren.Print("?")
-	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
-		ren.Print(strconv.Quote(name))
+		w.WriteByte('?')
+	} else if !isPrintable(name) || strings.Contains(name, `"`) {
+		w.WriteString(strconv.Quote(name))
 	} else {
-		ren.Print(name)
+		w.WriteString(name)
 	}
 
-	ren.Print("/")
+	w.WriteByte('/')
 
 	if !keyOK {
-		ren.Print("?")
+		w.WriteByte('?')
 	} else if uuid, err := uuidpb.Parse(key); err == nil {
-		ren.Print(uuid.AsString())
-	} else if !isPrintableIdentifier(key) || strings.Contains(key, `"`) {
-		ren.Print(strconv.Quote(key))
+		w.WriteString(uuid.AsString())
+	} else if !isPrintable(key) || strings.Contains(key, `"`) {
+		w.WriteString(strconv.Quote(key))
 	} else {
-		ren.Print(key)
+		w.WriteString(key)
+	}
+
+	return w.String()
+}
+
+func (i *Identity) validate(ctx *validateContext) {
+	validateComponent(ctx)
+
+	if n, ok := i.Name.TryGet(); ok {
+		if !isPrintable(n) {
+			ctx.Invalid(InvalidIdentityNameError{n})
+		}
+	} else {
+		ctx.Absent("name")
+	}
+
+	if k, ok := i.Key.TryGet(); ok {
+		if _, err := uuidpb.Parse(k); err != nil {
+			ctx.Invalid(InvalidIdentityKeyError{k})
+		}
+	} else {
+		ctx.Absent("key")
 	}
 }
 
-func (i *Identity) renderDetails(ren *renderer.Renderer) {
-	f, errs := validate(i)
+func (i *Identity) describe(ctx *describeContext) {
+	ctx.DescribeFidelity()
+	ctx.Print("identity")
 
-	renderFidelity(ren, f, errs)
-	ren.Print("identity ")
+	n, hasN := i.Name.TryGet()
+	k, hasK := i.Key.TryGet()
 
-	if name, ok := i.AsConfigured.Name.TryGet(); !ok {
-		ren.Print("?")
-	} else if !isPrintableIdentifier(name) || strings.Contains(name, `"`) {
-		ren.Print(strconv.Quote(name))
-	} else {
-		ren.Print(name)
-	}
+	if hasN || hasK {
+		ctx.Print(" ")
 
-	ren.Print("/")
+		if !hasN {
+			ctx.Print("?")
+		} else if !isPrintable(n) || strings.Contains(n, `"`) {
+			ctx.Print(strconv.Quote(n))
+		} else {
+			ctx.Print(n)
+		}
 
-	if key, ok := i.AsConfigured.Key.TryGet(); !ok {
-		ren.Print("?")
-	} else if !isPrintableIdentifier(key) || strings.Contains(key, `"`) {
-		ren.Print(strconv.Quote(key))
-	} else {
-		ren.Print(key)
-	}
+		ctx.Print("/")
 
-	if key, ok := i.AsConfigured.Key.TryGet(); ok {
-		if uuid, err := uuidpb.Parse(key); err == nil {
-			if uuid.AsString() != key {
-				ren.Print(" (non-canonical)")
+		if !hasK {
+			ctx.Print("?")
+		} else if !isPrintable(k) || strings.Contains(k, `"`) {
+			ctx.Print(strconv.Quote(k))
+		} else {
+			ctx.Print(k)
+
+			if uuid, err := uuidpb.Parse(k); err == nil {
+				if uuid.AsString() != k {
+					ctx.Print(" (non-canonical)")
+				}
 			}
 		}
 	}
 
-	ren.Print("\n")
-	renderErrors(ren, errs)
+	ctx.Print("\n")
+	ctx.DescribeErrors()
 }
 
-func (i *Identity) clone() Component {
-	return &Identity{i.AsConfigured}
+// InvalidIdentityNameError indicates that the "name" element of an [Identity]
+// is invalid.
+type InvalidIdentityNameError struct {
+	InvalidName string
 }
 
-func (i *Identity) normalize(ctx *normalizationContext) {
-	if n, ok := i.AsConfigured.Name.TryGet(); ok {
-		if !isPrintableIdentifier(n) {
-			ctx.Fail(InvalidIdentityNameError{n})
-		}
-	} else {
-		i.AsConfigured.Fidelity |= Incomplete
-	}
-
-	if k, ok := i.AsConfigured.Key.TryGet(); ok {
-		if id, err := uuidpb.Parse(k); err != nil {
-			ctx.Fail(InvalidIdentityKeyError{k})
-		} else {
-			i.AsConfigured.Key = optional.Some(id.AsString())
-		}
-	} else {
-		i.AsConfigured.Fidelity |= Incomplete
-	}
+func (e InvalidIdentityNameError) Error() string {
+	return fmt.Sprintf("invalid name (%q), expected a non-empty, printable UTF-8 string with no whitespace", e.InvalidName)
 }
 
-// isPrintableIdentifier returns true if n contains only non-whitespace printable
-// Unicode characters.
-func isPrintableIdentifier(n string) bool {
+// InvalidIdentityKeyError indicates that the "key" element of an [Identity]
+// is invalid.
+type InvalidIdentityKeyError struct {
+	InvalidKey string
+}
+
+func (e InvalidIdentityKeyError) Error() string {
+	return fmt.Sprintf("invalid key (%q), expected an RFC 4122/9562 UUID", e.InvalidKey)
+}
+
+// isPrintable returns true if n is a non-empty string containing only
+// non-whitespace printable Unicode characters.
+func isPrintable(n string) bool {
 	if len(n) == 0 {
 		return false
 	}
@@ -147,25 +152,4 @@ func isPrintableIdentifier(n string) bool {
 	}
 
 	return true
-}
-
-func buildIdentity(ctx *normalizationContext, identities []*Identity) *identitypb.Identity {
-	identities = clone(identities)
-	normalizeChildren(ctx, identities)
-	reportIdentityErrors(ctx, identities)
-
-	id := identities[0].AsConfigured
-
-	return &identitypb.Identity{
-		Name: id.Name.Get(),
-		Key:  uuidpb.MustParse(id.Key.Get()),
-	}
-}
-
-func reportIdentityErrors(ctx *normalizationContext, identities []*Identity) {
-	if len(identities) == 0 {
-		ctx.Fail(MissingIdentityError{})
-	} else if len(identities) > 1 {
-		ctx.Fail(MultipleIdentitiesError{identities})
-	}
 }

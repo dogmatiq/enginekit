@@ -23,8 +23,12 @@ func TestFromProjection(t *testing.T) {
 			nil,
 			func(dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					AsConfigured: config.ProjectionAsConfigured{
-						Fidelity: config.Incomplete,
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
+							ComponentCommon: config.ComponentCommon{
+								IsPartial: true,
+							},
+						},
 					},
 				}
 			},
@@ -34,19 +38,12 @@ func TestFromProjection(t *testing.T) {
 			&ProjectionMessageHandlerStub{},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					AsConfigured: config.ProjectionAsConfigured{
-						Source: config.Value[dogma.ProjectionMessageHandler]{
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-							Value:    optional.Some(h),
 						},
-						DeliveryPolicy: optional.Some(
-							config.Value[dogma.ProjectionDeliveryPolicy]{
-								TypeName: optional.Some("github.com/dogmatiq/dogma.UnicastProjectionDeliveryPolicy"),
-								Value:    optional.Some[dogma.ProjectionDeliveryPolicy](dogma.UnicastProjectionDeliveryPolicy{}),
-							},
-						),
-						IsDisabled: optional.Some(false),
 					},
+					Source: optional.Some(h),
 				}
 			},
 		},
@@ -68,40 +65,38 @@ func TestFromProjection(t *testing.T) {
 			},
 			func(h dogma.ProjectionMessageHandler) *config.Projection {
 				return &config.Projection{
-					AsConfigured: config.ProjectionAsConfigured{
-						Source: config.Value[dogma.ProjectionMessageHandler]{
+					HandlerCommon: config.HandlerCommon{
+						EntityCommon: config.EntityCommon{
 							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub"),
-							Value:    optional.Some(h),
-						},
-						Identities: []*config.Identity{
-							{
-								AsConfigured: config.IdentityAsConfigured{
+							IdentityComponents: []*config.Identity{
+								{
 									Name: optional.Some("projection"),
 									Key:  optional.Some("050415ad-ce90-496f-8987-40467e5415e0"),
 								},
 							},
 						},
-						Routes: []*config.Route{
+						RouteComponents: []*config.Route{
 							{
-								AsConfigured: config.RouteAsConfigured{
-									RouteType:       optional.Some(config.HandlesEventRouteType),
-									MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-									MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
-								},
+								RouteType:       optional.Some(config.HandlesEventRouteType),
+								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},
 						},
-						DeliveryPolicy: optional.Some(
-							config.Value[dogma.ProjectionDeliveryPolicy]{
-								TypeName: optional.Some("github.com/dogmatiq/dogma.BroadcastProjectionDeliveryPolicy"),
-								Value: optional.Some[dogma.ProjectionDeliveryPolicy](
-									dogma.BroadcastProjectionDeliveryPolicy{
-										PrimaryFirst: true,
-									},
-								),
-							},
-						),
-						IsDisabled: optional.Some(true),
+						DisabledFlags: []*config.Flag[config.Disabled]{
+							{Value: optional.Some(true)},
+						},
 					},
+					DeliveryPolicyComponents: []*config.ProjectionDeliveryPolicy{
+						{
+							DeliveryPolicyType: optional.Some(config.BroadcastProjectionDeliveryPolicyType),
+							Broadcast: struct {
+								PrimaryFirst optional.Optional[bool]
+							}{
+								optional.Some(true),
+							},
+						},
+					},
+					Source: optional.Some(h),
 				}
 			},
 		},

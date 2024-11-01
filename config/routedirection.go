@@ -15,6 +15,6 @@ const (
 )
 
 // Has returns true if d is a superset of dir.
-func (d RouteDirection) Has(dir RouteDirection) bool {
-	return d&dir != 0
+func (d RouteDirection) Has(x RouteDirection) bool {
+	return d&x != 0
 }

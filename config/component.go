@@ -2,110 +2,92 @@ package config
 
 import (
 	"fmt"
-	"slices"
-
-	"github.com/dogmatiq/enginekit/config/internal/renderer"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
-// A Component is some element of the configuration of a Dogma application.
+// Component is the "top-level" interface for the individual elements that form
+// a complete configuration of a Dogma application or handler.
 type Component interface {
 	fmt.Stringer
 
-	// Fidelity returns information about how well the configuration represents
-	// the actual configuration that would be used at runtime.
-	Fidelity() Fidelity
+	// ComponentProperties returns the properties common to all [Component]
+	// types.
+	ComponentProperties() *ComponentCommon
 
-	renderDescriptor(*renderer.Renderer)
-	renderDetails(*renderer.Renderer)
-
-	clone() Component
-	normalize(*normalizationContext)
+	validate(*validateContext)
+	describe(*describeContext)
 }
 
-// An Entity is a [Component] that represents the configuration of some
-// configurable Dogma entity; that is, any type with a Configure() method that
-// accepts one of the Dogma "configurer" interfaces.
-type Entity interface {
-	Component
+// ComponentCommon contains the properties common to all [Component] types.
+type ComponentCommon struct {
+	// IsSpeculative indicates that the [Component] is only present in the
+	// configuration under certain conditions, and that those conditions could
+	// not be evaluated at configuration time.
+	IsSpeculative bool
 
-	// Identity returns the entity's identity.
+	// IsPartial indicates that the configuration could not be loaded in its
+	// entirety. The configuration may be valid, but cannot be safely used to
+	// execute an application.
 	//
-	// It panics if no single valid identity is configured.
-	Identity() *identitypb.Identity
-
-	// RouteSet returns the routes configured for the entity.
-	//
-	// It panics if the route configuration is incomplete or invalid.
-	RouteSet() RouteSet
-
-	identities() []*Identity
+	// A value of false does not imply a complete configuration.
+	IsPartial bool
 }
 
-// A Handler is a specialization of [Entity] that represents configuration of a
-// Dogma message handler.
-type Handler interface {
-	Entity
-
-	// HandlerType returns [HandlerType] of the handler.
-	HandlerType() HandlerType
-
-	// IsDisabled returns true if the handler was disabled via the configurer.
-	IsDisabled() bool
-
-	routes() []*Route
+// ComponentProperties returns the properties common to all [Component] types.
+func (p *ComponentCommon) ComponentProperties() *ComponentCommon {
+	return p
 }
 
-// Fidelity is a bit-field that describes how well a [Component] configuration
-// represents the actual configuration that would be used at runtime.
-//
-// Importantly, it does not describe the validity of the configuration itself.
-type Fidelity int
+func validateComponent(ctx *validateContext) {
+	p := ctx.Component.ComponentProperties()
 
-const (
-	// Immaculate is the [Fidelity] value that indicates the configuration is an
-	// exact match for the actual configuration that would be used at runtime.
-	Immaculate Fidelity = 0
+	if p.IsPartial {
+		ctx.Invalid(PartialConfigurationError{})
+	}
 
-	// Incomplete is a [Fidelity] flag that indicates that the [Component] has
-	// some configuration that could not be resolved accurately at configuration
-	// time.
-	//
-	// Most commonly this is occurs during static analysis of code that uses
-	// interfaces that cannot be followed statically.
-	//
-	// Its absence means that all of the _available_ configuration logic was
-	// applied; it does not imply that all _mandatory_ configuration is present.
-	Incomplete Fidelity = 1 << iota
+	if ctx.Options.ForExecution && p.IsSpeculative {
+		ctx.Invalid(SpeculativeConfigurationError{})
+	}
+}
 
-	// Speculative is a [Fidelity] flag that indicates that the [Component] is
-	// only present in the configuration under certain conditions, and that
-	// those conditions could not be evaluated at configuration time.
-	Speculative
-)
+// ConfigurationUnavailableError indicates that a [Component]'s configuration is
+// missing some information that is deemed necessary for the component to be
+// considered valid.
+type ConfigurationUnavailableError struct {
+	// Description is a short description of the missing configuration.
+	Description string
+}
+
+func (e ConfigurationUnavailableError) Error() string {
+	return fmt.Sprintf("%s is unavailable", e.Description)
+}
+
+// PartialConfigurationError indicates that a [Component]'s configuration could
+// not be loaded in its entirety.
+type PartialConfigurationError struct{}
+
+func (e PartialConfigurationError) Error() string {
+	return "could not evaluate entire configuration"
+}
+
+// SpeculativeConfigurationError indicates that a [Component]'s inclusion in the
+// configuration is subject to some condition that could not be evaluated at the
+// time the configuration was built.
+type SpeculativeConfigurationError struct{}
+
+func (e SpeculativeConfigurationError) Error() string {
+	return "conditions for the component's inclusion in the configuration could not be evaluated"
+}
 
 var (
 	_ Component = (*Identity)(nil)
+	_ Component = (*Flag[struct{ symbol }])(nil)
 	_ Component = (*Route)(nil)
 
 	_ Entity = (*Application)(nil)
 
-	_ Handler = (*Aggregate)(nil)
-	_ Handler = (*Process)(nil)
-	_ Handler = (*Integration)(nil)
-	_ Handler = (*Projection)(nil)
+	_ Handler   = (*Aggregate)(nil)
+	_ Handler   = (*Process)(nil)
+	_ Handler   = (*Integration)(nil)
+	_ Handler   = (*Projection)(nil)
+	_ Component = (*ProjectionDeliveryPolicy)(nil)
 )
-
-func clone[T Component](components []T) []T {
-	clones := slices.Clone(components)
-
-	for i, c := range components {
-		clones[i] = c.clone().(T)
-	}
-
-	return clones
-}
-
-func cloneInPlace[T Component](components *[]T) {
-	*components = clone(*components)
-}

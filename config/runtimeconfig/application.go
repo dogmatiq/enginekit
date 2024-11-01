@@ -12,9 +12,9 @@ func FromApplication(app dogma.Application) *config.Application {
 	return configbuilder.Application(
 		func(b *configbuilder.ApplicationBuilder) {
 			if app == nil {
-				b.UpdateFidelity(config.Incomplete)
+				b.Partial()
 			} else {
-				b.SetSource(app)
+				b.Source(app)
 				app.Configure(&applicationConfigurer{b})
 			}
 		},
@@ -27,8 +27,8 @@ type applicationConfigurer struct {
 
 func (c *applicationConfigurer) Identity(name, key string) {
 	c.b.Identity(func(b *configbuilder.IdentityBuilder) {
-		b.SetName(name)
-		b.SetKey(key)
+		b.Name(name)
+		b.Key(key)
 	})
 }
 

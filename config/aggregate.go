@@ -2,107 +2,66 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
-// AggregateAsConfigured contains the raw unvalidated properties of an
-// [Aggregate].
-type AggregateAsConfigured struct {
-	// Source describes the type and value that produced the configuration.
-	Source Value[dogma.AggregateMessageHandler]
-
-	// Identities is the list of identities configured for the handler.
-	Identities []*Identity
-
-	// Routes is the list of routes configured on the handler.
-	Routes []*Route
-
-	// IsDisabled is true if the handler was disabled via the configurer, if
-	// known.
-	IsDisabled optional.Optional[bool]
-
-	// Fidelity describes the configuration's accuracy in comparison to the
-	// actual configuration that would be used at runtime.
-	Fidelity Fidelity
-}
-
-// Aggregate represents the (potentially invalid) configuration of a
-// [dogma.AggregateMessageHandler] implementation.
+// Aggregate is a [Handler] that represents the configuration of a
+// [dogma.AggregateMessageHandler].
 type Aggregate struct {
-	AsConfigured AggregateAsConfigured
+	HandlerCommon
+	Source optional.Optional[dogma.AggregateMessageHandler]
 }
 
 // Identity returns the entity's identity.
 //
-// It panics if no single valid identity is configured.
+// It panics the configuration does not specify a singular valid identity.
 func (h *Aggregate) Identity() *identitypb.Identity {
-	return buildIdentity(strictContext(h), h.AsConfigured.Identities)
+	return resolveIdentity(h)
 }
 
-// Fidelity returns information about how well the configuration represents
-// the actual configuration that would be used at runtime.
-func (h *Aggregate) Fidelity() Fidelity {
-	return h.AsConfigured.Fidelity
-}
-
-// HandlerType returns [HandlerType] of the handler.
+// HandlerType returns the [HandlerType] of the handler.
 func (h *Aggregate) HandlerType() HandlerType {
 	return AggregateHandlerType
 }
 
-// RouteSet returns the routes configured for the handler.
+// RouteSet returns the routes configured for the entity.
 //
-// It panics if the routes are incomplete or invalid.
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
 func (h *Aggregate) RouteSet() RouteSet {
-	return buildRouteSet(strictContext(h), h)
+	return resolveRouteSet(h)
 }
 
-// IsDisabled returns true if the handler was disabled via the configurer.
+// IsDisabled returns true if the handler is disabled.
+//
+// It panics if the configuration does not specify unambiguously whether the
+// handler is enabled or disabled.
 func (h *Aggregate) IsDisabled() bool {
-	return h.AsConfigured.IsDisabled.Get()
+	return resolveIsDisabled(h)
 }
 
-// Interface returns the [dogma.AggregateMessageHandler] instance that the
-// configuration represents, or panics if it is not available.
+// Interface returns the [dogma.Application] that the entity represents.
 func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
-	return h.AsConfigured.Source.Value.Get()
+	return resolveInterface(h, h.Source)
 }
 
 func (h *Aggregate) String() string {
-	return RenderDescriptor(h)
-}
-
-func (h *Aggregate) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "aggregate", h.AsConfigured.Source)
-}
-
-func (h *Aggregate) renderDetails(ren *renderer.Renderer) {
-	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+	return stringifyEntity(h)
 }
 
 func (h *Aggregate) identities() []*Identity {
-	return h.AsConfigured.Identities
+	return h.IdentityComponents
 }
 
 func (h *Aggregate) routes() []*Route {
-	return h.AsConfigured.Routes
+	return h.RouteComponents
 }
 
-func (h *Aggregate) clone() Component {
-	clone := &Aggregate{h.AsConfigured}
-	cloneInPlace(&clone.AsConfigured.Identities)
-	cloneInPlace(&clone.AsConfigured.Routes)
-	return clone
+func (h *Aggregate) validate(ctx *validateContext) {
+	validateHandler(ctx, h, h.Source)
 }
 
-func (h *Aggregate) normalize(ctx *normalizationContext) {
-	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-
-	normalizeChildren(ctx, h.AsConfigured.Identities)
-	normalizeChildren(ctx, h.AsConfigured.Routes)
-
-	reportIdentityErrors(ctx, h.AsConfigured.Identities)
-	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
+func (h *Aggregate) describe(ctx *describeContext) {
+	describeHandler(ctx, h, h.Source)
 }

@@ -132,7 +132,7 @@ func FilterByRouteType(types ...RouteType) RouteSetFilter {
 		f.routePredicates = append(
 			f.routePredicates,
 			func(r *Route) bool {
-				return slices.Contains(types, r.RouteType())
+				return slices.Contains(types, r.RouteType.Get())
 			},
 		)
 	}
@@ -146,7 +146,7 @@ func FilterByRouteDirection(directions ...RouteDirection) RouteSetFilter {
 			f.routePredicates,
 			func(r *Route) bool {
 				for _, dir := range directions {
-					if dir.Has(r.RouteType().Direction()) {
+					if dir.Has(r.RouteType.Get().Direction()) {
 						return true
 					}
 				}
@@ -163,7 +163,7 @@ func FilterByMessageKind(kinds ...message.Kind) RouteSetFilter {
 		f.routePredicates = append(
 			f.routePredicates,
 			func(r *Route) bool {
-				return slices.Contains(kinds, r.MessageType().Kind())
+				return slices.Contains(kinds, r.MessageType.Get().Kind())
 			},
 		)
 	}
@@ -176,7 +176,7 @@ func FilterByMessageType(kinds ...message.Kind) RouteSetFilter {
 		f.routePredicates = append(
 			f.routePredicates,
 			func(r *Route) bool {
-				return slices.Contains(kinds, r.RouteType().MessageKind())
+				return slices.Contains(kinds, r.RouteType.Get().MessageKind())
 			},
 		)
 	}
@@ -229,37 +229,4 @@ func (f routeSetFilters) TestMessage(t message.Type, routes map[RouteType]map[Ha
 		}
 	}
 	return true
-}
-
-func buildRouteSet(ctx *normalizationContext, h Handler) RouteSet {
-	routes := clone(h.routes())
-	normalizeChildren(ctx, routes)
-	reportRouteErrors(ctx, h, routes)
-
-	set := RouteSet{}
-
-	for _, r := range routes {
-		rt := r.RouteType()
-		mt := r.MessageType()
-
-		if set.byMessageType == nil {
-			set.byMessageType = map[message.Type]map[RouteType]map[Handler]*Route{}
-		}
-
-		byRouteType, ok := set.byMessageType[mt]
-		if !ok {
-			byRouteType = map[RouteType]map[Handler]*Route{}
-			set.byMessageType[mt] = byRouteType
-		}
-
-		byHandler, ok := byRouteType[rt]
-		if !ok {
-			byHandler = map[Handler]*Route{}
-			byRouteType[rt] = byHandler
-		}
-
-		byHandler[h] = r
-	}
-
-	return set
 }

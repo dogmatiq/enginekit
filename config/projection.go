@@ -2,147 +2,100 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/config/internal/renderer"
-	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
-// ProjectionAsConfigured contains the raw unvalidated properties of a
-// [Projection].
-type ProjectionAsConfigured struct {
-	// Source describes the type and value that produced the configuration.
-	Source Value[dogma.ProjectionMessageHandler]
-
-	// Identities is the list of identities configured for the handler.
-	Identities []*Identity
-
-	// Routes is the list of routes configured on the handler.
-	Routes []*Route
-
-	// IsDisabled is true if the handler was disabled via the configurer, if
-	// known.
-	IsDisabled optional.Optional[bool]
-
-	// DeliveryPolicy is the delivery policy for the handler, if configured.
-	DeliveryPolicy optional.Optional[Value[dogma.ProjectionDeliveryPolicy]]
-
-	// Fidelity describes the configuration's accuracy in comparison to the
-	// actual configuration that would be used at runtime.
-	Fidelity Fidelity
-}
-
-// Projection represents the (potentially invalid) configuration of a
-// [dogma.ProjectionMessageHandler] implementation.
+// Projection is a [Handler] that represents the configuration of a
+// [dogma.ProjectionMessageHandler].
 type Projection struct {
-	AsConfigured ProjectionAsConfigured
+	HandlerCommon
+	DeliveryPolicyComponents []*ProjectionDeliveryPolicy
+	Source                   optional.Optional[dogma.ProjectionMessageHandler]
 }
 
 // Identity returns the entity's identity.
 //
-// It panics if no single valid identity is configured.
+// It panics the configuration does not specify a singular valid identity.
 func (h *Projection) Identity() *identitypb.Identity {
-	return buildIdentity(strictContext(h), h.AsConfigured.Identities)
+	return resolveIdentity(h)
 }
 
-// Fidelity returns information about how well the configuration represents
-// the actual configuration that would be used at runtime.
-func (h *Projection) Fidelity() Fidelity {
-	return h.AsConfigured.Fidelity
-}
-
-// HandlerType returns [HandlerType] of the handler.
+// HandlerType returns the [HandlerType] of the handler.
 func (h *Projection) HandlerType() HandlerType {
 	return ProjectionHandlerType
 }
 
-// RouteSet returns the routes configured for the handler.
+// RouteSet returns the routes configured for the entity.
 //
-// It panics if the routes are incomplete or invalid.
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
 func (h *Projection) RouteSet() RouteSet {
-	return buildRouteSet(strictContext(h), h)
+	return resolveRouteSet(h)
 }
 
-// IsDisabled returns true if the handler was disabled via the configurer.
+// IsDisabled returns true if the handler is disabled.
+//
+// It panics if the configuration does not specify unambiguously whether the
+// handler is enabled or disabled.
 func (h *Projection) IsDisabled() bool {
-	return h.AsConfigured.IsDisabled.Get()
+	return resolveIsDisabled(h)
 }
 
 // DeliveryPolicy returns the delivery policy for the handler.
+//
+// It returns the last delivery policy component that was configured, as each
+// call to [dogma.ProjectionConfigurer.DeliveryPolicy] replaces the previous
+// value.
+//
+// If no delivery policy has been configured, it returns
+// [dogma.UnicastProjectionDeliveryPolicy], which is the default.
+//
+// It panics if the configuration does not specify valid delivery policies.
 func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
-	if v, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
-		return v.Value.Get()
+	ctx := newResolutionContext(h, false)
+
+	for _, p := range h.DeliveryPolicyComponents {
+		ctx.ValidateChild(p)
 	}
-	return dogma.UnicastProjectionDeliveryPolicy{}
+
+	n := len(h.DeliveryPolicyComponents)
+	if n == 0 {
+		return dogma.UnicastProjectionDeliveryPolicy{}
+	}
+
+	return h.DeliveryPolicyComponents[n-1].Interface()
 }
 
-// Interface returns the [dogma.ProjectionMessageHandler] instance that the
-// configuration represents, or panics if it is not available.
+// Interface returns the [dogma.Application] that the entity represents.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
-	return h.AsConfigured.Source.Value.Get()
+	return resolveInterface(h, h.Source)
 }
 
 func (h *Projection) String() string {
-	return RenderDescriptor(h)
-}
-
-func (h *Projection) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "projection", h.AsConfigured.Source)
-}
-
-func (h *Projection) renderDetails(ren *renderer.Renderer) {
-	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
-
-	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
-		// TODO: https://github.com/dogmatiq/enginekit/issues/55
-		if typeName, ok := p.TypeName.TryGet(); ok {
-			ren.IndentBullet()
-
-			switch typeName {
-			case typename.For[dogma.UnicastProjectionDeliveryPolicy]():
-				ren.Printf("unicast delivery policy")
-			case typename.For[dogma.BroadcastProjectionDeliveryPolicy]():
-				ren.Printf("broadcast delivery policy")
-			default:
-				ren.Printf("unrecognized delivery policy")
-			}
-
-			if !p.Value.IsPresent() {
-				ren.Print(" (runtime type unavailable)")
-			}
-
-			ren.Indent()
-			ren.Print("\n")
-		}
-	}
+	return stringifyEntity(h)
 }
 
 func (h *Projection) identities() []*Identity {
-	return h.AsConfigured.Identities
+	return h.IdentityComponents
 }
 
 func (h *Projection) routes() []*Route {
-	return h.AsConfigured.Routes
+	return h.RouteComponents
 }
 
-func (h *Projection) clone() Component {
-	clone := &Projection{h.AsConfigured}
-	cloneInPlace(&clone.AsConfigured.Identities)
-	cloneInPlace(&clone.AsConfigured.Routes)
-	return clone
+func (h *Projection) validate(ctx *validateContext) {
+	validateHandler(ctx, h, h.Source)
+
+	for _, p := range h.DeliveryPolicyComponents {
+		ctx.ValidateChild(p)
+	}
 }
 
-func (h *Projection) normalize(ctx *normalizationContext) {
-	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
+func (h *Projection) describe(ctx *describeContext) {
+	describeHandler(ctx, h, h.Source)
 
-	normalizeChildren(ctx, h.AsConfigured.Identities)
-	normalizeChildren(ctx, h.AsConfigured.Routes)
-
-	reportIdentityErrors(ctx, h.AsConfigured.Identities)
-	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
-
-	if p, ok := h.AsConfigured.DeliveryPolicy.TryGet(); ok {
-		normalizeValue(ctx, &p, &h.AsConfigured.Fidelity)
-		h.AsConfigured.DeliveryPolicy = optional.Some(p)
+	for _, p := range h.DeliveryPolicyComponents {
+		ctx.DescribeChild(p)
 	}
 }

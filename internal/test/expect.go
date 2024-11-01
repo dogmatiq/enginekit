@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"testing"
 
@@ -77,6 +78,17 @@ func ExpectPanic(
 		t.Helper()
 
 		got := recover()
+
+		if got != nil {
+			defer func() {
+				t.Helper()
+
+				if t.Failed() {
+					m := "\n=== stack trace ===\n\n" + string(debug.Stack())
+					t.Log(m)
+				}
+			}()
+		}
 
 		Expect(
 			t,

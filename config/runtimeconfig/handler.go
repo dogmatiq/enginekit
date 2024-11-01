@@ -2,28 +2,39 @@ package runtimeconfig
 
 import (
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
-type handlerConfigurer[R dogma.Route] struct {
-	b configbuilder.HandlerBuilder
+type handlerConfigurer[R dogma.Route, T config.Handler, H any] struct {
+	b configbuilder.HandlerBuilder[T, H]
 }
 
-func (c *handlerConfigurer[R]) Identity(name, key string) {
+func newHandlerConfigurer[
+	R dogma.Route,
+	T config.Handler,
+	H any,
+](b configbuilder.HandlerBuilder[T, H]) *handlerConfigurer[R, T, H] {
+	return &handlerConfigurer[R, T, H]{b}
+}
+
+func (c *handlerConfigurer[R, T, H]) Identity(name, key string) {
 	c.b.Identity(func(b *configbuilder.IdentityBuilder) {
-		b.SetName(name)
-		b.SetKey(key)
+		b.Name(name)
+		b.Key(key)
 	})
 }
 
-func (c *handlerConfigurer[R]) Routes(routes ...R) {
+func (c *handlerConfigurer[R, T, H]) Routes(routes ...R) {
 	for _, r := range routes {
 		c.b.Route(func(b *configbuilder.RouteBuilder) {
-			b.SetRoute(r)
+			b.AsPerRoute(r)
 		})
 	}
 }
 
-func (c *handlerConfigurer[R]) Disable(...dogma.DisableOption) {
-	c.b.SetDisabled(true)
+func (c *handlerConfigurer[R, T, H]) Disable(...dogma.DisableOption) {
+	c.b.Disabled(func(b *configbuilder.FlagBuilder[config.Disabled]) {
+		b.Value(true)
+	})
 }

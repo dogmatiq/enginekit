@@ -2,107 +2,66 @@ package config
 
 import (
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/config/internal/renderer"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 )
 
-// IntegrationAsConfigured contains the raw unvalidated properties of an
-// [Integration].
-type IntegrationAsConfigured struct {
-	// Source describes the type and value that produced the configuration.
-	Source Value[dogma.IntegrationMessageHandler]
-
-	// Identities is the list of identities configured for the handler.
-	Identities []*Identity
-
-	// Routes is the list of routes configured on the handler.
-	Routes []*Route
-
-	// IsDisabled is true if the handler was disabled via the configurer, if
-	// known.
-	IsDisabled optional.Optional[bool]
-
-	// Fidelity describes the configuration's accuracy in comparison to the
-	// actual configuration that would be used at runtime.
-	Fidelity Fidelity
-}
-
-// Integration represents the (potentially invalid) configuration of a
-// [dogma.IntegrationMessageHandler] implementation.
+// Integration is a [Handler] that represents the configuration of a
+// [dogma.IntegrationMessageHandler].
 type Integration struct {
-	AsConfigured IntegrationAsConfigured
+	HandlerCommon
+	Source optional.Optional[dogma.IntegrationMessageHandler]
 }
 
 // Identity returns the entity's identity.
 //
-// It panics if no single valid identity is configured.
+// It panics the configuration does not specify a singular valid identity.
 func (h *Integration) Identity() *identitypb.Identity {
-	return buildIdentity(strictContext(h), h.AsConfigured.Identities)
+	return resolveIdentity(h)
 }
 
-// Fidelity returns information about how well the configuration represents
-// the actual configuration that would be used at runtime.
-func (h *Integration) Fidelity() Fidelity {
-	return h.AsConfigured.Fidelity
-}
-
-// HandlerType returns [HandlerType] of the handler.
+// HandlerType returns the [HandlerType] of the handler.
 func (h *Integration) HandlerType() HandlerType {
 	return IntegrationHandlerType
 }
 
-// RouteSet returns the routes configured for the handler.
+// RouteSet returns the routes configured for the entity.
 //
-// It panics if the routes are incomplete or invalid.
+// It panics if the configuration does not specify a complete set of valid
+// routes for the entity and its constituents.
 func (h *Integration) RouteSet() RouteSet {
-	return buildRouteSet(strictContext(h), h)
+	return resolveRouteSet(h)
 }
 
-// IsDisabled returns true if the handler was disabled via the configurer.
+// IsDisabled returns true if the handler is disabled.
+//
+// It panics if the configuration does not specify unambiguously whether the
+// handler is enabled or disabled.
 func (h *Integration) IsDisabled() bool {
-	return h.AsConfigured.IsDisabled.Get()
+	return resolveIsDisabled(h)
 }
 
-// Interface returns the [dogma.IntegrationMessageHandler] instance that the
-// configuration represents, or panics if it is not available.
+// Interface returns the [dogma.Application] that the entity represents.
 func (h *Integration) Interface() dogma.IntegrationMessageHandler {
-	return h.AsConfigured.Source.Value.Get()
+	return resolveInterface(h, h.Source)
 }
 
 func (h *Integration) String() string {
-	return RenderDescriptor(h)
-}
-
-func (h *Integration) renderDescriptor(ren *renderer.Renderer) {
-	renderEntityDescriptor(ren, "integration", h.AsConfigured.Source)
-}
-
-func (h *Integration) renderDetails(ren *renderer.Renderer) {
-	renderHandlerDetails(ren, h, h.AsConfigured.Source, h.AsConfigured.IsDisabled)
+	return stringifyEntity(h)
 }
 
 func (h *Integration) identities() []*Identity {
-	return h.AsConfigured.Identities
+	return h.IdentityComponents
 }
 
 func (h *Integration) routes() []*Route {
-	return h.AsConfigured.Routes
+	return h.RouteComponents
 }
 
-func (h *Integration) clone() Component {
-	clone := &Integration{h.AsConfigured}
-	cloneInPlace(&clone.AsConfigured.Identities)
-	cloneInPlace(&clone.AsConfigured.Routes)
-	return clone
+func (h *Integration) validate(ctx *validateContext) {
+	validateHandler(ctx, h, h.Source)
 }
 
-func (h *Integration) normalize(ctx *normalizationContext) {
-	normalizeValue(ctx, &h.AsConfigured.Source, &h.AsConfigured.Fidelity)
-
-	normalizeChildren(ctx, h.AsConfigured.Identities)
-	normalizeChildren(ctx, h.AsConfigured.Routes)
-
-	reportIdentityErrors(ctx, h.AsConfigured.Identities)
-	reportRouteErrors(ctx, h, h.AsConfigured.Routes)
+func (h *Integration) describe(ctx *describeContext) {
+	describeHandler(ctx, h, h.Source)
 }

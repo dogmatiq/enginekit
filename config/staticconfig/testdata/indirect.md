@@ -5,7 +5,7 @@ This test verifies that the static analyzer traverses into code called from the
 `ApplicationConfigurer` interface.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
   - valid identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 

@@ -93,18 +93,22 @@ func TestAnalyzer(t *testing.T) {
 				}
 
 				// Render the details of the application.
-				details := config.RenderDetails(app)
+				err := config.Validate(app)
+				desc := config.Description(
+					app,
+					config.WithValidationResult(err),
+				)
 
 				// Remove the random portion of the temporary directory name
 				// so that the test output is deterministic.
 				rel, _ := filepath.Rel(cwd, dir)
-				details = strings.ReplaceAll(
-					details,
+				desc = strings.ReplaceAll(
+					desc,
 					"/"+rel+".",
 					".",
 				)
 
-				if _, err := io.WriteString(out, details); err != nil {
+				if _, err := io.WriteString(out, desc); err != nil {
 					return err
 				}
 			}

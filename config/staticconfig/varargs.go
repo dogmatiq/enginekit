@@ -43,8 +43,12 @@ func isIndexOfArray(
 	return 0, false
 }
 
-func resolveVariadic(
-	b configbuilder.EntityBuilder,
+func resolveVariadic[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+](
+	b B,
 	inst ssa.CallInstruction,
 ) iter.Seq[ssa.Value] {
 	return func(yield func(ssa.Value) bool) {
@@ -57,7 +61,7 @@ func resolveVariadic(
 
 		array, ok := findAllocation(variadics)
 		if !ok {
-			b.UpdateFidelity(config.Incomplete)
+			b.Partial()
 			return
 		}
 

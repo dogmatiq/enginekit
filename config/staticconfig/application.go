@@ -3,6 +3,7 @@ package staticconfig
 import (
 	"go/types"
 
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
@@ -24,7 +25,9 @@ func analyzeApplicationType(ctx *context, t types.Type) {
 	ctx.Analysis.Applications = append(ctx.Analysis.Applications, app)
 }
 
-func analyzeApplicationConfigurerCall(ctx *configurerCallContext[*configbuilder.ApplicationBuilder]) {
+func analyzeApplicationConfigurerCall(
+	ctx *configurerCallContext[*config.Application, dogma.Application, *configbuilder.ApplicationBuilder],
+) {
 	switch ctx.Method.Name() {
 	case "RegisterAggregate":
 		analyzeHandler(ctx, ctx.Builder.Aggregate, nil)
@@ -35,6 +38,6 @@ func analyzeApplicationConfigurerCall(ctx *configurerCallContext[*configbuilder.
 	case "RegisterProjection":
 		analyzeHandler(ctx, ctx.Builder.Projection, analyzeProjectionConfigurerCall)
 	default:
-		ctx.Builder.UpdateFidelity(config.Incomplete)
+		ctx.Builder.Partial()
 	}
 }

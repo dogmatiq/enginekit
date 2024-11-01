@@ -4,12 +4,13 @@ This test ensures that the static analyzer supports all aspects of configuring
 an aggregate handler.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
   - valid identity app/0726ae0d-67e4-4a50-8a19-9f58eae38e51
-  - disabled valid aggregate github.com/dogmatiq/enginekit/config/staticconfig.Aggregate (runtime type unavailable)
+  - valid aggregate github.com/dogmatiq/enginekit/config/staticconfig.Aggregate (value unavailable)
       - valid identity aggregate/916e5e95-70c4-4823-9de2-0f7389d18b4f
-      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
-      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
+      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid disabled flag, set to true
 ```
 
 ```go au:input au:group=matrix

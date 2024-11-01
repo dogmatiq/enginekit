@@ -4,8 +4,10 @@ This test verifies that the static analyzer includes an entity's identity, even
 if it cannot determine the values used.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
-  - incomplete identity ?/?
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
+  - incomplete identity
+      - name is unavailable
+      - key is unavailable
 ```
 
 ## Variables

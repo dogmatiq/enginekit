@@ -5,10 +5,10 @@ routes that are constructed but never passed to the configurer's `Routes()`
 method.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
   - valid identity app/f2c08525-623e-4c76-851c-3172953269e3
-  - invalid integration github.com/dogmatiq/enginekit/config/staticconfig.Integration (runtime type unavailable)
-      - no "handles-command" routes are configured
+  - invalid integration github.com/dogmatiq/enginekit/config/staticconfig.Integration (value unavailable)
+      - no handles-command routes
       - valid identity handler/ac391765-da58-4e7c-a478-e4725eb2b0e9
 ```
 

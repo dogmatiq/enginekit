@@ -7,12 +7,18 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
-func analyzeRoutes[T configbuilder.HandlerBuilder](
-	ctx *configurerCallContext[T],
+func analyzeRoutes[
+	T config.Handler,
+	H any,
+	B configbuilder.HandlerBuilder[T, H],
+](
+	ctx *configurerCallContext[T, H, B],
 ) {
 	for r := range resolveVariadic(ctx.Builder, ctx.Instruction) {
 		ctx.Builder.Route(func(b *configbuilder.RouteBuilder) {
-			b.UpdateFidelity(ctx.Fidelity) // TODO: is this correct?
+			if ctx.IsSpeculative {
+				b.Speculative() // TODO: is this correct?
+			}
 			analyzeRoute(ctx.context, b, r)
 		})
 	}
@@ -25,7 +31,7 @@ func analyzeRoute(
 ) {
 	call, ok := findRouteCall(ctx, r)
 	if !ok {
-		b.UpdateFidelity(config.Incomplete)
+		b.Partial()
 		return
 	}
 
@@ -33,18 +39,18 @@ func analyzeRoute(
 
 	switch fn.Object() {
 	case ctx.Dogma.HandlesCommand:
-		b.SetRouteType(config.HandlesCommandRouteType)
+		b.RouteType(config.HandlesCommandRouteType)
 	case ctx.Dogma.HandlesEvent:
-		b.SetRouteType(config.HandlesEventRouteType)
+		b.RouteType(config.HandlesEventRouteType)
 	case ctx.Dogma.ExecutesCommand:
-		b.SetRouteType(config.ExecutesCommandRouteType)
+		b.RouteType(config.ExecutesCommandRouteType)
 	case ctx.Dogma.RecordsEvent:
-		b.SetRouteType(config.RecordsEventRouteType)
+		b.RouteType(config.RecordsEventRouteType)
 	case ctx.Dogma.SchedulesTimeout:
-		b.SetRouteType(config.SchedulesTimeoutRouteType)
+		b.RouteType(config.SchedulesTimeoutRouteType)
 	}
 
-	b.SetMessageTypeName(typename.OfStatic(fn.TypeArgs()[0]))
+	b.MessageTypeName(typename.OfStatic(fn.TypeArgs()[0]))
 }
 
 func findRouteCall(

@@ -10,17 +10,21 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
-type entityContext[T configbuilder.EntityBuilder] struct {
+type entityContext[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+] struct {
 	*context
 
 	EntityType             types.Type
-	Builder                T
+	Builder                B
 	ConfigureMethod        *ssa.Function
 	FunctionUnderAnalysis  *ssa.Function
 	ConfigurerParamIndices []int
 }
 
-func (c *entityContext[T]) IsConfigurer(v ssa.Value) bool {
+func (c *entityContext[T, E, B]) IsConfigurer(v ssa.Value) bool {
 	for _, i := range c.ConfigurerParamIndices {
 		if v == c.FunctionUnderAnalysis.Params[i] {
 			return true
@@ -29,57 +33,77 @@ func (c *entityContext[T]) IsConfigurer(v ssa.Value) bool {
 	return false
 }
 
-type configurerCallContext[T configbuilder.EntityBuilder] struct {
-	*entityContext[T]
+type configurerCallContext[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+] struct {
+	*entityContext[T, E, B]
 	*ssa.CallCommon
 
-	Instruction ssa.CallInstruction
-	Fidelity    config.Fidelity
+	Instruction   ssa.CallInstruction
+	IsSpeculative bool
 }
 
 // configurerCallAnalyzer is a function that analyzes a call to a method on an
 // entity's configurer.
-type configurerCallAnalyzer[T configbuilder.EntityBuilder] func(*configurerCallContext[T])
+type configurerCallAnalyzer[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+] func(*configurerCallContext[T, E, B])
 
 // analyzeEntity analyzes the Configure() method of the type t, which must be a
 // Dogma application or handler.
 //
 // It calls the analyze function for each call to a method on the configurer,
 // other than Identity() which is handled the same in all cases.
-func analyzeEntity[T configbuilder.EntityBuilder](
+func analyzeEntity[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+](
 	ctx *context,
 	t types.Type,
-	builder T,
-	analyze configurerCallAnalyzer[T],
+	builder B,
+	analyze configurerCallAnalyzer[T, E, B],
 ) {
-	builder.SetSourceTypeName(typename.OfStatic(t))
+	builder.TypeName(typename.OfStatic(t))
 	configure := ctx.LookupMethod(t, "Configure")
 
+	ectx := &entityContext[T, E, B]{
+		context:                ctx,
+		EntityType:             t,
+		Builder:                builder,
+		ConfigureMethod:        configure,
+		FunctionUnderAnalysis:  configure,
+		ConfigurerParamIndices: []int{1},
+	}
+
+	fn := func(ctx *configurerCallContext[T, E, B]) {
+		switch ctx.Method.Name() {
+		case "Identity":
+			analyzeIdentity(ctx)
+		default:
+			analyze(ctx)
+		}
+	}
+
 	analyzeConfigurerCallsInFunc(
-		&entityContext[T]{
-			context:                ctx,
-			EntityType:             t,
-			Builder:                builder,
-			ConfigureMethod:        configure,
-			FunctionUnderAnalysis:  configure,
-			ConfigurerParamIndices: []int{1},
-		},
-		func(ctx *configurerCallContext[T]) {
-			switch ctx.Method.Name() {
-			case "Identity":
-				analyzeIdentity(ctx)
-			default:
-				analyze(ctx)
-			}
-		},
+		ectx,
+		fn,
 	)
 }
 
 // analyzeConfigurerCallsInFunc analyzes calls to methods on the configurer in
 // the function under analysis.
-func analyzeConfigurerCallsInFunc[T configbuilder.EntityBuilder](
-	ctx *entityContext[T],
-	analyze configurerCallAnalyzer[T],
+func analyzeConfigurerCallsInFunc[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+](
+	ctx *entityContext[T, E, B],
+	analyze configurerCallAnalyzer[T, E, B],
 ) {
 	for b := range ssax.WalkFunc(ctx.FunctionUnderAnalysis) {
 		for _, inst := range b.Instrs {
@@ -92,27 +116,24 @@ func analyzeConfigurerCallsInFunc[T configbuilder.EntityBuilder](
 
 // analyzeConfigurerCallsInInstruction analyzes calls to methods on the
 // configurer in the given instruction.
-func analyzeConfigurerCallsInInstruction[T configbuilder.EntityBuilder](
-	ctx *entityContext[T],
+func analyzeConfigurerCallsInInstruction[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+](
+	ctx *entityContext[T, E, B],
 	inst ssa.CallInstruction,
-	analyze configurerCallAnalyzer[T],
+	analyze configurerCallAnalyzer[T, E, B],
 ) {
 	com := inst.Common()
 
 	if com.IsInvoke() && ctx.IsConfigurer(com.Value) {
-		// We've found a direct call to a method on the configurer.
-		var f config.Fidelity
-		if !ssax.IsUnconditional(inst.Block()) {
-			f |= config.Speculative
-		}
-
-		analyze(&configurerCallContext[T]{
+		analyze(&configurerCallContext[T, E, B]{
 			entityContext: ctx,
 			CallCommon:    com,
 			Instruction:   inst,
-			Fidelity:      f,
+			IsSpeculative: !ssax.IsUnconditional(inst.Block()),
 		})
-
 		return
 	}
 
@@ -143,12 +164,12 @@ func analyzeConfigurerCallsInInstruction[T configbuilder.EntityBuilder](
 	// some other un-analyzable function.
 	fn := com.StaticCallee()
 	if fn == nil {
-		ctx.Builder.UpdateFidelity(config.Incomplete)
+		ctx.Builder.Partial()
 		return
 	}
 
 	analyzeConfigurerCallsInFunc(
-		&entityContext[T]{
+		&entityContext[T, E, B]{
 			context:                ctx.context,
 			EntityType:             ctx.EntityType,
 			Builder:                ctx.Builder,
@@ -160,24 +181,26 @@ func analyzeConfigurerCallsInInstruction[T configbuilder.EntityBuilder](
 	)
 }
 
-func analyzeIdentity[T configbuilder.EntityBuilder](
-	ctx *configurerCallContext[T],
+func analyzeIdentity[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+](
+	ctx *configurerCallContext[T, E, B],
 ) {
 	ctx.
 		Builder.
 		Identity(func(b *configbuilder.IdentityBuilder) {
-			b.UpdateFidelity(ctx.Fidelity)
+			if ctx.IsSpeculative {
+				b.Speculative()
+			}
 
 			if name, ok := ssax.AsString(ctx.Args[0]).TryGet(); ok {
-				b.SetName(name)
-			} else {
-				b.UpdateFidelity(config.Incomplete)
+				b.Name(name)
 			}
 
 			if key, ok := ssax.AsString(ctx.Args[1]).TryGet(); ok {
-				b.SetKey(key)
-			} else {
-				b.UpdateFidelity(config.Incomplete)
+				b.Key(key)
 			}
 		})
 }

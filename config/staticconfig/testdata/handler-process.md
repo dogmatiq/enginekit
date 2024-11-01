@@ -4,13 +4,14 @@ This test ensures that the static analyzer supports all aspects of configuring
 a process handler.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
   - valid identity app/0726ae0d-67e4-4a50-8a19-9f58eae38e51
-  - disabled valid process github.com/dogmatiq/enginekit/config/staticconfig.Process (runtime type unavailable)
+  - valid process github.com/dogmatiq/enginekit/config/staticconfig.Process (value unavailable)
       - valid identity process/4ff1b1c1-5c64-49bc-a547-c13f5bafad7d
-      - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
-      - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
-      - valid schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
+      - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid disabled flag, set to true
 ```
 
 ```go au:input au:group=matrix

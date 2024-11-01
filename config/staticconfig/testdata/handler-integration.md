@@ -4,12 +4,13 @@ This test ensures that the static analyzer supports all aspects of configuring
 an integration handler.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
   - valid identity app/0726ae0d-67e4-4a50-8a19-9f58eae38e51
-  - disabled valid integration github.com/dogmatiq/enginekit/config/staticconfig.Integration (runtime type unavailable)
+  - valid integration github.com/dogmatiq/enginekit/config/staticconfig.Integration (value unavailable)
       - valid identity integration/b92431e6-3a7d-4235-a76f-541622c487ee
-      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
-      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (runtime type unavailable)
+      - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA] (type unavailable)
+      - valid disabled flag, set to true
 ```
 
 ```go au:input au:group=matrix

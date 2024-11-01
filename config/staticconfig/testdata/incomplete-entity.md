@@ -5,7 +5,8 @@ incomplete if the `Configure()` method calls into code that is unable to be
 analyzed.
 
 ```au:output au:group=matrix
-incomplete application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+incomplete application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
+  - could not evaluate entire configuration
   - valid identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 

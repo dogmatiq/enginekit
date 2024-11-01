@@ -4,22 +4,26 @@ This test ensures that the static analyzer includes basic information about the
 presence of `nil` handlers.
 
 ```au:output au:group=matrix
-valid application github.com/dogmatiq/enginekit/config/staticconfig.App (runtime type unavailable)
+valid application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
   - valid identity app/0726ae0d-67e4-4a50-8a19-9f58eae38e51
   - incomplete aggregate
-      - no identity is configured
-      - no "handles-command" routes are configured
-      - no "records-event" routes are configured
+      - could not evaluate entire configuration
+      - no identity
+      - no handles-command routes
+      - no records-event routes
   - incomplete process
-      - no identity is configured
-      - no "handles-event" routes are configured
-      - no "executes-command" routes are configured
+      - could not evaluate entire configuration
+      - no identity
+      - no handles-event routes
+      - no executes-command routes
   - incomplete integration
-      - no identity is configured
-      - no "handles-command" routes are configured
+      - could not evaluate entire configuration
+      - no identity
+      - no handles-command routes
   - incomplete projection
-      - no identity is configured
-      - no "handles-event" routes are configured
+      - could not evaluate entire configuration
+      - no identity
+      - no handles-event routes
 ```
 
 ```go au:input au:group=matrix

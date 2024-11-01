@@ -111,9 +111,9 @@ func (ctx *describeContext) DescribeChild(c Component) {
 		child.errors = ErrorsByComponent(child.Component, err)
 	}
 
-	child.renderer.IndentBullet()
+	child.renderer.StartChild()
 	c.describe(child)
-	child.renderer.Dedent()
+	child.renderer.EndChild()
 }
 
 func (ctx *describeContext) Print(str ...string) {
@@ -126,8 +126,8 @@ func (ctx *describeContext) Printf(format string, args ...any) {
 
 func (ctx *describeContext) DescribeErrors() {
 	for _, err := range ctx.errors {
-		ctx.renderer.IndentBullet()
+		ctx.renderer.StartChild()
 		ctx.renderer.Print(err.Error(), "\n")
-		ctx.renderer.Dedent()
+		ctx.renderer.EndChild()
 	}
 }

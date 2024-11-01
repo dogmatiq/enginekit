@@ -6,6 +6,8 @@ import (
 	"iter"
 	"slices"
 	"strings"
+
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 )
 
 // Validate returns an error if the configuration is invalid.
@@ -43,29 +45,20 @@ type InvalidComponentError struct {
 }
 
 func (e InvalidComponentError) Error() string {
-	var w strings.Builder
+	w := &strings.Builder{}
+	r := &renderer.Renderer{Target: w}
 
-	fmt.Fprint(&w, e.Component)
-	w.WriteString(" is invalid")
+	r.Print(e.Component.String())
+	r.Print(" is invalid:")
 
 	if len(e.Causes) == 1 {
-		w.WriteString(": ")
-		w.WriteString(e.Causes[0].Error())
+		r.Print(" ", e.Causes[0].Error())
 	} else if len(e.Causes) > 1 {
-		w.WriteString(":")
-
 		for _, cause := range e.Causes {
-			lines := strings.Split(cause.Error(), "\n")
-
-			for i, line := range lines {
-				w.WriteByte('\n')
-				if i == 0 {
-					w.WriteString("- ")
-				} else {
-					w.WriteString("  ")
-				}
-				w.WriteString(line)
-			}
+			r.Print("\n")
+			r.StartChild()
+			r.Print(cause.Error())
+			r.EndChild()
 		}
 	}
 

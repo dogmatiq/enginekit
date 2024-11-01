@@ -64,8 +64,8 @@ func TestIntegration(t *testing.T) {
 				Name: "no runtime values with ForExecution() option",
 				Error: multiline(
 					`integration:SomeIntegration is invalid:`,
-					`- dogma.IntegrationMessageHandler value is unavailable`,
-					`- route:handles-command:SomeCommand is invalid: message type is unavailable`,
+					`  - dogma.IntegrationMessageHandler value is unavailable`,
+					`  - route:handles-command:SomeCommand is invalid: message type is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -92,9 +92,9 @@ func TestIntegration(t *testing.T) {
 				Name: "nil integration",
 				Error: multiline(
 					`integration is invalid:`,
-					`- could not evaluate entire configuration`,
-					`- no identity`,
-					`- no handles-command routes`,
+					`  - could not evaluate entire configuration`,
+					`  - no identity`,
+					`  - no handles-command routes`,
 				),
 				Component: runtimeconfig.FromIntegration(nil),
 			},
@@ -102,8 +102,8 @@ func TestIntegration(t *testing.T) {
 				Name: "unconfigured integration",
 				Error: multiline(
 					`integration:IntegrationMessageHandlerStub is invalid:`,
-					`- no identity`,
-					`- no handles-command routes`,
+					`  - no identity`,
+					`  - no handles-command routes`,
 				),
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{}),
 			},

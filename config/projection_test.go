@@ -69,9 +69,9 @@ func TestProjection(t *testing.T) {
 				Name: "no runtime values with ForExecution() option",
 				Error: multiline(
 					`projection:SomeProjection is invalid:`,
-					`- dogma.ProjectionMessageHandler value is unavailable`,
-					`- route:handles-event:SomeEvent is invalid: message type is unavailable`,
-					`- delivery-policy:broadcast is invalid: primary-first setting is unavailable`,
+					`  - dogma.ProjectionMessageHandler value is unavailable`,
+					`  - route:handles-event:SomeEvent is invalid: message type is unavailable`,
+					`  - delivery-policy:broadcast is invalid: primary-first setting is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -103,9 +103,9 @@ func TestProjection(t *testing.T) {
 				Name: "nil projection",
 				Error: multiline(
 					`projection is invalid:`,
-					`- could not evaluate entire configuration`,
-					`- no identity`,
-					`- no handles-event routes`,
+					`  - could not evaluate entire configuration`,
+					`  - no identity`,
+					`  - no handles-event routes`,
 				),
 				Component: runtimeconfig.FromProjection(nil),
 			},
@@ -113,8 +113,8 @@ func TestProjection(t *testing.T) {
 				Name: "unconfigured projection",
 				Error: multiline(
 					`projection:ProjectionMessageHandlerStub is invalid:`,
-					`- no identity`,
-					`- no handles-event routes`,
+					`  - no identity`,
+					`  - no handles-event routes`,
 				),
 				Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{}),
 			},

@@ -31,8 +31,8 @@ func TestIdentity(t *testing.T) {
 				Name: "empty",
 				Error: multiline(
 					`identity is invalid:`,
-					`- name is unavailable`,
-					`- key is unavailable`,
+					`  - name is unavailable`,
+					`  - key is unavailable`,
 				),
 				Component: &Identity{},
 			},

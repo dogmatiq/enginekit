@@ -12,27 +12,17 @@ type Renderer struct {
 	count int
 	err   error
 
-	indents  []*indent
+	indents  []bool
 	sameLine bool
 }
 
-type indent struct {
-	isBullet  bool
-	firstLine bool
+// StartChild increases the indentation level and adds a bullet point.
+func (r *Renderer) StartChild() {
+	r.indents = append(r.indents, true)
 }
 
-// Indent increases the indentation level.
-func (r *Renderer) Indent() {
-	r.indents = append(r.indents, &indent{false, true})
-}
-
-// IndentBullet increases the indentation level and adds a bullet point.
-func (r *Renderer) IndentBullet() {
-	r.indents = append(r.indents, &indent{true, true})
-}
-
-// Dedent decreases the indentation level.
-func (r *Renderer) Dedent() {
+// EndChild decreases the indentation level.
+func (r *Renderer) EndChild() {
 	r.indents = r.indents[:len(r.indents)-1]
 }
 
@@ -56,18 +46,16 @@ func (r *Renderer) Done() (int, error) {
 func (r *Renderer) print(s string) {
 	for s != "" && r.err == nil {
 		if !r.sameLine {
-			for _, i := range r.indents {
+			for i, isFirstLine := range r.indents {
 				r.write("  ")
 
-				if i.isBullet {
-					if i.firstLine {
-						r.write("- ")
-					} else {
-						r.write("  ")
-					}
+				if isFirstLine {
+					r.write("- ")
+				} else {
+					r.write("  ")
 				}
 
-				i.firstLine = false
+				r.indents[i] = false
 			}
 
 			r.sameLine = true

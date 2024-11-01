@@ -7,13 +7,13 @@ import (
 	"github.com/dogmatiq/enginekit/internal/test"
 )
 
-type renderTestCases []struct {
+type describeTestCases []struct {
 	Name                string
 	String, Description string
 	Component           Component
 }
 
-func testDescribe(t *testing.T, cases renderTestCases) {
+func testDescribe(t *testing.T, cases describeTestCases) {
 	t.Helper()
 
 	t.Run("func String()", func(t *testing.T) {

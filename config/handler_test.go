@@ -78,5 +78,21 @@ func testHandler[
 				},
 			)
 		})
+
+		t.Run("panics if the flag value is missing", func(t *testing.T) {
+			handler := build(func(b B) {
+				b.Disabled(
+					func(b *configbuilder.FlagBuilder[Disabled]) {},
+				)
+			})
+
+			test.ExpectPanic(
+				t,
+				`flag:disabled is invalid: value is unavailable`,
+				func() {
+					handler.IsDisabled()
+				},
+			)
+		})
 	})
 }

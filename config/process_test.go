@@ -264,7 +264,7 @@ func TestProcess(t *testing.T) {
 
 	testDescribe(
 		t,
-		renderTestCases{
+		describeTestCases{
 			{
 				Name:   "complete",
 				String: `process:ProcessMessageHandlerStub`,

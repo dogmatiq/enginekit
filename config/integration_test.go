@@ -202,7 +202,7 @@ func TestIntegration(t *testing.T) {
 
 	testDescribe(
 		t,
-		renderTestCases{
+		describeTestCases{
 			{
 				Name:   "complete",
 				String: `integration:IntegrationMessageHandlerStub`,

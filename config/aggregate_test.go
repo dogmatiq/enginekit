@@ -242,7 +242,7 @@ func TestAggregate(t *testing.T) {
 
 	testDescribe(
 		t,
-		renderTestCases{
+		describeTestCases{
 			{
 				Name:   "complete",
 				String: `aggregate:AggregateMessageHandlerStub`,

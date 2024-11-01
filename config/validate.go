@@ -191,7 +191,7 @@ func (c *validateContext) Absent(desc string) {
 
 func (c *validateContext) Malformed(format string, args ...any) {
 	panic(fmt.Sprintf(
-		"malformed configuration representation: there is a problem with the %T value, not necessarily the configuration it represents %s",
+		"malformed configuration representation: there is a problem with the %T value (and not necessarily the configuration it represents): %s",
 		c.Component,
 		fmt.Sprintf(format, args...),
 	))

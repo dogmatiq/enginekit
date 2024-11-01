@@ -121,7 +121,7 @@ func TestIdentity(t *testing.T) {
 
 	testDescribe(
 		t,
-		renderTestCases{
+		describeTestCases{
 			{
 				Name:        "valid",
 				String:      `identity:name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,

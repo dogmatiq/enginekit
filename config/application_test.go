@@ -255,7 +255,7 @@ func TestApplication(t *testing.T) {
 
 	testDescribe(
 		t,
-		renderTestCases{
+		describeTestCases{
 			{
 				Name:   "complete",
 				String: `application:ApplicationStub`,

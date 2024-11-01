@@ -199,7 +199,7 @@ func TestProjection(t *testing.T) {
 
 	testDescribe(
 		t,
-		renderTestCases{
+		describeTestCases{
 			{
 				Name:   "complete",
 				String: `projection:ProjectionMessageHandlerStub`,

@@ -187,7 +187,7 @@ func TestProjection(t *testing.T) {
 						)
 						b.Route(
 							func(b *configbuilder.RouteBuilder) {
-								b.RouteType(SchedulesTimeoutRouteType)
+								b.RouteType(SchedulesTimeoutRouteType) // <-- UNSUPPORTED ROUTE TYPE
 								b.MessageTypeName("pkg.SomeTimeout")
 							},
 						)

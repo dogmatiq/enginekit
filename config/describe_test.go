@@ -16,7 +16,7 @@ type renderTestCases []struct {
 func testDescribe(t *testing.T, cases renderTestCases) {
 	t.Helper()
 
-	t.Run("func Format()", func(t *testing.T) {
+	t.Run("func String()", func(t *testing.T) {
 		t.Helper()
 
 		for _, c := range cases {
@@ -25,14 +25,24 @@ func testDescribe(t *testing.T, cases renderTestCases) {
 
 				test.Expect(
 					t,
-					"unexpected short string representation",
+					"unexpected string representation",
 					c.Component.String(),
 					c.String,
 				)
+			})
+		}
+	})
+
+	t.Run("func describe()", func(t *testing.T) {
+		t.Helper()
+
+		for _, c := range cases {
+			t.Run(c.Name, func(t *testing.T) {
+				t.Helper()
 
 				test.Expect(
 					t,
-					"unexpected long string representation",
+					"unexpected string representation",
 					Description(
 						c.Component,
 						WithValidationResult(Validate(c.Component)),

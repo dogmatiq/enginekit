@@ -12,41 +12,46 @@ import (
 //
 // If v cannot be resolved to a single value, it returns an empty optional.
 func StaticValue(v ssa.Value) optional.Optional[ssa.Value] {
-	switch v := v.(type) {
-	case *ssa.Const:
-		return optional.Some[ssa.Value](v)
-
-	case ssa.Instruction:
-		values := staticValuesFromInstruction(v)
-		if len(values) > 1 {
-			panic("did not expect multiple values")
-		}
-
-		if len(values) == 1 {
-			return values[0]
-		}
+	values := staticValues(v)
+	if len(values) > 1 {
+		panic("did not expect multiple values")
 	}
 
-	// TODO(jmalloc): This implementation is incomplete.
+	if len(values) == 1 {
+		return values[0]
+	}
+
 	return optional.None[ssa.Value]()
 }
 
-// staticValuesFromInstruction returns the static value(s) that result from
-// evaluating the given instruction.
+// staticValues returns the static value(s) that result from evaluating the
+// given node.
 //
 // If an individual value within the expression cannot be resolved to a singular
-// static value, it is represented as a nil value in the returned slice.
+// static value, it is represented as an empty optional in the returned slice.
 //
 // It returns an empty slice if the expression itself cannot be resolved.
-func staticValuesFromInstruction(inst ssa.Instruction) []optional.Optional[ssa.Value] {
-	switch inst := inst.(type) {
+func staticValues(v ssa.Value) []optional.Optional[ssa.Value] {
+	switch v := v.(type) {
+	case *ssa.Const:
+		return optional.Slice[ssa.Value](v)
+
 	case *ssa.Call:
-		return staticValuesFromCall(inst.Common())
+		return staticValuesFromCall(v.Common())
 
 	case *ssa.Extract:
-		if expr, ok := inst.Tuple.(ssa.Instruction); ok {
-			values := staticValuesFromInstruction(expr)
-			return values[inst.Index : inst.Index+1]
+		values := staticValues(v.Tuple)
+		if len(values) <= v.Index {
+			return nil
+		}
+		return values[v.Index : v.Index+1]
+
+	case *ssa.MakeInterface:
+		return staticValues(v.X)
+
+	case *ssa.UnOp:
+		if v.Op == token.MUL { // pointer de-reference
+			return staticValues(v.X)
 		}
 	}
 
@@ -58,13 +63,11 @@ func staticValuesFromInstruction(inst ssa.Instruction) []optional.Optional[ssa.V
 // a call to a function.
 //
 // If an individual value within the expression cannot be resolved to a singular
-// static value, it is represented as a nil value in the returned slice.
+// static value, it is represented as an empty value in the returned slice.
 //
 // It returns an empty slice if the function itself cannot be resolved. For
 // example, if it is a dynamic call to an interface method.
-func staticValuesFromCall(
-	call *ssa.CallCommon,
-) []optional.Optional[ssa.Value] {
+func staticValuesFromCall(call *ssa.CallCommon) []optional.Optional[ssa.Value] {
 	// TODO: we could use StaticValue or some variant thereof to resolve the
 	// callee in more cases.
 	fn := call.StaticCallee()

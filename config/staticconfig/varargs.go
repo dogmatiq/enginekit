@@ -1,85 +1,92 @@
 package staticconfig
 
 import (
-	"go/token"
-	"iter"
-
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
 	"golang.org/x/tools/go/ssa"
 )
 
-func findAllocation(v ssa.Value) (*ssa.Alloc, bool) {
-	switch v := v.(type) {
-	case *ssa.Alloc:
-		return v, true
-
-	case *ssa.Slice:
-		return findAllocation(v.X)
-
-	case *ssa.UnOp:
-		if v.Op == token.MUL { // pointer de-reference
-			return findAllocation(v.X)
-		}
-		return nil, false
-
-	default:
-		return nil, false
-	}
-}
-
-func isIndexOfArray(
-	array *ssa.Alloc,
-	v ssa.Value,
-) (int, bool) {
-	switch v := v.(type) {
-	case *ssa.IndexAddr:
-		if v.X != array {
-			return 0, false
-		}
-		return ssax.AsInt(v.Index).TryGet()
-	}
-	return 0, false
-}
-
-func resolveVariadic[
+func analyzeVariadicArguments[
 	T config.Entity,
 	E any,
 	B configbuilder.EntityBuilder[T, E],
+	TChild config.Component,
+	BChild configbuilder.ComponentBuilder[TChild],
 ](
-	b B,
-	inst ssa.CallInstruction,
-) iter.Seq[ssa.Value] {
-	return func(yield func(ssa.Value) bool) {
-		call := inst.Common()
+	ctx *configurerCallContext[T, E, B],
+	child func(func(BChild)),
+	analyze func(*context, BChild, ssa.Value),
+) {
+	// The variadic slice parameter is always the last argument.
+	varargs := ctx.Args[len(ctx.Args)-1]
 
-		variadics := call.Args[len(call.Args)-1]
-		if ssax.IsZeroValue(variadics) {
-			return
+	if ssax.IsZeroValue(varargs) {
+		return
+	}
+
+	array, ok := findSliceArrayAllocation(varargs)
+	if !ok {
+		ctx.Builder.Partial()
+		return
+	}
+
+	buildersByIndex := map[int][]BChild{}
+
+	for block := range ssax.WalkBlock(array.Block()) {
+		// If there's no path from this block to the call instruction, we can
+		// safely ignore it, even if it modifies the underlying array.
+		if !ssax.PathExists(block, ctx.Instruction.Block()) {
+			continue
 		}
 
-		array, ok := findAllocation(variadics)
-		if !ok {
-			b.Partial()
-			return
-		}
-
-		for b := range ssax.WalkBlock(array.Block()) {
-			if !ssax.PathExists(b, inst.Block()) {
-				continue
-			}
-
-			for inst := range ssax.InstructionsBefore(b, inst) {
-				switch inst := inst.(type) {
-				case *ssa.Store:
-					if _, ok := isIndexOfArray(array, inst.Addr); ok {
-						if !yield(inst.Val) {
-							return
+		for inst := range ssax.InstructionsBefore(block, ctx.Instruction) {
+			switch inst := inst.(type) {
+			case *ssa.Store:
+				if addr, ok := inst.Addr.(*ssa.IndexAddr); ok && addr.X == array {
+					child(func(b BChild) {
+						if index, ok := ssax.AsInt(addr.Index).TryGet(); ok {
+							// If there are multiple writes to the same index,
+							// we mark them all as speculative.
+							//
+							// TODO: Could we handle this more intelligently by
+							// using the value of the store instruction closest
+							// to the call instruction?
+							conflicting := buildersByIndex[index]
+							if len(conflicting) == 1 {
+								conflicting[0].Speculative()
+							}
+							if len(conflicting) != 0 {
+								b.Speculative()
+							}
+							buildersByIndex[index] = append(conflicting, b)
+						} else {
+							// If we can't resolve the index we assume the child
+							// is speculative because we can't tell if it is
+							// ever overwritten with a different value.
+							b.Speculative()
 						}
-					}
+
+						if ctx.IsSpeculative {
+							b.Speculative()
+						}
+
+						analyze(ctx.context, b, inst.Val)
+					})
 				}
 			}
 		}
+	}
+}
+
+// findSliceArrayAllocation returns the underlying array allocation of a slice.
+func findSliceArrayAllocation(v ssa.Value) (*ssa.Alloc, bool) {
+	switch v := v.(type) {
+	case *ssa.Alloc:
+		return v, true
+	case *ssa.Slice:
+		return findSliceArrayAllocation(v.X)
+	default:
+		return nil, false
 	}
 }

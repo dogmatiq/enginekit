@@ -14,14 +14,11 @@ func analyzeRoutes[
 ](
 	ctx *configurerCallContext[T, H, B],
 ) {
-	for r := range resolveVariadic(ctx.Builder, ctx.Instruction) {
-		ctx.Builder.Route(func(b *configbuilder.RouteBuilder) {
-			if ctx.IsSpeculative {
-				b.Speculative() // TODO: is this correct?
-			}
-			analyzeRoute(ctx.context, b, r)
-		})
-	}
+	analyzeVariadicArguments(
+		ctx,
+		ctx.Builder.Route,
+		analyzeRoute,
+	)
 }
 
 func analyzeRoute(

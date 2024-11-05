@@ -92,7 +92,7 @@ func TestIntegration(t *testing.T) {
 				Name: "nil integration",
 				Error: multiline(
 					`integration is invalid:`,
-					`  - could not evaluate entire configuration`,
+					`  - could not evaluate entire configuration: handler is nil`,
 					`  - no identity`,
 					`  - no handles-command routes`,
 				),

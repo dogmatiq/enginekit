@@ -7,10 +7,16 @@ import (
 	"github.com/dogmatiq/enginekit/optional"
 )
 
+// UntypedComponentBuilder is the interface for builders of some unknown
+// [config.Component] type.
+type UntypedComponentBuilder interface {
+	Partial(format string, args ...any)
+	Speculative()
+}
+
 // ComponentBuilder an interface for builders that produce a [config.Component].
 type ComponentBuilder[T config.Component] interface {
-	Partial()
-	Speculative()
+	UntypedComponentBuilder
 	Done() T
 }
 

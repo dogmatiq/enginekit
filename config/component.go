@@ -2,6 +2,9 @@ package config
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/dogmatiq/enginekit/config/internal/renderer"
 )
 
 // Component is the "top-level" interface for the individual elements that form
@@ -24,12 +27,12 @@ type ComponentCommon struct {
 	// not be evaluated at configuration time.
 	IsSpeculative bool
 
-	// IsPartial indicates that the configuration could not be loaded in its
-	// entirety. The configuration may be valid, but cannot be safely used to
-	// execute an application.
+	// IsPartialReasons is a list of reasons that the configuration could not be
+	// loaded in its entirety. The configuration may be valid, but cannot be
+	// safely used to execute an application.
 	//
-	// A value of false does not imply a complete configuration.
-	IsPartial bool
+	// An empty slice does not imply a complete or valid configuration.
+	IsPartialReasons []string
 }
 
 // ComponentProperties returns the properties common to all [Component] types.
@@ -40,8 +43,8 @@ func (p *ComponentCommon) ComponentProperties() *ComponentCommon {
 func validateComponent(ctx *validateContext) {
 	p := ctx.Component.ComponentProperties()
 
-	if p.IsPartial {
-		ctx.Invalid(PartialConfigurationError{})
+	if len(p.IsPartialReasons) != 0 {
+		ctx.Invalid(PartialConfigurationError{p.IsPartialReasons})
 	}
 
 	if ctx.Options.ForExecution && p.IsSpeculative {
@@ -63,16 +66,35 @@ func (e ConfigurationUnavailableError) Error() string {
 
 // PartialConfigurationError indicates that a [Component]'s configuration could
 // not be loaded in its entirety.
-type PartialConfigurationError struct{}
+type PartialConfigurationError struct {
+	Reasons []string
+}
 
 func (e PartialConfigurationError) Error() string {
-	return "could not evaluate entire configuration"
+	w := &strings.Builder{}
+	r := &renderer.Renderer{Target: w}
+
+	r.Print("could not evaluate entire configuration:")
+
+	if len(e.Reasons) == 1 {
+		r.Print(" ", e.Reasons[0])
+	} else if len(e.Reasons) > 1 {
+		for _, reason := range e.Reasons {
+			r.Print("\n")
+			r.StartChild()
+			r.Print(reason)
+			r.EndChild()
+		}
+	}
+
+	return w.String()
 }
 
 // SpeculativeConfigurationError indicates that a [Component]'s inclusion in the
 // configuration is subject to some condition that could not be evaluated at the
 // time the configuration was built.
-type SpeculativeConfigurationError struct{}
+type SpeculativeConfigurationError struct {
+}
 
 func (e SpeculativeConfigurationError) Error() string {
 	return "conditions for the component's inclusion in the configuration could not be evaluated"

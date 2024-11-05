@@ -106,7 +106,7 @@ func TestProcess(t *testing.T) {
 				Name: "nil process",
 				Error: multiline(
 					`process is invalid:`,
-					`  - could not evaluate entire configuration`,
+					`  - could not evaluate entire configuration: handler is nil`,
 					`  - no identity`,
 					`  - no handles-event routes`,
 					`  - no executes-command routes`,

@@ -38,6 +38,6 @@ func analyzeApplicationConfigurerCall(
 	case "RegisterProjection":
 		analyzeHandler(ctx, ctx.Builder.Projection, analyzeProjectionConfigurerCall)
 	default:
-		ctx.Builder.Partial()
+		cannotAnalyzeUnrecognizedConfigurerMethod(ctx)
 	}
 }

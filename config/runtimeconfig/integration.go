@@ -18,7 +18,7 @@ func FromIntegration(h dogma.IntegrationMessageHandler) *config.Integration {
 
 func buildIntegration(b *configbuilder.IntegrationBuilder, h dogma.IntegrationMessageHandler) {
 	if h == nil {
-		b.Partial()
+		b.Partial("handler is nil")
 	} else {
 		b.Source(h)
 		h.Configure(newHandlerConfigurer[dogma.IntegrationRoute](b))

@@ -17,14 +17,12 @@ func analyzeHandler[
 	analyze configurerCallAnalyzer[T, H, B],
 ) {
 	build(func(b B) {
-		if ctx.IsSpeculative {
-			b.Speculative()
-		}
+		ctx.Apply(b)
 
 		t := ssax.ConcreteType(ctx.Args[0])
 
 		if !t.IsPresent() {
-			b.Partial()
+			b.Partial("the handler's type is unknown")
 			return
 		}
 
@@ -40,16 +38,14 @@ func analyzeHandler[
 				case "Disable":
 					ctx.Builder.Disabled(
 						func(b *configbuilder.FlagBuilder[config.Disabled]) {
-							if ctx.IsSpeculative {
-								b.Speculative()
-							}
+							ctx.Apply(b)
 							b.Value(true)
 						},
 					)
 
 				default:
 					if analyze == nil {
-						ctx.Builder.Partial()
+						cannotAnalyzeUnrecognizedConfigurerMethod(ctx)
 					} else {
 						analyze(ctx)
 					}
@@ -66,6 +62,6 @@ func analyzeProjectionConfigurerCall(
 	case "DeliveryPolicy":
 		panic("not implemented") // TODO
 	default:
-		ctx.Builder.Partial()
+		cannotAnalyzeUnrecognizedConfigurerMethod(ctx)
 	}
 }

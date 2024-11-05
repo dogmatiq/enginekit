@@ -1,7 +1,10 @@
 package staticconfig
 
 import (
+	"fmt"
 	"go/types"
+	"os"
+	"runtime"
 
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
@@ -41,8 +44,15 @@ type configurerCallContext[
 	*entityContext[T, E, B]
 	*ssa.CallCommon
 
-	Instruction   ssa.CallInstruction
-	IsSpeculative bool
+	Instruction     ssa.CallInstruction
+	IsUnconditional bool
+}
+
+// Apply configures b with any properties that are inferred from the context.
+func (c *configurerCallContext[T, E, B]) Apply(b configbuilder.UntypedComponentBuilder) {
+	if !c.IsUnconditional {
+		b.Speculative()
+	}
 }
 
 // configurerCallAnalyzer is a function that analyzes a call to a method on an
@@ -70,6 +80,9 @@ func analyzeEntity[
 ) {
 	builder.TypeName(typename.OfStatic(t))
 	configure := ctx.LookupMethod(t, "Configure")
+
+	fmt.Println("===========================================")
+	configure.WriteTo(os.Stderr)
 
 	ectx := &entityContext[T, E, B]{
 		context:                ctx,
@@ -125,14 +138,14 @@ func analyzeConfigurerCallsInInstruction[
 	inst ssa.CallInstruction,
 	analyze configurerCallAnalyzer[T, E, B],
 ) {
-	com := inst.Common()
+	call := inst.Common()
 
-	if com.IsInvoke() && ctx.IsConfigurer(com.Value) {
+	if call.IsInvoke() && ctx.IsConfigurer(call.Value) {
 		analyze(&configurerCallContext[T, E, B]{
-			entityContext: ctx,
-			CallCommon:    com,
-			Instruction:   inst,
-			IsSpeculative: !ssax.IsUnconditional(inst.Block()),
+			entityContext:   ctx,
+			CallCommon:      call,
+			Instruction:     inst,
+			IsUnconditional: ssax.IsUnconditional(inst.Block()),
 		})
 		return
 	}
@@ -149,7 +162,7 @@ func analyzeConfigurerCallsInInstruction[
 	// configurer. It doesn't make much sense, but the configurer could be
 	// passed in multiple positions.
 	var indices []int
-	for i, arg := range com.Args {
+	for i, arg := range call.Args {
 		if ctx.IsConfigurer(arg) {
 			indices = append(indices, i)
 		}
@@ -162,9 +175,9 @@ func analyzeConfigurerCallsInInstruction[
 
 	// If we can't obtain the callee this is a call to an interface method or
 	// some other un-analyzable function.
-	fn := com.StaticCallee()
+	fn := call.StaticCallee()
 	if fn == nil {
-		ctx.Builder.Partial()
+		cannotAnalyzeNonStaticCall(ctx.Builder)
 		return
 	}
 
@@ -191,9 +204,7 @@ func analyzeIdentity[
 	ctx.
 		Builder.
 		Identity(func(b *configbuilder.IdentityBuilder) {
-			if ctx.IsSpeculative {
-				b.Speculative()
-			}
+			ctx.Apply(b)
 
 			if name, ok := ssax.AsString(ctx.Args[0]).TryGet(); ok {
 				b.Name(name)
@@ -203,4 +214,30 @@ func analyzeIdentity[
 				b.Key(key)
 			}
 		})
+}
+
+func cannotAnalyzeUnrecognizedConfigurerMethod[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+](
+	ctx *configurerCallContext[T, E, B],
+) {
+	ctx.Builder.Partial(
+		"configuration uses %s.%s(), which is not recognized",
+		ctx.Value.Type(),
+		ctx.Method.Name(),
+	)
+}
+
+func cannotAnalyzeNonStaticCall(b configbuilder.UntypedComponentBuilder) {
+	b.Partial("analysis of non-static function call is not possible")
+}
+
+func unimplementedAnalysis(b configbuilder.UntypedComponentBuilder, node any) {
+	if _, file, line, ok := runtime.Caller(1); ok {
+		b.Partial("static analysis of %T is not implemented at %s:%d", node, file, line)
+	} else {
+		b.Partial("static analysis of %T is not implemented", node)
+	}
 }

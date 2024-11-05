@@ -105,7 +105,7 @@ func TestAggregate(t *testing.T) {
 				Name: "nil aggregate",
 				Error: multiline(
 					`aggregate is invalid:`,
-					`  - could not evaluate entire configuration`,
+					`  - could not evaluate entire configuration: handler is nil`,
 					`  - no identity`,
 					`  - no handles-command routes`,
 					`  - no records-event routes`,

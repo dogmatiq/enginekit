@@ -31,7 +31,7 @@ func TestFromApplication(t *testing.T) {
 				return &config.Application{
 					EntityCommon: config.EntityCommon{
 						ComponentCommon: config.ComponentCommon{
-							IsPartial: true,
+							IsPartialReasons: []string{"application is nil"},
 						},
 					},
 				}

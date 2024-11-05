@@ -6,7 +6,7 @@ analyzed.
 
 ```au:output au:group=matrix
 incomplete application github.com/dogmatiq/enginekit/config/staticconfig.App (value unavailable)
-  - could not evaluate entire configuration
+  - could not evaluate entire configuration: analysis of non-static function call is not possible
   - valid identity app/de142370-93ee-409c-9336-5084d9c5e285
 ```
 

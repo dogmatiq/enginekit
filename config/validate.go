@@ -138,8 +138,10 @@ func newResolutionContext(c Component, allowPartial bool) *validateContext {
 		},
 	}
 
-	if !allowPartial && c.ComponentProperties().IsPartial {
-		ctx.Invalid(PartialConfigurationError{})
+	p := c.ComponentProperties()
+
+	if !allowPartial && len(p.IsPartialReasons) > 0 {
+		ctx.Invalid(PartialConfigurationError{p.IsPartialReasons})
 	}
 
 	return ctx

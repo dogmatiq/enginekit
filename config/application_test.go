@@ -76,7 +76,7 @@ func TestApplication(t *testing.T) {
 				Name: "nil application",
 				Error: multiline(
 					`application is invalid:`,
-					`  - could not evaluate entire configuration`,
+					`  - could not evaluate entire configuration: application is nil`,
 					`  - no identity`,
 				),
 				Component: runtimeconfig.FromApplication(nil),

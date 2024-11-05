@@ -1,6 +1,7 @@
 package configbuilder
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/dogmatiq/dogma"
@@ -67,8 +68,8 @@ func (b *RouteBuilder) MessageType(t message.Type) {
 }
 
 // Partial marks the compomnent as partially configured.
-func (b *RouteBuilder) Partial() {
-	b.target.IsPartial = true
+func (b *RouteBuilder) Partial(format string, args ...any) {
+	b.target.IsPartialReasons = append(b.target.IsPartialReasons, fmt.Sprintf(format, args...))
 }
 
 // Speculative marks the component as speculative.

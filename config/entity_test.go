@@ -53,7 +53,7 @@ func testEntity[
 		t.Run("it panics if the entity is partially configured", func(t *testing.T) {
 			entity := build(
 				func(b B) {
-					b.Partial()
+					b.Partial("<reason>")
 					b.Identity(
 						func(b *configbuilder.IdentityBuilder) {
 							b.Name("name")
@@ -65,7 +65,7 @@ func testEntity[
 
 			test.ExpectPanic(
 				t,
-				"could not evaluate entire configuration",
+				"could not evaluate entire configuration: <reason>",
 				func() {
 					entity.Identity()
 				},

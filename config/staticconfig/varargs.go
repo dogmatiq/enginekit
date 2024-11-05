@@ -7,86 +7,125 @@ import (
 	"golang.org/x/tools/go/ssa"
 )
 
+type variadicConfigurerCallContext[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+	TC config.Component,
+	BC configbuilder.ComponentBuilder[TC],
+] struct {
+	*configurerCallContext[T, E, B]
+
+	BuildChild   func(func(BC))
+	AnalyzeChild func(*configurerCallContext[T, E, B], BC, ssa.Value)
+
+	seen map[ssa.Value]struct{}
+}
+
+// analyzeVariadicArguments analyzes the variadic arguments of a method call.
 func analyzeVariadicArguments[
 	T config.Entity,
 	E any,
 	B configbuilder.EntityBuilder[T, E],
-	TChild config.Component,
-	BChild configbuilder.ComponentBuilder[TChild],
+	TC config.Component,
+	BC configbuilder.ComponentBuilder[TC],
 ](
 	ctx *configurerCallContext[T, E, B],
-	child func(func(BChild)),
-	analyze func(*context, BChild, ssa.Value),
+	buildChild func(func(BC)),
+	analyzeChild func(*configurerCallContext[T, E, B], BC, ssa.Value),
 ) {
-	// The variadic slice parameter is always the last argument.
-	varargs := ctx.Args[len(ctx.Args)-1]
+	walkUpVariadic(
+		&variadicConfigurerCallContext[T, E, B, TC, BC]{
+			configurerCallContext: ctx,
+			BuildChild:            buildChild,
+			AnalyzeChild:          analyzeChild,
+			seen:                  map[ssa.Value]struct{}{},
+		},
+		ctx.Args[len(ctx.Args)-1], // varadic slice is always the last argument
+	)
+}
 
-	if ssax.IsZeroValue(varargs) {
+func walkUpVariadic[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+	TC config.Component,
+	BC configbuilder.ComponentBuilder[TC],
+](
+	ctx *variadicConfigurerCallContext[T, E, B, TC, BC],
+	v ssa.Value,
+) {
+	if _, ok := ctx.seen[v]; ok {
 		return
 	}
+	ctx.seen[v] = struct{}{}
 
-	array, ok := findSliceArrayAllocation(varargs)
-	if !ok {
-		ctx.Builder.Partial()
-		return
-	}
+	switch v := v.(type) {
+	default:
+		unimplementedAnalysis(ctx.Builder, v)
 
-	buildersByIndex := map[int][]BChild{}
+	case *ssa.Const:
+		// We've found a nil slice.
 
-	for block := range ssax.WalkBlock(array.Block()) {
-		// If there's no path from this block to the call instruction, we can
-		// safely ignore it, even if it modifies the underlying array.
-		if !ssax.PathExists(block, ctx.Instruction.Block()) {
-			continue
+	case *ssa.Phi:
+		for _, edge := range v.Edges {
+			walkUpVariadic(ctx, edge)
 		}
 
-		for inst := range ssax.InstructionsBefore(block, ctx.Instruction) {
-			switch inst := inst.(type) {
-			case *ssa.Store:
-				if addr, ok := inst.Addr.(*ssa.IndexAddr); ok && addr.X == array {
-					child(func(b BChild) {
-						if index, ok := ssax.AsInt(addr.Index).TryGet(); ok {
-							// If there are multiple writes to the same index,
-							// we mark them all as speculative.
-							//
-							// TODO: Could we handle this more intelligently by
-							// using the value of the store instruction closest
-							// to the call instruction?
-							conflicting := buildersByIndex[index]
-							if len(conflicting) == 1 {
-								conflicting[0].Speculative()
-							}
-							if len(conflicting) != 0 {
-								b.Speculative()
-							}
-							buildersByIndex[index] = append(conflicting, b)
-						} else {
-							// If we can't resolve the index we assume the child
-							// is speculative because we can't tell if it is
-							// ever overwritten with a different value.
-							b.Speculative()
-						}
+	case *ssa.Alloc:
+		walkDownVariadic(ctx, v)
 
-						if ctx.IsSpeculative {
-							b.Speculative()
-						}
+	case *ssa.Slice:
+		walkUpVariadic(ctx, v.X)
 
-						analyze(ctx.context, b, inst.Val)
-					})
+	case *ssa.Call:
+		call := v.Common()
+
+		if fn, ok := call.Value.(*ssa.Builtin); ok {
+			if fn.Name() == "append" {
+				for _, arg := range call.Args {
+					walkUpVariadic(ctx, arg)
 				}
 			}
 		}
 	}
 }
 
-// findSliceArrayAllocation returns the underlying array allocation of a slice.
-func findSliceArrayAllocation(v ssa.Value) (*ssa.Alloc, bool) {
-	switch v := v.(type) {
-	case *ssa.Alloc:
-		return v, true
-	case *ssa.Slice:
-		return findSliceArrayAllocation(v.X)
-	default:
-		return nil, false
+func walkDownVariadic[
+	T config.Entity,
+	E any,
+	B configbuilder.EntityBuilder[T, E],
+	TC config.Component,
+	BC configbuilder.ComponentBuilder[TC],
+](
+	ctx *variadicConfigurerCallContext[T, E, B, TC, BC],
+	alloc *ssa.Alloc,
+) {
+	for block := range ssax.WalkBlock(alloc.Block()) {
+		unconditional := ssax.IsUnconditional(block)
+
+		for inst := range ssax.InstructionsBefore(block, ctx.Instruction) {
+			switch inst := inst.(type) {
+			case *ssa.Store:
+				addr, ok := inst.Addr.(*ssa.IndexAddr)
+				if !ok {
+					continue
+				}
+
+				if addr.X != alloc {
+					continue
+				}
+
+				ctx.BuildChild(func(b BC) {
+					ctx.Apply(b)
+
+					if !unconditional {
+						b.Speculative()
+					}
+
+					ctx.AnalyzeChild(ctx.configurerCallContext, b, inst.Val)
+				})
+			}
+		}
 	}
 }

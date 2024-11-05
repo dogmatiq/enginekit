@@ -1,9 +1,7 @@
 package staticconfig
 
 import (
-	"fmt"
 	"go/types"
-	"os"
 	"runtime"
 
 	"github.com/dogmatiq/enginekit/config"
@@ -80,9 +78,6 @@ func analyzeEntity[
 ) {
 	builder.TypeName(typename.OfStatic(t))
 	configure := ctx.LookupMethod(t, "Configure")
-
-	fmt.Println("===========================================")
-	configure.WriteTo(os.Stderr)
 
 	ectx := &entityContext[T, E, B]{
 		context:                ctx,

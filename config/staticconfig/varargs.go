@@ -1,26 +1,13 @@
 package staticconfig
 
 import (
+	"github.com/dogmatiq/enginekit/collections/sets"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 	"github.com/dogmatiq/enginekit/config/staticconfig/internal/ssax"
+	"github.com/dogmatiq/enginekit/optional"
 	"golang.org/x/tools/go/ssa"
 )
-
-type variadicConfigurerCallContext[
-	T config.Entity,
-	E any,
-	B configbuilder.EntityBuilder[T, E],
-	TC config.Component,
-	BC configbuilder.ComponentBuilder[TC],
-] struct {
-	*configurerCallContext[T, E, B]
-
-	BuildChild   func(func(BC))
-	AnalyzeChild func(*configurerCallContext[T, E, B], BC, ssa.Value)
-
-	seen map[ssa.Value]struct{}
-}
 
 // analyzeVariadicArguments analyzes the variadic arguments of a method call.
 func analyzeVariadicArguments[
@@ -34,98 +21,128 @@ func analyzeVariadicArguments[
 	buildChild func(func(BC)),
 	analyzeChild func(*configurerCallContext[T, E, B], BC, ssa.Value),
 ) {
-	walkUpVariadic(
-		&variadicConfigurerCallContext[T, E, B, TC, BC]{
-			configurerCallContext: ctx,
-			BuildChild:            buildChild,
-			AnalyzeChild:          analyzeChild,
-			seen:                  map[ssa.Value]struct{}{},
-		},
+	allocs := collectVariadicAllocations(
+		ctx.Builder,
 		ctx.Args[len(ctx.Args)-1], // varadic slice is always the last argument
 	)
-}
 
-func walkUpVariadic[
-	T config.Entity,
-	E any,
-	B configbuilder.EntityBuilder[T, E],
-	TC config.Component,
-	BC configbuilder.ComponentBuilder[TC],
-](
-	ctx *variadicConfigurerCallContext[T, E, B, TC, BC],
-	v ssa.Value,
-) {
-	if _, ok := ctx.seen[v]; ok {
-		return
-	}
-	ctx.seen[v] = struct{}{}
+	var isVarArg func(v ssa.Value) (optional.Optional[int], bool)
 
-	switch v := v.(type) {
-	default:
-		unimplementedAnalysis(ctx.Builder, v)
-
-	case *ssa.Const:
-		// We've found a nil slice.
-
-	case *ssa.Phi:
-		for _, edge := range v.Edges {
-			walkUpVariadic(ctx, edge)
+	isVarArg = func(v ssa.Value) (optional.Optional[int], bool) {
+		if allocs.Has(v) {
+			return optional.Some(0), true
 		}
 
-	case *ssa.Alloc:
-		walkDownVariadic(ctx, v)
-
-	case *ssa.Slice:
-		walkUpVariadic(ctx, v.X)
-
-	case *ssa.Call:
-		call := v.Common()
-
-		if fn, ok := call.Value.(*ssa.Builtin); ok {
-			if fn.Name() == "append" {
-				for _, arg := range call.Args {
-					walkUpVariadic(ctx, arg)
+		switch v := v.(type) {
+		case *ssa.Slice:
+			if index, ok := isVarArg(v.X); ok {
+				if v.Low == nil {
+					return index, true
 				}
-			}
-		}
-	}
-}
 
-func walkDownVariadic[
-	T config.Entity,
-	E any,
-	B configbuilder.EntityBuilder[T, E],
-	TC config.Component,
-	BC configbuilder.ComponentBuilder[TC],
-](
-	ctx *variadicConfigurerCallContext[T, E, B, TC, BC],
-	alloc *ssa.Alloc,
-) {
-	for block := range ssax.WalkBlock(alloc.Block()) {
+				return optional.Sum(
+					index,
+					ssax.AsInt(v.Low),
+				), true
+			}
+		case *ssa.IndexAddr:
+			if index, ok := isVarArg(v.X); ok {
+				return optional.Sum(
+					index,
+					ssax.AsInt(v.Index),
+				), true
+			}
+		default:
+			unimplementedAnalysis(ctx.Builder, v)
+		}
+
+		return optional.None[int](), false
+	}
+
+	indexCounts := map[int]int{}
+	hasUnknownIndices := false
+	var children []func(BC)
+
+	for block := range ssax.WalkFunc(ctx.FunctionUnderAnalysis) {
+		if !ssax.PathExists(block, ctx.Instruction.Block()) {
+			continue
+		}
+
 		unconditional := ssax.IsUnconditional(block)
 
 		for inst := range ssax.InstructionsBefore(block, ctx.Instruction) {
-			switch inst := inst.(type) {
-			case *ssa.Store:
-				addr, ok := inst.Addr.(*ssa.IndexAddr)
+			if inst, ok := inst.(*ssa.Store); ok {
+				index, ok := isVarArg(inst.Addr)
 				if !ok {
 					continue
 				}
 
-				if addr.X != alloc {
-					continue
+				if i, ok := index.TryGet(); ok {
+					indexCounts[i]++
+				} else {
+					hasUnknownIndices = true
 				}
 
-				ctx.BuildChild(func(b BC) {
+				children = append(children, func(b BC) {
 					ctx.Apply(b)
 
-					if !unconditional {
+					if hasUnknownIndices || !unconditional {
+						b.Speculative()
+					} else if i, ok := index.TryGet(); ok && indexCounts[i] > 1 {
 						b.Speculative()
 					}
 
-					ctx.AnalyzeChild(ctx.configurerCallContext, b, inst.Val)
+					analyzeChild(ctx, b, inst.Val)
 				})
 			}
 		}
 	}
+
+	for _, child := range children {
+		buildChild(child)
+	}
+}
+
+func collectVariadicAllocations(
+	b configbuilder.UntypedComponentBuilder,
+	v ssa.Value,
+) *sets.Set[ssa.Value] {
+	allocs := sets.New[ssa.Value]()
+
+	var collect func(v ssa.Value)
+	collect = func(v ssa.Value) {
+		switch v := v.(type) {
+		case *ssa.Alloc:
+			allocs.Add(v)
+
+		case *ssa.Slice:
+			collect(v.X)
+
+		case *ssa.Const:
+			// We've found a nil slice.
+
+		case *ssa.Phi:
+			for _, edge := range v.Edges {
+				collect(edge)
+			}
+
+		case *ssa.Call:
+			call := v.Common()
+
+			if fn, ok := call.Value.(*ssa.Builtin); ok {
+				if fn.Name() == "append" {
+					for _, arg := range call.Args {
+						collect(arg)
+					}
+				}
+			}
+
+		default:
+			unimplementedAnalysis(b, v)
+		}
+	}
+
+	collect(v)
+
+	return allocs
 }

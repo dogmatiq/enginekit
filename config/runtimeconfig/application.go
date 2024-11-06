@@ -12,7 +12,7 @@ func FromApplication(app dogma.Application) *config.Application {
 	return configbuilder.Application(
 		func(b *configbuilder.ApplicationBuilder) {
 			if app == nil {
-				b.Partial()
+				b.Partial("application is nil")
 			} else {
 				b.Source(app)
 				app.Configure(&applicationConfigurer{b})

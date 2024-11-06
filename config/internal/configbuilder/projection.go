@@ -1,6 +1,8 @@
 package configbuilder
 
 import (
+	"fmt"
+
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 )
@@ -53,8 +55,8 @@ func (b *ProjectionBuilder) DeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuil
 }
 
 // Partial marks the compomnent as partially configured.
-func (b *ProjectionBuilder) Partial() {
-	b.target.IsPartial = true
+func (b *ProjectionBuilder) Partial(format string, args ...any) {
+	b.target.IsPartialReasons = append(b.target.IsPartialReasons, fmt.Sprintf(format, args...))
 }
 
 // Speculative marks the component as speculative.

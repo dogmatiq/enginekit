@@ -63,14 +63,14 @@ func TestIdentity(t *testing.T) {
 			},
 			{
 				Name:  "partial",
-				Error: `identity:name/e6b691dd-731c-4c14-8e1c-1622381202dc is invalid: could not evaluate entire configuration`,
+				Error: `identity:name/e6b691dd-731c-4c14-8e1c-1622381202dc is invalid: could not evaluate entire configuration: <reason>`,
 				Component: &Identity{
 					// It's possibly non-sensical to have an identity that contains
 					// both it's name and key be considered incomplete, but this
 					// allows us to represent a case where the name and key are
 					// build dynamically and we don't have the _entire_ string.
 					ComponentCommon: ComponentCommon{
-						IsPartial: true,
+						IsPartialReasons: []string{"<reason>"},
 					},
 					Name: optional.Some("name"),
 					Key:  optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),

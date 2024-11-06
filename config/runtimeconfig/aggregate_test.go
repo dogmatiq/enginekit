@@ -28,7 +28,7 @@ func TestFromAggregate(t *testing.T) {
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
 							ComponentCommon: config.ComponentCommon{
-								IsPartial: true,
+								IsPartialReasons: []string{"handler is nil"},
 							},
 						},
 					},

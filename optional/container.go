@@ -32,3 +32,12 @@ func Key[K comparable, V any, M ~map[K]V](m M, k K) Optional[V] {
 	}
 	return None[V]()
 }
+
+// Slice returns a slice of Optional[T] values.
+func Slice[T any](elems ...T) []Optional[T] {
+	slice := make([]Optional[T], len(elems))
+	for i, elem := range elems {
+		slice[i] = Some(elem)
+	}
+	return slice
+}

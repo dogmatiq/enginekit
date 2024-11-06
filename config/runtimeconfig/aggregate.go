@@ -18,7 +18,7 @@ func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
 
 func buildAggregate(b *configbuilder.AggregateBuilder, h dogma.AggregateMessageHandler) {
 	if h == nil {
-		b.Partial()
+		b.Partial("handler is nil")
 	} else {
 		b.Source(h)
 		h.Configure(newHandlerConfigurer[dogma.AggregateRoute](b))

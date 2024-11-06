@@ -18,7 +18,7 @@ func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
 
 func buildProcess(b *configbuilder.ProcessBuilder, h dogma.ProcessMessageHandler) {
 	if h == nil {
-		b.Partial()
+		b.Partial("handler is nil")
 	} else {
 		b.Source(h)
 		h.Configure(newHandlerConfigurer[dogma.ProcessRoute](b))

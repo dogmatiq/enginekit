@@ -16,7 +16,7 @@ func FromProjection(h dogma.ProjectionMessageHandler) *config.Projection {
 
 func buildProjection(b *configbuilder.ProjectionBuilder, h dogma.ProjectionMessageHandler) {
 	if h == nil {
-		b.Partial()
+		b.Partial("handler is nil")
 	} else {
 		b.Source(h)
 		h.Configure(&projectionConfigurer{

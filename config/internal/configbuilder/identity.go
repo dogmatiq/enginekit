@@ -1,6 +1,8 @@
 package configbuilder
 
 import (
+	"fmt"
+
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/optional"
 )
@@ -33,8 +35,8 @@ func (b *IdentityBuilder) Key(key string) {
 }
 
 // Partial marks the compomnent as partially configured.
-func (b *IdentityBuilder) Partial() {
-	b.target.IsPartial = true
+func (b *IdentityBuilder) Partial(format string, args ...any) {
+	b.target.IsPartialReasons = append(b.target.IsPartialReasons, fmt.Sprintf(format, args...))
 }
 
 // Speculative marks the component as speculative.

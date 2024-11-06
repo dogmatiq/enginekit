@@ -65,14 +65,14 @@ func testHandler[
 			handler := build(func(b B) {
 				b.Disabled(
 					func(b *configbuilder.FlagBuilder[Disabled]) {
-						b.Partial()
+						b.Partial("<reason>")
 					},
 				)
 			})
 
 			test.ExpectPanic(
 				t,
-				`flag:disabled is invalid: could not evaluate entire configuration`,
+				`flag:disabled is invalid: could not evaluate entire configuration: <reason>`,
 				func() {
 					handler.IsDisabled()
 				},

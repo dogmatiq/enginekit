@@ -103,7 +103,7 @@ func TestProjection(t *testing.T) {
 				Name: "nil projection",
 				Error: multiline(
 					`projection is invalid:`,
-					`  - could not evaluate entire configuration`,
+					`  - could not evaluate entire configuration: handler is nil`,
 					`  - no identity`,
 					`  - no handles-event routes`,
 				),
@@ -426,13 +426,13 @@ func TestProjection(t *testing.T) {
 		t.Run("it panics if the handler is partially configured", func(t *testing.T) {
 			handler := configbuilder.Projection(
 				func(b *configbuilder.ProjectionBuilder) {
-					b.Partial()
+					b.Partial("<reason>")
 				},
 			)
 
 			test.ExpectPanic(
 				t,
-				"could not evaluate entire configuration",
+				`could not evaluate entire configuration: <reason>`,
 				func() {
 					handler.DeliveryPolicy()
 				},

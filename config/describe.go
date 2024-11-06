@@ -85,7 +85,7 @@ func hasError[T error](ctx *describeContext) bool {
 func (ctx *describeContext) DescribeFidelity() {
 	p := ctx.Component.ComponentProperties()
 
-	if p.IsPartial || hasError[PartialConfigurationError](ctx) || hasError[ConfigurationUnavailableError](ctx) {
+	if len(p.IsPartialReasons) != 0 || hasError[PartialConfigurationError](ctx) || hasError[ConfigurationUnavailableError](ctx) {
 		ctx.Print("incomplete ")
 	} else if !ctx.options.ValidationResult.IsPresent() {
 		ctx.Print("unvalidated ")

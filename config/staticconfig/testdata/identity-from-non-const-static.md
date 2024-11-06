@@ -18,7 +18,7 @@ import "github.com/dogmatiq/dogma"
 type App struct {
 }
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	c.Identity(name(), "a0a0edb7-ce45-4eb4-940c-0f77459ae2a0")
 }
 
@@ -37,7 +37,7 @@ import "github.com/dogmatiq/dogma"
 type App struct {
 }
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	c.Identity(ident())
 }
 
@@ -56,7 +56,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
     c.Identity(ident())
 }
 

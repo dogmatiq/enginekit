@@ -18,7 +18,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if false {
 		return
 	}
@@ -36,7 +36,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if true {
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 	}
@@ -52,7 +52,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if true {
 		defer c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 	}
@@ -68,7 +68,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if cond() {
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 	}

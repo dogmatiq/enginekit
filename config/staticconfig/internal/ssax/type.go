@@ -80,12 +80,28 @@ func ConcreteType(v ssa.Value) optional.Optional[types.Type] {
 	case *ssa.BinOp:
 	case *ssa.Builtin:
 	case *ssa.Call:
+		call := v.Common()
+		r := call.Signature().Results()
+
+		if r.Len() != 1 {
+			return optional.None[types.Type]()
+		}
+
+		t := r.At(0).Type()
+
+		if IsAbstract(t) {
+			return optional.None[types.Type]()
+		}
+
+		return optional.Some(t)
+
 	case *ssa.ChangeInterface:
 	case *ssa.ChangeType:
 	case *ssa.Const:
 		// We made it past the IsAbstract() check so we know this is a constant
 		// nil value for an interface, and hence no type information is present.
 		return optional.None[types.Type]()
+
 	case *ssa.Convert:
 	case *ssa.Extract:
 	case *ssa.Field:
@@ -100,6 +116,7 @@ func ConcreteType(v ssa.Value) optional.Optional[types.Type] {
 	case *ssa.MakeClosure:
 	case *ssa.MakeInterface:
 		return ConcreteType(v.X)
+
 	case *ssa.MakeMap:
 	case *ssa.MakeSlice:
 	case *ssa.MultiConvert:

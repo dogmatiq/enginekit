@@ -19,7 +19,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 	}
 
@@ -37,7 +37,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 	} else {
 	}
@@ -56,7 +56,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	switch rand.Int() {
 	case 0:
 	}
@@ -75,7 +75,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	for range rand.Int() {
 	}
 
@@ -94,7 +94,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	select {
 	case <-time.After(time.Duration(rand.Int())):
 	default:

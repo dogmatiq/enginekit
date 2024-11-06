@@ -22,7 +22,7 @@ func (a App) Configure(c dogma.ApplicationConfigurer) {
     a.setup(c)
 }
 
-func (a App) setup(c dogma.ApplicationConfigurer) {
+func (App) setup(c dogma.ApplicationConfigurer) {
     c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 }
 ```
@@ -36,7 +36,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
     setup(c)
 }
 
@@ -54,7 +54,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
     setup(c)
 }
 
@@ -72,7 +72,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
     defer c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 }
 ```
@@ -90,7 +90,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
     go c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 }
 ```

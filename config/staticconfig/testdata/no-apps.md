@@ -26,7 +26,7 @@ import _ "github.com/dogmatiq/dogma"
 // it's compatible.
 type App struct{}
 
-func (a App) Configure(c ApplicationConfigurer) {
+func (App) Configure(c ApplicationConfigurer) {
     c.Identity("name", "ee6ca834-34a3-4e59-8c36-7aeb796401d7")
 }
 

@@ -18,7 +18,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 	}
@@ -35,7 +35,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 	} else {
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
@@ -53,7 +53,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 		return
 	}
@@ -72,7 +72,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 		panic("oh no")
 	}
@@ -91,7 +91,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	switch rand.Int() {
 	case 0:
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
@@ -109,7 +109,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	for range rand.Int() {
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 	}
@@ -127,7 +127,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	select {
 	case <-time.After(time.Duration(rand.Int())):
 		c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
@@ -146,7 +146,7 @@ import "github.com/dogmatiq/dogma"
 
 type App struct {}
 
-func (a App) Configure(c dogma.ApplicationConfigurer) {
+func (App) Configure(c dogma.ApplicationConfigurer) {
 	if rand.Int() == 0 {
 		defer c.Identity("app", "de142370-93ee-409c-9336-5084d9c5e285")
 	}

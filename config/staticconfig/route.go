@@ -31,6 +31,9 @@ func analyzeRoute[
 	r ssa.Value,
 ) {
 	switch r := r.(type) {
+	case *ssa.Const:
+		// We've found a nil route.
+
 	case *ssa.MakeInterface:
 		analyzeRoute(ctx, b, r.X)
 

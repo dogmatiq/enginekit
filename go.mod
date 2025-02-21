@@ -6,7 +6,7 @@ require (
 	github.com/dogmatiq/dapper v0.6.0
 	github.com/dogmatiq/dogma v0.15.0
 	github.com/dogmatiq/primo v0.3.1
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
 	pgregory.net/rapid v1.1.0

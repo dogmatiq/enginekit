@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/enginetest/internal/action"
 	"github.com/dogmatiq/enginekit/enginetest/internal/testapp"
 	"google.golang.org/protobuf/proto"
 )
@@ -66,6 +67,7 @@ func RunTests(t *testing.T, setup SetupFunc) {
 
 		testCommandExecutor(ctx, t, e)
 		testIntegration(ctx, t, e)
+		testProcess(ctx, t, e)
 	})
 
 	cancel()
@@ -83,6 +85,15 @@ type engine struct {
 func (e *engine) ExecuteCommand(t *testing.T, c command) {
 	if err := e.Executor.ExecuteCommand(e.ctx, c); err != nil {
 		t.Fatal("failed to execute command", err)
+	}
+}
+
+func (e *engine) RecordEvent(t *testing.T, ev event) {
+	c := &testapp.DoActions{
+		Actions: action.RecordEvent(ev),
+	}
+	if err := e.Executor.ExecuteCommand(e.ctx, c); err != nil {
+		t.Fatal("failed to record event", err)
 	}
 }
 

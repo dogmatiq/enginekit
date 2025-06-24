@@ -6,6 +6,7 @@ import (
 	sync "sync"
 
 	"github.com/dogmatiq/dogma"
+	action "github.com/dogmatiq/enginekit/enginetest/internal/action"
 )
 
 // EventProjection tracks all events produced by the test application.
@@ -54,8 +55,10 @@ func (h *EventProjection) Range(
 func (h *EventProjection) Configure(c dogma.ProjectionConfigurer) {
 	c.Identity("events", "aa0d1129-4713-42e9-aad5-bf95f024c6aa")
 	c.Routes(
+		dogma.HandlesEvent[*GenericEvent](),
 		dogma.HandlesEvent[*IntegrationEventA](),
 		dogma.HandlesEvent[*IntegrationEventB](),
+		dogma.HandlesEvent[*ProcessEventA](),
 	)
 }
 
@@ -105,4 +108,44 @@ func (h *EventProjection) CloseResource(_ context.Context, r []byte) error {
 	h.m.Unlock()
 
 	return nil
+}
+
+func (x *DoActions) MessageDescription() string {
+	return "record event"
+}
+
+func (x *DoActions) Validate(dogma.CommandValidationScope) error {
+	return nil
+}
+
+func (x *GenericEvent) MessageDescription() string {
+	return x.Value
+}
+
+func (x *GenericEvent) Validate(dogma.EventValidationScope) error {
+	return nil
+}
+
+type actionExecutor struct{}
+
+func (h *actionExecutor) Configure(c dogma.IntegrationConfigurer) {
+	c.Identity("action-executor", "ea8dcfb4-d37e-45e1-ac92-c0775d5cf277")
+	c.Routes(
+		dogma.HandlesCommand[*DoActions](),
+		dogma.RecordsEvent[*GenericEvent](),
+		dogma.RecordsEvent[*ProcessEventA](),
+	)
+}
+
+func (h *actionExecutor) HandleCommand(
+	_ context.Context,
+	s dogma.IntegrationCommandScope,
+	c dogma.Command,
+) error {
+	switch c := c.(type) {
+	case *DoActions:
+		return action.Run(s, c)
+	default:
+		panic(dogma.UnexpectedMessage)
+	}
 }

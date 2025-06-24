@@ -1,0 +1,14 @@
+syntax = "proto3";
+package dogmatiq.enginekit.enginetest;
+
+option go_package = "github.com/dogmatiq/enginekit/enginetest/internal/testapp";
+
+import "github.com/dogmatiq/enginekit/enginetest/internal/action/action.proto";
+
+message DoActions {
+  repeated Action actions = 1;
+}
+
+message GenericEvent {
+  string value = 1;
+}

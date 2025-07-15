@@ -55,11 +55,6 @@ func TestFromProjection(t *testing.T) {
 					c.Routes(
 						dogma.HandlesEvent[EventStub[TypeA]](),
 					)
-					c.DeliveryPolicy(
-						dogma.BroadcastProjectionDeliveryPolicy{
-							PrimaryFirst: true,
-						},
-					)
 					c.Disable()
 				},
 			},
@@ -84,16 +79,6 @@ func TestFromProjection(t *testing.T) {
 						},
 						DisabledFlags: []*config.Flag[config.Disabled]{
 							{Value: optional.Some(true)},
-						},
-					},
-					DeliveryPolicyComponents: []*config.ProjectionDeliveryPolicy{
-						{
-							DeliveryPolicyType: optional.Some(config.BroadcastProjectionDeliveryPolicyType),
-							Broadcast: struct {
-								PrimaryFirst optional.Optional[bool]
-							}{
-								optional.Some(true),
-							},
 						},
 					},
 					Source: optional.Some(h),

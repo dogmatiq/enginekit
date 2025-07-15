@@ -46,12 +46,6 @@ func (b *ProjectionBuilder) Disabled(fn func(*FlagBuilder[config.Disabled])) {
 	b.target.DisabledFlags = append(b.target.DisabledFlags, Flag(fn))
 }
 
-// DeliveryPolicy calls fn which configures a [config.ProjectionDeliveryPolicy]
-// that is added to the handler.
-func (b *ProjectionBuilder) DeliveryPolicy(fn func(*ProjectionDeliveryPolicyBuilder)) {
-	b.target.DeliveryPolicyComponents = append(b.target.DeliveryPolicyComponents, ProjectionDeliveryPolicy(fn))
-}
-
 // Partial marks the compomnent as partially configured.
 func (b *ProjectionBuilder) Partial() {
 	b.target.IsPartial = true

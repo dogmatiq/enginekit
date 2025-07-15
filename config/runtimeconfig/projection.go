@@ -30,11 +30,3 @@ type projectionConfigurer struct {
 	*handlerConfigurer[dogma.ProjectionRoute, *config.Projection, dogma.ProjectionMessageHandler]
 	b *configbuilder.ProjectionBuilder
 }
-
-func (c *projectionConfigurer) DeliveryPolicy(p dogma.ProjectionDeliveryPolicy) {
-	c.b.DeliveryPolicy(
-		func(b *configbuilder.ProjectionDeliveryPolicyBuilder) {
-			b.AsPerDeliveryPolicy(p)
-		},
-	)
-}

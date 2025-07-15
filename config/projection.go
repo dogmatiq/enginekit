@@ -76,14 +76,6 @@ func (h *Projection) String() string {
 	return stringifyEntity(h)
 }
 
-func (h *Projection) identities() []*Identity {
-	return h.IdentityComponents
-}
-
-func (h *Projection) routes() []*Route {
-	return h.RouteComponents
-}
-
 func (h *Projection) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
 

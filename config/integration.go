@@ -50,14 +50,6 @@ func (h *Integration) String() string {
 	return stringifyEntity(h)
 }
 
-func (h *Integration) identities() []*Identity {
-	return h.IdentityComponents
-}
-
-func (h *Integration) routes() []*Route {
-	return h.RouteComponents
-}
-
 func (h *Integration) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
 }

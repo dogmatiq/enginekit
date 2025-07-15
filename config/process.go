@@ -50,14 +50,6 @@ func (h *Process) String() string {
 	return stringifyEntity(h)
 }
 
-func (h *Process) identities() []*Identity {
-	return h.IdentityComponents
-}
-
-func (h *Process) routes() []*Route {
-	return h.RouteComponents
-}
-
 func (h *Process) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
 }

@@ -1,9 +1,7 @@
 package config
 
 import (
-	"errors"
 	"fmt"
-	"iter"
 	"slices"
 	"strings"
 
@@ -91,24 +89,6 @@ func ErrorsByComponent(c Component, err error) []error {
 	}
 
 	return matches
-}
-
-func unwrap(err error) iter.Seq[error] {
-	type many interface {
-		Unwrap() []error
-	}
-
-	return func(yield func(error) bool) {
-		if err := errors.Unwrap(err); err != nil {
-			yield(err)
-		} else if err, ok := err.(many); ok {
-			for _, e := range err.Unwrap() {
-				if !yield(e) {
-					return
-				}
-			}
-		}
-	}
 }
 
 type validationOptions struct {

@@ -50,14 +50,6 @@ func (h *Aggregate) String() string {
 	return stringifyEntity(h)
 }
 
-func (h *Aggregate) identities() []*Identity {
-	return h.IdentityComponents
-}
-
-func (h *Aggregate) routes() []*Route {
-	return h.RouteComponents
-}
-
 func (h *Aggregate) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
 }

@@ -17,6 +17,9 @@ type Route struct {
 	// RouteType is the type of route, if available.
 	RouteType optional.Optional[RouteType]
 
+	// TypeID is the unique identifier of the message type.
+	MessageTypeID optional.Optional[string]
+
 	// MessageTypeName is the fully-qualified name of the Go type that
 	// implements the [dogma.Message] interface, if available.
 	MessageTypeName optional.Optional[string]
@@ -62,6 +65,7 @@ func (r *Route) validate(ctx *validateContext) {
 	validateComponent(ctx)
 
 	rt, hasRT := r.RouteType.TryGet()
+	_, hasID := r.MessageTypeID.TryGet()
 	mn, hasMN := r.MessageTypeName.TryGet()
 	mt, hasMT := r.MessageType.TryGet()
 
@@ -71,6 +75,16 @@ func (r *Route) validate(ctx *validateContext) {
 
 	if !hasMN {
 		ctx.Absent("message type name")
+	}
+
+	if ctx.Options.ForExecution {
+		if !hasID {
+			ctx.Absent("message type ID")
+		}
+
+		if !hasMT {
+			ctx.Absent("message type")
+		}
 	}
 
 	if hasMT {
@@ -89,8 +103,6 @@ func (r *Route) validate(ctx *validateContext) {
 				mt.Name(),
 			)
 		}
-	} else if ctx.Options.ForExecution {
-		ctx.Absent("message type")
 	}
 }
 

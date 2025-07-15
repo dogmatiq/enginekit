@@ -1,7 +1,6 @@
 package testapp
 
 import (
-	"bytes"
 	"context"
 	sync "sync"
 
@@ -13,10 +12,10 @@ import (
 type EventProjection struct {
 	dogma.NoCompactBehavior
 
-	m         sync.Mutex
-	resources map[string][]byte
-	wait      chan struct{}
-	events    []dogma.Event
+	m           sync.Mutex
+	checkpoints map[string]uint64
+	wait        chan struct{}
+	events      []dogma.Event
 }
 
 // Range calls fn for each event that the application records until fn returns
@@ -65,22 +64,25 @@ func (h *EventProjection) Configure(c dogma.ProjectionConfigurer) {
 // HandleEvent updates the projection to reflect the occurrence of an event.
 func (h *EventProjection) HandleEvent(
 	_ context.Context,
-	r, c, n []byte,
-	_ dogma.ProjectionEventScope,
+	s dogma.ProjectionEventScope,
 	e dogma.Event,
-) (ok bool, err error) {
+) (uint64, error) {
 	h.m.Lock()
 	defer h.m.Unlock()
 
-	v := h.resources[string(r)]
-	if !bytes.Equal(v, c) {
-		return false, nil
+	stream := s.StreamID()
+	checkpoint := h.checkpoints[stream]
+
+	if checkpoint != s.CheckpointOffset() {
+		return checkpoint, nil
 	}
 
-	if h.resources == nil {
-		h.resources = map[string][]byte{}
+	if h.checkpoints == nil {
+		h.checkpoints = map[string]uint64{}
 	}
-	h.resources[string(r)] = n
+
+	checkpoint = s.Offset() + 1
+	h.checkpoints[stream] = checkpoint
 	h.events = append(h.events, e)
 
 	if h.wait != nil {
@@ -88,26 +90,16 @@ func (h *EventProjection) HandleEvent(
 		h.wait = nil
 	}
 
-	return true, nil
+	return checkpoint, nil
 }
 
-// ResourceVersion returns the current version of a resource.
-func (h *EventProjection) ResourceVersion(_ context.Context, r []byte) ([]byte, error) {
+// CheckpointOffset returns the offset at which the handler expects to
+// resume handling events from a specific stream.
+func (h *EventProjection) CheckpointOffset(_ context.Context, id string) (uint64, error) {
 	h.m.Lock()
-	v := h.resources[string(r)]
-	h.m.Unlock()
+	defer h.m.Unlock()
 
-	return v, nil
-}
-
-// CloseResource informs the handler that the engine has no further use for a
-// resource.
-func (h *EventProjection) CloseResource(_ context.Context, r []byte) error {
-	h.m.Lock()
-	delete(h.resources, string(r))
-	h.m.Unlock()
-
-	return nil
+	return h.checkpoints[id], nil
 }
 
 // MessageDescription returns a human-readable description of the message.

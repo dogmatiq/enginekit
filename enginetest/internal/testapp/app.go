@@ -17,8 +17,6 @@ func (a *App) Configure(c dogma.ApplicationConfigurer) {
 		dogma.ViaProjection(&a.Events),
 		dogma.ViaIntegration(&actionExecutor{}),
 
-		dogma.ViaIntegration(&actionExecutor{}),
-
 		dogma.ViaIntegration(&integrationA{}),
 		dogma.ViaIntegration(&integrationB{}),
 

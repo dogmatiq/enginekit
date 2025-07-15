@@ -13,11 +13,15 @@ type App struct {
 func (a *App) Configure(c dogma.ApplicationConfigurer) {
 	c.Identity("enginetest", "861916bb-e09b-4027-90d2-139722be331a")
 
-	c.RegisterProjection(&a.Events)
-	c.RegisterIntegration(&actionExecutor{})
+	c.Routes(
+		dogma.ViaProjection(&a.Events),
+		dogma.ViaIntegration(&actionExecutor{}),
 
-	c.RegisterIntegration(&integrationA{})
-	c.RegisterIntegration(&integrationB{})
+		dogma.ViaIntegration(&actionExecutor{}),
 
-	c.RegisterProcess(&processA{})
+		dogma.ViaIntegration(&integrationA{}),
+		dogma.ViaIntegration(&integrationB{}),
+
+		dogma.ViaProcess(&processA{}),
+	)
 }

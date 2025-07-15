@@ -9,11 +9,10 @@ import (
 // ProjectionMessageHandlerStub is a test implementation of
 // [dogma.ProjectionMessageHandler].
 type ProjectionMessageHandlerStub struct {
-	ConfigureFunc       func(dogma.ProjectionConfigurer)
-	HandleEventFunc     func(context.Context, []byte, []byte, []byte, dogma.ProjectionEventScope, dogma.Event) (bool, error)
-	ResourceVersionFunc func(context.Context, []byte) ([]byte, error)
-	CloseResourceFunc   func(context.Context, []byte) error
-	CompactFunc         func(context.Context, dogma.ProjectionCompactScope) error
+	ConfigureFunc        func(dogma.ProjectionConfigurer)
+	HandleEventFunc      func(context.Context, dogma.ProjectionEventScope, dogma.Event) (uint64, error)
+	CheckpointOffsetFunc func(context.Context, string) (uint64, error)
+	CompactFunc          func(context.Context, dogma.ProjectionCompactScope) error
 }
 
 var _ dogma.ProjectionMessageHandler = &ProjectionMessageHandlerStub{}
@@ -28,37 +27,25 @@ func (h *ProjectionMessageHandlerStub) Configure(c dogma.ProjectionConfigurer) {
 // HandleEvent updates the projection to reflect the occurrence of an event.
 func (h *ProjectionMessageHandlerStub) HandleEvent(
 	ctx context.Context,
-	r, c, n []byte,
 	s dogma.ProjectionEventScope,
 	e dogma.Event,
-) (bool, error) {
+) (uint64, error) {
 	if h.HandleEventFunc != nil {
-		return h.HandleEventFunc(ctx, r, c, n, s, e)
+		return h.HandleEventFunc(ctx, s, e)
 	}
-	return true, nil
+	return s.Offset() + 1, nil
 }
 
-// ResourceVersion returns the current version of a resource.
-func (h *ProjectionMessageHandlerStub) ResourceVersion(
+// CheckpointOffset returns the offset at which the handler expects to
+// resume handling events from a specific stream.
+func (h *ProjectionMessageHandlerStub) CheckpointOffset(
 	ctx context.Context,
-	r []byte,
-) ([]byte, error) {
-	if h.ResourceVersionFunc != nil {
-		return h.ResourceVersionFunc(ctx, r)
+	id string,
+) (uint64, error) {
+	if h.CheckpointOffsetFunc != nil {
+		return h.CheckpointOffsetFunc(ctx, id)
 	}
-	return nil, nil
-}
-
-// CloseResource informs the handler that the engine has no further use for
-// a resource.
-func (h *ProjectionMessageHandlerStub) CloseResource(
-	ctx context.Context,
-	r []byte,
-) error {
-	if h.CloseResourceFunc != nil {
-		return h.CloseResourceFunc(ctx, r)
-	}
-	return nil
+	return 0, nil
 }
 
 // Compact attempts to reduce the size of the projection.

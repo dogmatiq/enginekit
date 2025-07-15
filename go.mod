@@ -6,7 +6,7 @@ toolchain go1.24.1
 
 require (
 	github.com/dogmatiq/dapper v0.6.0
-	github.com/dogmatiq/dogma v0.15.0
+	github.com/dogmatiq/dogma v0.15.1-0.20250715071844-9254b198118c
 	github.com/dogmatiq/primo v0.3.1
 	github.com/google/go-cmp v0.7.0
 	google.golang.org/grpc v1.75.1

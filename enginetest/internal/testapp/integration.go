@@ -61,7 +61,7 @@ var ErrInvalidIntegrationMessage = errors.New("integration message is invalid")
 
 // MessageDescription returns a human-readable description of the message.
 func (x *IntegrationCommandA) MessageDescription() string {
-	return fmt.Sprintf("integration command A")
+	return "integration command A"
 }
 
 // Validate returns an error if the message is invalid.
@@ -74,7 +74,7 @@ func (x *IntegrationCommandA) Validate(dogma.CommandValidationScope) error {
 
 // MessageDescription returns a human-readable description of the message.
 func (x *IntegrationCommandB) MessageDescription() string {
-	return fmt.Sprintf("integration command B")
+	return "integration command B"
 }
 
 // Validate returns an error if the message is invalid.

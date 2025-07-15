@@ -31,15 +31,17 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME NAME
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf") // <-- SAME NAME
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](),
-									dogma.RecordsEvent[EventStub[TypeA]](),
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf") // <-- SAME NAME
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](),
+										dogma.RecordsEvent[EventStub[TypeA]](),
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -49,26 +51,28 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-						c.RegisterProcess(&ProcessMessageHandlerStub{
-							ConfigureFunc: func(c dogma.ProcessConfigurer) {
-								c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
-								c.Routes(
-									dogma.HandlesEvent[EventStub[TypeA]](),
-									dogma.ExecutesCommand[CommandStub[TypeA]](),
-									dogma.SchedulesTimeout[TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
-								)
-							},
-						})
-						c.RegisterProcess(&ProcessMessageHandlerStub{
-							ConfigureFunc: func(c dogma.ProcessConfigurer) {
-								c.Identity("process2", "f2c9acdd-93a8-4ca0-9014-56aaae16a3af")
-								c.Routes(
-									dogma.HandlesEvent[EventStub[TypeA]](),
-									dogma.ExecutesCommand[CommandStub[TypeA]](),
-									dogma.SchedulesTimeout[TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaProcess(&ProcessMessageHandlerStub{
+								ConfigureFunc: func(c dogma.ProcessConfigurer) {
+									c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
+									c.Routes(
+										dogma.HandlesEvent[EventStub[TypeA]](),
+										dogma.ExecutesCommand[CommandStub[TypeA]](),
+										dogma.SchedulesTimeout[TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+									)
+								},
+							}),
+							dogma.ViaProcess(&ProcessMessageHandlerStub{
+								ConfigureFunc: func(c dogma.ProcessConfigurer) {
+									c.Identity("process2", "f2c9acdd-93a8-4ca0-9014-56aaae16a3af")
+									c.Routes(
+										dogma.HandlesEvent[EventStub[TypeA]](),
+										dogma.ExecutesCommand[CommandStub[TypeA]](),
+										dogma.SchedulesTimeout[TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -112,15 +116,17 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("aggregate", "fe78acbf-dfd4-490a-bf99-93b6acf9f891")
-								c.Routes(
-									// <-- MISSING "handles-command" ROUTE
-									dogma.RecordsEvent[EventStub[TypeA]](),
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("aggregate", "fe78acbf-dfd4-490a-bf99-93b6acf9f891")
+									c.Routes(
+										// <-- MISSING "handles-command" ROUTE
+										dogma.RecordsEvent[EventStub[TypeA]](),
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -130,15 +136,17 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME IDENTITY KEY
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("aggregate", "14769F7F-87FE-48DD-916E-5BCAB6BA6ACA") // <-- SAME IDENTITY KEY (note: non-canonical UUID)
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](),
-									dogma.RecordsEvent[EventStub[TypeA]](),
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("aggregate", "14769F7F-87FE-48DD-916E-5BCAB6BA6ACA") // <-- SAME IDENTITY KEY (note: non-canonical UUID)
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](),
+										dogma.RecordsEvent[EventStub[TypeA]](),
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -148,24 +156,26 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("handler", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db") // <-- SAME IDENTITY NAME
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](),
-									dogma.RecordsEvent[EventStub[TypeA]](),
-								)
-							},
-						})
-						c.RegisterIntegration(&IntegrationMessageHandlerStub{
-							ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-								c.Identity("handler", "300a00e7-9d8f-4859-b67a-7eb36c7e3d83") // <-- SAME IDENTITY NAME
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeB]](),
-									dogma.RecordsEvent[EventStub[TypeB]](),
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("handler", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db") // <-- SAME IDENTITY NAME
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](),
+										dogma.RecordsEvent[EventStub[TypeA]](),
+									)
+								},
+							}),
+							dogma.ViaIntegration(&IntegrationMessageHandlerStub{
+								ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+									c.Identity("handler", "300a00e7-9d8f-4859-b67a-7eb36c7e3d83") // <-- SAME IDENTITY NAME
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeB]](),
+										dogma.RecordsEvent[EventStub[TypeB]](),
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -202,24 +212,26 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db")
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
-									dogma.RecordsEvent[EventStub[TypeA]](),
-								)
-							},
-						})
-						c.RegisterIntegration(&IntegrationMessageHandlerStub{
-							ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-								c.Identity("integration", "1228c8a5-ad60-4e59-81b3-e236c31f12e2")
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
-									dogma.RecordsEvent[EventStub[TypeB]](),
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db")
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
+										dogma.RecordsEvent[EventStub[TypeA]](),
+									)
+								},
+							}),
+							dogma.ViaIntegration(&IntegrationMessageHandlerStub{
+								ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+									c.Identity("integration", "1228c8a5-ad60-4e59-81b3-e236c31f12e2")
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
+										dogma.RecordsEvent[EventStub[TypeB]](),
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -229,24 +241,26 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db")
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](),
-									dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
-								)
-							},
-						})
-						c.RegisterIntegration(&IntegrationMessageHandlerStub{
-							ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-								c.Identity("integration", "1228c8a5-ad60-4e59-81b3-e236c31f12e2")
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeB]](),
-									dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db")
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](),
+										dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
+									)
+								},
+							}),
+							dogma.ViaIntegration(&IntegrationMessageHandlerStub{
+								ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+									c.Identity("integration", "1228c8a5-ad60-4e59-81b3-e236c31f12e2")
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeB]](),
+										dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -270,16 +284,17 @@ func TestApplication(t *testing.T) {
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "c85acb36-e47b-4ef6-b46b-64d847a853b7")
-
-						c.RegisterAggregate(&AggregateMessageHandlerStub{
-							ConfigureFunc: func(c dogma.AggregateConfigurer) {
-								c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
-								c.Routes(
-									dogma.HandlesCommand[CommandStub[TypeA]](),
-									dogma.RecordsEvent[EventStub[TypeA]](),
-								)
-							},
-						})
+						c.Routes(
+							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+								ConfigureFunc: func(c dogma.AggregateConfigurer) {
+									c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
+									c.Routes(
+										dogma.HandlesCommand[CommandStub[TypeA]](),
+										dogma.RecordsEvent[EventStub[TypeA]](),
+									)
+								},
+							}),
+						)
 					},
 				}),
 			},
@@ -382,7 +397,7 @@ func TestApplication(t *testing.T) {
 		entity := runtimeconfig.FromApplication(&ApplicationStub{
 			ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 				c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
-				c.RegisterAggregate(h)
+				c.Routes(dogma.ViaAggregate(h))
 			},
 		})
 
@@ -409,26 +424,28 @@ func TestApplication(t *testing.T) {
 			app := &ApplicationStub{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
-					c.RegisterAggregate(&AggregateMessageHandlerStub{
-						ConfigureFunc: func(c dogma.AggregateConfigurer) {
-							c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
-							c.Routes(
-								dogma.HandlesCommand[CommandStub[TypeA]](),
-								dogma.RecordsEvent[EventStub[TypeA]](),
-								dogma.RecordsEvent[EventStub[TypeB]](),
-							)
-						},
-					})
-					c.RegisterProcess(&ProcessMessageHandlerStub{
-						ConfigureFunc: func(c dogma.ProcessConfigurer) {
-							c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
-							c.Routes(
-								dogma.HandlesEvent[EventStub[TypeB]](),
-								dogma.ExecutesCommand[CommandStub[TypeB]](),
-								dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
-							)
-						},
-					})
+					c.Routes(
+						dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							ConfigureFunc: func(c dogma.AggregateConfigurer) {
+								c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
+								c.Routes(
+									dogma.HandlesCommand[CommandStub[TypeA]](),
+									dogma.RecordsEvent[EventStub[TypeA]](),
+									dogma.RecordsEvent[EventStub[TypeB]](),
+								)
+							},
+						}),
+						dogma.ViaProcess(&ProcessMessageHandlerStub{
+							ConfigureFunc: func(c dogma.ProcessConfigurer) {
+								c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
+								c.Routes(
+									dogma.HandlesEvent[EventStub[TypeB]](),
+									dogma.ExecutesCommand[CommandStub[TypeB]](),
+									dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+								)
+							},
+						}),
+					)
 				},
 			}
 

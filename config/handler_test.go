@@ -18,7 +18,7 @@ func testHandler[
 	B configbuilder.HandlerBuilder[T, H],
 	H constraints.Handler[C, R],
 	C constraints.HandlerConfigurer[R],
-	R dogma.Route,
+	R dogma.MessageRoute,
 ](
 	t *testing.T,
 	build func(func(B)) T,

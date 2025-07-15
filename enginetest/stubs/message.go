@@ -730,7 +730,7 @@ var namePattern = regexp.MustCompile(`(Command|Event|Timeout)Stub\[[^]]+\.Type(.
 
 // MessageTypeID returns the RFC 4122 UUID for a message stub of type T.
 //
-// T must be one of [CommabdStub], [EventStub], or [TimeoutStub], with a type
+// T must be one of [CommandStub], [EventStub], or [TimeoutStub], with a type
 // parameter of [TypeA] to [TypeZ], otherwise the function panics.
 func MessageTypeID[T dogma.Message]() string {
 	typeName := reflect.TypeFor[T]().String()

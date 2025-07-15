@@ -75,16 +75,19 @@ func TestFromProcess(t *testing.T) {
 						RouteComponents: []*config.Route{
 							{
 								RouteType:       optional.Some(config.HandlesEventRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},
 							{
 								RouteType:       optional.Some(config.ExecutesCommandRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 							},
 							{
 								RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[TimeoutStub[TypeA]]()),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 								MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
 							},

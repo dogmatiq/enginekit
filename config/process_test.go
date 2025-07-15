@@ -72,8 +72,12 @@ func TestProcess(t *testing.T) {
 				Error: multiline(
 					`process:SomeProcess is invalid:`,
 					`  - dogma.ProcessMessageHandler value is unavailable`,
-					`  - route:handles-event:SomeEvent is invalid: message type is unavailable`,
-					`  - route:executes-command:SomeCommand is invalid: message type is unavailable`,
+					`  - route:handles-event:SomeEvent is invalid:`,
+					`      - message type ID is unavailable`,
+					`      - message type is unavailable`,
+					`  - route:executes-command:SomeCommand is invalid:`,
+					`      - message type ID is unavailable`,
+					`      - message type is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -427,6 +431,7 @@ func TestProcess(t *testing.T) {
 					`unsupported handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesCommandRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 					},
@@ -436,6 +441,7 @@ func TestProcess(t *testing.T) {
 					`unsupported records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(RecordsEventRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 					},

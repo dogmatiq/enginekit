@@ -76,11 +76,13 @@ func TestFromAggregate(t *testing.T) {
 						RouteComponents: []*config.Route{
 							{
 								RouteType:       optional.Some(config.HandlesCommandRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 							},
 							{
 								RouteType:       optional.Some(config.RecordsEventRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},

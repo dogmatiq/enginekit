@@ -85,9 +85,8 @@ var (
 
 	_ Entity = (*Application)(nil)
 
-	_ Handler   = (*Aggregate)(nil)
-	_ Handler   = (*Process)(nil)
-	_ Handler   = (*Integration)(nil)
-	_ Handler   = (*Projection)(nil)
-	_ Component = (*ProjectionDeliveryPolicy)(nil)
+	_ Handler = (*Aggregate)(nil)
+	_ Handler = (*Process)(nil)
+	_ Handler = (*Integration)(nil)
+	_ Handler = (*Projection)(nil)
 )

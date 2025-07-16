@@ -239,14 +239,6 @@ type plain struct {
 	upper, lower uint64
 }
 
-func (x *UUID) plain() plain {
-	return plain{x.GetUpper(), x.GetLower()}
-}
-
-func (k plain) proto() *UUID {
-	return &UUID{Upper: k.upper, Lower: k.lower}
-}
-
 // DapperString implements [github.com/dogmatiq/dapper.Stringer].
 func (k plain) DapperString() string {
 	return asString(k.upper, k.lower)

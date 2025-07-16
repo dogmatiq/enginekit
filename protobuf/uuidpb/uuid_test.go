@@ -317,11 +317,37 @@ func TestUUID_Format(t *testing.T) {
 		Lower: 0x9a4119577be5fec5,
 	}
 
-	expect := subject.AsString()
-	actual := fmt.Sprintf("%s", subject)
+	cases := []struct {
+		Desc   string
+		Format string
+		Want   string
+	}{
+		{
+			"string",
+			"%s",
+			`a967a8b9-3f9c-4918-9a41-19577be5fec5`,
+		},
+		{
+			"quoted string",
+			"%q",
+			`"a967a8b9-3f9c-4918-9a41-19577be5fec5"`,
+		},
+		{
+			"fallback",
+			"%v",
+			`&{{{} [] [] <nil>} 12206910828600641816 11115193218858614469 [] 0}`, // depends on protobuf internals, unfortunately
+		},
+	}
 
-	if actual != expect {
-		t.Fatalf("got %q, want %q", actual, expect)
+	for _, c := range cases {
+		t.Run(c.Desc, func(t *testing.T) {
+			t.Parallel()
+
+			actual := fmt.Sprintf(c.Format, subject)
+			if actual != c.Want {
+				t.Fatalf("got %q, want %q", actual, c.Want)
+			}
+		})
 	}
 }
 

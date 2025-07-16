@@ -148,7 +148,7 @@ func (x *UUID) Format(f fmt.State, verb rune) {
 	format := fmt.FormatString(f, verb)
 
 	// If we're formatting as a string, use the RFC 9562 format.
-	if verb == 's' {
+	if verb == 's' || verb == 'q' {
 		fmt.Fprintf(f, format, x.AsString())
 		return
 	}

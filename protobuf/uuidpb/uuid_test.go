@@ -157,6 +157,51 @@ func TestAsByteArray(t *testing.T) {
 	}
 }
 
+func TestCopyBytes(t *testing.T) {
+	t.Parallel()
+
+	subject := &UUID{
+		Upper: 0xa967a8b93f9c4918,
+		Lower: 0x9a4119577be5fec5,
+	}
+
+	t.Run("fills the target slice with the UUID's bytes", func(t *testing.T) {
+		var actual [16]byte
+		n := CopyBytes(subject, actual[:])
+		expect := []byte{
+			0xa9, 0x67, 0xa8, 0xb9,
+			0x3f, 0x9c, 0x49, 0x18,
+			0x9a, 0x41, 0x19, 0x57,
+			0x7b, 0xe5, 0xfe, 0xc5,
+		}
+
+		if !bytes.Equal(actual[:], expect) {
+			t.Fatalf("got %q, want %q", actual, expect)
+		}
+
+		if n != 16 {
+			t.Fatalf("got %d, want 16", n)
+		}
+	})
+
+	t.Run("it truncates to the target slice's length", func(t *testing.T) {
+		var actual [8]byte
+		n := CopyBytes(subject, actual[:])
+		expect := []byte{
+			0xa9, 0x67, 0xa8, 0xb9,
+			0x3f, 0x9c, 0x49, 0x18,
+		}
+
+		if !bytes.Equal(actual[:], expect) {
+			t.Fatalf("got %q, want %q", actual, expect)
+		}
+
+		if n != 8 {
+			t.Fatalf("got %d, want 8", n)
+		}
+	})
+}
+
 func TestUUID_AsBytes(t *testing.T) {
 	t.Parallel()
 

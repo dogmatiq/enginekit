@@ -114,6 +114,15 @@ func AsByteArray[T ~[16]B, B ~byte](x *UUID) T {
 	return data
 }
 
+// CopyBytes copies the binary representation of x into dst.
+//
+// It returns the number of elements copied, which will be the minimum of 16 and
+// len(dst).
+func CopyBytes[T ~[]B, B byte](x *UUID, dst T) int {
+	data := AsByteArray[[16]B](x)
+	return copy(dst, data[:])
+}
+
 // AsBytes returns the UUID as a byte slice.
 func (x *UUID) AsBytes() []byte {
 	data := AsByteArray[[16]byte](x)

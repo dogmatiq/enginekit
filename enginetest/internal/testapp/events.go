@@ -110,18 +110,22 @@ func (h *EventProjection) CloseResource(_ context.Context, r []byte) error {
 	return nil
 }
 
+// MessageDescription returns a human-readable description of the message.
 func (x *DoActions) MessageDescription() string {
-	return "record event"
+	return "performing an action"
 }
 
+// Validate returns an error if the message is invalid.
 func (x *DoActions) Validate(dogma.CommandValidationScope) error {
 	return nil
 }
 
+// MessageDescription returns a human-readable description of the message.
 func (x *GenericEvent) MessageDescription() string {
 	return x.Value
 }
 
+// Validate returns an error if the message is invalid.
 func (x *GenericEvent) Validate(dogma.EventValidationScope) error {
 	return nil
 }

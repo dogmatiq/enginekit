@@ -14,7 +14,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Added `uuidpb.CopyBytes()`
+- Added `uuidpb.Derive()`, which returns a UUID derived from a namespace and
+  name using SHA-1 hashing.
+- Added `uuidpb.CopyBytes()`, which copies the bytes of a UUID into a byte
+  slice.
 
 ## [0.16.2] - 2025-06-24
 

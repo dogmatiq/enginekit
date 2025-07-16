@@ -20,6 +20,35 @@ func TestGenerate(t *testing.T) {
 	}
 }
 
+func TestDerive(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it derived a UUID from the namespace using SHA-1", func(t *testing.T) {
+		t.Parallel()
+
+		ns := MustParse("9236932a-4971-43d0-a667-26711872681e")
+		const want = "bf6d549f-7fa3-52ea-a9cd-2817080dd532"
+		got := Derive(ns, "<name>")
+
+		if got.AsString() != want {
+			t.Fatalf("unexpected derived UUID: got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("it performs multiple derivations when passed multiple names", func(t *testing.T) {
+		t.Parallel()
+
+		ns := Generate()
+		intermediate := Derive(ns, "<name-1>")
+		want := Derive(intermediate, "<name-2>")
+		got := Derive(ns, "<name-1>", "<name-2>")
+
+		if !got.Equal(want) {
+			t.Fatalf("unexpected derived UUID: got %q, want %q", got, want)
+		}
+	})
+}
+
 func TestParse(t *testing.T) {
 	t.Parallel()
 

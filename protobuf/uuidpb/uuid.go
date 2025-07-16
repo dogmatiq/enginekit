@@ -2,6 +2,7 @@ package uuidpb
 
 import (
 	"crypto/rand"
+	"crypto/sha1"
 	"errors"
 	"fmt"
 )
@@ -17,6 +18,45 @@ func Generate() *UUID {
 	data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 9562)
 
 	return FromByteArray(data)
+}
+
+// Derive returns a new SHA-1 derived (v5) UUID from the given namespace and
+// names.
+func Derive(ns *UUID, names ...string) *UUID {
+	hash := sha1.New()
+	var data [20]byte // storage for derived UUID and intermediate hash
+
+	CopyBytes(ns, data[:16])
+
+	for _, name := range names {
+		hash.Reset()
+		hash.Write(data[:16])
+		hash.Write([]byte(name))
+		hash.Sum(data[:0])
+
+		data[6] = (data[6] & 0x0f) | 0x50 // Version 5
+		data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 9562)
+	}
+
+	return &UUID{
+		Upper: uint64(data[0])<<56 |
+			uint64(data[1])<<48 |
+			uint64(data[2])<<40 |
+			uint64(data[3])<<32 |
+			uint64(data[4])<<24 |
+			uint64(data[5])<<16 |
+			uint64(data[6])<<8 |
+			uint64(data[7]),
+		Lower: uint64(data[8])<<56 |
+			uint64(data[9])<<48 |
+			uint64(data[10])<<40 |
+			uint64(data[11])<<32 |
+			uint64(data[12])<<24 |
+			uint64(data[13])<<16 |
+			uint64(data[14])<<8 |
+			uint64(data[15]),
+	}
+
 }
 
 // Parse parses an RFC 9562 "hex-and-dash" UUID string.

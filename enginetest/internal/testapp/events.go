@@ -145,3 +145,8 @@ func (h *actionExecutor) HandleCommand(
 		panic(dogma.UnexpectedMessage)
 	}
 }
+
+func init() {
+	dogma.RegisterCommand[*DoActions]("8b1fc480-9af5-47b3-9e73-0fe677c805bb")
+	dogma.RegisterEvent[*GenericEvent]("56680d2b-9853-4ef7-95a6-14854ae74827")
+}

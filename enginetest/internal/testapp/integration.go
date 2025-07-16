@@ -104,3 +104,10 @@ func (x *IntegrationEventB) MessageDescription() string {
 func (x *IntegrationEventB) Validate(dogma.EventValidationScope) error {
 	return nil
 }
+
+func init() {
+	dogma.RegisterCommand[*IntegrationCommandA]("7f0d9dfc-e936-460e-b32e-a80913ed8211")
+	dogma.RegisterCommand[*IntegrationCommandB]("d47d4e83-ab5f-434d-a9b8-4a2306f231fb")
+	dogma.RegisterEvent[*IntegrationEventA]("f3d33db7-9061-4d17-aae0-a072cd78b3c4")
+	dogma.RegisterEvent[*IntegrationEventB]("c0743533-63af-4cc2-9f61-59edd8baaa0b")
+}

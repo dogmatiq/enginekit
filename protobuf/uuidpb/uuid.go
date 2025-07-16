@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// Generate returns a new randonly generated UUID.
+// Generate returns a new randomly generated (v4) UUID.
 func Generate() *UUID {
 	var data [16]byte
 	if _, err := rand.Read(data[:]); err != nil {

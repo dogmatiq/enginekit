@@ -54,10 +54,12 @@ func TestFromApplication(t *testing.T) {
 			&ApplicationStub{
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("app", "bed53df8-bf22-4502-be4b-64d56532d8be")
-					c.RegisterAggregate(aggregate)
-					c.RegisterProcess(process)
-					c.RegisterIntegration(integration)
-					c.RegisterProjection(projection)
+					c.Routes(
+						dogma.ViaAggregate(aggregate),
+						dogma.ViaProcess(process),
+						dogma.ViaIntegration(integration),
+						dogma.ViaProjection(projection),
+					)
 				},
 			},
 			func(app dogma.Application) *config.Application {

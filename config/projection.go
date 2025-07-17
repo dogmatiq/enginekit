@@ -10,8 +10,7 @@ import (
 // [dogma.ProjectionMessageHandler].
 type Projection struct {
 	HandlerCommon
-	DeliveryPolicyComponents []*ProjectionDeliveryPolicy
-	Source                   optional.Optional[dogma.ProjectionMessageHandler]
+	Source optional.Optional[dogma.ProjectionMessageHandler]
 }
 
 // Identity returns the entity's identity.
@@ -42,31 +41,6 @@ func (h *Projection) IsDisabled() bool {
 	return resolveIsDisabled(h)
 }
 
-// DeliveryPolicy returns the delivery policy for the handler.
-//
-// It returns the last delivery policy component that was configured, as each
-// call to [dogma.ProjectionConfigurer.DeliveryPolicy] replaces the previous
-// value.
-//
-// If no delivery policy has been configured, it returns
-// [dogma.UnicastProjectionDeliveryPolicy], which is the default.
-//
-// It panics if the configuration does not specify valid delivery policies.
-func (h *Projection) DeliveryPolicy() dogma.ProjectionDeliveryPolicy {
-	ctx := newResolutionContext(h, false)
-
-	for _, p := range h.DeliveryPolicyComponents {
-		ctx.ValidateChild(p)
-	}
-
-	n := len(h.DeliveryPolicyComponents)
-	if n == 0 {
-		return dogma.UnicastProjectionDeliveryPolicy{}
-	}
-
-	return h.DeliveryPolicyComponents[n-1].Interface()
-}
-
 // Interface returns the [dogma.Application] that the entity represents.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return resolveInterface(h, h.Source)
@@ -78,16 +52,8 @@ func (h *Projection) String() string {
 
 func (h *Projection) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
-
-	for _, p := range h.DeliveryPolicyComponents {
-		ctx.ValidateChild(p)
-	}
 }
 
 func (h *Projection) describe(ctx *describeContext) {
 	describeHandler(ctx, h, h.Source)
-
-	for _, p := range h.DeliveryPolicyComponents {
-		ctx.DescribeChild(p)
-	}
 }

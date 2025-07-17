@@ -23,12 +23,24 @@ func TestGenerate(t *testing.T) {
 func TestDerive(t *testing.T) {
 	t.Parallel()
 
-	t.Run("it derived a UUID from the namespace using SHA-1", func(t *testing.T) {
+	t.Run("it derives a UUID from the namespace using SHA-1 and string name", func(t *testing.T) {
 		t.Parallel()
 
 		ns := MustParse("9236932a-4971-43d0-a667-26711872681e")
 		const want = "bf6d549f-7fa3-52ea-a9cd-2817080dd532"
 		got := Derive(ns, "<name>")
+
+		if got.AsString() != want {
+			t.Fatalf("unexpected derived UUID: got %q, want %q", got, want)
+		}
+	})
+
+	t.Run("it derives a UUID from the namespace using SHA-1 and byte-slice name", func(t *testing.T) {
+		t.Parallel()
+
+		ns := MustParse("9236932a-4971-43d0-a667-26711872681e")
+		const want = "bf6d549f-7fa3-52ea-a9cd-2817080dd532"
+		got := Derive(ns, []byte("<name>"))
 
 		if got.AsString() != want {
 			t.Fatalf("unexpected derived UUID: got %q, want %q", got, want)

@@ -22,7 +22,7 @@ func Generate() *UUID {
 
 // Derive returns a new SHA-1 derived (v5) UUID from the given namespace and
 // names.
-func Derive(ns *UUID, names ...string) *UUID {
+func Derive[T ~string | ~[]byte](ns *UUID, names ...T) *UUID {
 	hash := sha1.New()
 	var data [20]byte // storage for derived UUID and intermediate hash
 
@@ -56,7 +56,6 @@ func Derive(ns *UUID, names ...string) *UUID {
 			uint64(data[14])<<8 |
 			uint64(data[15]),
 	}
-
 }
 
 // Parse parses an RFC 9562 "hex-and-dash" UUID string.

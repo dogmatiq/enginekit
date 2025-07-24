@@ -6,12 +6,12 @@ import (
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
-type handlerConfigurer[R dogma.Route, T config.Handler, H any] struct {
+type handlerConfigurer[R dogma.MessageRoute, T config.Handler, H any] struct {
 	b configbuilder.HandlerBuilder[T, H]
 }
 
 func newHandlerConfigurer[
-	R dogma.Route,
+	R dogma.MessageRoute,
 	T config.Handler,
 	H any,
 ](b configbuilder.HandlerBuilder[T, H]) *handlerConfigurer[R, T, H] {

@@ -28,14 +28,12 @@ type Entity[C Configurer] interface {
 }
 
 // Handler is an [Entity] that represents a Dogma handler.
-type Handler[C HandlerConfigurer[R], R dogma.Route] interface {
+type Handler[C HandlerConfigurer[R], R dogma.MessageRoute] interface {
 	Entity[C]
 }
 
 // HandlerConfigurer is a [Configurer] for configuring [Handler] entities.
-type HandlerConfigurer[R dogma.Route] interface {
-	Configurer
-
+type HandlerConfigurer[R dogma.MessageRoute] interface {
+	dogma.HandlerConfigurer
 	Routes(...R)
-	Disable(...dogma.DisableOption)
 }

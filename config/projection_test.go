@@ -35,7 +35,6 @@ func TestProjection(t *testing.T) {
 						c.Routes(
 							dogma.HandlesEvent[EventStub[TypeA]](),
 						)
-						c.DeliveryPolicy(dogma.BroadcastProjectionDeliveryPolicy{})
 					},
 				}),
 			},
@@ -57,11 +56,6 @@ func TestProjection(t *testing.T) {
 								b.MessageTypeName("pkg.SomeEvent")
 							},
 						)
-						b.DeliveryPolicy(
-							func(b *configbuilder.ProjectionDeliveryPolicyBuilder) {
-								b.Type(BroadcastProjectionDeliveryPolicyType)
-							},
-						)
 					},
 				),
 			},
@@ -70,8 +64,9 @@ func TestProjection(t *testing.T) {
 				Error: multiline(
 					`projection:SomeProjection is invalid:`,
 					`  - dogma.ProjectionMessageHandler value is unavailable`,
-					`  - route:handles-event:SomeEvent is invalid: message type is unavailable`,
-					`  - delivery-policy:broadcast is invalid: primary-first setting is unavailable`,
+					`  - route:handles-event:SomeEvent is invalid:`,
+					`      - message type ID is unavailable`,
+					`      - message type is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -89,11 +84,6 @@ func TestProjection(t *testing.T) {
 							func(b *configbuilder.RouteBuilder) {
 								b.RouteType(HandlesEventRouteType)
 								b.MessageTypeName("pkg.SomeEvent")
-							},
-						)
-						b.DeliveryPolicy(
-							func(b *configbuilder.ProjectionDeliveryPolicyBuilder) {
-								b.Type(BroadcastProjectionDeliveryPolicyType)
 							},
 						)
 					},
@@ -207,7 +197,6 @@ func TestProjection(t *testing.T) {
 					`valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - valid broadcast delivery policy (primary first)`,
 				),
 				Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
@@ -215,9 +204,6 @@ func TestProjection(t *testing.T) {
 						c.Routes(
 							dogma.HandlesEvent[EventStub[TypeA]](),
 						)
-						c.DeliveryPolicy(dogma.BroadcastProjectionDeliveryPolicy{
-							PrimaryFirst: true,
-						})
 					},
 				}),
 			},
@@ -340,37 +326,41 @@ func TestProjection(t *testing.T) {
 					&Route{},
 				},
 				{
-					"unexpected HandlesCommand route",
+					"unsupported HandlesCommand route",
 					`unsupported handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesCommandRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 					},
 				},
 				{
-					"unexpected ExecutesCommand route",
+					"unsupported ExecutesCommand route",
 					`unsupported executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 					},
 				},
 				{
-					"unexpected RecordsEvent route",
+					"unsupported RecordsEvent route",
 					`unsupported records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(RecordsEventRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 					},
 				},
 				{
-					"unexpected SchedulesTimeout route",
+					"unsupported SchedulesTimeout route",
 					`unsupported schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[TimeoutStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
 					},
@@ -394,49 +384,6 @@ func TestProjection(t *testing.T) {
 					)
 				})
 			}
-		})
-	})
-
-	t.Run("func DeliveryPolicy()", func(t *testing.T) {
-		t.Run("it returns the last delivery policy", func(t *testing.T) {
-			want := dogma.BroadcastProjectionDeliveryPolicy{
-				PrimaryFirst: true,
-			}
-
-			handler := runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
-				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
-					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
-					c.Routes(
-						dogma.HandlesEvent[EventStub[TypeA]](),
-					)
-					c.DeliveryPolicy(dogma.UnicastProjectionDeliveryPolicy{})
-					c.DeliveryPolicy(dogma.BroadcastProjectionDeliveryPolicy{})
-					c.DeliveryPolicy(want)
-				},
-			})
-
-			test.Expect(
-				t,
-				"unexpected delivery policy",
-				handler.DeliveryPolicy(),
-				want,
-			)
-		})
-
-		t.Run("it panics if the handler is partially configured", func(t *testing.T) {
-			handler := configbuilder.Projection(
-				func(b *configbuilder.ProjectionBuilder) {
-					b.Partial()
-				},
-			)
-
-			test.ExpectPanic(
-				t,
-				"could not evaluate entire configuration",
-				func() {
-					handler.DeliveryPolicy()
-				},
-			)
 		})
 	})
 }

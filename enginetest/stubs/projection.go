@@ -2,6 +2,7 @@ package stubs
 
 import (
 	"context"
+	"time"
 
 	"github.com/dogmatiq/dogma"
 )
@@ -15,7 +16,7 @@ type ProjectionMessageHandlerStub struct {
 	CompactFunc          func(context.Context, dogma.ProjectionCompactScope) error
 }
 
-var _ dogma.ProjectionMessageHandler = &ProjectionMessageHandlerStub{}
+var _ dogma.ProjectionMessageHandler = (*ProjectionMessageHandlerStub)(nil)
 
 // Configure describes the handler's configuration to the engine.
 func (h *ProjectionMessageHandlerStub) Configure(c dogma.ProjectionConfigurer) {
@@ -57,4 +58,69 @@ func (h *ProjectionMessageHandlerStub) Compact(
 		return h.CompactFunc(ctx, s)
 	}
 	return nil
+}
+
+// ProjectionEventScopeStub is a test implementation of
+// [dogma.ProjectionEventScope].
+type ProjectionEventScopeStub struct {
+	NowFunc              func() time.Time
+	LogFunc              func(format string, args ...any)
+	RecordedAtFunc       func() time.Time
+	StreamIDFunc         func() string
+	OffsetFunc           func() uint64
+	CheckpointOffsetFunc func() uint64
+}
+
+var _ dogma.ProjectionEventScope = (*ProjectionEventScopeStub)(nil)
+
+// Now returns the current local time according to the engine.
+func (s *ProjectionEventScopeStub) Now() time.Time {
+	if s.NowFunc != nil {
+		return s.NowFunc()
+	}
+	return time.Now()
+}
+
+// Log records an informational message using [fmt.Printf]-style formatting.
+func (s *ProjectionEventScopeStub) Log(format string, args ...any) {
+	if s.LogFunc != nil {
+		s.LogFunc(format, args...)
+	}
+}
+
+// RecordedAt returns the time at which the [Event] occurred.
+func (s *ProjectionEventScopeStub) RecordedAt() time.Time {
+	if s.RecordedAtFunc != nil {
+		return s.RecordedAtFunc()
+	}
+	return time.Now()
+}
+
+// StreamID returns the RFC 9562 UUID that identifies the event stream to
+// which the [Event] belongs.
+func (s *ProjectionEventScopeStub) StreamID() string {
+	if s.StreamIDFunc != nil {
+		return s.StreamIDFunc()
+	}
+	return "6d1e805f-1760-409f-b1eb-e14983ec3f68"
+}
+
+// Offset returns the event's zero-based offset within the stream.
+func (s *ProjectionEventScopeStub) Offset() uint64 {
+	if s.OffsetFunc != nil {
+		return s.OffsetFunc()
+	}
+	return 0
+}
+
+// CheckpointOffset returns the offset from which the handler should resume
+// handling events from this stream, according to the engine.
+//
+// It may be lower than the incoming event's offset when the stream contains
+// event types that the handler doesn't consume.
+func (s *ProjectionEventScopeStub) CheckpointOffset() uint64 {
+	if s.CheckpointOffsetFunc != nil {
+		return s.CheckpointOffsetFunc()
+	}
+	return 0
 }

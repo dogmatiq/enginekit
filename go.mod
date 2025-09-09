@@ -10,7 +10,7 @@ require (
 	github.com/dogmatiq/primo v0.3.1
 	github.com/google/go-cmp v0.7.0
 	google.golang.org/grpc v1.75.0
-	google.golang.org/protobuf v1.36.8
+	google.golang.org/protobuf v1.36.9
 	pgregory.net/rapid v1.2.0
 )
 

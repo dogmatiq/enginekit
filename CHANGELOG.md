@@ -9,15 +9,22 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
+[bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
-## [Unreleased]
+## [0.17.0] - 2025-09-14
+
+**[BC]** This release includes updates for compatibility with [Dogma v0.16.0],
+which itself includes a large numbers of breaking changes.
+
+[Dogma v0.16.0]: https://github.com/dogmatiq/dogma/releases/v0.16.0
 
 ### Added
 
 - Added `uuidpb.Derive()`, which returns a UUID derived from a namespace and
-  name using SHA-1 hashing.
+  name(s) using SHA-1 hashing.
 - Added `uuidpb.CopyBytes()`, which copies the bytes of a UUID into a byte
   slice.
+- Added support for `%q` verb when formatting `uuidpb.UUID` values.
 
 ### Fixed
 
@@ -224,6 +231,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [0.16.0]: https://github.com/dogmatiq/enginekit/releases/v0.16.0
 [0.16.1]: https://github.com/dogmatiq/enginekit/releases/v0.16.1
 [0.16.2]: https://github.com/dogmatiq/enginekit/releases/v0.16.2
+[0.17.0]: https://github.com/dogmatiq/enginekit/releases/v0.17.0
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

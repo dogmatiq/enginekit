@@ -313,7 +313,6 @@ func testSet[
 						}
 					}
 				},
-
 				"union with disjoint set": func(t *rapid.T) {
 					s := newDisjointSet(t, 0, 3)
 

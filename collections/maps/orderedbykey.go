@@ -39,46 +39,46 @@ func (m *OrderedByKey[K, V]) Update(k K, fn func(*V)) {
 
 // Remove removes the given keys from the map.
 func (m *OrderedByKey[K, V]) Remove(keys ...K) {
-	orderedRemove[K, V](m, keys...)
+	orderedRemove(m, keys...)
 }
 
 // Clear removes all keys from the map.
 func (m *OrderedByKey[K, V]) Clear() {
-	orderedClear[K, V](m)
+	orderedClear(m)
 }
 
 // Len returns the number of elements in the map.
 func (m *OrderedByKey[K, V]) Len() int {
-	return orderedLen[K, V](m)
+	return orderedLen(m)
 }
 
 // Has returns true if all of the given keys are in the map.
 func (m *OrderedByKey[K, V]) Has(keys ...K) bool {
-	return orderedHas[K, V](m, keys...)
+	return orderedHas(m, keys...)
 }
 
 // Get returns the value associated with the given key. It returns the zero
 // value if the key is not in the map.
 func (m *OrderedByKey[K, V]) Get(k K) V {
-	return orderedGet[K, V](m, k)
+	return orderedGet(m, k)
 }
 
 // TryGet returns the value associated with the given key, or false if the key
 // is not in the map.
 func (m *OrderedByKey[K, V]) TryGet(k K) (V, bool) {
-	return orderedTryGet[K, V](m, k)
+	return orderedTryGet(m, k)
 }
 
 // Clone returns a shallow copy of the map.
 func (m *OrderedByKey[K, V]) Clone() *OrderedByKey[K, V] {
-	return orderedClone[K, V](m)
+	return orderedClone(m)
 }
 
 // Merge returns a new map containing all key/value pairs from s and x.
 //
 // If a key is present in both maps, the value from x is used.
 func (m *OrderedByKey[K, V]) Merge(x *OrderedByKey[K, V]) *OrderedByKey[K, V] {
-	return orderedMerge[K, V](m, x)
+	return orderedMerge(m, x)
 }
 
 // Select returns a new map containing all key/value pairs from m for which the
@@ -96,35 +96,35 @@ func (m *OrderedByKey[K, V]) Project(transform func(K, V) (K, V, bool)) *Ordered
 
 // All returns a sequence that yields all key/value pairs in the map in order.
 func (m *OrderedByKey[K, V]) All() iter.Seq2[K, V] {
-	return orderedAll[K, V](m)
+	return orderedAll(m)
 }
 
 // Keys returns a sequence that yields all keys in the map in order.
 func (m *OrderedByKey[K, V]) Keys() iter.Seq[K] {
-	return orderedKeys[K, V](m)
+	return orderedKeys(m)
 }
 
 // Values returns a sequence that yields all values in the map in order.
 func (m *OrderedByKey[K, V]) Values() iter.Seq[V] {
-	return orderedValues[K, V](m)
+	return orderedValues(m)
 }
 
 // Reverse returns a sequence that yields all key/value pairs in the map in
 // reverse order.
 func (m *OrderedByKey[K, V]) Reverse() iter.Seq2[K, V] {
-	return orderedReverse[K, V](m)
+	return orderedReverse(m)
 }
 
 // ReverseKeys returns a sequence that yields all keys in the map in reverse
 // order.
 func (m *OrderedByKey[K, V]) ReverseKeys() iter.Seq[K] {
-	return orderedReverseKeys[K, V](m)
+	return orderedReverseKeys(m)
 }
 
 // ReverseValues returns a sequence that yields all values in the map in reverse
 // order.
 func (m *OrderedByKey[K, V]) ReverseValues() iter.Seq[V] {
-	return orderedReverseValues[K, V](m)
+	return orderedReverseValues(m)
 }
 
 func (m *OrderedByKey[K, V]) ptr() *[]Pair[K, V] {

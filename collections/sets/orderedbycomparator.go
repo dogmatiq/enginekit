@@ -48,27 +48,27 @@ func (s *OrderedByComparator[T, C]) Remove(members ...T) {
 
 // Clear removes all members from the set.
 func (s *OrderedByComparator[T, C]) Clear() {
-	orderedClear[T](s)
+	orderedClear(s)
 }
 
 // Len returns the number of members in the set.
 func (s *OrderedByComparator[T, C]) Len() int {
-	return orderedLen[T](s)
+	return orderedLen(s)
 }
 
 // Has returns true if all of the given values are members of the set.
 func (s *OrderedByComparator[T, C]) Has(members ...T) bool {
-	return orderedHas[T](s, members)
+	return orderedHas(s, members)
 }
 
 // IsEqual returns true if s and x have the same members.
 func (s *OrderedByComparator[T, C]) IsEqual(x *OrderedByComparator[T, C]) bool {
-	return orderedIsEqual[T](s, x)
+	return orderedIsEqual(s, x)
 }
 
 // IsSuperset returns true if s has all of the members of x.
 func (s *OrderedByComparator[T, C]) IsSuperset(x *OrderedByComparator[T, C]) bool {
-	return orderedIsSuperset[T](s, x)
+	return orderedIsSuperset(s, x)
 }
 
 // IsSubset returns true if x has all of the members of s.
@@ -90,34 +90,34 @@ func (s *OrderedByComparator[T, C]) IsStrictSubset(x *OrderedByComparator[T, C])
 
 // Clone returns a shallow copy of the set.
 func (s *OrderedByComparator[T, C]) Clone() *OrderedByComparator[T, C] {
-	return orderedClone[T](s)
+	return orderedClone(s)
 }
 
 // Union returns a set containing all members of s and x.
 func (s *OrderedByComparator[T, C]) Union(x *OrderedByComparator[T, C]) *OrderedByComparator[T, C] {
-	return orderedUnion[T](s, x)
+	return orderedUnion(s, x)
 }
 
 // Intersection returns a set containing members that are in both s and x.
 func (s *OrderedByComparator[T, C]) Intersection(x *OrderedByComparator[T, C]) *OrderedByComparator[T, C] {
-	return orderedIntersection[T](s, x)
+	return orderedIntersection(s, x)
 }
 
 // Select returns the subset of s containing members for which the given
 // predicate function returns true.
 func (s *OrderedByComparator[T, C]) Select(pred func(T) bool) *OrderedByComparator[T, C] {
-	return orderedSelect[T](s, pred)
+	return orderedSelect(s, pred)
 }
 
 // All returns a sequence that yields all members of the set in order.
 func (s *OrderedByComparator[T, C]) All() iter.Seq[T] {
-	return orderedAll[T](s)
+	return orderedAll(s)
 }
 
 // Reverse returns a sequence that yields all members of the set in reverse
 // order.
 func (s *OrderedByComparator[T, C]) Reverse() iter.Seq[T] {
-	return orderedReverse[T](s)
+	return orderedReverse(s)
 }
 
 func (s *OrderedByComparator[T, C]) ptr() *[]T {

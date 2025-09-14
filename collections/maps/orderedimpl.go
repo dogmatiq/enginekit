@@ -75,7 +75,7 @@ func orderedSet[K, V any, M ordered[K, V, I], I any](
 
 	pairs := m.ptr()
 
-	if i, ok := orderedSearch[K, V](m, k); ok {
+	if i, ok := orderedSearch(m, k); ok {
 		(*pairs)[i].Value = v
 	} else {
 		*pairs = slices.Insert(*pairs, i, Pair[K, V]{k, v})
@@ -95,7 +95,7 @@ func orderedUpdate[K, V any, M ordered[K, V, I], I any](
 
 	pairs := m.ptr()
 
-	if i, ok := orderedSearch[K, V](m, k); ok {
+	if i, ok := orderedSearch(m, k); ok {
 		fn(&(*pairs)[i].Value)
 	} else {
 		var v V
@@ -119,7 +119,7 @@ func orderedRemove[K, V any, M ordered[K, V, I], I any](
 			return
 		}
 
-		if i, ok := orderedSearch[K, V](m, k); ok {
+		if i, ok := orderedSearch(m, k); ok {
 			*pairs = slices.Delete(*pairs, i, i+1)
 		}
 	}
@@ -152,7 +152,7 @@ func orderedHas[K, V any, M ordered[K, V, I], I any](
 	keys ...K,
 ) bool {
 	for _, k := range keys {
-		if _, ok := orderedSearch[K, V](m, k); !ok {
+		if _, ok := orderedSearch(m, k); !ok {
 			return false
 		}
 	}
@@ -164,7 +164,7 @@ func orderedGet[K, V any, M ordered[K, V, I], I any](
 	m M,
 	k K,
 ) V {
-	v, _ := orderedTryGet[K, V](m, k)
+	v, _ := orderedTryGet(m, k)
 	return v
 }
 
@@ -172,7 +172,7 @@ func orderedTryGet[K, V any, M ordered[K, V, I], I any](
 	m M,
 	k K,
 ) (V, bool) {
-	if i, ok := orderedSearch[K, V](m, k); ok {
+	if i, ok := orderedSearch(m, k); ok {
 		p := m.ptr()
 		return (*p)[i].Value, true
 	}
@@ -196,15 +196,15 @@ func orderedClone[K, V any, M ordered[K, V, I], I any](
 func orderedMerge[K, V any, M ordered[K, V, I], I any](
 	x, y M,
 ) M {
-	lenX := orderedLen[K, V](x)
-	lenY := orderedLen[K, V](y)
+	lenX := orderedLen(x)
+	lenY := orderedLen(y)
 
 	if lenX == 0 {
-		return orderedClone[K, V](y)
+		return orderedClone(y)
 	}
 
 	if lenY == 0 {
-		return orderedClone[K, V](x)
+		return orderedClone(x)
 	}
 
 	pairsX, pairsY := *x.ptr(), *y.ptr()

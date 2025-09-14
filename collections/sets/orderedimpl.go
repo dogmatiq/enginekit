@@ -93,7 +93,7 @@ func orderedAdd[T any, S ordered[T, I], I any](
 	mems := s.ptr()
 
 	for _, m := range members {
-		if i, ok := orderedSearch[T, S](s, m); !ok {
+		if i, ok := orderedSearch(s, m); !ok {
 			*mems = slices.Insert(*mems, i, m)
 		}
 	}
@@ -114,7 +114,7 @@ func orderedRemove[T any, S ordered[T, I], I any](
 			return
 		}
 
-		if i, ok := orderedSearch[T, S](s, m); ok {
+		if i, ok := orderedSearch(s, m); ok {
 			*mems = slices.Delete(*mems, i, i+1)
 		}
 	}
@@ -147,7 +147,7 @@ func orderedHas[T any, S ordered[T, I], I any](
 	members []T,
 ) bool {
 	for _, m := range members {
-		if _, ok := orderedSearch[T, S](s, m); !ok {
+		if _, ok := orderedSearch(s, m); !ok {
 			return false
 		}
 	}
@@ -158,8 +158,8 @@ func orderedHas[T any, S ordered[T, I], I any](
 func orderedIsEqual[T any, S ordered[T, I], I any](
 	x, y S,
 ) bool {
-	lenX := orderedLen[T](x)
-	lenY := orderedLen[T](y)
+	lenX := orderedLen(x)
+	lenY := orderedLen(y)
 
 	if lenX != lenY {
 		return false
@@ -185,11 +185,11 @@ func orderedIsEqual[T any, S ordered[T, I], I any](
 func orderedIsSuperset[T any, S ordered[T, I], I any](
 	x, y S,
 ) bool {
-	lenX := orderedLen[T](x)
-	lenY := orderedLen[T](y)
+	lenX := orderedLen(x)
+	lenY := orderedLen(y)
 
 	if lenX == lenY {
-		return orderedIsEqual[T](x, y)
+		return orderedIsEqual(x, y)
 	}
 
 	if lenX < lenY {
@@ -240,11 +240,11 @@ func orderedUnion[T any, S ordered[T, I], I any](
 	x, y S,
 ) S {
 	if x == nil {
-		return orderedClone[T](y)
+		return orderedClone(y)
 	}
 
 	if y == nil {
-		return orderedClone[T](x)
+		return orderedClone(x)
 	}
 
 	membersX, membersY := *x.ptr(), *y.ptr()
@@ -252,11 +252,11 @@ func orderedUnion[T any, S ordered[T, I], I any](
 	lenX, lenY := len(membersX), len(membersY)
 
 	if lenX == 0 {
-		return orderedClone[T](y)
+		return orderedClone(y)
 	}
 
 	if lenY == 0 {
-		return orderedClone[T](x)
+		return orderedClone(x)
 	}
 
 	members := make([]T, 0, max(lenX, lenY))

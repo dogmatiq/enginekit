@@ -19,6 +19,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Added `uuidpb.CopyBytes()`, which copies the bytes of a UUID into a byte
   slice.
 
+### Fixed
+
+- Set `IsSuperset()` and `IsSubset()` methods no longer produce incorrect
+  results when the argument is `nil`.
+
 ## [0.16.2] - 2025-06-24
 
 ### Added

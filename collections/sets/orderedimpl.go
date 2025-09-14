@@ -188,12 +188,16 @@ func orderedIsSuperset[T any, S ordered[T, I], I any](
 	lenX := orderedLen(x)
 	lenY := orderedLen(y)
 
-	if lenX == lenY {
-		return orderedIsEqual(x, y)
+	if lenY == 0 {
+		return true
 	}
 
 	if lenX < lenY {
 		return false
+	}
+
+	if lenX == lenY {
+		return orderedIsEqual(x, y)
 	}
 
 	membersX, membersY := *x.ptr(), *y.ptr()

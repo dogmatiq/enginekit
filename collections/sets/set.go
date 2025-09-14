@@ -136,7 +136,7 @@ func (s *Set[T]) IsSuperset(x *Set[T]) bool {
 	}
 
 	if x == nil {
-		return s.Len() == 0
+		return true
 	}
 
 	for m := range x.members {

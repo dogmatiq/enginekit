@@ -138,7 +138,7 @@ func (s *Proto[T]) IsSuperset(x *Proto[T]) bool {
 	}
 
 	if x == nil {
-		return s.Len() == 0
+		return true
 	}
 
 	return s.members.IsSuperset(&x.members)

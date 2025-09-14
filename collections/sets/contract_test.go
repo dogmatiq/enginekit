@@ -415,6 +415,48 @@ func testSet[
 						t.Fatal("did not expect the set to be a strict subset of itself")
 					}
 
+					if len(expected) == 0 {
+						if !subject.IsEqual(nil) {
+							t.Fatal("empty set should be equal to nil")
+						}
+
+						if !subject.IsSuperset(nil) {
+							t.Fatal("empty set should be a superset of nil")
+						}
+
+						if !subject.IsSubset(nil) {
+							t.Fatal("empty set should be a subset of nil")
+						}
+
+						if subject.IsStrictSuperset(nil) {
+							t.Fatal("empty set should not be a strict superset of nil")
+						}
+
+						if subject.IsStrictSubset(nil) {
+							t.Fatal("empty set should not be a strict subset of nil")
+						}
+					} else {
+						if subject.IsEqual(nil) {
+							t.Fatal("non-empty set should not be equal to nil")
+						}
+
+						if !subject.IsSuperset(nil) {
+							t.Fatal("non-empty set should be a superset of nil")
+						}
+
+						if subject.IsSubset(nil) {
+							t.Fatal("non-empty set should not be a subset of nil")
+						}
+
+						if !subject.IsStrictSuperset(nil) {
+							t.Fatal("non-empty set should be a strict superset of nil")
+						}
+
+						if subject.IsStrictSubset(nil) {
+							t.Fatal("non-empty set should not be a strict subset of nil")
+						}
+					}
+
 					equivalent := newSet()
 
 					for _, m := range expected {

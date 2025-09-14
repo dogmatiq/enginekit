@@ -147,7 +147,7 @@ func (s *Keyed[T, K, G]) IsSuperset(x *Keyed[T, K, G]) bool {
 	}
 
 	if x == nil {
-		return s.Len() == 0
+		return true
 	}
 
 	for m := range x.members {

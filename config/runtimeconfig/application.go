@@ -1,6 +1,8 @@
 package runtimeconfig
 
 import (
+	"fmt"
+
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
@@ -32,26 +34,31 @@ func (c *applicationConfigurer) Identity(name, key string) {
 	})
 }
 
-func (c *applicationConfigurer) RegisterAggregate(h dogma.AggregateMessageHandler, _ ...dogma.RegisterAggregateOption) {
-	c.b.Aggregate(func(b *configbuilder.AggregateBuilder) {
-		buildAggregate(b, h)
-	})
-}
+func (c *applicationConfigurer) Routes(routes ...dogma.HandlerRoute) {
+	for _, r := range routes {
+		switch r := r.(type) {
+		case dogma.AggregateHandlerRoute:
+			c.b.Aggregate(func(b *configbuilder.AggregateBuilder) {
+				buildAggregate(b, r.Handler())
+			})
 
-func (c *applicationConfigurer) RegisterProcess(h dogma.ProcessMessageHandler, _ ...dogma.RegisterProcessOption) {
-	c.b.Process(func(b *configbuilder.ProcessBuilder) {
-		buildProcess(b, h)
-	})
-}
+		case dogma.ProcessHandlerRoute:
+			c.b.Process(func(b *configbuilder.ProcessBuilder) {
+				buildProcess(b, r.Handler())
+			})
 
-func (c *applicationConfigurer) RegisterIntegration(h dogma.IntegrationMessageHandler, _ ...dogma.RegisterIntegrationOption) {
-	c.b.Integration(func(b *configbuilder.IntegrationBuilder) {
-		buildIntegration(b, h)
-	})
-}
+		case dogma.IntegrationHandlerRoute:
+			c.b.Integration(func(b *configbuilder.IntegrationBuilder) {
+				buildIntegration(b, r.Handler())
+			})
 
-func (c *applicationConfigurer) RegisterProjection(h dogma.ProjectionMessageHandler, _ ...dogma.RegisterProjectionOption) {
-	c.b.Projection(func(b *configbuilder.ProjectionBuilder) {
-		buildProjection(b, h)
-	})
+		case dogma.ProjectionHandlerRoute:
+			c.b.Projection(func(b *configbuilder.ProjectionBuilder) {
+				buildProjection(b, r.Handler())
+			})
+
+		default:
+			panic(fmt.Sprintf("unsupported route type: %T", r))
+		}
+	}
 }

@@ -71,8 +71,12 @@ func TestAggregate(t *testing.T) {
 				Error: multiline(
 					`aggregate:SomeAggregate is invalid:`,
 					`  - dogma.AggregateMessageHandler value is unavailable`,
-					`  - route:handles-command:SomeCommand is invalid: message type is unavailable`,
-					`  - route:records-event:SomeEvent is invalid: message type is unavailable`,
+					`  - route:handles-command:SomeCommand is invalid:`,
+					`      - message type ID is unavailable`,
+					`      - message type is unavailable`,
+					`  - route:records-event:SomeEvent is invalid:`,
+					`      - message type ID is unavailable`,
+					`      - message type is unavailable`,
 				),
 				Options: []ValidateOption{
 					ForExecution(),
@@ -394,28 +398,31 @@ func TestAggregate(t *testing.T) {
 					&Route{},
 				},
 				{
-					"unexpected ExecutesCommand route",
+					"unsupported ExecutesCommand route",
 					`unsupported executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
 					},
 				},
 				{
-					"unexpected HandlesEvent route",
+					"unsupported HandlesEvent route",
 					`unsupported handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesEventRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 					},
 				},
 				{
-					"unexpected SchedulesTimeout route",
+					"unsupported SchedulesTimeout route",
 					`unsupported schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
+						MessageTypeID:   optional.Some(MessageTypeID[TimeoutStub[TypeA]]()),
 						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
 					},

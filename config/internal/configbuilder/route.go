@@ -1,8 +1,6 @@
 package configbuilder
 
 import (
-	"reflect"
-
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/config"
 	"github.com/dogmatiq/enginekit/internal/typename"
@@ -23,30 +21,28 @@ type RouteBuilder struct {
 }
 
 // AsPerRoute configures the builder to use the same properties as r.
-func (b *RouteBuilder) AsPerRoute(r dogma.Route) {
-	set := func(
-		rt config.RouteType,
-		t reflect.Type,
-	) {
-		b.target.RouteType = optional.Some(rt)
-		b.target.MessageTypeName = optional.Some(typename.Get(t))
-		b.target.MessageType = optional.Some(message.TypeFromReflect(t))
-	}
-
-	switch r := r.(type) {
+func (b *RouteBuilder) AsPerRoute(r dogma.MessageRoute) {
+	switch r.(type) {
 	case dogma.HandlesCommandRoute:
-		set(config.HandlesCommandRouteType, r.Type)
+		b.target.RouteType = optional.Some(config.HandlesCommandRouteType)
 	case dogma.RecordsEventRoute:
-		set(config.RecordsEventRouteType, r.Type)
+		b.target.RouteType = optional.Some(config.RecordsEventRouteType)
 	case dogma.HandlesEventRoute:
-		set(config.HandlesEventRouteType, r.Type)
+		b.target.RouteType = optional.Some(config.HandlesEventRouteType)
 	case dogma.ExecutesCommandRoute:
-		set(config.ExecutesCommandRouteType, r.Type)
+		b.target.RouteType = optional.Some(config.ExecutesCommandRouteType)
 	case dogma.SchedulesTimeoutRoute:
-		set(config.SchedulesTimeoutRouteType, r.Type)
+		b.target.RouteType = optional.Some(config.SchedulesTimeoutRouteType)
 	default:
 		panic("unsupported route type")
 	}
+
+	messageType := r.Type()
+	goType := messageType.GoType()
+
+	b.target.MessageTypeID = optional.Some(messageType.ID())
+	b.target.MessageTypeName = optional.Some(typename.Get(goType))
+	b.target.MessageType = optional.Some(message.TypeFromReflect(goType))
 }
 
 // RouteType sets the route type of the route.

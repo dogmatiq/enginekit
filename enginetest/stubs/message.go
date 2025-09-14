@@ -3,6 +3,8 @@ package stubs
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"regexp"
 
 	"github.com/dogmatiq/dogma"
 )
@@ -723,3 +725,115 @@ var (
 	// TimeoutZ3 is a timeout message of type [TimeoutZ] with content "Z3".
 	TimeoutZ3 = TimeoutStub[TypeZ]{Content: "Z3"}
 )
+
+var namePattern = regexp.MustCompile(`(Command|Event|Timeout)Stub\[[^]]+\.Type(.)\]`)
+
+// MessageTypeID returns the RFC 4122 UUID for a message stub of type T.
+//
+// T must be one of [CommandStub], [EventStub], or [TimeoutStub], with a type
+// parameter of [TypeA] to [TypeZ], otherwise the function panics.
+func MessageTypeID[T dogma.Message]() string {
+	typeName := reflect.TypeFor[T]().String()
+	matches := namePattern.FindStringSubmatch(typeName)
+
+	if matches == nil {
+		panic("cannot generate message type ID for non-stub message: " + typeName)
+	}
+
+	var prefix string
+	switch matches[1] {
+	case "Command":
+		prefix = "c"
+	case "Event":
+		prefix = "e"
+	case "Timeout":
+		prefix = "7" // 7 looks a little like `t`, for timeout, right?
+	}
+
+	letter := 0xa + matches[2][0] - 'A' // convert letter to 0-25 range
+
+	return fmt.Sprintf("%s0000000-0000-0000-0000-%012x", prefix, letter)
+}
+
+func init() {
+	dogma.RegisterCommand[CommandStub[TypeA]](MessageTypeID[CommandStub[TypeA]]())
+	dogma.RegisterCommand[CommandStub[TypeB]](MessageTypeID[CommandStub[TypeB]]())
+	dogma.RegisterCommand[CommandStub[TypeC]](MessageTypeID[CommandStub[TypeC]]())
+	dogma.RegisterCommand[CommandStub[TypeD]](MessageTypeID[CommandStub[TypeD]]())
+	dogma.RegisterCommand[CommandStub[TypeE]](MessageTypeID[CommandStub[TypeE]]())
+	dogma.RegisterCommand[CommandStub[TypeF]](MessageTypeID[CommandStub[TypeF]]())
+	dogma.RegisterCommand[CommandStub[TypeG]](MessageTypeID[CommandStub[TypeG]]())
+	dogma.RegisterCommand[CommandStub[TypeH]](MessageTypeID[CommandStub[TypeH]]())
+	dogma.RegisterCommand[CommandStub[TypeI]](MessageTypeID[CommandStub[TypeI]]())
+	dogma.RegisterCommand[CommandStub[TypeJ]](MessageTypeID[CommandStub[TypeJ]]())
+	dogma.RegisterCommand[CommandStub[TypeK]](MessageTypeID[CommandStub[TypeK]]())
+	dogma.RegisterCommand[CommandStub[TypeL]](MessageTypeID[CommandStub[TypeL]]())
+	dogma.RegisterCommand[CommandStub[TypeM]](MessageTypeID[CommandStub[TypeM]]())
+	dogma.RegisterCommand[CommandStub[TypeN]](MessageTypeID[CommandStub[TypeN]]())
+	dogma.RegisterCommand[CommandStub[TypeO]](MessageTypeID[CommandStub[TypeO]]())
+	dogma.RegisterCommand[CommandStub[TypeP]](MessageTypeID[CommandStub[TypeP]]())
+	dogma.RegisterCommand[CommandStub[TypeQ]](MessageTypeID[CommandStub[TypeQ]]())
+	dogma.RegisterCommand[CommandStub[TypeR]](MessageTypeID[CommandStub[TypeR]]())
+	dogma.RegisterCommand[CommandStub[TypeS]](MessageTypeID[CommandStub[TypeS]]())
+	dogma.RegisterCommand[CommandStub[TypeT]](MessageTypeID[CommandStub[TypeT]]())
+	dogma.RegisterCommand[CommandStub[TypeU]](MessageTypeID[CommandStub[TypeU]]())
+	dogma.RegisterCommand[CommandStub[TypeV]](MessageTypeID[CommandStub[TypeV]]())
+	dogma.RegisterCommand[CommandStub[TypeW]](MessageTypeID[CommandStub[TypeW]]())
+	dogma.RegisterCommand[CommandStub[TypeX]](MessageTypeID[CommandStub[TypeX]]())
+	dogma.RegisterCommand[CommandStub[TypeY]](MessageTypeID[CommandStub[TypeY]]())
+	dogma.RegisterCommand[CommandStub[TypeZ]](MessageTypeID[CommandStub[TypeZ]]())
+
+	dogma.RegisterEvent[EventStub[TypeA]](MessageTypeID[EventStub[TypeA]]())
+	dogma.RegisterEvent[EventStub[TypeB]](MessageTypeID[EventStub[TypeB]]())
+	dogma.RegisterEvent[EventStub[TypeC]](MessageTypeID[EventStub[TypeC]]())
+	dogma.RegisterEvent[EventStub[TypeD]](MessageTypeID[EventStub[TypeD]]())
+	dogma.RegisterEvent[EventStub[TypeE]](MessageTypeID[EventStub[TypeE]]())
+	dogma.RegisterEvent[EventStub[TypeF]](MessageTypeID[EventStub[TypeF]]())
+	dogma.RegisterEvent[EventStub[TypeG]](MessageTypeID[EventStub[TypeG]]())
+	dogma.RegisterEvent[EventStub[TypeH]](MessageTypeID[EventStub[TypeH]]())
+	dogma.RegisterEvent[EventStub[TypeI]](MessageTypeID[EventStub[TypeI]]())
+	dogma.RegisterEvent[EventStub[TypeJ]](MessageTypeID[EventStub[TypeJ]]())
+	dogma.RegisterEvent[EventStub[TypeK]](MessageTypeID[EventStub[TypeK]]())
+	dogma.RegisterEvent[EventStub[TypeL]](MessageTypeID[EventStub[TypeL]]())
+	dogma.RegisterEvent[EventStub[TypeM]](MessageTypeID[EventStub[TypeM]]())
+	dogma.RegisterEvent[EventStub[TypeN]](MessageTypeID[EventStub[TypeN]]())
+	dogma.RegisterEvent[EventStub[TypeO]](MessageTypeID[EventStub[TypeO]]())
+	dogma.RegisterEvent[EventStub[TypeP]](MessageTypeID[EventStub[TypeP]]())
+	dogma.RegisterEvent[EventStub[TypeQ]](MessageTypeID[EventStub[TypeQ]]())
+	dogma.RegisterEvent[EventStub[TypeR]](MessageTypeID[EventStub[TypeR]]())
+	dogma.RegisterEvent[EventStub[TypeS]](MessageTypeID[EventStub[TypeS]]())
+	dogma.RegisterEvent[EventStub[TypeT]](MessageTypeID[EventStub[TypeT]]())
+	dogma.RegisterEvent[EventStub[TypeU]](MessageTypeID[EventStub[TypeU]]())
+	dogma.RegisterEvent[EventStub[TypeV]](MessageTypeID[EventStub[TypeV]]())
+	dogma.RegisterEvent[EventStub[TypeW]](MessageTypeID[EventStub[TypeW]]())
+	dogma.RegisterEvent[EventStub[TypeX]](MessageTypeID[EventStub[TypeX]]())
+	dogma.RegisterEvent[EventStub[TypeY]](MessageTypeID[EventStub[TypeY]]())
+	dogma.RegisterEvent[EventStub[TypeZ]](MessageTypeID[EventStub[TypeZ]]())
+
+	dogma.RegisterTimeout[TimeoutStub[TypeA]](MessageTypeID[TimeoutStub[TypeA]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeB]](MessageTypeID[TimeoutStub[TypeB]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeC]](MessageTypeID[TimeoutStub[TypeC]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeD]](MessageTypeID[TimeoutStub[TypeD]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeE]](MessageTypeID[TimeoutStub[TypeE]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeF]](MessageTypeID[TimeoutStub[TypeF]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeG]](MessageTypeID[TimeoutStub[TypeG]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeH]](MessageTypeID[TimeoutStub[TypeH]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeI]](MessageTypeID[TimeoutStub[TypeI]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeJ]](MessageTypeID[TimeoutStub[TypeJ]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeK]](MessageTypeID[TimeoutStub[TypeK]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeL]](MessageTypeID[TimeoutStub[TypeL]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeM]](MessageTypeID[TimeoutStub[TypeM]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeN]](MessageTypeID[TimeoutStub[TypeN]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeO]](MessageTypeID[TimeoutStub[TypeO]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeP]](MessageTypeID[TimeoutStub[TypeP]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeQ]](MessageTypeID[TimeoutStub[TypeQ]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeR]](MessageTypeID[TimeoutStub[TypeR]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeS]](MessageTypeID[TimeoutStub[TypeS]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeT]](MessageTypeID[TimeoutStub[TypeT]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeU]](MessageTypeID[TimeoutStub[TypeU]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeV]](MessageTypeID[TimeoutStub[TypeV]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeW]](MessageTypeID[TimeoutStub[TypeW]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeX]](MessageTypeID[TimeoutStub[TypeX]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeY]](MessageTypeID[TimeoutStub[TypeY]]())
+	dogma.RegisterTimeout[TimeoutStub[TypeZ]](MessageTypeID[TimeoutStub[TypeZ]]())
+}

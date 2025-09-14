@@ -55,11 +55,6 @@ func TestFromProjection(t *testing.T) {
 					c.Routes(
 						dogma.HandlesEvent[EventStub[TypeA]](),
 					)
-					c.DeliveryPolicy(
-						dogma.BroadcastProjectionDeliveryPolicy{
-							PrimaryFirst: true,
-						},
-					)
 					c.Disable()
 				},
 			},
@@ -78,22 +73,13 @@ func TestFromProjection(t *testing.T) {
 						RouteComponents: []*config.Route{
 							{
 								RouteType:       optional.Some(config.HandlesEventRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
 								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
 							},
 						},
 						DisabledFlags: []*config.Flag[config.Disabled]{
 							{Value: optional.Some(true)},
-						},
-					},
-					DeliveryPolicyComponents: []*config.ProjectionDeliveryPolicy{
-						{
-							DeliveryPolicyType: optional.Some(config.BroadcastProjectionDeliveryPolicyType),
-							Broadcast: struct {
-								PrimaryFirst optional.Optional[bool]
-							}{
-								optional.Some(true),
-							},
 						},
 					},
 					Source: optional.Some(h),

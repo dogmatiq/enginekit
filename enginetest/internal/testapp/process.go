@@ -55,3 +55,7 @@ func (x *ProcessEventA) MessageDescription() string {
 func (x *ProcessEventA) Validate(dogma.EventValidationScope) error {
 	return nil
 }
+
+func init() {
+	dogma.RegisterEvent[*ProcessEventA]("bf50b68b-c0ef-4004-b76f-22bbde9de9f3")
+}

@@ -4,8 +4,8 @@ github.com/dogmatiq/dogma v0.16.0 h1:O6W9N8K30psWka7smLUjjtcItUubiLDtlHpJSebsc28
 github.com/dogmatiq/dogma v0.16.0/go.mod h1:TF6xisRxQ2RE3JQwFr6MCI4nWLKQQp7KRWXVHOq9K0k=
 github.com/dogmatiq/jumble v0.1.0 h1:Cb3ExfxY+AoUP4G9/sOwoOdYX8o+kOLK8+dhXAry+QA=
 github.com/dogmatiq/jumble v0.1.0/go.mod h1:FCGV2ImXu8zvThxhd4QLstiEdu74vbIVw9bFJSBcKr4=
-github.com/dogmatiq/primo v0.3.1 h1:JSqiCh1ma9CbIVzPf8k1vhzQ2Zn/d/WupzElDoiYZw0=
-github.com/dogmatiq/primo v0.3.1/go.mod h1:z2DfWNz0YmwIKhUEwgJY4xyeWOw0He+9veRRMGQ21UI=
+github.com/dogmatiq/primo v0.3.2 h1:aXozRZarqNE6XUo15pzfpR8SQGp1CDrDNTuy9OKsYy0=
+github.com/dogmatiq/primo v0.3.2/go.mod h1:KxVdMIF/PdkZzN0Toz2XNCSnP93EcoLarKhS52HqxvQ=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=

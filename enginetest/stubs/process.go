@@ -2,6 +2,7 @@ package stubs
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/dogmatiq/dogma"
 )
@@ -9,6 +10,16 @@ import (
 // ProcessRootStub is a test implementation of [dogma.ProcessRoot].
 type ProcessRootStub struct {
 	Value any `json:"value,omitempty"`
+}
+
+// MarshalBinary implements [encoding.BinaryMarshaler].
+func (r *ProcessRootStub) MarshalBinary() ([]byte, error) {
+	return json.Marshal(r)
+}
+
+// UnmarshalBinary implements [encoding.BinaryUnmarshaler].
+func (r *ProcessRootStub) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, r)
 }
 
 var _ dogma.ProcessRoot = &ProcessRootStub{}

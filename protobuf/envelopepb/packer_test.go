@@ -18,7 +18,6 @@ func TestPacker_packAndUnpack(t *testing.T) {
 	now := time.Now()
 
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Site: &identitypb.Identity{
 			Name: "site",
 			Key:  uuidpb.Generate(),
@@ -50,7 +49,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		SourceInstanceId:  "",
 		CreatedAt:         timestamppb.New(now),
 		Description:       `command(stubs.TypeA:A1, valid)`,
-		MediaType:         `application/json; type="CommandStub[TypeA]"`,
+		TypeId:            uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
 		Data:              []byte(`{"content":"A1"}`),
 	}
 
@@ -76,7 +75,6 @@ func TestPacker_packAndUnpack(t *testing.T) {
 
 func TestWithCause(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -98,7 +96,6 @@ func TestWithCause(t *testing.T) {
 
 func TestWithHandler(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -119,7 +116,6 @@ func TestWithHandler(t *testing.T) {
 
 func TestWithInstanceID(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -145,7 +141,6 @@ func TestWithInstanceID(t *testing.T) {
 
 func TestWithCreatedAt(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -170,7 +165,6 @@ func TestWithCreatedAt(t *testing.T) {
 
 func TestWithScheduledFor(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),

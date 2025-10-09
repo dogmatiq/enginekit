@@ -38,7 +38,7 @@ func (b *EnvelopeBuilder) From(x *Envelope) *EnvelopeBuilder {
 	b.prototype.CreatedAt = x.CreatedAt
 	b.prototype.ScheduledFor = x.ScheduledFor
 	b.prototype.Description = x.Description
-	b.prototype.MediaType = x.MediaType
+	b.prototype.TypeId = x.TypeId
 	b.prototype.Data = x.Data
 	b.prototype.Attributes = x.Attributes
 	return b
@@ -60,7 +60,7 @@ func (b *EnvelopeBuilder) Build() *Envelope {
 		CreatedAt:         b.prototype.CreatedAt,
 		ScheduledFor:      b.prototype.ScheduledFor,
 		Description:       b.prototype.Description,
-		MediaType:         b.prototype.MediaType,
+		TypeId:            b.prototype.TypeId,
 		Data:              b.prototype.Data,
 		Attributes:        b.prototype.Attributes,
 	}
@@ -136,10 +136,10 @@ func (b *EnvelopeBuilder) WithDescription(v string) *EnvelopeBuilder {
 	return b
 }
 
-// WithMediaType configures the builder to set the MediaType field to v,
+// WithTypeId configures the builder to set the TypeId field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithMediaType(v string) *EnvelopeBuilder {
-	b.prototype.MediaType = v
+func (b *EnvelopeBuilder) WithTypeId(v *uuidpb.UUID) *EnvelopeBuilder {
+	b.prototype.TypeId = v
 	return b
 }
 
@@ -223,9 +223,9 @@ func (x *Envelope) SetDescription(v string) {
 	x.Description = v
 }
 
-// SetMediaType sets the x.MediaType field to v, then returns x.
-func (x *Envelope) SetMediaType(v string) {
-	x.MediaType = v
+// SetTypeId sets the x.TypeId field to v, then returns x.
+func (x *Envelope) SetTypeId(v *uuidpb.UUID) {
+	x.TypeId = v
 }
 
 // SetData sets the x.Data field to v, then returns x.

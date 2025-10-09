@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/marshaler"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -24,9 +23,6 @@ type Packer struct {
 	// messages.
 	Application *identitypb.Identity
 
-	// Marshaler is used to marshal messages into envelopes.
-	Marshaler marshaler.Marshaler
-
 	// GenerateID is a function used to generate new message IDs.
 	//
 	// If it is nil, a random UUID is generated.
@@ -39,12 +35,20 @@ type Packer struct {
 
 // Pack returns an envelope containing the given message.
 func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
-	packet, err := p.Marshaler.Marshal(m)
+	data, err := m.MarshalBinary()
 	if err != nil {
 		panic(err)
 	}
 
 	id := p.generateID()
+
+	mt, ok := dogma.RegisteredMessageTypeOf(m)
+	if !ok {
+		panic(fmt.Sprintf(
+			"%T is not a registered message type",
+			m,
+		))
+	}
 
 	env := &Envelope{
 		MessageId:         id,
@@ -53,8 +57,8 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 		SourceSite:        p.Site,
 		SourceApplication: p.Application,
 		Description:       m.MessageDescription(),
-		MediaType:         packet.MediaType,
-		Data:              packet.Data,
+		TypeId:            uuidpb.MustParse(mt.ID()),
+		Data:              data,
 	}
 
 	for _, opt := range options {
@@ -74,21 +78,20 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 
 // Unpack returns the message contained within an envelope.
 func (p *Packer) Unpack(env *Envelope) (dogma.Message, error) {
-	packet := marshaler.Packet{
-		MediaType: env.MediaType,
-		Data:      env.Data,
+	mt, ok := dogma.RegisteredMessageTypeByID(env.TypeId.AsString())
+	if !ok {
+		return nil, fmt.Errorf(
+			"message type %q is not registered",
+			env.TypeId.String(),
+		)
 	}
 
-	m, err := p.Marshaler.Unmarshal(packet)
-	if err != nil {
+	m := mt.New()
+	if err := m.UnmarshalBinary(env.Data); err != nil {
 		return nil, err
 	}
 
-	if m, ok := m.(dogma.Message); ok {
-		return m, nil
-	}
-
-	return nil, fmt.Errorf("'%T' does not implement dogma.Message", m)
+	return m, nil
 }
 
 // now returns the current time.

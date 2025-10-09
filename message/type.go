@@ -17,7 +17,13 @@ type Type struct {
 //
 // It panics if T does not implement [dogma.Command], [dogma.Event] or
 // [dogma.Timeout].
-func TypeFor[T dogma.Message]() Type {
+func TypeFor[
+	T interface {
+		dogma.Message
+		*E
+	},
+	E any,
+]() Type {
 	return TypeFromReflect(reflect.TypeFor[T]())
 }
 

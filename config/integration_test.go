@@ -33,8 +33,8 @@ func TestIntegration(t *testing.T) {
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
-							dogma.RecordsEvent[EventStub[TypeA]](),
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
+							dogma.RecordsEvent[*EventStub[TypeA]](),
 						)
 					},
 				}),
@@ -116,7 +116,7 @@ func TestIntegration(t *testing.T) {
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("name", "non-uuid")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -130,7 +130,7 @@ func TestIntegration(t *testing.T) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
 						c.Identity("bar", "ee316cdb-894c-454e-91dd-ec0cc4531c42")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -147,27 +147,27 @@ func TestIntegration(t *testing.T) {
 			},
 			{
 				Name:  "integration must not have multiple routes for the same command type",
-				Error: `integration:IntegrationMessageHandlerStub is invalid: multiple handles-command routes for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Error: `integration:IntegrationMessageHandlerStub is invalid: multiple handles-command routes for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.HandlesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.HandlesCommand[*CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.HandlesCommand[*CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
 						)
 					},
 				}),
 			},
 			{
 				Name:  "integration must not have multiple routes for the same event type",
-				Error: `integration:IntegrationMessageHandlerStub is invalid: multiple records-event routes for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Error: `integration:IntegrationMessageHandlerStub is invalid: multiple records-event routes for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
-							dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.RecordsEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
+							dogma.RecordsEvent[*EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.RecordsEvent[*EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
 						)
 					},
 				}),
@@ -211,13 +211,13 @@ func TestIntegration(t *testing.T) {
 				Description: multiline(
 					`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-					`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -228,14 +228,14 @@ func TestIntegration(t *testing.T) {
 				Description: multiline(
 					`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-					`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					`  - valid disabled flag, set to true`,
 				),
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
 						)
 						c.Disable()
 					},
@@ -292,13 +292,13 @@ func TestIntegration(t *testing.T) {
 					`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 					`  - invalid identity name/non-uuid`,
 					`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
-					`  - valid handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 						c.Identity("name", "non-uuid")
 						c.Routes(
-							dogma.HandlesCommand[CommandStub[TypeA]](),
+							dogma.HandlesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -312,8 +312,8 @@ func TestIntegration(t *testing.T) {
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 					c.Routes(
-						dogma.HandlesCommand[CommandStub[TypeA]](),
-						dogma.RecordsEvent[EventStub[TypeA]](),
+						dogma.HandlesCommand[*CommandStub[TypeA]](),
+						dogma.RecordsEvent[*EventStub[TypeA]](),
 					)
 				},
 			}
@@ -325,8 +325,8 @@ func TestIntegration(t *testing.T) {
 				"unexpected routes",
 				handler.RouteSet().MessageTypes(),
 				map[message.Type]RouteDirection{
-					message.TypeFor[CommandStub[TypeA]](): InboundDirection,
-					message.TypeFor[EventStub[TypeA]]():   OutboundDirection,
+					message.TypeFor[*CommandStub[TypeA]](): InboundDirection,
+					message.TypeFor[*EventStub[TypeA]]():   OutboundDirection,
 				},
 			)
 		})
@@ -344,32 +344,32 @@ func TestIntegration(t *testing.T) {
 				},
 				{
 					"unsupported ExecutesCommand route",
-					`unsupported executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`unsupported executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
-						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+						MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 					},
 				},
 				{
 					"unsupported HandlesEvent route",
-					`unsupported handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`unsupported handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesEventRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
-						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-						MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+						MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 					},
 				},
 				{
 					"unsupported SchedulesTimeout route",
-					`unsupported schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`unsupported schedules-timeout route for *github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(SchedulesTimeoutRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[TimeoutStub[TypeA]]()),
-						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-						MessageType:     optional.Some(message.TypeFor[TimeoutStub[TypeA]]()),
+						MessageTypeID:   optional.Some(MessageTypeID[*TimeoutStub[TypeA]]()),
+						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[*TimeoutStub[TypeA]]()),
 					},
 				},
 			}

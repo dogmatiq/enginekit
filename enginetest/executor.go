@@ -31,7 +31,7 @@ func testCommandExecutor(ctx context.Context, t *testing.T, e *engine) {
 			},
 			{
 				Name:    "panics if passed an unrecognized command",
-				Command: UnrecognizedCommand{},
+				Command: &UnrecognizedCommand{},
 				Expect:  "UnrecognizedCommand",
 			},
 			{

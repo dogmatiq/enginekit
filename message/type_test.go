@@ -11,8 +11,8 @@ import (
 
 func TestTypeFor(t *testing.T) {
 	t.Run("it returns values that compare as equal for messages of the same type", func(t *testing.T) {
-		a := TypeFor[CommandStub[TypeA]]()
-		b := TypeFor[CommandStub[TypeA]]()
+		a := TypeFor[*CommandStub[TypeA]]()
+		b := TypeFor[*CommandStub[TypeA]]()
 
 		if a != b {
 			t.Fatal("expected the same return value for the same inputs")
@@ -20,8 +20,8 @@ func TestTypeFor(t *testing.T) {
 	})
 
 	t.Run("it returns values that do not compare as equal for messages of different types", func(t *testing.T) {
-		a := TypeFor[CommandStub[TypeA]]()
-		b := TypeFor[CommandStub[TypeB]]()
+		a := TypeFor[*CommandStub[TypeA]]()
+		b := TypeFor[*CommandStub[TypeB]]()
 
 		if a == b {
 			t.Fatal("did not expect the same return value for different inputs")
@@ -29,19 +29,14 @@ func TestTypeFor(t *testing.T) {
 	})
 
 	t.Run("it panics if the message does not implement any of the more specific interfaces", func(t *testing.T) {
-		defer expectPanic(t, "message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
-		TypeFor[partialMessage]()
-	})
-
-	t.Run("it panics if given a pointer to a type that uses non-pointer receivers", func(t *testing.T) {
-		defer expectPanic(t, "*message_test.nonPtrCommand does not use a pointer receiver to implement dogma.Command, use message_test.nonPtrCommand instead")
-		TypeFor[*nonPtrCommand]()
+		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		TypeFor[*partialMessage]()
 	})
 }
 
 func TestTypeOf(t *testing.T) {
 	t.Run("it returns the same Type as TypeFor()", func(t *testing.T) {
-		want := TypeFor[CommandStub[TypeA]]()
+		want := TypeFor[*CommandStub[TypeA]]()
 		got := TypeOf(CommandA1)
 
 		if got != want {
@@ -50,15 +45,15 @@ func TestTypeOf(t *testing.T) {
 	})
 
 	t.Run("it panics if the message does not implement any of the more specific interfaces", func(t *testing.T) {
-		defer expectPanic(t, "message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
-		TypeOf(partialMessage{})
+		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		TypeOf(&partialMessage{})
 	})
 }
 
 func TestTypeFromReflect(t *testing.T) {
 	t.Run("it returns the same Type as TypeFor()", func(t *testing.T) {
-		want := TypeFor[CommandStub[TypeA]]()
-		got := TypeFromReflect(reflect.TypeFor[CommandStub[TypeA]]())
+		want := TypeFor[*CommandStub[TypeA]]()
+		got := TypeFromReflect(reflect.TypeFor[*CommandStub[TypeA]]())
 
 		if got != want {
 			t.Fatalf("unexpected type: got %v, want %v", got, want)
@@ -76,26 +71,21 @@ func TestTypeFromReflect(t *testing.T) {
 	})
 
 	t.Run("it panics if the type does not implement any of the more specific interfaces", func(t *testing.T) {
-		defer expectPanic(t, "message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
-		TypeFromReflect(reflect.TypeFor[partialMessage]())
+		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		TypeFromReflect(reflect.TypeFor[*partialMessage]())
 	})
 
-	t.Run("it panics if given a pointer to a type that uses non-pointer receivers", func(t *testing.T) {
-		defer expectPanic(t, "*message_test.nonPtrCommand does not use a pointer receiver to implement dogma.Command, use message_test.nonPtrCommand instead")
-		TypeFromReflect(reflect.TypeFor[*nonPtrCommand]())
-	})
-
-	t.Run("it panics if given a non-pointer to a type that uses pointer receivers", func(t *testing.T) {
-		defer expectPanic(t, "message_test.ptrCommand uses a pointer receiver to implement dogma.Command, use *message_test.ptrCommand instead")
-		TypeFromReflect(reflect.TypeFor[ptrCommand]())
+	t.Run("it panics if given a non-pointer to an otherwise valid message type", func(t *testing.T) {
+		defer expectPanic(t, "message_test.nonPtrCommand implements dogma.Command, but message implementations must use pointer receivers, use *message_test.nonPtrCommand instead")
+		TypeFromReflect(reflect.TypeFor[nonPtrCommand]())
 	})
 }
 
 func TestType_name(t *testing.T) {
-	mt := TypeFor[CommandStub[TypeA]]()
+	mt := TypeFor[*CommandStub[TypeA]]()
 
 	got := mt.Name()
-	want := NameFor[CommandStub[TypeA]]()
+	want := NameFor[*CommandStub[TypeA]]()
 
 	if got != want {
 		t.Fatalf("unexpected name: got %q, want %q", got, want)
@@ -103,7 +93,7 @@ func TestType_name(t *testing.T) {
 }
 
 func TestType_kind(t *testing.T) {
-	mt := TypeFor[CommandStub[TypeA]]()
+	mt := TypeFor[*CommandStub[TypeA]]()
 
 	got := mt.Kind()
 	want := CommandKind
@@ -114,10 +104,10 @@ func TestType_kind(t *testing.T) {
 }
 
 func TestType_reflectType(t *testing.T) {
-	mt := TypeFor[CommandStub[TypeA]]()
+	mt := TypeFor[*CommandStub[TypeA]]()
 
 	got := mt.ReflectType()
-	want := reflect.TypeFor[CommandStub[TypeA]]()
+	want := reflect.TypeFor[*CommandStub[TypeA]]()
 
 	if got != want {
 		t.Fatalf("unexpected reflect type: got %v, want %v", got, want)
@@ -129,8 +119,7 @@ func TestType_string(t *testing.T) {
 		Message dogma.Message
 		Want    string
 	}{
-		{CommandA1, "stubs.CommandStub[TypeA]"},
-		{nonPtrCommand{}, "message_test.nonPtrCommand"},
+		{CommandA1, "*stubs.CommandStub[TypeA]"},
 		{&ptrCommand{}, "*message_test.ptrCommand"},
 	}
 
@@ -149,6 +138,10 @@ func expectPanic(t *testing.T, want string) {
 	got := recover()
 
 	if got != want {
+		if got == nil {
+			t.Fatal("expected panic")
+		}
+
 		panic(got)
 	}
 }

@@ -83,49 +83,49 @@ func TestEnvelope_Validate(t *testing.T) {
 			{
 				"empty",
 				&Envelope{},
-				"invalid message ID: UUID must use version 4",
+				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
 			},
 			{
 				"invalid message ID",
 				newEnvelope(func(e *Envelope) {
 					e.MessageId = &uuidpb.UUID{}
 				}),
-				"invalid message ID: UUID must use version 4",
+				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
 			},
 			{
 				"invalid causation ID",
 				newEnvelope(func(e *Envelope) {
 					e.CausationId = &uuidpb.UUID{}
 				}),
-				"invalid causation ID: UUID must use version 4",
+				"invalid causation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
 			},
 			{
 				"invalid correlation ID",
 				newEnvelope(func(e *Envelope) {
 					e.CorrelationId = &uuidpb.UUID{}
 				}),
-				"invalid correlation ID: UUID must use version 4",
+				"invalid correlation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
 			},
 			{
 				"invalid source site",
 				newEnvelope(func(e *Envelope) {
 					e.SourceSite = &identitypb.Identity{}
 				}),
-				"invalid source site: invalid name: must be between 1 and 255 bytes",
+				"invalid source site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source application",
 				newEnvelope(func(e *Envelope) {
 					e.SourceApplication = &identitypb.Identity{}
 				}),
-				"invalid source application: invalid name: must be between 1 and 255 bytes",
+				"invalid source application (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source handler",
 				newEnvelope(func(e *Envelope) {
 					e.SourceHandler = &identitypb.Identity{}
 				}),
-				"invalid source handler: invalid name: must be between 1 and 255 bytes",
+				"invalid source handler (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"source instance ID without source handler",
@@ -167,11 +167,11 @@ func TestEnvelope_Validate(t *testing.T) {
 				"invalid description: must not be empty",
 			},
 			{
-				"invalid media-type",
+				"without type ID",
 				newEnvelope(func(e *Envelope) {
-					e.MediaType = ""
+					e.TypeId = nil
 				}),
-				"invalid media-type: must not be empty",
+				"invalid type ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
 			},
 		}
 
@@ -210,9 +210,9 @@ func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
 		CreatedAt:         timestamppb.Now(),
 		ScheduledFor:      timestamppb.Now(),
 		Description:       "<description>",
-		MediaType:         "<media type>",
-		Attributes:        map[string]string{"<key>": "<value>"},
+		TypeId:            uuidpb.Generate(),
 		Data:              []byte("<data>"),
+		Attributes:        map[string]string{"<key>": "<value>"},
 	}
 
 	for _, fn := range modifiers {

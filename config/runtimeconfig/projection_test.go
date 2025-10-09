@@ -53,7 +53,7 @@ func TestFromProjection(t *testing.T) {
 				ConfigureFunc: func(c dogma.ProjectionConfigurer) {
 					c.Identity("projection", "050415ad-ce90-496f-8987-40467e5415e0")
 					c.Routes(
-						dogma.HandlesEvent[EventStub[TypeA]](),
+						dogma.HandlesEvent[*EventStub[TypeA]](),
 					)
 					c.Disable()
 				},
@@ -73,9 +73,9 @@ func TestFromProjection(t *testing.T) {
 						RouteComponents: []*config.Route{
 							{
 								RouteType:       optional.Some(config.HandlesEventRouteType),
-								MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+								MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 							},
 						},
 						DisabledFlags: []*config.Flag[config.Disabled]{

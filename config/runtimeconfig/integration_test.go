@@ -53,8 +53,8 @@ func TestFromIntegration(t *testing.T) {
 				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
 					c.Identity("integration", "51ffcb6f-171f-41a1-90e7-6fe1111649cd")
 					c.Routes(
-						dogma.HandlesCommand[CommandStub[TypeA]](),
-						dogma.RecordsEvent[EventStub[TypeA]](),
+						dogma.HandlesCommand[*CommandStub[TypeA]](),
+						dogma.RecordsEvent[*EventStub[TypeA]](),
 					)
 					c.Disable()
 				},
@@ -74,15 +74,15 @@ func TestFromIntegration(t *testing.T) {
 						RouteComponents: []*config.Route{
 							{
 								RouteType:       optional.Some(config.HandlesCommandRouteType),
-								MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+								MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+								MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 							},
 							{
 								RouteType:       optional.Some(config.RecordsEventRouteType),
-								MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
-								MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+								MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+								MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 							},
 						},
 						DisabledFlags: []*config.Flag[config.Disabled]{

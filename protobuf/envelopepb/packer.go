@@ -35,13 +35,6 @@ type Packer struct {
 
 // Pack returns an envelope containing the given message.
 func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
-	data, err := m.MarshalBinary()
-	if err != nil {
-		panic(err)
-	}
-
-	id := p.generateID()
-
 	mt, ok := dogma.RegisteredMessageTypeOf(m)
 	if !ok {
 		panic(fmt.Sprintf(
@@ -49,6 +42,17 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 			m,
 		))
 	}
+
+	data, err := m.MarshalBinary()
+	if err != nil {
+		panic(fmt.Sprintf(
+			"unable to marshal %T: %s",
+			m,
+			err,
+		))
+	}
+
+	id := p.generateID()
 
 	env := &Envelope{
 		MessageId:         id,
@@ -81,14 +85,14 @@ func (p *Packer) Unpack(env *Envelope) (dogma.Message, error) {
 	mt, ok := dogma.RegisteredMessageTypeByID(env.TypeId.AsString())
 	if !ok {
 		return nil, fmt.Errorf(
-			"message type %q is not registered",
-			env.TypeId.String(),
+			"%s is not a registered message type ID",
+			env.TypeId,
 		)
 	}
 
 	m := mt.New()
 	if err := m.UnmarshalBinary(env.Data); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to unmarshal %T: %w", m, err)
 	}
 
 	return m, nil

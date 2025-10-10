@@ -1,6 +1,10 @@
 package stubs
 
-import "github.com/dogmatiq/dogma"
+import (
+	"encoding/json"
+
+	"github.com/dogmatiq/dogma"
+)
 
 // AggregateRootStub is a test implementation of [dogma.AggregateRoot].
 type AggregateRootStub struct {
@@ -11,12 +15,22 @@ type AggregateRootStub struct {
 var _ dogma.AggregateRoot = &AggregateRootStub{}
 
 // ApplyEvent updates aggregate instance to reflect the occurrence of an event.
-func (v *AggregateRootStub) ApplyEvent(e dogma.Event) {
-	v.AppliedEvents = append(v.AppliedEvents, e)
+func (r *AggregateRootStub) ApplyEvent(e dogma.Event) {
+	r.AppliedEvents = append(r.AppliedEvents, e)
 
-	if v.ApplyEventFunc != nil {
-		v.ApplyEventFunc(e)
+	if r.ApplyEventFunc != nil {
+		r.ApplyEventFunc(e)
 	}
+}
+
+// MarshalBinary implements [encoding.BinaryMarshaler].
+func (r *AggregateRootStub) MarshalBinary() ([]byte, error) {
+	return json.Marshal(r)
+}
+
+// UnmarshalBinary implements [encoding.BinaryUnmarshaler].
+func (r *AggregateRootStub) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, r)
 }
 
 // AggregateMessageHandlerStub is a test implementation of

@@ -18,7 +18,6 @@ func TestPacker_packAndUnpack(t *testing.T) {
 	now := time.Now()
 
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Site: &identitypb.Identity{
 			Name: "site",
 			Key:  uuidpb.Generate(),
@@ -50,7 +49,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		SourceInstanceId:  "",
 		CreatedAt:         timestamppb.New(now),
 		Description:       `command(stubs.TypeA:A1, valid)`,
-		MediaType:         `application/json; type="CommandStub[TypeA]"`,
+		TypeId:            uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
 		Data:              []byte(`{"content":"A1"}`),
 	}
 
@@ -72,11 +71,81 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		gotMessage,
 		dogma.Message(CommandA1),
 	)
+
+	t.Run("func Pack()", func(t *testing.T) {
+		t.Run("it panics if passed an unregistered message", func(t *testing.T) {
+			ExpectPanic(
+				t,
+				"*envelopepb_test.T is not a registered message type",
+				func() {
+					type T struct{ dogma.Command }
+					packer.Pack(&T{})
+				},
+			)
+		})
+
+		t.Run("it panics if the message cannot be marshaled", func(t *testing.T) {
+			ExpectPanic(
+				t,
+				"unable to marshal *envelopepb_test.T: json: unsupported type: func()",
+				func() {
+					type T struct{ CommandStub[func()] }
+					dogma.RegisterCommand[*T]("622003a4-01a5-4c77-8a4c-cb36b51994e7")
+					packer.Pack(&T{})
+				},
+			)
+		})
+
+		t.Run("it panics if the envelope is invalid", func(t *testing.T) {
+			before := packer.Site
+			packer.Site = &identitypb.Identity{} // invalid
+			defer func() { packer.Site = before }()
+
+			ExpectPanic(
+				t,
+				"invalid source site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				func() {
+					packer.Pack(CommandA1)
+				},
+			)
+		})
+	})
+
+	t.Run("func Unpack()", func(t *testing.T) {
+		t.Run("it returns an error if the message type is not registered", func(t *testing.T) {
+			env := &Envelope{
+				TypeId: uuidpb.MustParse("f1816a71-3593-4771-8d8b-327650571288"),
+				Data:   []byte(`{"content":"A1"}`),
+			}
+
+			want := "f1816a71-3593-4771-8d8b-327650571288 is not a registered message type ID"
+
+			if _, err := packer.Unpack(env); err == nil {
+				t.Fatal("expected an error")
+			} else if err.Error() != want {
+				t.Fatalf("unexpected error: got %q, want %q", err, want)
+			}
+		})
+
+		t.Run("it returns an error if the message cannot be unmarshaled", func(t *testing.T) {
+			env := &Envelope{
+				TypeId: uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
+				Data:   []byte(`}`),
+			}
+
+			want := "unable to unmarshal *stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]: invalid character '}' looking for beginning of value"
+
+			if _, err := packer.Unpack(env); err == nil {
+				t.Fatal("expected an error")
+			} else if err.Error() != want {
+				t.Fatalf("unexpected error: got %q, want %q", err, want)
+			}
+		})
+	})
 }
 
 func TestWithCause(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -98,7 +167,6 @@ func TestWithCause(t *testing.T) {
 
 func TestWithHandler(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -119,7 +187,6 @@ func TestWithHandler(t *testing.T) {
 
 func TestWithInstanceID(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -145,7 +212,6 @@ func TestWithInstanceID(t *testing.T) {
 
 func TestWithCreatedAt(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),
@@ -170,7 +236,6 @@ func TestWithCreatedAt(t *testing.T) {
 
 func TestWithScheduledFor(t *testing.T) {
 	packer := &Packer{
-		Marshaler: Marshaler,
 		Application: &identitypb.Identity{
 			Name: "app",
 			Key:  uuidpb.Generate(),

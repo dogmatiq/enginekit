@@ -61,14 +61,11 @@ message Envelope {
   // Description is a human-readable description of the message.
   string description = 10;
 
-  // MediaType is a MIME media-type describing the content and encoding of the
-  // binary message data.
-  string media_type = 11;
+  // TypeId is a unique identifier for the type of message contained in
+  // the envelope.
+  UUID type_id = 11;
 
   // Data is the binary message data.
-  //
-  // The data format is described by MediaType, the allowed values of both are
-  // outside the scope of this specification.
   bytes data = 12;
 
   // Attributes is a set of arbitrary key/value pairs that provide additional

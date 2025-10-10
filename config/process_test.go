@@ -33,9 +33,9 @@ func TestProcess(t *testing.T) {
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
-							dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
+							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
 						)
 					},
 				}),
@@ -134,8 +134,8 @@ func TestProcess(t *testing.T) {
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("name", "non-uuid")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -149,8 +149,8 @@ func TestProcess(t *testing.T) {
 						c.Identity("foo", "63bd2756-2397-4cae-b33b-96e809b384d8")
 						c.Identity("bar", "ee316cdb-894c-454e-91dd-ec0cc4531c42")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -163,7 +163,7 @@ func TestProcess(t *testing.T) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
 							// <-- MISSING HandlesEvent ROUTE
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -175,7 +175,7 @@ func TestProcess(t *testing.T) {
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
 							// <-- MISSING ExecutesCommand ROUTE
 						)
 					},
@@ -183,43 +183,43 @@ func TestProcess(t *testing.T) {
 			},
 			{
 				Name:  "process must not have multiple routes for the same event type",
-				Error: `process:ProcessMessageHandlerStub is invalid: multiple handles-event routes for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Error: `process:ProcessMessageHandlerStub is invalid: multiple handles-event routes for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.HandlesEvent[EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.HandlesEvent[*EventStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
 			},
 			{
 				Name:  "process must not have multiple routes for the same command type",
-				Error: `process:ProcessMessageHandlerStub is invalid: multiple executes-command routes for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Error: `process:ProcessMessageHandlerStub is invalid: multiple executes-command routes for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.ExecutesCommand[CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.ExecutesCommand[*CommandStub[TypeA]](), // <-- SAME MESSAGE TYPE
 						)
 					},
 				}),
 			},
 			{
 				Name:  "process must not have multiple routes for the same timeout type",
-				Error: `process:ProcessMessageHandlerStub is invalid: multiple schedules-timeout routes for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Error: `process:ProcessMessageHandlerStub is invalid: multiple schedules-timeout routes for *github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
-							dogma.SchedulesTimeout[TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.SchedulesTimeout[TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
+							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
 						)
 					},
 				}),
@@ -275,17 +275,17 @@ func TestProcess(t *testing.T) {
 				Description: multiline(
 					`valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-					`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - valid schedules-timeout route for github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid schedules-timeout route for *github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
-							dogma.SchedulesTimeout[TimeoutStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
+							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
 						)
 					},
 				}),
@@ -296,16 +296,16 @@ func TestProcess(t *testing.T) {
 				Description: multiline(
 					`valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-					`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					`  - valid disabled flag, set to true`,
 				),
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
 						)
 						c.Disable()
 					},
@@ -374,15 +374,15 @@ func TestProcess(t *testing.T) {
 					`valid process *github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub`,
 					`  - invalid identity name/non-uuid`,
 					`      - invalid key ("non-uuid"), expected an RFC 4122/9562 UUID`,
-					`  - valid handles-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - valid executes-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("name", "non-uuid")
 						c.Routes(
-							dogma.HandlesEvent[EventStub[TypeA]](),
-							dogma.ExecutesCommand[CommandStub[TypeA]](),
+							dogma.HandlesEvent[*EventStub[TypeA]](),
+							dogma.ExecutesCommand[*CommandStub[TypeA]](),
 						)
 					},
 				}),
@@ -396,8 +396,8 @@ func TestProcess(t *testing.T) {
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 					c.Routes(
-						dogma.HandlesEvent[EventStub[TypeA]](),
-						dogma.ExecutesCommand[CommandStub[TypeA]](),
+						dogma.HandlesEvent[*EventStub[TypeA]](),
+						dogma.ExecutesCommand[*CommandStub[TypeA]](),
 					)
 				},
 			}
@@ -409,8 +409,8 @@ func TestProcess(t *testing.T) {
 				"unexpected routes",
 				handler.RouteSet().MessageTypes(),
 				map[message.Type]RouteDirection{
-					message.TypeFor[EventStub[TypeA]]():   InboundDirection,
-					message.TypeFor[CommandStub[TypeA]](): OutboundDirection,
+					message.TypeFor[*EventStub[TypeA]]():   InboundDirection,
+					message.TypeFor[*CommandStub[TypeA]](): OutboundDirection,
 				},
 			)
 		})
@@ -428,22 +428,22 @@ func TestProcess(t *testing.T) {
 				},
 				{
 					"unexpected HandlesCommand route",
-					`unsupported handles-command route for github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`unsupported handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesCommandRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[CommandStub[TypeA]]()),
-						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-						MessageType:     optional.Some(message.TypeFor[CommandStub[TypeA]]()),
+						MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 					},
 				},
 				{
 					"unexpected RecordsEvent route",
-					`unsupported records-event route for github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`unsupported records-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(RecordsEventRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[EventStub[TypeA]]()),
-						MessageTypeName: optional.Some("github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-						MessageType:     optional.Some(message.TypeFor[EventStub[TypeA]]()),
+						MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+						MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 					},
 				},
 			}

@@ -45,15 +45,15 @@ func TestKind_symbol(t *testing.T) {
 }
 
 func TestKindFor(t *testing.T) {
-	if want, got := CommandKind, KindFor[CommandStub[TypeA]](); got != want {
+	if want, got := CommandKind, KindFor[*CommandStub[TypeA]](); got != want {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
-	if want, got := EventKind, KindFor[EventStub[TypeA]](); got != want {
+	if want, got := EventKind, KindFor[*EventStub[TypeA]](); got != want {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
-	if want, got := TimeoutKind, KindFor[TimeoutStub[TypeA]](); got != want {
+	if want, got := TimeoutKind, KindFor[*TimeoutStub[TypeA]](); got != want {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 

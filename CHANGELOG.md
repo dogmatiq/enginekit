@@ -11,6 +11,27 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `MarshalBinary()` and `UnmarshalBinary()` methods to all stub types.
+- Added `envelopepb.Envelope.TypeId` field, which stores the UUID that uniquely
+  identifies the message type.
+
+### Changed
+
+- Changed message stubs to use pointer receivers.
+- **[BC]** `message.TypeFor()` now requires its type parameter to be a pointer.
+
+### Removed
+
+- **[BC]** Removed `marshaler` package. Messages, aggregate roots and process
+  roots are now responsible for their own marshaling.
+- **[BC]** Removed `envelopepb.Transcoder`.
+- **[BC]** Removed `stubs.Marshaler`.
+- **[BC]** Removed `envelopepb.Envelope.MediaType`.
+
 ## [0.17.0] - 2025-09-14
 
 **[BC]** This release includes updates for compatibility with [Dogma v0.16.0],

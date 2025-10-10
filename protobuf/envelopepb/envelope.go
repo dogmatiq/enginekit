@@ -17,30 +17,30 @@ import (
 // can be unmarshaled.
 func (x *Envelope) Validate() error {
 	if err := x.GetMessageId().Validate(); err != nil {
-		return fmt.Errorf("invalid message ID: %w", err)
+		return fmt.Errorf("invalid message ID (%s): %w", x.GetMessageId(), err)
 	}
 
 	if err := x.GetCausationId().Validate(); err != nil {
-		return fmt.Errorf("invalid causation ID: %w", err)
+		return fmt.Errorf("invalid causation ID (%s): %w", x.GetCausationId(), err)
 	}
 
 	if err := x.GetCorrelationId().Validate(); err != nil {
-		return fmt.Errorf("invalid correlation ID: %w", err)
+		return fmt.Errorf("invalid correlation ID (%s): %w", x.GetCorrelationId(), err)
 	}
 
 	if x.SourceSite != nil {
 		if err := x.GetSourceSite().Validate(); err != nil {
-			return fmt.Errorf("invalid source site: %w", err)
+			return fmt.Errorf("invalid source site (%s): %w", x.GetSourceSite(), err)
 		}
 	}
 
 	if err := x.GetSourceApplication().Validate(); err != nil {
-		return fmt.Errorf("invalid source application: %w", err)
+		return fmt.Errorf("invalid source application (%s): %w", x.GetSourceApplication(), err)
 	}
 
 	if id := x.GetSourceHandler(); id != nil {
 		if err := id.Validate(); err != nil {
-			return fmt.Errorf("invalid source handler: %w", err)
+			return fmt.Errorf("invalid source handler (%s): %w", id, err)
 		}
 	} else {
 		if x.GetSourceInstanceId() != "" {
@@ -65,12 +65,12 @@ func (x *Envelope) Validate() error {
 		return errors.New("invalid description: must not be empty")
 	}
 
-	if x.GetMediaType() == "" {
-		return errors.New("invalid media-type: must not be empty")
+	if err := x.GetTypeId().Validate(); err != nil {
+		return fmt.Errorf("invalid type ID (%s): %w", x.GetTypeId(), err)
 	}
 
-	// Note, e.Data *may* be empty. A specific application's marshaler could
-	// conceivably have a message with no data where the message type is
+	// Note, e.Data *may* be empty. A specific application's marshaling logic
+	// could conceivably have a message with no data where the message type is
 	// sufficient information.
 
 	return nil

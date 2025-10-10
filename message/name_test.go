@@ -8,8 +8,8 @@ import (
 )
 
 func TestNameFor(t *testing.T) {
-	got := NameFor[CommandStub[TypeA]]()
-	want := Name("github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]")
+	got := NameFor[*CommandStub[TypeA]]()
+	want := Name("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]")
 
 	if got != want {
 		t.Fatalf("unexpected name: got %q, want %q", got, want)
@@ -18,7 +18,7 @@ func TestNameFor(t *testing.T) {
 
 func TestNameOf(t *testing.T) {
 	got := NameOf(CommandA1)
-	want := NameFor[CommandStub[TypeA]]()
+	want := NameFor[*CommandStub[TypeA]]()
 
 	if got != want {
 		t.Fatalf("unexpected name: got %q, want %q", got, want)

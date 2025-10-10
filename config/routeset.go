@@ -4,6 +4,7 @@ import (
 	"iter"
 	"slices"
 
+	"github.com/dogmatiq/enginekit/collections/sets"
 	"github.com/dogmatiq/enginekit/message"
 )
 
@@ -37,6 +38,17 @@ func (s RouteSet) MessageTypes() map[message.Type]RouteDirection {
 		for rt := range byRouteType {
 			types[mt] |= rt.Direction()
 		}
+	}
+
+	return types
+}
+
+// MessageTypeSet returns a set of all of the message types in the [RouteSet].
+func (s RouteSet) MessageTypeSet() *sets.Set[message.Type] {
+	types := &sets.Set[message.Type]{}
+
+	for mt := range s.byMessageType {
+		types.Add(mt)
 	}
 
 	return types

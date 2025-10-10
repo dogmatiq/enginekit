@@ -60,7 +60,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		want,
 	)
 
-	gotMessage, err := packer.Unpack(want)
+	gotMessage, err := Unpack(want)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 
 			want := "f1816a71-3593-4771-8d8b-327650571288 is not a registered message type ID"
 
-			if _, err := packer.Unpack(env); err == nil {
+			if _, err := Unpack(env); err == nil {
 				t.Fatal("expected an error")
 			} else if err.Error() != want {
 				t.Fatalf("unexpected error: got %q, want %q", err, want)
@@ -135,7 +135,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 
 			want := "unable to unmarshal *stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]: invalid character '}' looking for beginning of value"
 
-			if _, err := packer.Unpack(env); err == nil {
+			if _, err := Unpack(env); err == nil {
 				t.Fatal("expected an error")
 			} else if err.Error() != want {
 				t.Fatalf("unexpected error: got %q, want %q", err, want)

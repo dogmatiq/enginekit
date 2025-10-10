@@ -81,7 +81,7 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 }
 
 // Unpack returns the message contained within an envelope.
-func (p *Packer) Unpack(env *Envelope) (dogma.Message, error) {
+func Unpack(env *Envelope) (dogma.Message, error) {
 	mt, ok := dogma.RegisteredMessageTypeByID(env.TypeId.AsString())
 	if !ok {
 		return nil, fmt.Errorf(

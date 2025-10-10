@@ -763,13 +763,7 @@ var namePattern = regexp.MustCompile(`(Command|Event|Timeout)Stub\[[^]]+\.Type(.
 //
 // T must be one of [CommandStub], [EventStub], or [TimeoutStub], with a type
 // parameter of [TypeA] to [TypeZ], otherwise the function panics.
-func MessageTypeID[
-	T interface {
-		dogma.Message
-		*E
-	},
-	E any,
-]() string {
+func MessageTypeID[T dogma.Message]() string {
 	typeName := reflect.TypeFor[T]().String()
 	matches := namePattern.FindStringSubmatch(typeName)
 

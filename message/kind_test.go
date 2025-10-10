@@ -57,6 +57,18 @@ func TestKindFor(t *testing.T) {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
+	if want, got := CommandKind, KindFor[dogma.Command](); got != want {
+		t.Fatalf("unexpected result: got %q, want %q", got, want)
+	}
+
+	if want, got := EventKind, KindFor[dogma.Event](); got != want {
+		t.Fatalf("unexpected result: got %q, want %q", got, want)
+	}
+
+	if want, got := TimeoutKind, KindFor[dogma.Timeout](); got != want {
+		t.Fatalf("unexpected result: got %q, want %q", got, want)
+	}
+
 	t.Run("it panics if the message does not implement any of the more specific interfaces", func(t *testing.T) {
 		defer func() {
 			if r := recover(); r == nil {

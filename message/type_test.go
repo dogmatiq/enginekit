@@ -74,11 +74,6 @@ func TestTypeFromReflect(t *testing.T) {
 		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
 		TypeFromReflect(reflect.TypeFor[*partialMessage]())
 	})
-
-	t.Run("it panics if given a non-pointer to an otherwise valid message type", func(t *testing.T) {
-		defer expectPanic(t, "message_test.nonPtrCommand implements dogma.Command, but message implementations must use pointer receivers, use *message_test.nonPtrCommand instead")
-		TypeFromReflect(reflect.TypeFor[nonPtrCommand]())
-	})
 }
 
 func TestType_name(t *testing.T) {

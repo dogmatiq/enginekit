@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.2] - 2025-10-11
+
+### Added
+
+- Added `uuidtest.Sequence` package for generating sequences of deterministic
+  UUIDs for use in tests.
+
 ## [0.19.1] - 2025-10-11
 
 ### Added
@@ -286,6 +293,7 @@ which itself includes a large numbers of breaking changes.
 [0.18.2]: https://github.com/dogmatiq/enginekit/releases/v0.18.2
 [0.19.0]: https://github.com/dogmatiq/enginekit/releases/v0.19.0
 [0.19.1]: https://github.com/dogmatiq/enginekit/releases/v0.19.1
+[0.19.2]: https://github.com/dogmatiq/enginekit/releases/v0.19.2
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

@@ -8,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
 
 // CommandStub is a test implementation of [dogma.Command].
@@ -784,6 +785,17 @@ func MessageTypeID[T dogma.Message]() string {
 	letter := 0xa + matches[2][0] - 'A' // convert letter to 0-25 range
 
 	return fmt.Sprintf("%s0000000-0000-4000-8000-%012x", prefix, letter)
+}
+
+// MessageTypeUUID returns the RFC 4122 UUID for a message stub of type T as
+// a [uuidpb.UUID].
+//
+// T must be one of [CommandStub], [EventStub], or [TimeoutStub], with a type
+// parameter of [TypeA] to [TypeZ], otherwise the function panics.
+func MessageTypeUUID[T dogma.Message]() *uuidpb.UUID {
+	return uuidpb.MustParse(
+		MessageTypeID[T](),
+	)
 }
 
 func init() {

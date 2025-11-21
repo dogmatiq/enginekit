@@ -11,6 +11,7 @@ import (
 // EventProjection tracks all events produced by the test application.
 type EventProjection struct {
 	dogma.NoCompactBehavior
+	dogma.NoResetBehavior
 
 	m           sync.Mutex
 	checkpoints map[string]uint64

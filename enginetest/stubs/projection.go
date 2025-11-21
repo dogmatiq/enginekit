@@ -14,6 +14,7 @@ type ProjectionMessageHandlerStub struct {
 	HandleEventFunc      func(context.Context, dogma.ProjectionEventScope, dogma.Event) (uint64, error)
 	CheckpointOffsetFunc func(context.Context, string) (uint64, error)
 	CompactFunc          func(context.Context, dogma.ProjectionCompactScope) error
+	ResetFunc            func(context.Context, dogma.ProjectionResetScope) error
 }
 
 var _ dogma.ProjectionMessageHandler = (*ProjectionMessageHandlerStub)(nil)
@@ -56,6 +57,18 @@ func (h *ProjectionMessageHandlerStub) Compact(
 ) error {
 	if h.CompactFunc != nil {
 		return h.CompactFunc(ctx, s)
+	}
+	return nil
+}
+
+// Reset clears all projection data and checkpoint offsets such that the
+// projection data is rebuilt by handling all historical events.
+func (h *ProjectionMessageHandlerStub) Reset(
+	ctx context.Context,
+	s dogma.ProjectionResetScope,
+) error {
+	if h.ResetFunc != nil {
+		return h.ResetFunc(ctx, s)
 	}
 	return nil
 }

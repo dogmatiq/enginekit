@@ -17,8 +17,8 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - Added functions to the `uuidpb` package for parsing RFC 9562 UUID strings
   directly into their various binary representations:
-  - `ParseAsByteArray()` is equivalent to `Parse(x).AsByteArray()` but avoids all allocations.
-  - `ParseIntoBytes()` is equivalent to `Parse(x).AsBytes()`, but avoids all allocations.
+  - `ParseAsByteArray()` is equivalent to `AsByteArray(Parse(x))` but avoids all allocations.
+  - `ParseIntoBytes()` is equivalent to `CopyBytes(Parse(x), dst)`, but avoids all allocations.
   - `ParseAsBytes()` is equivalent to `Parse(x).AsBytes()`, but avoids the intermediate `uuidpb.UUID` allocation.
   - Each function has a `MustXXX()` variant that panics instead of returning an error.
 

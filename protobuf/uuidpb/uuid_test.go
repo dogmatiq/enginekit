@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"testing"
+	unsafe "unsafe"
 
 	"github.com/dogmatiq/dapper"
 	. "github.com/dogmatiq/enginekit/protobuf/uuidpb"
@@ -61,22 +62,38 @@ func TestDerive(t *testing.T) {
 	})
 }
 
+var (
+	validCases = []struct {
+		Desc   string
+		String string
+	}{
+		{"lowercase", "a967a8b9-3f9c-4918-9a41-19577be5fec5"},
+		{"uppercase", "A967A8B9-3F9C-4918-9A41-19577BE5FEC5"},
+	}
+
+	invalidCases = []struct {
+		Desc   string
+		String string
+	}{
+		{"empty string", ""},
+		{"too short", "3493af5d-e4d0-4f3b-a73d-048e6b08496"},
+		{"too long", "3493af5d-e4d0-4f3b-a73d-048e6b08496ab"},
+		{"no hyphens", "a967a8b93f9c49189a4119577be5fec5"},
+		{"no hyphens at position 8", "7e770248_7336-4cee-881d-f24013e6c1bf"},
+		{"no hyphens at position 13", "7e770248-7336_4cee-881d-f24013e6c1bf"},
+		{"no hyphens at position 18", "7e770248-7336-4cee_881d-f24013e6c1bf"},
+		{"no hyphens at position 23", "7e770248-7336-4cee-881d_f24013e6c1bf"},
+		{"non-hex character", "26c4a622-e4b4-4Xe7-8454-e3dc90f7d1d8"},
+	}
+)
+
 func TestParse(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when the string is a valid UUID", func(t *testing.T) {
 		t.Parallel()
 
-		cases := []struct {
-			Desc   string
-			String string
-		}{
-			{"lowercase", "a967a8b9-3f9c-4918-9a41-19577be5fec5"},
-			{"uppercase", "A967A8B9-3F9C-4918-9A41-19577BE5FEC5"},
-		}
-
-		for _, c := range cases {
-			c := c // capture loop variable
+		for _, c := range validCases {
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 
@@ -99,23 +116,7 @@ func TestParse(t *testing.T) {
 	t.Run("when the string is not a valid UUID", func(t *testing.T) {
 		t.Parallel()
 
-		cases := []struct {
-			Desc   string
-			String string
-		}{
-			{"empty string", ""},
-			{"too short", "3493af5d-e4d0-4f3b-a73d-048e6b08496"},
-			{"too long", "3493af5d-e4d0-4f3b-a73d-048e6b08496ab"},
-			{"no hyphens", "a967a8b93f9c49189a4119577be5fec5"},
-			{"no hyphens at position 8", "7e770248_7336-4cee-881d-f24013e6c1bf"},
-			{"no hyphens at position 13", "7e770248-7336_4cee-881d-f24013e6c1bf"},
-			{"no hyphens at position 18", "7e770248-7336-4cee_881d-f24013e6c1bf"},
-			{"no hyphens at position 23", "7e770248-7336-4cee-881d_f24013e6c1bf"},
-			{"non-hex character", "26c4a622-e4b4-4Xe7-8454-e3dc90f7d1d8"},
-		}
-
-		for _, c := range cases {
-			c := c // capture loop variable
+		for _, c := range invalidCases {
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 
@@ -126,6 +127,27 @@ func TestParse(t *testing.T) {
 			})
 		}
 	})
+}
+
+func BenchmarkParse(b *testing.B) {
+	for b.Loop() {
+		_, err := Parse("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestParse_OnlyAllocatesTheUUID(t *testing.T) {
+	allocs := testing.AllocsPerRun(100, func() {
+		Parse("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+	})
+
+	const size = unsafe.Sizeof(UUID{})
+
+	if allocs > float64(size) {
+		t.Fatalf("expected maximum allocation of %d bytes, got %f", size, allocs)
+	}
 }
 
 func TestMustParse(t *testing.T) {
@@ -153,6 +175,305 @@ func TestMustParse(t *testing.T) {
 		}()
 
 		MustParse("invalid")
+	})
+}
+
+func TestParseAsByteArray(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		for _, c := range validCases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				expect := [16]byte{
+					0xa9, 0x67, 0xa8, 0xb9,
+					0x3f, 0x9c, 0x49, 0x18,
+					0x9a, 0x41, 0x19, 0x57,
+					0x7b, 0xe5, 0xfe, 0xc5,
+				}
+				actual, err := ParseAsByteArray(c.String)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if actual != expect {
+					t.Fatalf("got %v, want %v", actual, expect)
+				}
+			})
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		for _, c := range invalidCases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				_, err := ParseAsByteArray(c.String)
+				if err == nil {
+					t.Fatal("expected an error")
+				}
+			})
+		}
+	})
+}
+
+func TestParseAsByteArray_DoesNotAlloc(t *testing.T) {
+	allocs := testing.AllocsPerRun(100, func() {
+		ParseAsByteArray("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+	})
+
+	if allocs != 0 {
+		t.Fatalf("expected zero allocations, got %f", allocs)
+	}
+}
+
+func BenchmarkParseAsByteArray(b *testing.B) {
+	for b.Loop() {
+		_, err := ParseAsByteArray("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestMustParseAsByteArray(t *testing.T) {
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		expect := [16]byte{
+			0xa9, 0x67, 0xa8, 0xb9,
+			0x3f, 0x9c, 0x49, 0x18,
+			0x9a, 0x41, 0x19, 0x57,
+			0x7b, 0xe5, 0xfe, 0xc5,
+		}
+		actual := MustParseAsByteArray("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+
+		if actual != expect {
+			t.Fatalf("got %q, want %q", actual, expect)
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("expected a panic")
+			}
+		}()
+
+		MustParseAsByteArray("invalid")
+	})
+}
+
+func TestParseIntoBytes(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		for _, c := range validCases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				expect := [16]byte{
+					0xa9, 0x67, 0xa8, 0xb9,
+					0x3f, 0x9c, 0x49, 0x18,
+					0x9a, 0x41, 0x19, 0x57,
+					0x7b, 0xe5, 0xfe, 0xc5,
+				}
+				var actual [16]byte
+				err := ParseIntoBytes(c.String, actual[:])
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if actual != expect {
+					t.Fatalf("got %v, want %v", actual, expect)
+				}
+			})
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		for _, c := range invalidCases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				var target [16]byte
+				err := ParseIntoBytes(c.String, target[:])
+				if err == nil {
+					t.Fatal("expected an error")
+				}
+			})
+		}
+	})
+
+	t.Run("when the target slice does not have adequate length", func(t *testing.T) {
+		t.Parallel()
+
+		var target [8]byte
+		err := ParseIntoBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5", target[:])
+		if err == nil {
+			t.Fatal("expected an error")
+		}
+	})
+}
+
+func TestParseIntoBytes_DoesNotAlloc(t *testing.T) {
+	allocs := testing.AllocsPerRun(100, func() {
+		var target [16]byte
+		ParseIntoBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5", target[:])
+	})
+
+	if allocs != 0 {
+		t.Fatalf("expected zero allocations, got %f", allocs)
+	}
+}
+
+func BenchmarkParseIntoBytes(b *testing.B) {
+	var target [16]byte
+
+	for b.Loop() {
+		err := ParseIntoBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5", target[:])
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestMustParseIntoBytes(t *testing.T) {
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		expect := [16]byte{
+			0xa9, 0x67, 0xa8, 0xb9,
+			0x3f, 0x9c, 0x49, 0x18,
+			0x9a, 0x41, 0x19, 0x57,
+			0x7b, 0xe5, 0xfe, 0xc5,
+		}
+		var actual [16]byte
+		MustParseIntoBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5", actual[:])
+
+		if actual != expect {
+			t.Fatalf("got %q, want %q", actual, expect)
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("expected a panic")
+			}
+		}()
+
+		var target [16]byte
+		MustParseIntoBytes("invalid", target[:])
+	})
+
+	t.Run("when the target slice does not have adequate length", func(t *testing.T) {
+		t.Parallel()
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("expected a panic")
+			}
+		}()
+
+		var target [8]byte
+		MustParseIntoBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5", target[:])
+	})
+}
+
+func TestParseAsBytes(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		for _, c := range validCases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				expect := []byte{
+					0xa9, 0x67, 0xa8, 0xb9,
+					0x3f, 0x9c, 0x49, 0x18,
+					0x9a, 0x41, 0x19, 0x57,
+					0x7b, 0xe5, 0xfe, 0xc5,
+				}
+				actual, err := ParseAsBytes(c.String)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				if !bytes.Equal(actual, expect) {
+					t.Fatalf("got %v, want %v", actual, expect)
+				}
+			})
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		for _, c := range invalidCases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				_, err := ParseAsBytes(c.String)
+				if err == nil {
+					t.Fatal("expected an error")
+				}
+			})
+		}
+	})
+}
+
+func BenchmarkParseAsBytes(b *testing.B) {
+	for b.Loop() {
+		_, err := ParseAsBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func TestMustParseAsBytes(t *testing.T) {
+	t.Run("when the string is a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		expect := []byte{
+			0xa9, 0x67, 0xa8, 0xb9,
+			0x3f, 0x9c, 0x49, 0x18,
+			0x9a, 0x41, 0x19, 0x57,
+			0x7b, 0xe5, 0xfe, 0xc5,
+		}
+		actual := MustParseAsBytes("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+
+		if !bytes.Equal(actual, expect) {
+			t.Fatalf("got %q, want %q", actual, expect)
+		}
+	})
+
+	t.Run("when the string is not a valid UUID", func(t *testing.T) {
+		t.Parallel()
+
+		defer func() {
+			if r := recover(); r == nil {
+				t.Fatal("expected a panic")
+			}
+		}()
+
+		MustParseAsBytes("invalid")
 	})
 }
 
@@ -287,7 +608,6 @@ func TestUUID_AsBytes(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		c := c // capture loop variable
 		t.Run(c.Desc, func(t *testing.T) {
 			t.Parallel()
 
@@ -321,7 +641,6 @@ func TestUUID_AsString(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		c := c // capture loop variable
 		t.Run(c.Desc, func(t *testing.T) {
 			t.Parallel()
 
@@ -447,7 +766,6 @@ func TestUUID_Validate(t *testing.T) {
 		}
 
 		for _, c := range cases {
-			c := c // capture loop variable
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 

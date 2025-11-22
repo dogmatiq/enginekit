@@ -68,22 +68,20 @@ func Parse(str string) (*UUID, error) {
 	target := &uuid.Upper
 	shift := 60
 
-	for index := 0; index < 36; index++ {
-		char := str[index]
-
+	for index := range 36 {
 		switch index {
 		case 18:
 			target = &uuid.Lower
 			shift = 60
 			fallthrough
 		case 8, 13, 23:
-			if char != '-' {
-				return nil, errors.New("invalid UUID format, expected hyphen")
+			if str[index] != '-' {
+				return nil, fmt.Errorf("invalid UUID format, expected hyphen at position %d", index)
 			}
 		default:
-			value := fromHex[char]
-			if value == bad {
-				return nil, errors.New("invalid UUID format, expected hex digit")
+			value, err := fromHex(str, index)
+			if err != nil {
+				return nil, err
 			}
 
 			*target |= uint64(value) << shift
@@ -102,6 +100,114 @@ func MustParse(str string) *UUID {
 		panic(err)
 	}
 	return uuid
+}
+
+// ParseAsByteArray parses an RFC 9562 "hex-and-dash" UUID string directly to
+// its byte array representation.
+//
+// This is equivalent to calling AsByteArray() on the result of Parse(str),
+// but avoids all allocations.
+func ParseAsByteArray(str string) ([16]byte, error) {
+	var uuid [16]byte
+	return uuid, ParseIntoBytes(str, uuid[:])
+}
+
+// MustParseAsByteArray parses an RFC 9562 "hex-and-dash" UUID string directly
+// to its byte array representation, or panics if unable to do so.
+//
+// This is equivalent to calling MustParse(str).AsByteArray(), but avoids
+// all allocations.
+func MustParseAsByteArray(str string) [16]byte {
+	uuid, err := ParseAsByteArray(str)
+	if err != nil {
+		panic(err)
+	}
+	return uuid
+}
+
+// ParseIntoBytes parses an RFC 9562 "hex-and-dash" UUID string into the given
+// byte slice.
+//
+// This is equivalent to calling [CopyBytes] on the result of [Parse], but
+// avoids all allocations.
+func ParseIntoBytes(str string, dst []byte) error {
+	if len(dst) < 16 {
+		return fmt.Errorf(
+			"destination slice must have at least 16 bytes, got %d",
+			len(dst),
+		)
+	}
+
+	if len(str) != 36 {
+		return errors.New("invalid UUID format, expected 36 characters")
+	}
+
+	read := 0
+	write := 0
+
+	for read < 36 {
+		switch read {
+		case 8, 13, 18, 23:
+			if str[read] != '-' {
+				return fmt.Errorf("invalid UUID format, expected hyphen at position %d", read)
+			}
+
+			read++
+		}
+
+		high, err := fromHex(str, read)
+		if err != nil {
+			return err
+		}
+
+		read++
+
+		low, err := fromHex(str, read)
+		if err != nil {
+			return err
+		}
+
+		read++
+
+		dst[write] = (high << 4) | low
+		write++
+	}
+
+	return nil
+}
+
+// MustParseIntoBytes parses an RFC 9562 "hex-and-dash" UUID string into the
+// given byte slice, or panics if unable to do so.
+//
+// This is equivalent to calling [CopyBytes] on the result of [MustParse], but
+// avoids all allocations.
+func MustParseIntoBytes(str string, dst []byte) {
+	if err := ParseIntoBytes(str, dst); err != nil {
+		panic(err)
+	}
+}
+
+// ParseAsBytes parses an RFC 9562 "hex-and-dash" UUID string directly to its
+// byte slice representation.
+//
+// This is equivalent to calling AsBytes() on the result of Parse(str),
+// but avoids allocation of the intermediate [UUID] struct.
+func ParseAsBytes(str string) ([]byte, error) {
+	uuid, err := ParseAsByteArray(str)
+	if err != nil {
+		return nil, err
+	}
+	return uuid[:], nil
+}
+
+// MustParseAsBytes parses an RFC 9562 "hex-and-dash" UUID string directly to
+// its byte slice representation, or panics if unable to do so.
+//
+// This is equivalent to calling MustParse(str).AsBytes(), but avoids allocation
+// of the intermediate [UUID] struct.
+func MustParseAsBytes(str string) []byte {
+	uuid := MustParseAsByteArray(str)
+	return uuid[:]
 }
 
 // FromByteArray returns a UUID from a byte array.
@@ -253,7 +359,7 @@ var (
 		'c', 'd', 'e', 'f',
 	}
 
-	fromHex = [256]byte{
+	fromHexMap = [256]byte{
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
@@ -272,6 +378,16 @@ var (
 		bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad, bad,
 	}
 )
+
+// fromHex returns the numerical value of a hexadecimal digit at the given index
+// in str.
+func fromHex(str string, index int) (byte, error) {
+	v := fromHexMap[str[index]]
+	if v == bad {
+		return 0, fmt.Errorf("invalid UUID format, expected hex digit at position %d", index)
+	}
+	return v, nil
+}
 
 // plain is a [comparable] representation of a [UUID].
 type plain struct {

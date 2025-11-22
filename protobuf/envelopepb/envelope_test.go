@@ -61,7 +61,6 @@ func TestEnvelope_Validate(t *testing.T) {
 		}
 
 		for _, c := range cases {
-			c := c // capture loop variable
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 
@@ -176,7 +175,6 @@ func TestEnvelope_Validate(t *testing.T) {
 		}
 
 		for _, c := range cases {
-			c := c // capture loop variable
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 

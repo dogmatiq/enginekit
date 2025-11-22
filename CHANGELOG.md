@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.7] - 2025-11-23
+
+### Added
+
+- Added functions to the `uuidpb` package for parsing RFC 9562 UUID strings
+  directly into their various binary representations:
+  - `ParseAsByteArray()` is equivalent to `Parse(x).AsByteArray()` but avoids all allocations.
+  - `ParseIntoBytes()` is equivalent to `Parse(x).AsBytes()`, but avoids all allocations.
+  - `ParseAsBytes()` is equivalent to `Parse(x).AsBytes()`, but avoids the intermediate `uuidpb.UUID` allocation.
+  - Each function has a `MustXXX()` variant that panics instead of returning an error.
+
 ## [0.19.6] - 2025-11-22
 
 ### Added
@@ -326,6 +337,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.4]: https://github.com/dogmatiq/enginekit/releases/v0.19.4
 [0.19.5]: https://github.com/dogmatiq/enginekit/releases/v0.19.5
 [0.19.6]: https://github.com/dogmatiq/enginekit/releases/v0.19.6
+[0.19.7]: https://github.com/dogmatiq/enginekit/releases/v0.19.7
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

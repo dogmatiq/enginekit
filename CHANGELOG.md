@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.6] - 2025-11-22
+
+### Added
+
+- Added `stubs.ProjectionCompactScopeStub` and `stubs.ProjectionResetScopeStub`.
+
 ## [0.19.5] - 2025-11-22
 
 ### Added
@@ -319,6 +325,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.3]: https://github.com/dogmatiq/enginekit/releases/v0.19.3
 [0.19.4]: https://github.com/dogmatiq/enginekit/releases/v0.19.4
 [0.19.5]: https://github.com/dogmatiq/enginekit/releases/v0.19.5
+[0.19.6]: https://github.com/dogmatiq/enginekit/releases/v0.19.6
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

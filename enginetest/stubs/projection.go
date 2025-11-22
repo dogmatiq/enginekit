@@ -137,3 +137,51 @@ func (s *ProjectionEventScopeStub) CheckpointOffset() uint64 {
 	}
 	return 0
 }
+
+// ProjectionCompactScopeStub is a test implementation of
+// [dogma.ProjectionCompactScope].
+type ProjectionCompactScopeStub struct {
+	NowFunc func() time.Time
+	LogFunc func(format string, args ...any)
+}
+
+var _ dogma.ProjectionCompactScope = (*ProjectionCompactScopeStub)(nil)
+
+// Now returns the current local time according to the engine.
+func (s *ProjectionCompactScopeStub) Now() time.Time {
+	if s.NowFunc != nil {
+		return s.NowFunc()
+	}
+	return time.Now()
+}
+
+// Log records an informational message using [fmt.Printf]-style formatting.
+func (s *ProjectionCompactScopeStub) Log(format string, args ...any) {
+	if s.LogFunc != nil {
+		s.LogFunc(format, args...)
+	}
+}
+
+// ProjectionResetScopeStub is a test implementation of
+// [dogma.ProjectionResetScope].
+type ProjectionResetScopeStub struct {
+	NowFunc func() time.Time
+	LogFunc func(format string, args ...any)
+}
+
+var _ dogma.ProjectionResetScope = (*ProjectionResetScopeStub)(nil)
+
+// Now returns the current local time according to the engine.
+func (s *ProjectionResetScopeStub) Now() time.Time {
+	if s.NowFunc != nil {
+		return s.NowFunc()
+	}
+	return time.Now()
+}
+
+// Log records an informational message using [fmt.Printf]-style formatting.
+func (s *ProjectionResetScopeStub) Log(format string, args ...any) {
+	if s.LogFunc != nil {
+		s.LogFunc(format, args...)
+	}
+}

@@ -1,6 +1,7 @@
 package prototest_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -77,8 +78,5 @@ func (m *mockT) Helper() {}
 
 func (m *mockT) Errorf(format string, args ...any) {
 	m.failed = true
-	m.message = format
-	if len(args) > 0 {
-		m.message = args[0].(string)
-	}
+	m.message = fmt.Sprintf(format, args...)
 }

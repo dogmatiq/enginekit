@@ -73,11 +73,42 @@ func (x *Identity) Validate() error {
 // Format implements the fmt.Formatter interface, allowing UUIDs to be formatted
 // with functions from the fmt package.
 func (x *Identity) Format(f fmt.State, verb rune) {
-	fmt.Fprintf(
-		f,
-		fmt.FormatString(f, verb),
-		fmt.Sprintf("%s/%s", x.GetName(), x.GetKey()),
-	)
+	format := fmt.FormatString(f, verb)
+
+	// If we're formatting as a string, use a slash separated notation.
+	if verb == 's' {
+		str := fmt.Sprintf("%s/%s", x.GetName(), x.GetKey())
+		fmt.Fprintf(f, format, str)
+		return
+	}
+
+	// If we're formatting the Go syntax, output something more useful than the
+	// protobuf internals.
+	if verb == 'v' && f.Flag('#') {
+		fmt.Fprintf(
+			f,
+			"identitypb.New(%#v, %#v)",
+			x.GetName(),
+			x.GetKey(),
+		)
+		return
+	}
+
+	// Otherwise, fall-back to the default behavior. In order to avoid infinite
+	// recursion into this method, we define a new type that does not have any
+	// methods.
+
+	// First, we create an alias to the _real_ type so that we can base our new
+	// type on it without causing a recursive type definition.
+	type realType = Identity
+
+	// Then, we create a new type with the structure of the real type, but none
+	// of its methods. We use the same name as the real type so that any format
+	// verbs that include the type name (such as "%T") will still print the
+	// correct name.
+	type Identity realType
+
+	fmt.Fprintf(f, format, (*Identity)(x))
 }
 
 // Equal returns true if x and id are equal.

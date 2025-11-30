@@ -693,6 +693,11 @@ func TestUUID_Format(t *testing.T) {
 			`"a967a8b9-3f9c-4918-9a41-19577be5fec5"`,
 		},
 		{
+			"go string",
+			"%#v",
+			`uuidpb.MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5")`,
+		},
+		{
 			"fallback",
 			"%v",
 			`&{{{} [] [] <nil>} 12206910828600641816 11115193218858614469 [] 0}`, // depends on protobuf internals, unfortunately

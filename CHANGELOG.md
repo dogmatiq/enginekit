@@ -11,6 +11,15 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.8] - 2025-11-30
+
+### Changed
+
+- Improved `uuidpb.UUID.Format()` and `identitypb.Identity.Format()` to handle
+  `%#v` verb by rendering Go syntax that can be used to recreate the value using
+  functions from their respective packages, instead of the default Protocol
+  Buffers struct representation.
+
 ## [0.19.7] - 2025-11-23
 
 ### Added
@@ -338,6 +347,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.5]: https://github.com/dogmatiq/enginekit/releases/v0.19.5
 [0.19.6]: https://github.com/dogmatiq/enginekit/releases/v0.19.6
 [0.19.7]: https://github.com/dogmatiq/enginekit/releases/v0.19.7
+[0.19.8]: https://github.com/dogmatiq/enginekit/releases/v0.19.8
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

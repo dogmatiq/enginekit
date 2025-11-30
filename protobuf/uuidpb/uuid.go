@@ -298,19 +298,26 @@ func (x *UUID) Format(f fmt.State, verb rune) {
 		return
 	}
 
+	// If we're formatting the Go syntax, output something more useful than the
+	// protobuf internals.
+	if verb == 'v' && f.Flag('#') {
+		fmt.Fprintf(f, "uuidpb.MustParse(%q)", x.AsString())
+		return
+	}
+
 	// Otherwise, fall-back to the default behavior. In order to avoid infinite
 	// recursion into this method, we define a new type that does not have any
 	// methods.
 
-	// First, we create an alias to the _real_ UUID type so that we can base
-	// our new type on it without causing a recursive type definition.
-	type realUUID = UUID
+	// First, we create an alias to the _real_ type so that we can base our new
+	// type on it without causing a recursive type definition.
+	type realType = UUID
 
-	// Then, we create a new type with the structure of the real UUID type, but
-	// none of its methods. We "reuse" the name "UUID" so that any format verbs
-	// that include the type name (such as "%T") will still print the correct
-	// name.
-	type UUID realUUID
+	// Then, we create a new type with the structure of the real type, but none
+	// of its methods. We use the same name as the real type so that any format
+	// verbs that include the type name (such as "%T") will still print the
+	// correct name.
+	type UUID realType
 
 	fmt.Fprintf(f, format, (*UUID)(x))
 }

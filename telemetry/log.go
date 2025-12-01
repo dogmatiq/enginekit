@@ -15,7 +15,7 @@ func (r *Recorder) Info(
 	event, message string,
 	attrs ...Attr,
 ) {
-	r.recordEvent(ctx, log.SeverityInfo, event, message, nil, attrs)
+	r.log(ctx, log.SeverityInfo, event, message, nil, attrs)
 }
 
 // Error logs an error message to the log and as a span event.
@@ -27,7 +27,7 @@ func (r *Recorder) Error(
 	err error,
 	attrs ...Attr,
 ) {
-	r.recordEvent(ctx, log.SeverityError, event, err.Error(), err, attrs)
+	r.log(ctx, log.SeverityError, event, err.Error(), err, attrs)
 	r.errorCount(ctx, 1)
 
 	span := trace.SpanFromContext(ctx)
@@ -35,7 +35,7 @@ func (r *Recorder) Error(
 	span.RecordError(err)
 }
 
-func (r *Recorder) recordEvent(
+func (r *Recorder) log(
 	ctx context.Context,
 	severity log.Severity,
 	event, message string,
@@ -51,27 +51,27 @@ func (r *Recorder) recordEvent(
 		return
 	}
 
-	span := trace.SpanFromContext(ctx)
-	span.AddEvent(
-		event,
-		trace.WithAttributes(attribute.String("message", message)),
-		trace.WithAttributes(asAttrKeyValues(attrs)...),
-	)
-
 	var rec log.Record
 	rec.SetEventName(event)
+	rec.SetBody(log.StringValue(message))
 	rec.SetSeverity(severity)
-	rec.AddAttributes(r.logKVs...)
-	rec.AddAttributes(log.String("message", message))
 
 	if err != nil {
 		rec.AddAttributes(log.String("error", err.Error()))
 	}
 
-	if len(attrs) != 0 {
-		kvs := asLogKeyValues(attrs)
-		rec.SetBody(log.MapValue(kvs...))
+	span, ok := ctx.Value(contextKey{}).(*Span)
+	if ok {
+		span.underlying.AddEvent(
+			event,
+			trace.WithAttributes(attribute.String("message", message)),
+			trace.WithAttributes(asAttrKeyValues(attrs)...),
+		)
+
+		rec.AddAttributes(asLogKeyValues(span.attrs)...)
 	}
+
+	rec.AddAttributes(asLogKeyValues(attrs)...)
 
 	r.logger.Emit(ctx, rec)
 }

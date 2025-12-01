@@ -8,8 +8,9 @@ import (
 
 // Span represents a single named and timed operation of a workflow.
 type Span struct {
-	span trace.Span
-	end  func()
+	underlying trace.Span
+	attrs      []Attr
+	end        func()
 }
 
 // StartSpan starts a new span and records the operation to the recorder's
@@ -22,7 +23,6 @@ func (r *Recorder) StartSpan(
 	ctx, underlying := r.tracer.Start(
 		ctx,
 		name,
-		trace.WithAttributes(r.attrKVs.ToSlice()...),
 		trace.WithAttributes(asAttrKeyValues(attrs)...),
 	)
 
@@ -30,20 +30,36 @@ func (r *Recorder) StartSpan(
 	r.operationCount(ctx, 1, op)
 	r.operationsInFlightCount(ctx, 1, op)
 
-	return ctx, &Span{
-		span: underlying,
-		end:  func() { r.operationsInFlightCount(ctx, -1, op) },
+	span := &Span{
+		underlying: underlying,
+		end:        func() { r.operationsInFlightCount(ctx, -1, op) },
 	}
+
+	return context.WithValue(ctx, contextKey{}, span), span
 }
 
 // End completes the span and decrements the "in-flight" gauge instrument.
 func (s *Span) End() {
 	s.end()
-	s.span.End()
+	s.underlying.End()
 }
 
 // SetAttributes adds the given attributes to the underlying OpenTelemetry span
 // and any future log messages.
 func (s *Span) SetAttributes(attrs ...Attr) {
-	s.span.SetAttributes(asAttrKeyValues(attrs)...)
+next:
+	for _, attr := range attrs {
+		for i, x := range s.attrs {
+			if x.key == attr.key {
+				s.attrs[i] = attr
+				continue next
+			}
+		}
+
+		s.attrs = append(s.attrs, attr)
+	}
+
+	s.underlying.SetAttributes(asAttrKeyValues(attrs)...)
 }
+
+type contextKey struct{}

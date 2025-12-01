@@ -141,7 +141,7 @@ func (a Attr) asLogKeyValue() (log.KeyValue, bool) {
 	case attrTypeNone:
 		return log.KeyValue{}, false
 	case attrTypeBinary:
-		return log.Bytes(a.key, []byte(a.str)), true
+		return log.Bytes(a.key, []byte(strconv.QuoteToASCII(a.str))), true
 	case attrTypeString:
 		return log.String(a.key, a.str), true
 	case attrTypeBool:

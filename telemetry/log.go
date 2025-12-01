@@ -23,11 +23,11 @@ func (r *Recorder) Info(
 // It marks the span as an error and emits increments the "errors" metric.
 func (r *Recorder) Error(
 	ctx context.Context,
-	event string,
+	event, message string,
 	err error,
 	attrs ...Attr,
 ) {
-	r.log(ctx, log.SeverityError, event, err.Error(), err, attrs)
+	r.log(ctx, log.SeverityError, event, message, err, attrs)
 	r.errorCount(ctx, 1)
 
 	span := trace.SpanFromContext(ctx)
@@ -53,8 +53,8 @@ func (r *Recorder) log(
 
 	var rec log.Record
 	rec.SetEventName(event)
-	rec.SetBody(log.StringValue(message))
 	rec.SetSeverity(severity)
+	rec.SetBody(log.StringValue(message))
 
 	if err != nil {
 		rec.AddAttributes(log.String("error", err.Error()))

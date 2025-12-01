@@ -58,8 +58,22 @@ func (l *testLogger) Emit(ctx context.Context, rec log.Record) {
 		level = slog.LevelInfo
 	}
 
-	message := rec.EventName()
 	var attrs []slog.Attr
+
+	message := "?"
+
+	if rec.Body().Kind() == log.KindString {
+		message = rec.Body().AsString()
+	} else if !rec.Body().Empty() {
+		attrs = append(
+			attrs,
+			convertValue("body", rec.Body()),
+		)
+	}
+
+	if ev := rec.EventName(); ev != "" {
+		attrs = append(attrs, slog.String("event", ev))
+	}
 
 	rec.WalkAttributes(
 		func(kv log.KeyValue) bool {
@@ -70,15 +84,6 @@ func (l *testLogger) Emit(ctx context.Context, rec log.Record) {
 			return true
 		},
 	)
-
-	if rec.Body().Kind() == log.KindString {
-		message += ": " + rec.Body().AsString()
-	} else if !rec.Body().Empty() {
-		attrs = append(
-			attrs,
-			convertValue("body", rec.Body()),
-		)
-	}
 
 	if !rec.Timestamp().IsZero() {
 		attrs = append(attrs, slog.Time("timestamp", rec.Timestamp()))

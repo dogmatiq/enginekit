@@ -141,7 +141,24 @@ func (a Attr) asLogKeyValue() (log.KeyValue, bool) {
 	case attrTypeNone:
 		return log.KeyValue{}, false
 	case attrTypeBinary:
-		return log.String(a.key, strconv.QuoteToASCII(a.str)), true
+		data := []byte(a.str)
+
+		// threshold is the number of characters that must be printable
+		// in order to render as a quoted ASCII string.
+		threshold := len(data) - (len(data) / 3)
+
+		count := 0
+		for _, ch := range data {
+			if ch >= ' ' || ch <= '~' {
+				count++
+				if count > threshold {
+					return log.String(a.key, strconv.QuoteToASCII(a.str)), true
+				}
+			}
+		}
+
+		return log.Bytes(a.key, data), true
+
 	case attrTypeString:
 		return log.String(a.key, a.str), true
 	case attrTypeBool:

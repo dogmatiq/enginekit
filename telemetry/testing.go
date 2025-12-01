@@ -123,7 +123,7 @@ func convertValue(name string, v log.Value) slog.Attr {
 		return slog.String(name, v.AsString())
 
 	case log.KindBytes:
-		return slog.Any(name, v.AsBytes())
+		return slog.String(name, v.AsString())
 
 	case log.KindSlice:
 		var attrs []slog.Attr

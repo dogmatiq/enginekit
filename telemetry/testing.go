@@ -58,6 +58,7 @@ func (l *testLogger) Emit(ctx context.Context, rec log.Record) {
 		level = slog.LevelInfo
 	}
 
+	message := rec.EventName()
 	var attrs []slog.Attr
 
 	rec.WalkAttributes(
@@ -70,13 +71,8 @@ func (l *testLogger) Emit(ctx context.Context, rec log.Record) {
 		},
 	)
 
-	if rec.Body().Kind() == log.KindMap {
-		for _, pair := range rec.Body().AsMap() {
-			attrs = append(
-				attrs,
-				convertValue(pair.Key, pair.Value),
-			)
-		}
+	if rec.Body().Kind() == log.KindString {
+		message += ": " + rec.Body().AsString()
 	} else if !rec.Body().Empty() {
 		attrs = append(
 			attrs,
@@ -95,7 +91,7 @@ func (l *testLogger) Emit(ctx context.Context, rec log.Record) {
 	l.logger.LogAttrs(
 		ctx,
 		level,
-		rec.EventName(),
+		message,
 		attrs...,
 	)
 }

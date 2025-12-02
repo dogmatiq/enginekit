@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.10] - 2025-12-02
+
+### Fixed
+
+- Ensure `telemetry.Span` attributes set on span creation are added to log
+  records.
+
 ## [0.19.9] - 2025-12-02
 
 ### Added
@@ -355,6 +362,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.7]: https://github.com/dogmatiq/enginekit/releases/v0.19.7
 [0.19.8]: https://github.com/dogmatiq/enginekit/releases/v0.19.8
 [0.19.9]: https://github.com/dogmatiq/enginekit/releases/v0.19.9
+[0.19.10]: https://github.com/dogmatiq/enginekit/releases/v0.19.10
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

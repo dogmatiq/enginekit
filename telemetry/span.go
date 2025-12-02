@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"context"
+	"slices"
 
 	"go.opentelemetry.io/otel/trace"
 )
@@ -31,8 +32,9 @@ func (r *Recorder) StartSpan(
 	r.operationsInFlightCount(ctx, 1, op)
 
 	span := &Span{
-		underlying: underlying,
-		end:        func() { r.operationsInFlightCount(ctx, -1, op) },
+		underlying,
+		slices.Clone(attrs),
+		func() { r.operationsInFlightCount(ctx, -1, op) },
 	}
 
 	return context.WithValue(ctx, contextKey{}, span), span

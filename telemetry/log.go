@@ -60,6 +60,8 @@ func (r *Recorder) log(
 		rec.AddAttributes(log.String("error", err.Error()))
 	}
 
+	rec.AddAttributes(r.logKVs...)
+
 	span, ok := ctx.Value(contextKey{}).(*Span)
 	if ok {
 		span.underlying.AddEvent(

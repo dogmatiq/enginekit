@@ -24,6 +24,7 @@ func (r *Recorder) StartSpan(
 	ctx, underlying := r.tracer.Start(
 		ctx,
 		name,
+		trace.WithAttributes(r.attrKVs.ToSlice()...),
 		trace.WithAttributes(asAttrKeyValues(attrs)...),
 	)
 

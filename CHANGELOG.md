@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.15] - 2025-12-05
+
+### Added
+
+- Added global attributes to `telemetry.Provider` that are applied to all spans,
+  metrics and log records created by the provider.
+
 ## [0.19.14] - 2025-12-04
 
 - Remove use of `slog.GroupAttrs()`, which is only available as of Go v1.25 (the
@@ -392,6 +399,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.12]: https://github.com/dogmatiq/enginekit/releases/v0.19.12
 [0.19.13]: https://github.com/dogmatiq/enginekit/releases/v0.19.13
 [0.19.14]: https://github.com/dogmatiq/enginekit/releases/v0.19.14
+[0.19.15]: https://github.com/dogmatiq/enginekit/releases/v0.19.15
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

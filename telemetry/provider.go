@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"runtime/debug"
+	"slices"
 	"strings"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -21,6 +22,7 @@ type Provider struct {
 	TracerProvider trace.TracerProvider
 	MeterProvider  metric.MeterProvider
 	LoggerProvider log.LoggerProvider
+	Attrs          []Attr
 }
 
 // Recorder records traces, metrics and logs for a particular subsystem.
@@ -52,6 +54,11 @@ func (p *Provider) Recorder(pkg string, attrs ...Attr) *Recorder {
 		tracerProvider = p.TracerProvider
 		meterProvider = p.MeterProvider
 		loggerProvider = p.LoggerProvider
+
+		attrs = append(
+			slices.Clone(p.Attrs),
+			attrs...,
+		)
 	}
 
 	if tracerProvider == nil {

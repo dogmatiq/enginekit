@@ -136,7 +136,7 @@ func convertValue(name string, v log.Value) slog.Attr {
 				),
 			)
 		}
-		return slog.GroupAttrs(name, attrs...)
+		return groupAttrs(name, attrs)
 
 	case log.KindMap:
 		var attrs []slog.Attr
@@ -149,12 +149,18 @@ func convertValue(name string, v log.Value) slog.Attr {
 				),
 			)
 		}
-		return slog.Attr{
-			Key:   name,
-			Value: slog.GroupValue(attrs...),
-		}
+		return groupAttrs(name, attrs)
 
 	default:
 		return slog.String(name, v.String())
+	}
+}
+
+// TODO: remove this when go.mod is updated to Go 1.25 or later, then use
+// [slog.GroupAttrs] instead.
+func groupAttrs(name string, attrs []slog.Attr) slog.Attr {
+	return slog.Attr{
+		Key:   name,
+		Value: slog.GroupValue(attrs...),
 	}
 }

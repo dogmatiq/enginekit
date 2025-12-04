@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.13] - 2025-12-04
+
+### Fixed
+
+- Remove use of `slog.GroupAttrs()`, which is only available as of Go v1.25 (the
+  module targets Go v1.24).
+
 ## [0.19.12] - 2025-12-04
 
 ### Added
@@ -378,6 +385,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.10]: https://github.com/dogmatiq/enginekit/releases/v0.19.10
 [0.19.11]: https://github.com/dogmatiq/enginekit/releases/v0.19.11
 [0.19.12]: https://github.com/dogmatiq/enginekit/releases/v0.19.12
+[0.19.13]: https://github.com/dogmatiq/enginekit/releases/v0.19.13
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

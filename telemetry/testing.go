@@ -149,7 +149,10 @@ func convertValue(name string, v log.Value) slog.Attr {
 				),
 			)
 		}
-		return slog.GroupAttrs(name, attrs...)
+		return slog.Attr{
+			Key:   name,
+			Value: slog.GroupValue(attrs...),
+		}
 
 	default:
 		return slog.String(name, v.String())

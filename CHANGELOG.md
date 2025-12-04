@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.19.16] - 2025-12-05
+
+### Added
+
+- Added `telemetry.NewSLogProvider()`, which adapts an `slog.Logger` to the
+  OpenTelemetry `log.LoggerProvider` interface.
+
 ## [0.19.15] - 2025-12-05
 
 ### Added
@@ -400,6 +407,7 @@ which itself includes a large numbers of breaking changes.
 [0.19.13]: https://github.com/dogmatiq/enginekit/releases/v0.19.13
 [0.19.14]: https://github.com/dogmatiq/enginekit/releases/v0.19.14
 [0.19.15]: https://github.com/dogmatiq/enginekit/releases/v0.19.15
+[0.19.16]: https://github.com/dogmatiq/enginekit/releases/v0.19.16
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

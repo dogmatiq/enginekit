@@ -477,6 +477,36 @@ func TestMustParseAsBytes(t *testing.T) {
 	})
 }
 
+func TestFromBytes(t *testing.T) {
+	t.Parallel()
+
+	subject := []byte{
+		0xa9, 0x67, 0xa8, 0xb9,
+		0x3f, 0x9c, 0x49, 0x18,
+		0x9a, 0x41, 0x19, 0x57,
+		0x7b, 0xe5, 0xfe, 0xc5,
+	}
+
+	actual, err := FromBytes(subject)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expect := &UUID{
+		Upper: 0xa967a8b93f9c4918,
+		Lower: 0x9a4119577be5fec5,
+	}
+
+	if !proto.Equal(actual, expect) {
+		t.Fatalf("got %s, want %s", actual, expect)
+	}
+
+	_, err = FromBytes(subject[:8])
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+}
+
 func TestFromByteArray(t *testing.T) {
 	t.Parallel()
 
@@ -564,7 +594,7 @@ func TestCopyBytes(t *testing.T) {
 	})
 }
 
-func TestUUID_AsBytes(t *testing.T) {
+func TestUUID_AsBytesAndAsByteArray(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
@@ -615,6 +645,11 @@ func TestUUID_AsBytes(t *testing.T) {
 
 			if !bytes.Equal(actual, c.Expect) {
 				t.Fatalf("got %q, want %q", actual, c.Expect)
+			}
+
+			array := c.Subject.AsByteArray()
+			if !bytes.Equal(array[:], c.Expect) {
+				t.Fatalf("got %q, want %q", array, c.Expect)
 			}
 		})
 	}

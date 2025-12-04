@@ -210,6 +210,34 @@ func MustParseAsBytes(str string) []byte {
 	return uuid[:]
 }
 
+// FromBytes returns a UUID from a byte slice.
+//
+// It returns an error if the length of the slice is not exactly 16 bytes.
+func FromBytes[T ~[]B, B byte](data T) (*UUID, error) {
+	if len(data) != 16 {
+		return nil, fmt.Errorf("slice must be exactly 16 bytes, got %d", len(data))
+	}
+
+	return &UUID{
+		Upper: uint64(data[0])<<56 |
+			uint64(data[1])<<48 |
+			uint64(data[2])<<40 |
+			uint64(data[3])<<32 |
+			uint64(data[4])<<24 |
+			uint64(data[5])<<16 |
+			uint64(data[6])<<8 |
+			uint64(data[7]),
+		Lower: uint64(data[8])<<56 |
+			uint64(data[9])<<48 |
+			uint64(data[10])<<40 |
+			uint64(data[11])<<32 |
+			uint64(data[12])<<24 |
+			uint64(data[13])<<16 |
+			uint64(data[14])<<8 |
+			uint64(data[15]),
+	}, nil
+}
+
 // FromByteArray returns a UUID from a byte array.
 func FromByteArray[T ~[16]B, B byte](data T) *UUID {
 	return &UUID{
@@ -272,6 +300,11 @@ func CopyBytes[T ~[]B, B byte](x *UUID, dst T) int {
 func (x *UUID) AsBytes() []byte {
 	data := AsByteArray[[16]byte](x)
 	return data[:]
+}
+
+// AsByteArray returns the UUID as a byte array.
+func (x *UUID) AsByteArray() [16]byte {
+	return AsByteArray[[16]byte](x)
 }
 
 // AsString returns the UUID as an RFC 9562 string.

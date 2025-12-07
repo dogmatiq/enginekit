@@ -46,6 +46,11 @@ func (b *ProjectionBuilder) Disabled(fn func(*FlagBuilder[config.Disabled])) {
 	b.target.DisabledFlags = append(b.target.DisabledFlags, Flag(fn))
 }
 
+// ConcurrencyPreference sets the concurrency preference of the handler.
+func (b *ProjectionBuilder) ConcurrencyPreference(fn func(*ConcurrencyPreferenceBuilder)) {
+	b.target.ConcurrencyPreferences = append(b.target.ConcurrencyPreferences, ConcurrencyPreference(fn))
+}
+
 // Partial marks the compomnent as partially configured.
 func (b *ProjectionBuilder) Partial() {
 	b.target.IsPartial = true

@@ -6,7 +6,11 @@ import (
 	"github.com/dogmatiq/enginekit/config/internal/configbuilder"
 )
 
-type handlerConfigurer[R dogma.MessageRoute, T config.Handler, H any] struct {
+type handlerConfigurer[
+	R dogma.MessageRoute,
+	T config.Handler,
+	H any,
+] struct {
 	b configbuilder.HandlerBuilder[T, H]
 }
 
@@ -37,4 +41,32 @@ func (c *handlerConfigurer[R, T, H]) Disable(...dogma.DisableOption) {
 	c.b.Disabled(func(b *configbuilder.FlagBuilder[config.Disabled]) {
 		b.Value(true)
 	})
+}
+
+type handlerConfigurerWithConcurrencyPreference[
+	R dogma.MessageRoute,
+	T config.Handler,
+	H any,
+] struct {
+	*handlerConfigurer[R, T, H]
+	b configbuilder.HandlerBuilderWithConcurrencyPreference[T, H]
+}
+
+func newHandlerConfigurerWithConcurrencyPreference[
+	R dogma.MessageRoute,
+	T config.Handler,
+	H any,
+](b configbuilder.HandlerBuilderWithConcurrencyPreference[T, H]) *handlerConfigurerWithConcurrencyPreference[R, T, H] {
+	return &handlerConfigurerWithConcurrencyPreference[R, T, H]{
+		newHandlerConfigurer[R](b),
+		b,
+	}
+}
+
+func (c *handlerConfigurerWithConcurrencyPreference[R, T, H]) ConcurrencyPreference(p dogma.ConcurrencyPreference) {
+	c.b.ConcurrencyPreference(
+		func(b *configbuilder.ConcurrencyPreferenceBuilder) {
+			b.Value(p)
+		},
+	)
 }

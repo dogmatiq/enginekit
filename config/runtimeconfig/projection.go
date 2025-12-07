@@ -18,15 +18,8 @@ func buildProjection(b *configbuilder.ProjectionBuilder, h dogma.ProjectionMessa
 	if h == nil {
 		b.Partial()
 	} else {
+		c := newHandlerConfigurerWithConcurrencyPreference[dogma.ProjectionRoute](b)
 		b.Source(h)
-		h.Configure(&projectionConfigurer{
-			newHandlerConfigurer[dogma.ProjectionRoute](b),
-			b,
-		})
+		h.Configure(c)
 	}
-}
-
-type projectionConfigurer struct {
-	*handlerConfigurer[dogma.ProjectionRoute, *config.Projection, dogma.ProjectionMessageHandler]
-	b *configbuilder.ProjectionBuilder
 }

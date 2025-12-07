@@ -43,16 +43,27 @@ type HandlerBuilder[T config.Handler, H any] interface {
 	Disabled(fn func(*FlagBuilder[config.Disabled]))
 }
 
+// HandlerBuilderWithConcurrencyPreference is an interface for builders that
+// produce a [config.Handler] that supports configuring a
+// [config.ConcurrencyPreference].
+type HandlerBuilderWithConcurrencyPreference[T config.Handler, H any] interface {
+	HandlerBuilder[T, H]
+
+	// ConcurrencyPreference calls fn which configures a
+	// [config.ConcurrencyPreference] that is added to the handler.
+	ConcurrencyPreference(fn func(*ConcurrencyPreferenceBuilder))
+}
+
 var (
 	_ ComponentBuilder[*config.Identity]              = (*IdentityBuilder)(nil)
 	_ ComponentBuilder[*config.Flag[config.Disabled]] = (*FlagBuilder[config.Disabled])(nil)
 
 	_ EntityBuilder[*config.Application, dogma.Application] = (*ApplicationBuilder)(nil)
 
-	_ HandlerBuilder[*config.Aggregate, dogma.AggregateMessageHandler]     = (*AggregateBuilder)(nil)
-	_ HandlerBuilder[*config.Process, dogma.ProcessMessageHandler]         = (*ProcessBuilder)(nil)
-	_ HandlerBuilder[*config.Integration, dogma.IntegrationMessageHandler] = (*IntegrationBuilder)(nil)
-	_ HandlerBuilder[*config.Projection, dogma.ProjectionMessageHandler]   = (*ProjectionBuilder)(nil)
+	_ HandlerBuilder[*config.Aggregate, dogma.AggregateMessageHandler]                              = (*AggregateBuilder)(nil)
+	_ HandlerBuilder[*config.Process, dogma.ProcessMessageHandler]                                  = (*ProcessBuilder)(nil)
+	_ HandlerBuilderWithConcurrencyPreference[*config.Integration, dogma.IntegrationMessageHandler] = (*IntegrationBuilder)(nil)
+	_ HandlerBuilderWithConcurrencyPreference[*config.Projection, dogma.ProjectionMessageHandler]   = (*ProjectionBuilder)(nil)
 
 	_ ComponentBuilder[*config.Route] = (*RouteBuilder)(nil)
 )

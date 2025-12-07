@@ -14,7 +14,7 @@ import (
 )
 
 func TestProjection(t *testing.T) {
-	testHandler(
+	testHandlerWithConcurrencyPreference(
 		t,
 		configbuilder.Projection,
 		runtimeconfig.FromProjection,
@@ -197,6 +197,7 @@ func TestProjection(t *testing.T) {
 					`valid projection *github.com/dogmatiq/enginekit/enginetest/stubs.ProjectionMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid concurrency preference, set to dogma.MinimizeConcurrency`,
 				),
 				Component: runtimeconfig.FromProjection(&ProjectionMessageHandlerStub{
 					ConfigureFunc: func(c dogma.ProjectionConfigurer) {
@@ -204,6 +205,7 @@ func TestProjection(t *testing.T) {
 						c.Routes(
 							dogma.HandlesEvent[*EventStub[TypeA]](),
 						)
+						c.ConcurrencyPreference(dogma.MinimizeConcurrency)
 					},
 				}),
 			},

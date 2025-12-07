@@ -10,7 +10,8 @@ import (
 // [dogma.ProjectionMessageHandler].
 type Projection struct {
 	HandlerCommon
-	Source optional.Optional[dogma.ProjectionMessageHandler]
+	Source                 optional.Optional[dogma.ProjectionMessageHandler]
+	ConcurrencyPreferences []*ConcurrencyPreference
 }
 
 // Identity returns the entity's identity.
@@ -41,6 +42,14 @@ func (h *Projection) IsDisabled() bool {
 	return resolveIsDisabled(h)
 }
 
+// ConcurrencyPreference returns the [dogma.ConcurrencyPreference] for the
+// handler.
+//
+// It panics if the configuration does not specify the preference unambiguously.
+func (h *Projection) ConcurrencyPreference() dogma.ConcurrencyPreference {
+	return resolveConcurrencyPreference(h, h.ConcurrencyPreferences)
+}
+
 // Interface returns the [dogma.Application] that the entity represents.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return resolveInterface(h, h.Source)
@@ -52,8 +61,10 @@ func (h *Projection) String() string {
 
 func (h *Projection) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
+	validateConcurrencyPreferences(ctx, h.ConcurrencyPreferences)
 }
 
 func (h *Projection) describe(ctx *describeContext) {
 	describeHandler(ctx, h, h.Source)
+	describeConcurrencyPreferences(ctx, h.ConcurrencyPreferences)
 }

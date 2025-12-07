@@ -46,6 +46,11 @@ func (b *IntegrationBuilder) Disabled(fn func(*FlagBuilder[config.Disabled])) {
 	b.target.DisabledFlags = append(b.target.DisabledFlags, Flag(fn))
 }
 
+// ConcurrencyPreference sets the concurrency preference of the handler.
+func (b *IntegrationBuilder) ConcurrencyPreference(fn func(*ConcurrencyPreferenceBuilder)) {
+	b.target.ConcurrencyPreferences = append(b.target.ConcurrencyPreferences, ConcurrencyPreference(fn))
+}
+
 // Partial marks the compomnent as partially configured.
 func (b *IntegrationBuilder) Partial() {
 	b.target.IsPartial = true

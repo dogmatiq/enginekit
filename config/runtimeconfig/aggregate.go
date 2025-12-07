@@ -20,7 +20,8 @@ func buildAggregate(b *configbuilder.AggregateBuilder, h dogma.AggregateMessageH
 	if h == nil {
 		b.Partial()
 	} else {
+		c := newHandlerConfigurer[dogma.AggregateRoute](b)
 		b.Source(h)
-		h.Configure(newHandlerConfigurer[dogma.AggregateRoute](b))
+		h.Configure(c)
 	}
 }

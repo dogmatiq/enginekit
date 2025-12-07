@@ -20,7 +20,8 @@ func buildProcess(b *configbuilder.ProcessBuilder, h dogma.ProcessMessageHandler
 	if h == nil {
 		b.Partial()
 	} else {
+		c := newHandlerConfigurer[dogma.ProcessRoute](b)
 		b.Source(h)
-		h.Configure(newHandlerConfigurer[dogma.ProcessRoute](b))
+		h.Configure(c)
 	}
 }

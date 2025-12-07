@@ -14,7 +14,7 @@ import (
 )
 
 func TestIntegration(t *testing.T) {
-	testHandler(
+	testHandlerWithConcurrencyPreference(
 		t,
 		configbuilder.Integration,
 		runtimeconfig.FromIntegration,
@@ -212,6 +212,7 @@ func TestIntegration(t *testing.T) {
 					`valid integration *github.com/dogmatiq/enginekit/enginetest/stubs.IntegrationMessageHandlerStub`,
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid concurrency preference, set to dogma.MinimizeConcurrency`,
 				),
 				Component: runtimeconfig.FromIntegration(&IntegrationMessageHandlerStub{
 					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
@@ -219,6 +220,7 @@ func TestIntegration(t *testing.T) {
 						c.Routes(
 							dogma.HandlesCommand[*CommandStub[TypeA]](),
 						)
+						c.ConcurrencyPreference(dogma.MinimizeConcurrency)
 					},
 				}),
 			},

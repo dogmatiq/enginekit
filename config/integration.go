@@ -10,7 +10,8 @@ import (
 // [dogma.IntegrationMessageHandler].
 type Integration struct {
 	HandlerCommon
-	Source optional.Optional[dogma.IntegrationMessageHandler]
+	Source                 optional.Optional[dogma.IntegrationMessageHandler]
+	ConcurrencyPreferences []*ConcurrencyPreference
 }
 
 // Identity returns the entity's identity.
@@ -41,6 +42,14 @@ func (h *Integration) IsDisabled() bool {
 	return resolveIsDisabled(h)
 }
 
+// ConcurrencyPreference returns the [dogma.ConcurrencyPreference] for the
+// handler.
+//
+// It panics if the configuration does not specify the preference unambiguously.
+func (h *Integration) ConcurrencyPreference() dogma.ConcurrencyPreference {
+	return resolveConcurrencyPreference(h, h.ConcurrencyPreferences)
+}
+
 // Interface returns the [dogma.Application] that the entity represents.
 func (h *Integration) Interface() dogma.IntegrationMessageHandler {
 	return resolveInterface(h, h.Source)
@@ -52,8 +61,11 @@ func (h *Integration) String() string {
 
 func (h *Integration) validate(ctx *validateContext) {
 	validateHandler(ctx, h, h.Source)
+	validateConcurrencyPreferences(ctx, h.ConcurrencyPreferences)
+
 }
 
 func (h *Integration) describe(ctx *describeContext) {
 	describeHandler(ctx, h, h.Source)
+	describeConcurrencyPreferences(ctx, h.ConcurrencyPreferences)
 }

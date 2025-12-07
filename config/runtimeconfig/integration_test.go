@@ -56,6 +56,7 @@ func TestFromIntegration(t *testing.T) {
 						dogma.HandlesCommand[*CommandStub[TypeA]](),
 						dogma.RecordsEvent[*EventStub[TypeA]](),
 					)
+					c.ConcurrencyPreference(dogma.MinimizeConcurrency)
 					c.Disable()
 				},
 			},
@@ -90,6 +91,9 @@ func TestFromIntegration(t *testing.T) {
 						},
 					},
 					Source: optional.Some(h),
+					ConcurrencyPreferences: []*config.ConcurrencyPreference{
+						{Value: optional.Some(dogma.MinimizeConcurrency)},
+					},
 				}
 			},
 		},

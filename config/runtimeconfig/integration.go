@@ -20,7 +20,8 @@ func buildIntegration(b *configbuilder.IntegrationBuilder, h dogma.IntegrationMe
 	if h == nil {
 		b.Partial()
 	} else {
+		c := newHandlerConfigurerWithConcurrencyPreference[dogma.IntegrationRoute](b)
 		b.Source(h)
-		h.Configure(newHandlerConfigurer[dogma.IntegrationRoute](b))
+		h.Configure(c)
 	}
 }

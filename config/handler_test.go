@@ -96,3 +96,96 @@ func testHandler[
 		})
 	})
 }
+
+func testHandlerWithConcurrencyPreference[
+	T interface {
+		Handler
+		ConcurrencyPreference() dogma.ConcurrencyPreference
+		Interface() H
+	},
+	B configbuilder.HandlerBuilderWithConcurrencyPreference[T, H],
+	H constraints.Handler[C, R],
+	C constraints.HandlerConfigurer[R],
+	R dogma.MessageRoute,
+](
+	t *testing.T,
+	build func(func(B)) T,
+	runtime func(H) T,
+	construct func(func(C)) H,
+) {
+	testHandler(
+		t,
+		build,
+		runtime,
+		construct,
+	)
+
+	t.Run("func ConcurrencyPreference()", func(t *testing.T) {
+		t.Run("it returns dogma.MaximizeConcurrency if no preference is set", func(t *testing.T) {
+			handler := build(func(b B) {})
+
+			test.Expect(
+				t,
+				"unexpected concurrency preference",
+				handler.ConcurrencyPreference(),
+				dogma.MaximizeConcurrency,
+			)
+		})
+
+		t.Run("it returns the last configured concurrency preference", func(t *testing.T) {
+			handler := build(func(b B) {
+				b.ConcurrencyPreference(
+					func(b *configbuilder.ConcurrencyPreferenceBuilder) {
+						b.Value(dogma.MinimizeConcurrency)
+					},
+				)
+				b.ConcurrencyPreference(
+					func(b *configbuilder.ConcurrencyPreferenceBuilder) {
+						b.Value(dogma.MaximizeConcurrency)
+					},
+				)
+			})
+
+			test.Expect(
+				t,
+				"unexpected concurrency preference",
+				handler.ConcurrencyPreference(),
+				dogma.MaximizeConcurrency,
+			)
+		})
+
+		t.Run("panics if the value is partially configured", func(t *testing.T) {
+			handler := build(func(b B) {
+				b.ConcurrencyPreference(
+					func(b *configbuilder.ConcurrencyPreferenceBuilder) {
+						b.Partial()
+					},
+				)
+			})
+
+			test.ExpectPanic(
+				t,
+				`concurrency preference is invalid: could not evaluate entire configuration`,
+				func() {
+					handler.ConcurrencyPreference()
+				},
+			)
+		})
+
+		t.Run("panics if the value is missing", func(t *testing.T) {
+			handler := build(func(b B) {
+				b.ConcurrencyPreference(
+					func(b *configbuilder.ConcurrencyPreferenceBuilder) {},
+				)
+			})
+
+			test.ExpectPanic(
+				t,
+				`concurrency preference is invalid: value is unavailable`,
+				func() {
+					handler.ConcurrencyPreference()
+				},
+			)
+		})
+	})
+}

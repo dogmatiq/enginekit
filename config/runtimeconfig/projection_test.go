@@ -55,6 +55,7 @@ func TestFromProjection(t *testing.T) {
 					c.Routes(
 						dogma.HandlesEvent[*EventStub[TypeA]](),
 					)
+					c.ConcurrencyPreference(dogma.MinimizeConcurrency)
 					c.Disable()
 				},
 			},
@@ -83,6 +84,9 @@ func TestFromProjection(t *testing.T) {
 						},
 					},
 					Source: optional.Some(h),
+					ConcurrencyPreferences: []*config.ConcurrencyPreference{
+						{Value: optional.Some(dogma.MinimizeConcurrency)},
+					},
 				}
 			},
 		},

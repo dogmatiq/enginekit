@@ -11,6 +11,14 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `xsync.Future`.
+- Added `xsync.SucceedOnce`.
+- Added `xatomic.Value`.
+
 ## [0.19.17] - 2025-12-08
 
 ### Added

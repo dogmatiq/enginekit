@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Added `xsync.Future`.
 - Added `xsync.SucceedOnce`.
 - Added `xatomic.Value`.
+- Added `uuidpb.Set` and `Map` types.
 
 ## [0.19.17] - 2025-12-08
 

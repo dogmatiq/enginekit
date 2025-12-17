@@ -5,7 +5,7 @@ import (
 	"maps"
 )
 
-// Map is a map from UUID to values of type T.
+// Map is a map from [UUID] to values of type T.
 type Map[T any] struct {
 	m map[key]T
 }

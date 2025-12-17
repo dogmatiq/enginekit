@@ -20,49 +20,6 @@ func TestMap(t *testing.T) {
 			expected = map[string]int{}
 		)
 
-		// remove := func(k K) {
-		// 	for i, p := range expected {
-		// 		if isEqual(p.Key, k) {
-		// 			expected[i] = expected[len(expected)-1]
-		// 			expected = expected[:len(expected)-1]
-		// 			return
-		// 		}
-		// 	}
-		// }
-
-		// replace := func(k K, v int) {
-		// 	for i, p := range expected {
-		// 		if isEqual(p.Key, k) {
-		// 			expected[i].Value = v
-		// 			return
-		// 		}
-		// 	}
-		// }
-
-		// get := func(k K) (int, bool) {
-		// 	for _, p := range expected {
-		// 		if isEqual(p.Key, k) {
-		// 			return p.Value, true
-		// 		}
-		// 	}
-		// 	return 0, false
-		// }
-
-		// drawExistingKey := func(t *rapid.T) K {
-		// 	if len(expected) == 0 {
-		// 		t.Skip("map is empty")
-		// 	}
-
-		// 	var keys []K
-		// 	for _, p := range expected {
-		// 		keys = append(keys, p.Key)
-		// 	}
-
-		// 	return rapid.
-		// 		SampledFrom(keys).
-		// 		Draw(t, "existing key")
-		// }
-
 		t.Repeat(
 			map[string]func(*rapid.T){
 				"add a new key": func(t *rapid.T) {
@@ -212,6 +169,15 @@ func TestMap(t *testing.T) {
 
 							if x != v {
 								t.Fatalf("unexpected value for key %q in cloned map: got %d, want %d", k, x, v)
+							}
+						}
+
+						if clone != nil {
+							k := uuidpb.Generate()
+							clone.Set(k, 42)
+
+							if subject.Has(k) {
+								t.Fatalf("adding to cloned map modified the original map")
 							}
 						}
 					}

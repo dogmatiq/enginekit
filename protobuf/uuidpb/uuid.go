@@ -355,10 +355,13 @@ func (x *UUID) Format(f fmt.State, verb rune) {
 	fmt.Fprintf(f, format, (*UUID)(x))
 }
 
-// Validate returns an error if x is not a valid Version 4 (random) UUID.
+// Validate returns an error if x is not a valid Version 4 (random) or Version 5
+// (name-based) UUID.
 func (x *UUID) Validate() error {
-	if version := (x.GetUpper() >> 8) & 0xf0; version != 0x40 {
-		return errors.New("UUID must use version 4")
+	switch (x.GetUpper() >> 8) & 0xf0 {
+	case 0x40, 0x50:
+	default:
+		return errors.New("UUID must use version 4 or 5")
 	}
 
 	if variant := (x.GetLower() >> 56) & 0xc0; variant != 0x80 {

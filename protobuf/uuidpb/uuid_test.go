@@ -757,12 +757,34 @@ func TestUUID_Validate(t *testing.T) {
 	t.Run("when the UUID is valid", func(t *testing.T) {
 		t.Parallel()
 
-		subject := &UUID{
-			Upper: 0xa967a8b93f9c4918,
-			Lower: 0x9a4119577be5fec5,
+		cases := []struct {
+			Desc    string
+			Subject *UUID
+		}{
+			{
+				"version 4",
+				&UUID{
+					Upper: 0xa967a8b93f9c4918,
+					Lower: 0x9a4119577be5fec5,
+				},
+			},
+			{
+				"version 5",
+				&UUID{
+					Upper: 0xbf6d549f7fa352ea,
+					Lower: 0xa9cd2817080dd532,
+				},
+			},
 		}
-		if err := subject.Validate(); err != nil {
-			t.Fatal(err)
+
+		for _, c := range cases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				if err := c.Subject.Validate(); err != nil {
+					t.Fatal(err)
+				}
+			})
 		}
 	})
 
@@ -777,7 +799,7 @@ func TestUUID_Validate(t *testing.T) {
 			{
 				"nil UUID",
 				&UUID{},
-				"UUID must use version 4",
+				"UUID must use version 4 or 5",
 			},
 			{
 				"omni UUID",
@@ -785,7 +807,7 @@ func TestUUID_Validate(t *testing.T) {
 					Upper: 0xffffffffffffffff,
 					Lower: 0xffffffffffffffff,
 				},
-				"UUID must use version 4",
+				"UUID must use version 4 or 5",
 			},
 			{
 				"wrong version",
@@ -793,7 +815,7 @@ func TestUUID_Validate(t *testing.T) {
 					Upper: 0xa967a8b93f9c_f0_18,
 					Lower: 0x9a4119577be5fec5,
 				},
-				"UUID must use version 4",
+				"UUID must use version 4 or 5",
 			},
 			{
 				"wrong variant",

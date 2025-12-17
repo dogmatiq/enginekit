@@ -82,28 +82,28 @@ func TestEnvelope_Validate(t *testing.T) {
 			{
 				"empty",
 				&Envelope{},
-				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
+				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid message ID",
 				newEnvelope(func(e *Envelope) {
 					e.MessageId = &uuidpb.UUID{}
 				}),
-				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
+				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid causation ID",
 				newEnvelope(func(e *Envelope) {
 					e.CausationId = &uuidpb.UUID{}
 				}),
-				"invalid causation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
+				"invalid causation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid correlation ID",
 				newEnvelope(func(e *Envelope) {
 					e.CorrelationId = &uuidpb.UUID{}
 				}),
-				"invalid correlation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
+				"invalid correlation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid source site",
@@ -170,7 +170,7 @@ func TestEnvelope_Validate(t *testing.T) {
 				newEnvelope(func(e *Envelope) {
 					e.TypeId = nil
 				}),
-				"invalid type ID (00000000-0000-0000-0000-000000000000): UUID must use version 4",
+				"invalid type ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 		}
 

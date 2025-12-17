@@ -53,7 +53,7 @@ func TestIdentity_Validate(t *testing.T) {
 					Name: "<name>",
 					Key:  &uuidpb.UUID{},
 				},
-				"invalid key: UUID must use version 4",
+				"invalid key: UUID must use version 4 or 5",
 			},
 		}
 
@@ -154,7 +154,7 @@ func TestIdentity_ParseAndMustParse(t *testing.T) {
 				"invalid key",
 				"<name>",
 				"00000000-0000-0000-0000-000000000000",
-				"invalid key: UUID must use version 4",
+				"invalid key: UUID must use version 4 or 5",
 			},
 		}
 

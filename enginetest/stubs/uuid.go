@@ -9,30 +9,32 @@ import (
 
 // UUIDSequence is a generator of deterministic UUIDs for use in tests.
 type UUIDSequence struct {
-	namespace atomic.Pointer[uuidpb.UUID]
-	counter   atomic.Uint64
+	ns    atomic.Pointer[uuidpb.UUID]
+	count atomic.Uint32
 }
 
 // Next returns the next UUID in the sequence.
 func (g *UUIDSequence) Next() *uuidpb.UUID {
-	n := g.counter.Add(1) - 1
-	return g.At(n)
+	idx := g.count.Add(1) - 1
+	return g.At(int(idx))
 }
 
 // At returns the UUID at the given position in the sequence.
-func (g *UUIDSequence) At(n uint64) *uuidpb.UUID {
-	ns := g.namespace.Load()
+func (g *UUIDSequence) At(idx int) *uuidpb.UUID {
+	ns := g.ns.Load()
 
 	if ns == nil {
 		ns = uuidpb.Generate()
 
-		if !g.namespace.CompareAndSwap(nil, ns) {
-			ns = g.namespace.Load()
+		if !g.ns.CompareAndSwap(nil, ns) {
+			ns = g.ns.Load()
 		}
 	}
 
-	return uuidpb.Derive(
-		ns,
-		strconv.FormatUint(n, 10),
-	)
+	return uuidpb.Derive(ns, strconv.Itoa(idx))
+}
+
+// Count returns the number of UUIDs that have been generated so far.
+func (g *UUIDSequence) Count() int {
+	return int(g.count.Load())
 }

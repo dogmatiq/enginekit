@@ -22,7 +22,23 @@ type Provider struct {
 	TracerProvider trace.TracerProvider
 	MeterProvider  metric.MeterProvider
 	LoggerProvider log.LoggerProvider
-	Attrs          []Attr
+
+	attrs []Attr
+}
+
+// WithAttrs returns a copy of p with the given attributes appended to
+// its existing attributes.
+func (p *Provider) WithAttrs(attrs ...Attr) *Provider {
+	if p == nil || len(attrs) == 0 {
+		return p
+	}
+
+	return &Provider{
+		TracerProvider: p.TracerProvider,
+		MeterProvider:  p.MeterProvider,
+		LoggerProvider: p.LoggerProvider,
+		attrs:          slices.Concat(p.attrs, attrs),
+	}
 }
 
 // Recorder records traces, metrics and logs for a particular subsystem.
@@ -54,11 +70,7 @@ func (p *Provider) Recorder(pkg string, attrs ...Attr) *Recorder {
 		tracerProvider = p.TracerProvider
 		meterProvider = p.MeterProvider
 		loggerProvider = p.LoggerProvider
-
-		attrs = append(
-			slices.Clone(p.Attrs),
-			attrs...,
-		)
+		attrs = slices.Concat(p.attrs, attrs)
 	}
 
 	if tracerProvider == nil {

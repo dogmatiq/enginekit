@@ -16,6 +16,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### Added
 
 - Added `stubs.UUIDSequence.Count()` method.
+- Added `telemetry.Provider.WithAttrs()` method.
+
+### Removed
+
+- **[BC]** Removed `telemetry.Provider.Attrs` field.
 
 ## [0.19.19] - 2025-12-18
 

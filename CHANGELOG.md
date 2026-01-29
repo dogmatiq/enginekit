@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - **[BC]** Removed `telemetry.Provider.Attrs` field.
 
+### Fixed
+
+- `xrapid.Envelope()` now always generates valid message envelopes.
+
 ## [0.19.19] - 2025-12-18
 
 ### Added

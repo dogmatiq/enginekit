@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Added `stubs.UUIDSequence.Count()` method.
 - Added `telemetry.Provider.WithAttrs()` method.
 - Added `xrapid.Uint64Range()` function.
+- Added `xrapid.SamplesFromSeq2()` function.
 
 ### Removed
 
@@ -26,6 +27,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### Fixed
 
 - `xrapid.Envelope()` now always generates valid message envelopes.
+- `xrapid.Identity()` now always generates valid identities.
 
 ## [0.19.19] - 2025-12-18
 

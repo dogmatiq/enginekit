@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - Added `stubs.UUIDSequence.Count()` method.
 - Added `telemetry.Provider.WithAttrs()` method.
+- Added `xrapid.Uint64Range()` function.
 
 ### Removed
 

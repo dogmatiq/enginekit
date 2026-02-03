@@ -9,7 +9,7 @@ require (
 	github.com/dogmatiq/spruce v0.2.3
 	github.com/google/go-cmp v0.7.0
 	go.opentelemetry.io/otel v1.40.0
-	go.opentelemetry.io/otel/log v0.15.0
+	go.opentelemetry.io/otel/log v0.16.0
 	go.opentelemetry.io/otel/metric v1.40.0
 	go.opentelemetry.io/otel/trace v1.40.0
 	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39

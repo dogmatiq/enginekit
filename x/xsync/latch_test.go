@@ -6,7 +6,7 @@ import (
 )
 
 func TestLatch(t *testing.T) {
-	t.Run("latch set after waiters are waiting", func(t *testing.T) {
+	t.Run("setting the latch unblocks existing waiters", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
 			var latch Latch
 
@@ -27,14 +27,12 @@ func TestLatch(t *testing.T) {
 			}()
 
 			synctest.Wait()
-
 			latch.Set()
+			synctest.Wait()
 
 			if !latch.IsSet() {
 				t.Fatal("expected latch to be set")
 			}
-
-			synctest.Wait()
 
 			if !waitUnblocked {
 				t.Fatal("expected Wait() to unblock")
@@ -46,9 +44,10 @@ func TestLatch(t *testing.T) {
 		})
 	})
 
-	t.Run("latch set before waiters are waiting", func(t *testing.T) {
+	t.Run("setting the latch unblocks future waiters", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
 			var latch Latch
+
 			latch.Set()
 
 			waitUnblocked := false

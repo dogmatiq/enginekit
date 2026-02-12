@@ -11,6 +11,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+- Added `xsync.Latch`
+
 ## [0.20.0] - 2026-01-29
 
 ### Added

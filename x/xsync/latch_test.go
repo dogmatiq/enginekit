@@ -84,4 +84,18 @@ func TestLatch(t *testing.T) {
 			t.Fatal("expected latch to be set")
 		}
 	})
+
+	t.Run("a nil behaves as an unset latch", func(t *testing.T) {
+		var latch *Latch
+
+		if latch.IsSet() {
+			t.Fatal("did not expect latch to be set")
+		}
+
+		select {
+		case <-latch.Chan():
+			t.Fatal("expected Chan() to block forever")
+		default:
+		}
+	})
 }

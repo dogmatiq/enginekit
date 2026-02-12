@@ -33,7 +33,7 @@ func (l *Latch) Set() {
 
 // IsSet reports whether the latch has been set.
 func (l *Latch) IsSet() bool {
-	return l.closed.Load()
+	return l != nil && l.closed.Load()
 }
 
 // Wait blocks until the latch is set.
@@ -43,6 +43,10 @@ func (l *Latch) Wait() {
 
 // Chan returns a channel that is closed when the latch is set.
 func (l *Latch) Chan() <-chan struct{} {
+	if l == nil {
+		return nil
+	}
+
 	if l.created.Load() {
 		return l.ch
 	}

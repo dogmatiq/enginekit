@@ -32,7 +32,8 @@ func TestLatch(t *testing.T) {
 
 				latch.Set()
 
-				// Block until waiting goroutines exit.
+				// Block until waiting goroutines exit (or remain blocked if
+				// something is wrong).
 				synctest.Wait()
 
 				if !latch.IsSet() {
@@ -68,7 +69,8 @@ func TestLatch(t *testing.T) {
 					unblockedChan = true
 				}()
 
-				// Block until waiting goroutines exit.
+				// Block until waiting goroutines exit (or remain blocked if
+				// something is wrong).
 				synctest.Wait()
 
 				if !unblockedWait {
@@ -89,50 +91,6 @@ func TestLatch(t *testing.T) {
 			if !latch.IsSet() {
 				t.Fatal("expected latch to be set")
 			}
-		})
-	})
-
-	t.Run("Link()", func(t *testing.T) {
-		t.Run("unblocks waiters when upstream latch is set", func(t *testing.T) {
-			synctest.Test(t, func(t *testing.T) {
-				var upstream, downstreamA, downstreamB Latch
-
-				downstreamA.Link(&upstream)
-				downstreamB.Link(&upstream)
-
-				{
-					var downstreamC Latch
-					downstreamC.Link(&upstream)
-				}
-
-				unblockedA := false
-				go func() {
-					downstreamA.Wait()
-					unblockedA = true
-				}()
-
-				unblockedB := false
-				go func() {
-					downstreamB.Wait()
-					unblockedB = true
-				}()
-
-				// Block until waiting goroutine is blocked on the latch.
-				synctest.Wait()
-
-				upstream.Set()
-
-				// Block until waiting goroutine exits.
-				synctest.Wait()
-
-				if !unblockedA {
-					t.Fatal("expected latch A to unblock")
-				}
-
-				if !unblockedB {
-					t.Fatal("expected latch B to unblock")
-				}
-			})
 		})
 	})
 }

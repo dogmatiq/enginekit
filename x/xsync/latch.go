@@ -3,17 +3,14 @@ package xsync
 import (
 	"sync"
 	"sync/atomic"
-	"weak"
 )
 
 // Latch is a synchronization primitive that allows multiple waiters to wait for
 // a single event. Latches cannot be reset.
 type Latch struct {
 	hasChan, isSet atomic.Bool
-
-	m          sync.Mutex
-	ch         chan struct{}
-	downstream []weak.Pointer[Latch]
+	m              sync.Mutex
+	ch             chan struct{}
 }
 
 // Set sets the latch, allowing all waiters to proceed.
@@ -40,41 +37,7 @@ func (l *Latch) Set() bool {
 	close(l.ch)
 	l.isSet.Store(true)
 
-	for _, p := range l.downstream {
-		if x := p.Value(); x != nil {
-			x.Set()
-		}
-	}
-
 	return true
-}
-
-// Link creates a unidirectional relationship that sets l when the upstream
-// latch is closed.
-func (l *Latch) Link(upstream *Latch) {
-	if upstream.isSet.Load() {
-		l.Set()
-		return
-	}
-
-	upstream.m.Lock()
-	defer upstream.m.Unlock()
-
-	if upstream.isSet.Load() {
-		l.Set()
-		return
-	}
-
-	p := weak.Make(l)
-
-	for i, x := range upstream.downstream {
-		if x.Value() == nil {
-			upstream.downstream[i] = p
-			return
-		}
-	}
-
-	upstream.downstream = append(upstream.downstream, p)
 }
 
 // IsSet reports whether the latch has been set.

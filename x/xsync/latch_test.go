@@ -1,8 +1,10 @@
-package xsync
+package xsync_test
 
 import (
 	"testing"
 	"testing/synctest"
+
+	. "github.com/dogmatiq/enginekit/x/xsync"
 )
 
 func TestLatch(t *testing.T) {

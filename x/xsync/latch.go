@@ -5,15 +5,15 @@ import (
 	"sync/atomic"
 )
 
-// Latch is a synchronization primitive that allows multiple waiters to wait for
-// a single event. Latches cannot be reset.
+// Latch is a synchronization primitive that allows multiple goroutines to wait
+// until the latch is set. Latches cannot be reset.
 type Latch struct {
 	hasChan, isSet atomic.Bool
 	m              sync.Mutex
 	ch             chan struct{}
 }
 
-// Set sets the latch, allowing all waiters to proceed.
+// Set unblocks any goroutines that are waiting on the latch.
 //
 // It returns true if the latch was set by this call, or false if it was already
 // set.

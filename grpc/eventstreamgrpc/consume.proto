@@ -21,19 +21,14 @@ service ConsumeAPI {
   // If the requested offset is beyond the end of the stream, the server SHOULD
   // keep the stream open and send new events as they are written to the stream.
   //
-  // The requested event types MUST be a subset of those event types associated
-  // with the stream, as per the result of the ListStreams operation. If any
-  // other event types are requested the server MUST return an INVALID_ARGUMENT
-  // error with an attached [UnrecognizedEventType] value for each unrecognized
-  // event type. See [UnrecognizedEventTypeError].
+  // The requested type IDs MUST be a subset of those type IDs associated with
+  // the stream, as per the result of the ListStreams operation. If any other
+  // type IDs are requested the server MUST return an INVALID_ARGUMENT error
+  // with an attached [UnrecognizedEventType] value for each unrecognized type
+  // ID. See [UnrecognizedEventTypeError].
   //
-  // If no types are specified the server MUST return an INVALID_ARGUMENT error
-  // with an attached [NoEventTypes] value. See [NoEventTypesError].
-  //
-  // If none of the requested media-types for a given event type are supported
-  // the server MUST return an INVALID_ARGUMENT error with an attached
-  // [NoRecognizedMediaTypes] value for each such event type. See
-  // [NoRecognizedMediaTypesError].
+  // If no type IDs are specified the server MUST return an INVALID_ARGUMENT
+  // error with an attached [NoEventTypes] value. See [NoEventTypesError].
   rpc ConsumeEvents(ConsumeEventsRequest)
       returns (stream ConsumeEventsResponse);
 }
@@ -52,8 +47,8 @@ message Stream {
   // StreamId is a unique identifier for the stream.
   dogma.protobuf.UUID stream_id = 1;
 
-  // EventTypes is the set of event types that may appear on the stream.
-  repeated EventType event_types = 2;
+  // EventTypeIds is the set of type IDs of events that may appear on the stream.
+  repeated dogma.protobuf.UUID event_type_ids = 2;
 }
 
 // ConsumeEventsRequest is the input to the ConsumeAPI.ConsumeEvents method.
@@ -64,10 +59,10 @@ message ConsumeEventsRequest {
   // Offset is the offset of the earliest event to be consumed.
   uint64 offset = 2;
 
-  // EventTypes is a list of event types to be consumed. The consumer must be
-  // explicit about the event types that it understands; there is no mechanism
-  // to request all event types.
-  repeated EventType event_types = 3;
+  // EventTypeIds is a list of type IDs of the events to be consumed. The
+  // consumer must be explicit about the event types that it understands; there
+  // is no mechanism to request all event types.
+  repeated dogma.protobuf.UUID event_type_ids = 3;
 }
 
 // ConsumeResponse is the (streaming) output of the ConsumeAPI.ConsumeEvents
@@ -85,17 +80,6 @@ message ConsumeEventsResponse {
   oneof operation { EventDelivery event_delivery = 1; }
 }
 
-// EventType describes a type of event that may appear on a stream.
-message EventType {
-  // PortableName is a name that uniquely identifies the event type across
-  // process boundaries.
-  string portable_name = 1;
-
-  // MediaTypes is the set of supported media-types that can be used to
-  // represent events of this type, in order of preference.
-  repeated string media_types = 2;
-}
-
 // UnrecognizedStream is an error-details value for INVALID_ARGUMENT errors that
 // occurred because a consumer requested an unrecognized stream ID.
 message UnrecognizedStream {
@@ -105,23 +89,12 @@ message UnrecognizedStream {
 
 // NoEventTypes is an error-details value for INVALID_ARGUMENT errors that
 // occurred because a client sent a consume request without specifying any event
-// types.
+// type IDs.
 message NoEventTypes {}
 
 // UnrecognizedEventType is an error-details value for INVALID_ARGUMENT errors
-// that occurred because a specific event type was not recognized by the
-// server.
+// that occurred because a specific event type was not recognized by the server.
 message UnrecognizedEventType {
-  // PortableName is a name that uniquely identifies the event type across
-  // process boundaries.
-  string portable_name = 1;
-}
-
-// NoRecognizedMediaTypes is an error-details value for INVALID_ARGUMENT errors
-// that occurred because a the server does not support any of the media-types
-// requested by the client for a specific event type.
-message NoRecognizedMediaTypes {
-  // PortableName is a name that uniquely identifies the event type across
-  // process boundaries.
-  string portable_name = 1;
+  // EventTypeId is the ID of the unrecognized event type.
+  dogma.protobuf.UUID event_type_id = 1;
 }

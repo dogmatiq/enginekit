@@ -13,7 +13,19 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
 - Added `xsync.Latch`
+
+### Changed
+
+**[BC]** The `eventstreamgrpc` package has been updated to refer to event types
+using the type ID registered with Dogma, instead of the deprecated "portable
+name".
+
+### Removed
+
+- **[BC]** Removed `eventstreamgrpc.EventType`.
 
 ## [0.20.0] - 2026-01-29
 

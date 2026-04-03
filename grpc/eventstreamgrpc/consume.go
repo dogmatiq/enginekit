@@ -38,27 +38,11 @@ func NoEventTypesError() error {
 
 // UnrecognizedEventTypeError returns an error indicating that the given event
 // type is not recognized by the server.
-func UnrecognizedEventTypeError(portableName string) error {
+func UnrecognizedEventTypeError(id *uuidpb.UUID) error {
 	s, err := status.
 		New(codes.InvalidArgument, "unrecognized event type").
 		WithDetails(&UnrecognizedEventType{
-			PortableName: portableName,
-		})
-
-	if err != nil {
-		panic(err)
-	}
-
-	return s.Err()
-}
-
-// NoRecognizedMediaTypesError returns an error indicating that the server does
-// not support any of the requested media-types for the given event type.
-func NoRecognizedMediaTypesError(portableName string) error {
-	s, err := status.
-		New(codes.InvalidArgument, "no recognized media types").
-		WithDetails(&NoRecognizedMediaTypes{
-			PortableName: portableName,
+			EventTypeId: id,
 		})
 
 	if err != nil {

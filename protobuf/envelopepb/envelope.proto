@@ -74,4 +74,10 @@ message Envelope {
   // Keys beginning with "_" are reserved for use by the enginekit module. All
   // other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
   map<string, string> attributes = 13;
+
+  // IdempotencyKey is an application-defined value used to identify a command
+  // across retries.
+  //
+  // It is the zero-value if the message is a command or event.
+  string idempotency_key = 14;
 }

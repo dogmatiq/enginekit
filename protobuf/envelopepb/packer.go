@@ -156,3 +156,10 @@ func WithScheduledFor(t time.Time) PackOption {
 		e.ScheduledFor = timestamppb.New(t)
 	}
 }
+
+// WithIdempotencyKey sets the idempotency key of a command message.
+func WithIdempotencyKey(key string) PackOption {
+	return func(e *Envelope) {
+		e.IdempotencyKey = key
+	}
+}

@@ -261,3 +261,18 @@ func TestWithScheduledFor(t *testing.T) {
 		t.Fatalf("unexpected scheduled time: got %s, want %s", got, want)
 	}
 }
+
+func TestWithIdempotencyKey(t *testing.T) {
+	packer := &Packer{
+		Application: &identitypb.Identity{
+			Name: "app",
+			Key:  uuidpb.Generate(),
+		},
+	}
+
+	got := packer.Pack(CommandA1, WithIdempotencyKey("test-key"))
+
+	if got.IdempotencyKey != "test-key" {
+		t.Fatalf("unexpected idempotency key: got %q, want %q", got.IdempotencyKey, "test-key")
+	}
+}

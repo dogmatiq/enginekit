@@ -358,6 +358,21 @@ func (x *UUID) Format(f fmt.State, verb rune) {
 // Validate returns an error if x is not a valid Version 4 (random) or Version 5
 // (name-based) UUID.
 func (x *UUID) Validate() error {
+	// Only versions 4 (random) and 5 (name-based/SHA-1) are accepted.
+	//
+	// Version 7 (time-ordered) is intentionally excluded:
+	//   - Its primary benefit — B-tree index locality — only applies when the
+	//     UUID is a clustered primary key in a non-sharded B-tree database at
+	//     high write volumes. Dogmatiq uses UUIDs for message IDs and handler
+	//     identities, neither of which fits this profile.
+	//   - In sharded or distributed databases (CockroachDB, Spanner, Cassandra,
+	//     etc.), the sequential timestamp prefix causes write hotspots, actively
+	//     harming throughput.
+	//   - The naive implementation does not guarantee monotonicity within a
+	//     millisecond; true per-millisecond ordering requires shared mutable
+	//     state and clock-rollback handling.
+	//   - The embedded timestamp permanently leaks creation time to any observer
+	//     of the identifier, which is undesirable for security-sensitive uses.
 	switch (x.GetUpper() >> 8) & 0xf0 {
 	case 0x40, 0x50:
 	default:

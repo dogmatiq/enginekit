@@ -25,68 +25,14 @@ const (
 )
 
 // Envelope is a container for a Dogma message and its meta-data.
+//
+// It is wire-compatible with [MultiEnvelope].
 type Envelope struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// MessageId is a unique identifier for the message in this envelope.
-	MessageId *uuidpb.UUID `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	// CausationId is the (optional) ID of the message that was the direct cause
-	// of the message in this envelope.
-	//
-	// If it is the zero-value, the message was not caused by any other message.
-	CausationId *uuidpb.UUID `protobuf:"bytes,2,opt,name=causation_id,json=causationId,proto3" json:"causation_id,omitempty"`
-	// CorrelationId is the (optional) ID of the first ancestor of the message in
-	// this envelope that was not caused by another message.
-	//
-	// If it is the zero-value, the message was not caused by any other message.
-	CorrelationId *uuidpb.UUID `protobuf:"bytes,3,opt,name=correlation_id,json=correlationId,proto3" json:"correlation_id,omitempty"`
-	// SourceSite is the (optional) identity of the "site" that the source
-	// application is running within.
-	//
-	// The site is used to disambiguate between messages from different
-	// installations of the same application.
-	SourceSite *identitypb.Identity `protobuf:"bytes,4,opt,name=source_site,json=sourceSite,proto3" json:"source_site,omitempty"`
-	// SourceApplication is the identity of the Dogma application that produced
-	// the message in this envelope.
-	SourceApplication *identitypb.Identity `protobuf:"bytes,5,opt,name=source_application,json=sourceApplication,proto3" json:"source_application,omitempty"`
-	// SourceHandler is the identity of the Dogma handler that produced the
-	// message in this envelope.
-	//
-	// It is the zero-value if the message was not produced by a handler.
-	SourceHandler *identitypb.Identity `protobuf:"bytes,6,opt,name=source_handler,json=sourceHandler,proto3" json:"source_handler,omitempty"`
-	// SourceInstanceId is the ID of the aggregate or process instance that
-	// produced the message in this envelope.
-	//
-	// It is empty if the message was not produced by an aggregate or process
-	// handler.
-	SourceInstanceId string `protobuf:"bytes,7,opt,name=source_instance_id,json=sourceInstanceId,proto3" json:"source_instance_id,omitempty"`
-	// CreatedAt is the time at which the envelope was created.
-	//
-	// This is typically the point at which the message first enters the engine.
-	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	// ScheduledFor is the time at which a timeout message is scheduled to occur.
-	//
-	// It is the zero-value if the message is a command or event.
-	ScheduledFor *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=scheduled_for,json=scheduledFor,proto3" json:"scheduled_for,omitempty"`
-	// Description is a human-readable description of the message.
-	Description string `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"`
-	// TypeId is a unique identifier for the type of message contained in
-	// the envelope.
-	TypeId *uuidpb.UUID `protobuf:"bytes,11,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
-	// Data is the binary message data.
-	Data []byte `protobuf:"bytes,12,opt,name=data,proto3" json:"data,omitempty"`
-	// Attributes is a set of arbitrary key/value pairs that provide additional
-	// information about the message.
-	//
-	// Keys beginning with "_" are reserved for use by the enginekit module. All
-	// other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
-	Attributes map[string]string `protobuf:"bytes,13,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// IdempotencyKey is an application-defined value used to identify a command
-	// across retries.
-	//
-	// It is the zero-value if the message is a command or event.
-	IdempotencyKey string `protobuf:"bytes,14,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Header        *Header                `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`
+	Body          *Body                  `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Envelope) Reset() {
@@ -119,133 +65,523 @@ func (*Envelope) Descriptor() ([]byte, []int) {
 	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Envelope) GetMessageId() *uuidpb.UUID {
+func (x *Envelope) GetHeader() *Header {
 	if x != nil {
-		return x.MessageId
+		return x.Header
 	}
 	return nil
 }
 
-func (x *Envelope) GetCausationId() *uuidpb.UUID {
+func (x *Envelope) GetBody() *Body {
 	if x != nil {
-		return x.CausationId
+		return x.Body
 	}
 	return nil
 }
 
-func (x *Envelope) GetCorrelationId() *uuidpb.UUID {
+// MultiEnvelope is a container for multiple Dogma messages that were produced
+// by a single handler operation.
+//
+// It is a more efficient encoding of a slice of [Envelope] values.
+type MultiEnvelope struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Header        *Header                `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`
+	Bodies        []*Body                `protobuf:"bytes,2,rep,name=bodies,proto3" json:"bodies,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MultiEnvelope) Reset() {
+	*x = MultiEnvelope{}
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MultiEnvelope) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MultiEnvelope) ProtoMessage() {}
+
+func (x *MultiEnvelope) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[1]
 	if x != nil {
-		return x.CorrelationId
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MultiEnvelope.ProtoReflect.Descriptor instead.
+func (*MultiEnvelope) Descriptor() ([]byte, []int) {
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *MultiEnvelope) GetHeader() *Header {
+	if x != nil {
+		return x.Header
 	}
 	return nil
 }
 
-func (x *Envelope) GetSourceSite() *identitypb.Identity {
+func (x *MultiEnvelope) GetBodies() []*Body {
 	if x != nil {
-		return x.SourceSite
+		return x.Bodies
 	}
 	return nil
 }
 
-func (x *Envelope) GetSourceApplication() *identitypb.Identity {
+// Source identifies where a message originated.
+type Source struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Site is the (optional) identity of the "site" that the source
+	// application is running within.
+	//
+	// The site is used to disambiguate between messages from different
+	// installations of the same application.
+	Site *identitypb.Identity `protobuf:"bytes,1,opt,name=site,proto3" json:"site,omitempty"`
+	// Application is the identity of the Dogma application that produced the
+	// message.
+	Application *identitypb.Identity `protobuf:"bytes,2,opt,name=application,proto3" json:"application,omitempty"`
+	// Handler is the identity of the Dogma handler that produced the message.
+	//
+	// It is the zero-value if the message was not produced by a handler.
+	Handler *identitypb.Identity `protobuf:"bytes,3,opt,name=handler,proto3" json:"handler,omitempty"`
+	// InstanceId is the ID of the aggregate or process instance that produced
+	// the message.
+	//
+	// It is empty if the message was not produced by an aggregate or process
+	// handler.
+	InstanceId    string `protobuf:"bytes,4,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Source) Reset() {
+	*x = Source{}
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Source) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Source) ProtoMessage() {}
+
+func (x *Source) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[2]
 	if x != nil {
-		return x.SourceApplication
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Source.ProtoReflect.Descriptor instead.
+func (*Source) Descriptor() ([]byte, []int) {
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Source) GetSite() *identitypb.Identity {
+	if x != nil {
+		return x.Site
 	}
 	return nil
 }
 
-func (x *Envelope) GetSourceHandler() *identitypb.Identity {
+func (x *Source) GetApplication() *identitypb.Identity {
 	if x != nil {
-		return x.SourceHandler
+		return x.Application
 	}
 	return nil
 }
 
-func (x *Envelope) GetSourceInstanceId() string {
+func (x *Source) GetHandler() *identitypb.Identity {
 	if x != nil {
-		return x.SourceInstanceId
+		return x.Handler
+	}
+	return nil
+}
+
+func (x *Source) GetInstanceId() string {
+	if x != nil {
+		return x.InstanceId
 	}
 	return ""
 }
 
-func (x *Envelope) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
+// Message is the serialized representation of a [dogma.Message].
+type Message struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// TypeId is a unique identifier for the type of message, as per the Dogma
+	// message type registry.
+	TypeId *uuidpb.UUID `protobuf:"bytes,1,opt,name=type_id,json=typeId,proto3" json:"type_id,omitempty"`
+	// Description is a human-readable description of the message, as returned by
+	// the [dogma.Message.MessageDescription] method.
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// Data is the binary message data obtained by calling
+	// [dogma.Message.MarshalBinary] on the message.
+	Data          []byte `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Envelope) GetScheduledFor() *timestamppb.Timestamp {
-	if x != nil {
-		return x.ScheduledFor
-	}
-	return nil
+func (x *Message) Reset() {
+	*x = Message{}
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
 }
 
-func (x *Envelope) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
+func (x *Message) String() string {
+	return protoimpl.X.MessageStringOf(x)
 }
 
-func (x *Envelope) GetTypeId() *uuidpb.UUID {
+func (*Message) ProtoMessage() {}
+
+func (x *Message) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Message.ProtoReflect.Descriptor instead.
+func (*Message) Descriptor() ([]byte, []int) {
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Message) GetTypeId() *uuidpb.UUID {
 	if x != nil {
 		return x.TypeId
 	}
 	return nil
 }
 
-func (x *Envelope) GetData() []byte {
+func (x *Message) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Message) GetData() []byte {
 	if x != nil {
 		return x.Data
 	}
 	return nil
 }
 
-func (x *Envelope) GetAttributes() map[string]string {
+// Extensions is a container for arbitrary key/value pairs associated with a
+// message and/or its causal chain.
+//
+// Keys beginning with "_" are reserved for use by the enginekit module. All
+// other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
+type Extensions struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Attributes is a set of arbitrary key/value pairs that provide additional
+	// information about the message.
+	Attributes map[string]string `protobuf:"bytes,1,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Baggage is a set of arbitrary key/value pairs that are propagated through
+	// the entire causal chain of messages.
+	Baggage       map[string]string `protobuf:"bytes,2,rep,name=baggage,proto3" json:"baggage,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Extensions) Reset() {
+	*x = Extensions{}
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Extensions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Extensions) ProtoMessage() {}
+
+func (x *Extensions) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Extensions.ProtoReflect.Descriptor instead.
+func (*Extensions) Descriptor() ([]byte, []int) {
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Extensions) GetAttributes() map[string]string {
 	if x != nil {
 		return x.Attributes
 	}
 	return nil
 }
 
-func (x *Envelope) GetIdempotencyKey() string {
+func (x *Extensions) GetBaggage() map[string]string {
+	if x != nil {
+		return x.Baggage
+	}
+	return nil
+}
+
+type Header struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// CausationId is the (optional) ID of the message that was the direct cause
+	// of the messages.
+	//
+	// If it is the zero-value, the messages were not caused by any other
+	// message.
+	CausationId *uuidpb.UUID `protobuf:"bytes,1,opt,name=causation_id,json=causationId,proto3" json:"causation_id,omitempty"`
+	// CorrelationId is the (optional) ID of the first ancestor of the messages
+	// that was itself not caused by another message, that is, it's the root of
+	// the message chain that ultimately resulted in these messages.
+	//
+	// If it is the zero-value, the messages were not caused by any other
+	// message.
+	CorrelationId *uuidpb.UUID `protobuf:"bytes,2,opt,name=correlation_id,json=correlationId,proto3" json:"correlation_id,omitempty"`
+	// Source identifies the origin of the messages.
+	Source *Source `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
+	// Extensions is a container for arbitrary key/value pairs associated with
+	// the messages, their causal chain, or the envelope itself.
+	Extensions    *Extensions `protobuf:"bytes,4,opt,name=extensions,proto3" json:"extensions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Header) Reset() {
+	*x = Header{}
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Header) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Header) ProtoMessage() {}
+
+func (x *Header) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Header.ProtoReflect.Descriptor instead.
+func (*Header) Descriptor() ([]byte, []int) {
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Header) GetCausationId() *uuidpb.UUID {
+	if x != nil {
+		return x.CausationId
+	}
+	return nil
+}
+
+func (x *Header) GetCorrelationId() *uuidpb.UUID {
+	if x != nil {
+		return x.CorrelationId
+	}
+	return nil
+}
+
+func (x *Header) GetSource() *Source {
+	if x != nil {
+		return x.Source
+	}
+	return nil
+}
+
+func (x *Header) GetExtensions() *Extensions {
+	if x != nil {
+		return x.Extensions
+	}
+	return nil
+}
+
+type Body struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// MessageId is a unique identifier for the message in this envelope.
+	MessageId *uuidpb.UUID `protobuf:"bytes,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	// IdempotencyKey is an application-defined value used to identify a command
+	// across retries.
+	//
+	// It is the zero-value if the message is not a command, or if the producer
+	// of the message did not provide an idempotency key.
+	IdempotencyKey string `protobuf:"bytes,2,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	// CreatedAt is the time at which the envelope was created.
+	//
+	// This is typically the point at which the message first enters the engine.
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// ScheduledFor is the time at which a timeout message is scheduled to occur.
+	//
+	// It is the zero-value if the message is a command or event.
+	ScheduledFor *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=scheduled_for,json=scheduledFor,proto3" json:"scheduled_for,omitempty"`
+	// Message is the encoded representation of the [dogma.Message].
+	Message *Message `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
+	// Extensions is a container for arbitrary key/value pairs associated with
+	// this message and/or its causal chain.
+	//
+	// Any keys present in the [Header.Extensions] field are overridden by keys
+	// in this field.
+	Extensions    *Extensions `protobuf:"bytes,6,opt,name=extensions,proto3" json:"extensions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Body) Reset() {
+	*x = Body{}
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Body) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Body) ProtoMessage() {}
+
+func (x *Body) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Body.ProtoReflect.Descriptor instead.
+func (*Body) Descriptor() ([]byte, []int) {
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Body) GetMessageId() *uuidpb.UUID {
+	if x != nil {
+		return x.MessageId
+	}
+	return nil
+}
+
+func (x *Body) GetIdempotencyKey() string {
 	if x != nil {
 		return x.IdempotencyKey
 	}
 	return ""
 }
 
+func (x *Body) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Body) GetScheduledFor() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledFor
+	}
+	return nil
+}
+
+func (x *Body) GetMessage() *Message {
+	if x != nil {
+		return x.Message
+	}
+	return nil
+}
+
+func (x *Body) GetExtensions() *Extensions {
+	if x != nil {
+		return x.Extensions
+	}
+	return nil
+}
+
 var File_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto protoreflect.FileDescriptor
 
 const file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc = "" +
 	"\n" +
-	"@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x12\x0edogma.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a@github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"\xbb\x06\n" +
-	"\bEnvelope\x123\n" +
+	"@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x12\x0edogma.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a@github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"d\n" +
+	"\bEnvelope\x12.\n" +
+	"\x06header\x18\x01 \x01(\v2\x16.dogma.protobuf.HeaderR\x06header\x12(\n" +
+	"\x04body\x18\x02 \x01(\v2\x14.dogma.protobuf.BodyR\x04body\"m\n" +
+	"\rMultiEnvelope\x12.\n" +
+	"\x06header\x18\x01 \x01(\v2\x16.dogma.protobuf.HeaderR\x06header\x12,\n" +
+	"\x06bodies\x18\x02 \x03(\v2\x14.dogma.protobuf.BodyR\x06bodies\"\xc7\x01\n" +
+	"\x06Source\x12,\n" +
+	"\x04site\x18\x01 \x01(\v2\x18.dogma.protobuf.IdentityR\x04site\x12:\n" +
+	"\vapplication\x18\x02 \x01(\v2\x18.dogma.protobuf.IdentityR\vapplication\x122\n" +
+	"\ahandler\x18\x03 \x01(\v2\x18.dogma.protobuf.IdentityR\ahandler\x12\x1f\n" +
+	"\vinstance_id\x18\x04 \x01(\tR\n" +
+	"instanceId\"n\n" +
+	"\aMessage\x12-\n" +
+	"\atype_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\x06typeId\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
+	"\x04data\x18\x03 \x01(\fR\x04data\"\x96\x02\n" +
 	"\n" +
-	"message_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\tmessageId\x127\n" +
-	"\fcausation_id\x18\x02 \x01(\v2\x14.dogma.protobuf.UUIDR\vcausationId\x12;\n" +
-	"\x0ecorrelation_id\x18\x03 \x01(\v2\x14.dogma.protobuf.UUIDR\rcorrelationId\x129\n" +
-	"\vsource_site\x18\x04 \x01(\v2\x18.dogma.protobuf.IdentityR\n" +
-	"sourceSite\x12G\n" +
-	"\x12source_application\x18\x05 \x01(\v2\x18.dogma.protobuf.IdentityR\x11sourceApplication\x12?\n" +
-	"\x0esource_handler\x18\x06 \x01(\v2\x18.dogma.protobuf.IdentityR\rsourceHandler\x12,\n" +
-	"\x12source_instance_id\x18\a \x01(\tR\x10sourceInstanceId\x129\n" +
+	"Extensions\x12J\n" +
 	"\n" +
-	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12?\n" +
-	"\rscheduled_for\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\fscheduledFor\x12 \n" +
-	"\vdescription\x18\n" +
-	" \x01(\tR\vdescription\x12-\n" +
-	"\atype_id\x18\v \x01(\v2\x14.dogma.protobuf.UUIDR\x06typeId\x12\x12\n" +
-	"\x04data\x18\f \x01(\fR\x04data\x12H\n" +
-	"\n" +
-	"attributes\x18\r \x03(\v2(.dogma.protobuf.Envelope.AttributesEntryR\n" +
-	"attributes\x12'\n" +
-	"\x0fidempotency_key\x18\x0e \x01(\tR\x0eidempotencyKey\x1a=\n" +
+	"attributes\x18\x01 \x03(\v2*.dogma.protobuf.Extensions.AttributesEntryR\n" +
+	"attributes\x12A\n" +
+	"\abaggage\x18\x02 \x03(\v2'.dogma.protobuf.Extensions.BaggageEntryR\abaggage\x1a=\n" +
 	"\x0fAttributesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B3Z1github.com/dogmatiq/enginekit/protobuf/envelopepbb\x06proto3"
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
+	"\fBaggageEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xea\x01\n" +
+	"\x06Header\x127\n" +
+	"\fcausation_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\vcausationId\x12;\n" +
+	"\x0ecorrelation_id\x18\x02 \x01(\v2\x14.dogma.protobuf.UUIDR\rcorrelationId\x12.\n" +
+	"\x06source\x18\x03 \x01(\v2\x16.dogma.protobuf.SourceR\x06source\x12:\n" +
+	"\n" +
+	"extensions\x18\x04 \x01(\v2\x1a.dogma.protobuf.ExtensionsR\n" +
+	"extensions\"\xcf\x02\n" +
+	"\x04Body\x123\n" +
+	"\n" +
+	"message_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\tmessageId\x12'\n" +
+	"\x0fidempotency_key\x18\x02 \x01(\tR\x0eidempotencyKey\x129\n" +
+	"\n" +
+	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12?\n" +
+	"\rscheduled_for\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\fscheduledFor\x121\n" +
+	"\amessage\x18\x05 \x01(\v2\x17.dogma.protobuf.MessageR\amessage\x12:\n" +
+	"\n" +
+	"extensions\x18\x06 \x01(\v2\x1a.dogma.protobuf.ExtensionsR\n" +
+	"extensionsB3Z1github.com/dogmatiq/enginekit/protobuf/envelopepbb\x06proto3"
 
 var (
 	file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescOnce sync.Once
@@ -259,30 +595,46 @@ func file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDe
 	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescData
 }
 
-var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_goTypes = []any{
 	(*Envelope)(nil),              // 0: dogma.protobuf.Envelope
-	nil,                           // 1: dogma.protobuf.Envelope.AttributesEntry
-	(*uuidpb.UUID)(nil),           // 2: dogma.protobuf.UUID
-	(*identitypb.Identity)(nil),   // 3: dogma.protobuf.Identity
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
+	(*MultiEnvelope)(nil),         // 1: dogma.protobuf.MultiEnvelope
+	(*Source)(nil),                // 2: dogma.protobuf.Source
+	(*Message)(nil),               // 3: dogma.protobuf.Message
+	(*Extensions)(nil),            // 4: dogma.protobuf.Extensions
+	(*Header)(nil),                // 5: dogma.protobuf.Header
+	(*Body)(nil),                  // 6: dogma.protobuf.Body
+	nil,                           // 7: dogma.protobuf.Extensions.AttributesEntry
+	nil,                           // 8: dogma.protobuf.Extensions.BaggageEntry
+	(*identitypb.Identity)(nil),   // 9: dogma.protobuf.Identity
+	(*uuidpb.UUID)(nil),           // 10: dogma.protobuf.UUID
+	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
 }
 var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_depIdxs = []int32{
-	2,  // 0: dogma.protobuf.Envelope.message_id:type_name -> dogma.protobuf.UUID
-	2,  // 1: dogma.protobuf.Envelope.causation_id:type_name -> dogma.protobuf.UUID
-	2,  // 2: dogma.protobuf.Envelope.correlation_id:type_name -> dogma.protobuf.UUID
-	3,  // 3: dogma.protobuf.Envelope.source_site:type_name -> dogma.protobuf.Identity
-	3,  // 4: dogma.protobuf.Envelope.source_application:type_name -> dogma.protobuf.Identity
-	3,  // 5: dogma.protobuf.Envelope.source_handler:type_name -> dogma.protobuf.Identity
-	4,  // 6: dogma.protobuf.Envelope.created_at:type_name -> google.protobuf.Timestamp
-	4,  // 7: dogma.protobuf.Envelope.scheduled_for:type_name -> google.protobuf.Timestamp
-	2,  // 8: dogma.protobuf.Envelope.type_id:type_name -> dogma.protobuf.UUID
-	1,  // 9: dogma.protobuf.Envelope.attributes:type_name -> dogma.protobuf.Envelope.AttributesEntry
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	5,  // 0: dogma.protobuf.Envelope.header:type_name -> dogma.protobuf.Header
+	6,  // 1: dogma.protobuf.Envelope.body:type_name -> dogma.protobuf.Body
+	5,  // 2: dogma.protobuf.MultiEnvelope.header:type_name -> dogma.protobuf.Header
+	6,  // 3: dogma.protobuf.MultiEnvelope.bodies:type_name -> dogma.protobuf.Body
+	9,  // 4: dogma.protobuf.Source.site:type_name -> dogma.protobuf.Identity
+	9,  // 5: dogma.protobuf.Source.application:type_name -> dogma.protobuf.Identity
+	9,  // 6: dogma.protobuf.Source.handler:type_name -> dogma.protobuf.Identity
+	10, // 7: dogma.protobuf.Message.type_id:type_name -> dogma.protobuf.UUID
+	7,  // 8: dogma.protobuf.Extensions.attributes:type_name -> dogma.protobuf.Extensions.AttributesEntry
+	8,  // 9: dogma.protobuf.Extensions.baggage:type_name -> dogma.protobuf.Extensions.BaggageEntry
+	10, // 10: dogma.protobuf.Header.causation_id:type_name -> dogma.protobuf.UUID
+	10, // 11: dogma.protobuf.Header.correlation_id:type_name -> dogma.protobuf.UUID
+	2,  // 12: dogma.protobuf.Header.source:type_name -> dogma.protobuf.Source
+	4,  // 13: dogma.protobuf.Header.extensions:type_name -> dogma.protobuf.Extensions
+	10, // 14: dogma.protobuf.Body.message_id:type_name -> dogma.protobuf.UUID
+	11, // 15: dogma.protobuf.Body.created_at:type_name -> google.protobuf.Timestamp
+	11, // 16: dogma.protobuf.Body.scheduled_for:type_name -> google.protobuf.Timestamp
+	3,  // 17: dogma.protobuf.Body.message:type_name -> dogma.protobuf.Message
+	4,  // 18: dogma.protobuf.Body.extensions:type_name -> dogma.protobuf.Extensions
+	19, // [19:19] is the sub-list for method output_type
+	19, // [19:19] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_init() }
@@ -296,7 +648,7 @@ func file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_init(
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc), len(file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

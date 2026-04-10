@@ -29,33 +29,34 @@ func TestEnvelope_Validate(t *testing.T) {
 			{
 				"without source site",
 				newEnvelope(func(e *Envelope) {
-					e.SourceSite = nil
+					e.Header.Source.Site = nil
 				}),
 			},
 			{
 				"without source handler",
 				newEnvelope(func(e *Envelope) {
-					e.SourceHandler = nil
-					e.SourceInstanceId = ""
-					e.ScheduledFor = nil
+					e.Header.Source.Handler = nil
+					e.Header.Source.InstanceId = ""
+					e.Body.ScheduledFor = nil
 				}),
 			},
 			{
 				"without source instance ID",
 				newEnvelope(func(e *Envelope) {
-					e.SourceInstanceId = ""
+					e.Header.Source.InstanceId = ""
+					e.Body.ScheduledFor = nil
 				}),
 			},
 			{
 				"without attributes",
 				newEnvelope(func(e *Envelope) {
-					e.Attributes = nil
+					e.Body.Extensions.Attributes = nil
 				}),
 			},
 			{
 				"without data",
 				newEnvelope(func(e *Envelope) {
-					e.Data = nil
+					e.Body.Message.Data = nil
 				}),
 			},
 		}
@@ -82,95 +83,95 @@ func TestEnvelope_Validate(t *testing.T) {
 			{
 				"empty",
 				&Envelope{},
-				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
+				"invalid header: must not be nil",
 			},
 			{
 				"invalid message ID",
 				newEnvelope(func(e *Envelope) {
-					e.MessageId = &uuidpb.UUID{}
+					e.Body.MessageId = &uuidpb.UUID{}
 				}),
-				"invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
+				"invalid body: invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid causation ID",
 				newEnvelope(func(e *Envelope) {
-					e.CausationId = &uuidpb.UUID{}
+					e.Header.CausationId = &uuidpb.UUID{}
 				}),
-				"invalid causation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
+				"invalid header: invalid causation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid correlation ID",
 				newEnvelope(func(e *Envelope) {
-					e.CorrelationId = &uuidpb.UUID{}
+					e.Header.CorrelationId = &uuidpb.UUID{}
 				}),
-				"invalid correlation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
+				"invalid header: invalid correlation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid source site",
 				newEnvelope(func(e *Envelope) {
-					e.SourceSite = &identitypb.Identity{}
+					e.Header.Source.Site = &identitypb.Identity{}
 				}),
-				"invalid source site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source application",
 				newEnvelope(func(e *Envelope) {
-					e.SourceApplication = &identitypb.Identity{}
+					e.Header.Source.Application = &identitypb.Identity{}
 				}),
-				"invalid source application (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid application (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source handler",
 				newEnvelope(func(e *Envelope) {
-					e.SourceHandler = &identitypb.Identity{}
+					e.Header.Source.Handler = &identitypb.Identity{}
 				}),
-				"invalid source handler (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid handler (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"source instance ID without source handler",
 				newEnvelope(func(e *Envelope) {
-					e.SourceHandler = nil
+					e.Header.Source.Handler = nil
 				}),
-				"invalid source instance ID: must not be specified without a source handler",
+				"invalid header: invalid source: invalid instance ID: must not be specified without a handler",
 			},
 			{
 				"scheduled-for time without source handler",
 				newEnvelope(func(e *Envelope) {
-					e.SourceHandler = nil
-					e.SourceInstanceId = ""
+					e.Header.Source.Handler = nil
+					e.Header.Source.InstanceId = ""
 				}),
-				"invalid scheduled-for time: must not be specified without a source handler and instance ID",
+				"invalid body: invalid scheduled-for time: must not be specified without a source handler and instance ID",
 			},
 			{
 				"invalid created-at time",
 				newEnvelope(func(e *Envelope) {
-					e.CreatedAt = nil
+					e.Body.CreatedAt = nil
 				}),
-				"invalid created-at time: proto: invalid nil Timestamp",
+				"invalid body: invalid created-at time: proto: invalid nil Timestamp",
 			},
 			{
 				"invalid scheduled-for time",
 				newEnvelope(func(e *Envelope) {
-					e.ScheduledFor = &timestamppb.Timestamp{
+					e.Body.ScheduledFor = &timestamppb.Timestamp{
 						Seconds: math.MaxInt64,
 						Nanos:   math.MaxInt32,
 					}
 				}),
-				"invalid scheduled-for time: proto: timestamp (seconds:9223372036854775807 nanos:2147483647) after 9999-12-31",
+				"invalid body: invalid scheduled-for time: proto: timestamp (seconds:9223372036854775807 nanos:2147483647) after 9999-12-31",
 			},
 			{
 				"invalid description",
 				newEnvelope(func(e *Envelope) {
-					e.Description = ""
+					e.Body.Message.Description = ""
 				}),
-				"invalid description: must not be empty",
+				"invalid body: invalid message: invalid description: must not be empty",
 			},
 			{
 				"without type ID",
 				newEnvelope(func(e *Envelope) {
-					e.TypeId = nil
+					e.Body.Message.TypeId = nil
 				}),
-				"invalid type ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
+				"invalid body: invalid message: invalid type ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 		}
 
@@ -198,19 +199,30 @@ func TestEnvelope_Validate(t *testing.T) {
 
 func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
 	env := &Envelope{
-		MessageId:         uuidpb.Generate(),
-		CausationId:       uuidpb.Generate(),
-		CorrelationId:     uuidpb.Generate(),
-		SourceSite:        identitypb.New("<site-name>", uuidpb.Generate()),
-		SourceApplication: identitypb.New("<app-name>", uuidpb.Generate()),
-		SourceHandler:     identitypb.New("<handler-name>", uuidpb.Generate()),
-		SourceInstanceId:  "<instance>",
-		CreatedAt:         timestamppb.Now(),
-		ScheduledFor:      timestamppb.Now(),
-		Description:       "<description>",
-		TypeId:            uuidpb.Generate(),
-		Data:              []byte("<data>"),
-		Attributes:        map[string]string{"<key>": "<value>"},
+		Header: &Header{
+			CausationId:   uuidpb.Generate(),
+			CorrelationId: uuidpb.Generate(),
+			Source: &Source{
+				Site:        identitypb.New("<site-name>", uuidpb.Generate()),
+				Application: identitypb.New("<app-name>", uuidpb.Generate()),
+				Handler:     identitypb.New("<handler-name>", uuidpb.Generate()),
+				InstanceId:  "<instance>",
+			},
+		},
+		Body: &Body{
+			MessageId:    uuidpb.Generate(),
+			CreatedAt:    timestamppb.Now(),
+			ScheduledFor: timestamppb.Now(),
+			Message: &Message{
+				Description: "<description>",
+				TypeId:      uuidpb.Generate(),
+				Data:        []byte("<data>"),
+			},
+			Extensions: &Extensions{
+				Attributes: map[string]string{"<attr-key>": "<attr-value>"},
+				Baggage:    map[string]string{"<baggage-key": "<baggage-value>"},
+			},
+		},
 	}
 
 	for _, fn := range modifiers {

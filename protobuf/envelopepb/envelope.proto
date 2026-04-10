@@ -8,76 +8,130 @@ import "github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto";
 import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 
 // Envelope is a container for a Dogma message and its meta-data.
+//
+// It is wire-compatible with [MultiEnvelope].
 message Envelope {
-  // MessageId is a unique identifier for the message in this envelope.
-  UUID message_id = 1;
+  Header header = 1;
+  Body   body   = 2;
+}
 
-  // CausationId is the (optional) ID of the message that was the direct cause
-  // of the message in this envelope.
-  //
-  // If it is the zero-value, the message was not caused by any other message.
-  UUID causation_id = 2;
+// MultiEnvelope is a container for multiple Dogma messages that were produced
+// by a single handler operation.
+//
+// It is a more efficient encoding of a slice of [Envelope] values.
+message MultiEnvelope {
+  Header        header = 1;
+  repeated Body bodies = 2;
+}
 
-  // CorrelationId is the (optional) ID of the first ancestor of the message in
-  // this envelope that was not caused by another message.
-  //
-  // If it is the zero-value, the message was not caused by any other message.
-  UUID correlation_id = 3;
-
-  // SourceSite is the (optional) identity of the "site" that the source
+// Source identifies where a message originated.
+message Source {
+  // Site is the (optional) identity of the "site" that the source
   // application is running within.
   //
   // The site is used to disambiguate between messages from different
   // installations of the same application.
-  Identity source_site = 4;
+  Identity site = 1;
 
-  // SourceApplication is the identity of the Dogma application that produced
-  // the message in this envelope.
-  Identity source_application = 5;
+  // Application is the identity of the Dogma application that produced the
+  // message.
+  Identity application = 2;
 
-  // SourceHandler is the identity of the Dogma handler that produced the
-  // message in this envelope.
+  // Handler is the identity of the Dogma handler that produced the message.
   //
   // It is the zero-value if the message was not produced by a handler.
-  Identity source_handler = 6;
+  Identity handler = 3;
 
-  // SourceInstanceId is the ID of the aggregate or process instance that
-  // produced the message in this envelope.
+  // InstanceId is the ID of the aggregate or process instance that produced
+  // the message.
   //
   // It is empty if the message was not produced by an aggregate or process
   // handler.
-  string source_instance_id = 7;
+  string instance_id = 4;
+}
 
-  // CreatedAt is the time at which the envelope was created.
-  //
-  // This is typically the point at which the message first enters the engine.
-  google.protobuf.Timestamp created_at = 8;
+// Message is the serialized representation of a [dogma.Message].
+message Message {
+  // TypeId is a unique identifier for the type of message, as per the Dogma
+  // message type registry.
+  UUID type_id = 1;
 
-  // ScheduledFor is the time at which a timeout message is scheduled to occur.
-  //
-  // It is the zero-value if the message is a command or event.
-  google.protobuf.Timestamp scheduled_for = 9;
+  // Description is a human-readable description of the message, as returned by
+  // the [dogma.Message.MessageDescription] method.
+  string description = 2;
 
-  // Description is a human-readable description of the message.
-  string description = 10;
+  // Data is the binary message data obtained by calling
+  // [dogma.Message.MarshalBinary] on the message.
+  bytes data = 3;
+}
 
-  // TypeId is a unique identifier for the type of message contained in
-  // the envelope.
-  UUID type_id = 11;
-
-  // Data is the binary message data.
-  bytes data = 12;
-
+// Extensions is a container for arbitrary key/value pairs associated with a
+// message and/or its causal chain.
+//
+// Keys beginning with "_" are reserved for use by the enginekit module. All
+// other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
+message Extensions {
   // Attributes is a set of arbitrary key/value pairs that provide additional
   // information about the message.
+  map<string, string> attributes = 1;
+
+  // Baggage is a set of arbitrary key/value pairs that are propagated through
+  // the entire causal chain of messages.
+  map<string, string> baggage = 2;
+}
+
+message Header {
+  // CausationId is the (optional) ID of the message that was the direct cause
+  // of the messages.
   //
-  // Keys beginning with "_" are reserved for use by the enginekit module. All
-  // other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
-  map<string, string> attributes = 13;
+  // If it is the zero-value, the messages were not caused by any other
+  // message.
+  UUID causation_id = 1;
+
+  // CorrelationId is the (optional) ID of the first ancestor of the messages
+  // that was itself not caused by another message, that is, it's the root of
+  // the message chain that ultimately resulted in these messages.
+  //
+  // If it is the zero-value, the messages were not caused by any other
+  // message.
+  UUID correlation_id = 2;
+
+  // Source identifies the origin of the messages.
+  Source source = 3;
+
+  // Extensions is a container for arbitrary key/value pairs associated with
+  // the messages, their causal chain, or the envelope itself.
+  Extensions extensions = 4;
+}
+
+message Body {
+  // MessageId is a unique identifier for the message in this envelope.
+  UUID message_id = 1;
 
   // IdempotencyKey is an application-defined value used to identify a command
   // across retries.
   //
+  // It is the zero-value if the message is not a command, or if the producer
+  // of the message did not provide an idempotency key.
+  string idempotency_key = 2;
+
+  // CreatedAt is the time at which the envelope was created.
+  //
+  // This is typically the point at which the message first enters the engine.
+  google.protobuf.Timestamp created_at = 3;
+
+  // ScheduledFor is the time at which a timeout message is scheduled to occur.
+  //
   // It is the zero-value if the message is a command or event.
-  string idempotency_key = 14;
+  google.protobuf.Timestamp scheduled_for = 4;
+
+  // Message is the encoded representation of the [dogma.Message].
+  Message message = 5;
+
+  // Extensions is a container for arbitrary key/value pairs associated with
+  // this message and/or its causal chain.
+  //
+  // Any keys present in the [Header.Extensions] field are overridden by keys
+  // in this field.
+  Extensions extensions = 6;
 }

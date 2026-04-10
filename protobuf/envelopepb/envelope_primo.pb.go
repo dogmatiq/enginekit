@@ -28,20 +28,8 @@ func NewEnvelopeBuilder() *EnvelopeBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *EnvelopeBuilder) From(x *Envelope) *EnvelopeBuilder {
-	b.prototype.MessageId = x.MessageId
-	b.prototype.CausationId = x.CausationId
-	b.prototype.CorrelationId = x.CorrelationId
-	b.prototype.SourceSite = x.SourceSite
-	b.prototype.SourceApplication = x.SourceApplication
-	b.prototype.SourceHandler = x.SourceHandler
-	b.prototype.SourceInstanceId = x.SourceInstanceId
-	b.prototype.CreatedAt = x.CreatedAt
-	b.prototype.ScheduledFor = x.ScheduledFor
-	b.prototype.Description = x.Description
-	b.prototype.TypeId = x.TypeId
-	b.prototype.Data = x.Data
-	b.prototype.Attributes = x.Attributes
-	b.prototype.IdempotencyKey = x.IdempotencyKey
+	b.prototype.Header = x.Header
+	b.prototype.Body = x.Body
 	return b
 }
 
@@ -51,118 +39,373 @@ func (b *EnvelopeBuilder) From(x *Envelope) *EnvelopeBuilder {
 // not modify previously constructed messages.
 func (b *EnvelopeBuilder) Build() *Envelope {
 	return &Envelope{
-		MessageId:         b.prototype.MessageId,
-		CausationId:       b.prototype.CausationId,
-		CorrelationId:     b.prototype.CorrelationId,
-		SourceSite:        b.prototype.SourceSite,
-		SourceApplication: b.prototype.SourceApplication,
-		SourceHandler:     b.prototype.SourceHandler,
-		SourceInstanceId:  b.prototype.SourceInstanceId,
-		CreatedAt:         b.prototype.CreatedAt,
-		ScheduledFor:      b.prototype.ScheduledFor,
-		Description:       b.prototype.Description,
-		TypeId:            b.prototype.TypeId,
-		Data:              b.prototype.Data,
-		Attributes:        b.prototype.Attributes,
-		IdempotencyKey:    b.prototype.IdempotencyKey,
+		Header: b.prototype.Header,
+		Body:   b.prototype.Body,
 	}
 }
 
-// WithMessageId configures the builder to set the MessageId field to v,
+// WithHeader configures the builder to set the Header field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithMessageId(v *uuidpb.UUID) *EnvelopeBuilder {
-	b.prototype.MessageId = v
+func (b *EnvelopeBuilder) WithHeader(v *Header) *EnvelopeBuilder {
+	b.prototype.Header = v
 	return b
+}
+
+// WithBody configures the builder to set the Body field to v,
+// then returns b.
+func (b *EnvelopeBuilder) WithBody(v *Body) *EnvelopeBuilder {
+	b.prototype.Body = v
+	return b
+}
+
+type MultiEnvelopeBuilder struct {
+	prototype MultiEnvelope
+}
+
+// NewMultiEnvelopeBuilder returns a builder that constructs [MultiEnvelope] messages.
+func NewMultiEnvelopeBuilder() *MultiEnvelopeBuilder {
+	return &MultiEnvelopeBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *MultiEnvelopeBuilder) From(x *MultiEnvelope) *MultiEnvelopeBuilder {
+	b.prototype.Header = x.Header
+	b.prototype.Bodies = x.Bodies
+	return b
+}
+
+// Build returns a new [MultiEnvelope] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *MultiEnvelopeBuilder) Build() *MultiEnvelope {
+	return &MultiEnvelope{
+		Header: b.prototype.Header,
+		Bodies: b.prototype.Bodies,
+	}
+}
+
+// WithHeader configures the builder to set the Header field to v,
+// then returns b.
+func (b *MultiEnvelopeBuilder) WithHeader(v *Header) *MultiEnvelopeBuilder {
+	b.prototype.Header = v
+	return b
+}
+
+// WithBodies configures the builder to set the Bodies field to v,
+// then returns b.
+func (b *MultiEnvelopeBuilder) WithBodies(v []*Body) *MultiEnvelopeBuilder {
+	b.prototype.Bodies = v
+	return b
+}
+
+type SourceBuilder struct {
+	prototype Source
+}
+
+// NewSourceBuilder returns a builder that constructs [Source] messages.
+func NewSourceBuilder() *SourceBuilder {
+	return &SourceBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *SourceBuilder) From(x *Source) *SourceBuilder {
+	b.prototype.Site = x.Site
+	b.prototype.Application = x.Application
+	b.prototype.Handler = x.Handler
+	b.prototype.InstanceId = x.InstanceId
+	return b
+}
+
+// Build returns a new [Source] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *SourceBuilder) Build() *Source {
+	return &Source{
+		Site:        b.prototype.Site,
+		Application: b.prototype.Application,
+		Handler:     b.prototype.Handler,
+		InstanceId:  b.prototype.InstanceId,
+	}
+}
+
+// WithSite configures the builder to set the Site field to v,
+// then returns b.
+func (b *SourceBuilder) WithSite(v *identitypb.Identity) *SourceBuilder {
+	b.prototype.Site = v
+	return b
+}
+
+// WithApplication configures the builder to set the Application field to v,
+// then returns b.
+func (b *SourceBuilder) WithApplication(v *identitypb.Identity) *SourceBuilder {
+	b.prototype.Application = v
+	return b
+}
+
+// WithHandler configures the builder to set the Handler field to v,
+// then returns b.
+func (b *SourceBuilder) WithHandler(v *identitypb.Identity) *SourceBuilder {
+	b.prototype.Handler = v
+	return b
+}
+
+// WithInstanceId configures the builder to set the InstanceId field to v,
+// then returns b.
+func (b *SourceBuilder) WithInstanceId(v string) *SourceBuilder {
+	b.prototype.InstanceId = v
+	return b
+}
+
+type MessageBuilder struct {
+	prototype Message
+}
+
+// NewMessageBuilder returns a builder that constructs [Message] messages.
+func NewMessageBuilder() *MessageBuilder {
+	return &MessageBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *MessageBuilder) From(x *Message) *MessageBuilder {
+	b.prototype.TypeId = x.TypeId
+	b.prototype.Description = x.Description
+	b.prototype.Data = x.Data
+	return b
+}
+
+// Build returns a new [Message] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *MessageBuilder) Build() *Message {
+	return &Message{
+		TypeId:      b.prototype.TypeId,
+		Description: b.prototype.Description,
+		Data:        b.prototype.Data,
+	}
+}
+
+// WithTypeId configures the builder to set the TypeId field to v,
+// then returns b.
+func (b *MessageBuilder) WithTypeId(v *uuidpb.UUID) *MessageBuilder {
+	b.prototype.TypeId = v
+	return b
+}
+
+// WithDescription configures the builder to set the Description field to v,
+// then returns b.
+func (b *MessageBuilder) WithDescription(v string) *MessageBuilder {
+	b.prototype.Description = v
+	return b
+}
+
+// WithData configures the builder to set the Data field to v,
+// then returns b.
+func (b *MessageBuilder) WithData(v []byte) *MessageBuilder {
+	b.prototype.Data = v
+	return b
+}
+
+type ExtensionsBuilder struct {
+	prototype Extensions
+}
+
+// NewExtensionsBuilder returns a builder that constructs [Extensions] messages.
+func NewExtensionsBuilder() *ExtensionsBuilder {
+	return &ExtensionsBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *ExtensionsBuilder) From(x *Extensions) *ExtensionsBuilder {
+	b.prototype.Attributes = x.Attributes
+	b.prototype.Baggage = x.Baggage
+	return b
+}
+
+// Build returns a new [Extensions] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *ExtensionsBuilder) Build() *Extensions {
+	return &Extensions{
+		Attributes: b.prototype.Attributes,
+		Baggage:    b.prototype.Baggage,
+	}
+}
+
+// WithAttributes configures the builder to set the Attributes field to v,
+// then returns b.
+func (b *ExtensionsBuilder) WithAttributes(v map[string]string) *ExtensionsBuilder {
+	b.prototype.Attributes = v
+	return b
+}
+
+// WithBaggage configures the builder to set the Baggage field to v,
+// then returns b.
+func (b *ExtensionsBuilder) WithBaggage(v map[string]string) *ExtensionsBuilder {
+	b.prototype.Baggage = v
+	return b
+}
+
+type HeaderBuilder struct {
+	prototype Header
+}
+
+// NewHeaderBuilder returns a builder that constructs [Header] messages.
+func NewHeaderBuilder() *HeaderBuilder {
+	return &HeaderBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *HeaderBuilder) From(x *Header) *HeaderBuilder {
+	b.prototype.CausationId = x.CausationId
+	b.prototype.CorrelationId = x.CorrelationId
+	b.prototype.Source = x.Source
+	b.prototype.Extensions = x.Extensions
+	return b
+}
+
+// Build returns a new [Header] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *HeaderBuilder) Build() *Header {
+	return &Header{
+		CausationId:   b.prototype.CausationId,
+		CorrelationId: b.prototype.CorrelationId,
+		Source:        b.prototype.Source,
+		Extensions:    b.prototype.Extensions,
+	}
 }
 
 // WithCausationId configures the builder to set the CausationId field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithCausationId(v *uuidpb.UUID) *EnvelopeBuilder {
+func (b *HeaderBuilder) WithCausationId(v *uuidpb.UUID) *HeaderBuilder {
 	b.prototype.CausationId = v
 	return b
 }
 
 // WithCorrelationId configures the builder to set the CorrelationId field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithCorrelationId(v *uuidpb.UUID) *EnvelopeBuilder {
+func (b *HeaderBuilder) WithCorrelationId(v *uuidpb.UUID) *HeaderBuilder {
 	b.prototype.CorrelationId = v
 	return b
 }
 
-// WithSourceSite configures the builder to set the SourceSite field to v,
+// WithSource configures the builder to set the Source field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithSourceSite(v *identitypb.Identity) *EnvelopeBuilder {
-	b.prototype.SourceSite = v
+func (b *HeaderBuilder) WithSource(v *Source) *HeaderBuilder {
+	b.prototype.Source = v
 	return b
 }
 
-// WithSourceApplication configures the builder to set the SourceApplication field to v,
+// WithExtensions configures the builder to set the Extensions field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithSourceApplication(v *identitypb.Identity) *EnvelopeBuilder {
-	b.prototype.SourceApplication = v
+func (b *HeaderBuilder) WithExtensions(v *Extensions) *HeaderBuilder {
+	b.prototype.Extensions = v
 	return b
 }
 
-// WithSourceHandler configures the builder to set the SourceHandler field to v,
+type BodyBuilder struct {
+	prototype Body
+}
+
+// NewBodyBuilder returns a builder that constructs [Body] messages.
+func NewBodyBuilder() *BodyBuilder {
+	return &BodyBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
 // then returns b.
-func (b *EnvelopeBuilder) WithSourceHandler(v *identitypb.Identity) *EnvelopeBuilder {
-	b.prototype.SourceHandler = v
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *BodyBuilder) From(x *Body) *BodyBuilder {
+	b.prototype.MessageId = x.MessageId
+	b.prototype.IdempotencyKey = x.IdempotencyKey
+	b.prototype.CreatedAt = x.CreatedAt
+	b.prototype.ScheduledFor = x.ScheduledFor
+	b.prototype.Message = x.Message
+	b.prototype.Extensions = x.Extensions
 	return b
 }
 
-// WithSourceInstanceId configures the builder to set the SourceInstanceId field to v,
+// Build returns a new [Body] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *BodyBuilder) Build() *Body {
+	return &Body{
+		MessageId:      b.prototype.MessageId,
+		IdempotencyKey: b.prototype.IdempotencyKey,
+		CreatedAt:      b.prototype.CreatedAt,
+		ScheduledFor:   b.prototype.ScheduledFor,
+		Message:        b.prototype.Message,
+		Extensions:     b.prototype.Extensions,
+	}
+}
+
+// WithMessageId configures the builder to set the MessageId field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithSourceInstanceId(v string) *EnvelopeBuilder {
-	b.prototype.SourceInstanceId = v
+func (b *BodyBuilder) WithMessageId(v *uuidpb.UUID) *BodyBuilder {
+	b.prototype.MessageId = v
+	return b
+}
+
+// WithIdempotencyKey configures the builder to set the IdempotencyKey field to v,
+// then returns b.
+func (b *BodyBuilder) WithIdempotencyKey(v string) *BodyBuilder {
+	b.prototype.IdempotencyKey = v
 	return b
 }
 
 // WithCreatedAt configures the builder to set the CreatedAt field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithCreatedAt(v *timestamppb.Timestamp) *EnvelopeBuilder {
+func (b *BodyBuilder) WithCreatedAt(v *timestamppb.Timestamp) *BodyBuilder {
 	b.prototype.CreatedAt = v
 	return b
 }
 
 // WithScheduledFor configures the builder to set the ScheduledFor field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithScheduledFor(v *timestamppb.Timestamp) *EnvelopeBuilder {
+func (b *BodyBuilder) WithScheduledFor(v *timestamppb.Timestamp) *BodyBuilder {
 	b.prototype.ScheduledFor = v
 	return b
 }
 
-// WithDescription configures the builder to set the Description field to v,
+// WithMessage configures the builder to set the Message field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithDescription(v string) *EnvelopeBuilder {
-	b.prototype.Description = v
+func (b *BodyBuilder) WithMessage(v *Message) *BodyBuilder {
+	b.prototype.Message = v
 	return b
 }
 
-// WithTypeId configures the builder to set the TypeId field to v,
+// WithExtensions configures the builder to set the Extensions field to v,
 // then returns b.
-func (b *EnvelopeBuilder) WithTypeId(v *uuidpb.UUID) *EnvelopeBuilder {
-	b.prototype.TypeId = v
-	return b
-}
-
-// WithData configures the builder to set the Data field to v,
-// then returns b.
-func (b *EnvelopeBuilder) WithData(v []byte) *EnvelopeBuilder {
-	b.prototype.Data = v
-	return b
-}
-
-// WithAttributes configures the builder to set the Attributes field to v,
-// then returns b.
-func (b *EnvelopeBuilder) WithAttributes(v map[string]string) *EnvelopeBuilder {
-	b.prototype.Attributes = v
-	return b
-}
-
-// WithIdempotencyKey configures the builder to set the IdempotencyKey field to v,
-// then returns b.
-func (b *EnvelopeBuilder) WithIdempotencyKey(v string) *EnvelopeBuilder {
-	b.prototype.IdempotencyKey = v
+func (b *BodyBuilder) WithExtensions(v *Extensions) *BodyBuilder {
+	b.prototype.Extensions = v
 	return b
 }
 
@@ -182,72 +425,213 @@ func (x *Envelope) UnmarshalBinary(data []byte) error {
 	return proto.Unmarshal(data, x)
 }
 
-// SetMessageId sets the x.MessageId field to v, then returns x.
-func (x *Envelope) SetMessageId(v *uuidpb.UUID) {
-	x.MessageId = v
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*MultiEnvelope] to implement [encoding.BinaryMarshaler].
+func (x *MultiEnvelope) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
 }
 
-// SetCausationId sets the x.CausationId field to v, then returns x.
-func (x *Envelope) SetCausationId(v *uuidpb.UUID) {
-	x.CausationId = v
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*MultiEnvelope] to implement [encoding.BinaryUnmarshaler].
+func (x *MultiEnvelope) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
 }
 
-// SetCorrelationId sets the x.CorrelationId field to v, then returns x.
-func (x *Envelope) SetCorrelationId(v *uuidpb.UUID) {
-	x.CorrelationId = v
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*Source] to implement [encoding.BinaryMarshaler].
+func (x *Source) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
 }
 
-// SetSourceSite sets the x.SourceSite field to v, then returns x.
-func (x *Envelope) SetSourceSite(v *identitypb.Identity) {
-	x.SourceSite = v
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*Source] to implement [encoding.BinaryUnmarshaler].
+func (x *Source) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
 }
 
-// SetSourceApplication sets the x.SourceApplication field to v, then returns x.
-func (x *Envelope) SetSourceApplication(v *identitypb.Identity) {
-	x.SourceApplication = v
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*Message] to implement [encoding.BinaryMarshaler].
+func (x *Message) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
 }
 
-// SetSourceHandler sets the x.SourceHandler field to v, then returns x.
-func (x *Envelope) SetSourceHandler(v *identitypb.Identity) {
-	x.SourceHandler = v
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*Message] to implement [encoding.BinaryUnmarshaler].
+func (x *Message) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
 }
 
-// SetSourceInstanceId sets the x.SourceInstanceId field to v, then returns x.
-func (x *Envelope) SetSourceInstanceId(v string) {
-	x.SourceInstanceId = v
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*Extensions] to implement [encoding.BinaryMarshaler].
+func (x *Extensions) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
 }
 
-// SetCreatedAt sets the x.CreatedAt field to v, then returns x.
-func (x *Envelope) SetCreatedAt(v *timestamppb.Timestamp) {
-	x.CreatedAt = v
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*Extensions] to implement [encoding.BinaryUnmarshaler].
+func (x *Extensions) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
 }
 
-// SetScheduledFor sets the x.ScheduledFor field to v, then returns x.
-func (x *Envelope) SetScheduledFor(v *timestamppb.Timestamp) {
-	x.ScheduledFor = v
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*Header] to implement [encoding.BinaryMarshaler].
+func (x *Header) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
 }
 
-// SetDescription sets the x.Description field to v, then returns x.
-func (x *Envelope) SetDescription(v string) {
-	x.Description = v
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*Header] to implement [encoding.BinaryUnmarshaler].
+func (x *Header) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
+}
+
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*Body] to implement [encoding.BinaryMarshaler].
+func (x *Body) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
+}
+
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*Body] to implement [encoding.BinaryUnmarshaler].
+func (x *Body) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
+}
+
+// SetHeader sets the x.Header field to v, then returns x.
+func (x *Envelope) SetHeader(v *Header) {
+	x.Header = v
+}
+
+// SetBody sets the x.Body field to v, then returns x.
+func (x *Envelope) SetBody(v *Body) {
+	x.Body = v
+}
+
+// SetHeader sets the x.Header field to v, then returns x.
+func (x *MultiEnvelope) SetHeader(v *Header) {
+	x.Header = v
+}
+
+// SetBodies sets the x.Bodies field to v, then returns x.
+func (x *MultiEnvelope) SetBodies(v []*Body) {
+	x.Bodies = v
+}
+
+// SetSite sets the x.Site field to v, then returns x.
+func (x *Source) SetSite(v *identitypb.Identity) {
+	x.Site = v
+}
+
+// SetApplication sets the x.Application field to v, then returns x.
+func (x *Source) SetApplication(v *identitypb.Identity) {
+	x.Application = v
+}
+
+// SetHandler sets the x.Handler field to v, then returns x.
+func (x *Source) SetHandler(v *identitypb.Identity) {
+	x.Handler = v
+}
+
+// SetInstanceId sets the x.InstanceId field to v, then returns x.
+func (x *Source) SetInstanceId(v string) {
+	x.InstanceId = v
 }
 
 // SetTypeId sets the x.TypeId field to v, then returns x.
-func (x *Envelope) SetTypeId(v *uuidpb.UUID) {
+func (x *Message) SetTypeId(v *uuidpb.UUID) {
 	x.TypeId = v
 }
 
+// SetDescription sets the x.Description field to v, then returns x.
+func (x *Message) SetDescription(v string) {
+	x.Description = v
+}
+
 // SetData sets the x.Data field to v, then returns x.
-func (x *Envelope) SetData(v []byte) {
+func (x *Message) SetData(v []byte) {
 	x.Data = v
 }
 
 // SetAttributes sets the x.Attributes field to v, then returns x.
-func (x *Envelope) SetAttributes(v map[string]string) {
+func (x *Extensions) SetAttributes(v map[string]string) {
 	x.Attributes = v
 }
 
+// SetBaggage sets the x.Baggage field to v, then returns x.
+func (x *Extensions) SetBaggage(v map[string]string) {
+	x.Baggage = v
+}
+
+// SetCausationId sets the x.CausationId field to v, then returns x.
+func (x *Header) SetCausationId(v *uuidpb.UUID) {
+	x.CausationId = v
+}
+
+// SetCorrelationId sets the x.CorrelationId field to v, then returns x.
+func (x *Header) SetCorrelationId(v *uuidpb.UUID) {
+	x.CorrelationId = v
+}
+
+// SetSource sets the x.Source field to v, then returns x.
+func (x *Header) SetSource(v *Source) {
+	x.Source = v
+}
+
+// SetExtensions sets the x.Extensions field to v, then returns x.
+func (x *Header) SetExtensions(v *Extensions) {
+	x.Extensions = v
+}
+
+// SetMessageId sets the x.MessageId field to v, then returns x.
+func (x *Body) SetMessageId(v *uuidpb.UUID) {
+	x.MessageId = v
+}
+
 // SetIdempotencyKey sets the x.IdempotencyKey field to v, then returns x.
-func (x *Envelope) SetIdempotencyKey(v string) {
+func (x *Body) SetIdempotencyKey(v string) {
 	x.IdempotencyKey = v
+}
+
+// SetCreatedAt sets the x.CreatedAt field to v, then returns x.
+func (x *Body) SetCreatedAt(v *timestamppb.Timestamp) {
+	x.CreatedAt = v
+}
+
+// SetScheduledFor sets the x.ScheduledFor field to v, then returns x.
+func (x *Body) SetScheduledFor(v *timestamppb.Timestamp) {
+	x.ScheduledFor = v
+}
+
+// SetMessage sets the x.Message field to v, then returns x.
+func (x *Body) SetMessage(v *Message) {
+	x.Message = v
+}
+
+// SetExtensions sets the x.Extensions field to v, then returns x.
+func (x *Body) SetExtensions(v *Extensions) {
+	x.Extensions = v
 }

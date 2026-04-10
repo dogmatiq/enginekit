@@ -41,16 +41,23 @@ func TestPacker_packAndUnpack(t *testing.T) {
 	}
 
 	want := &Envelope{
-		MessageId:         id,
-		CausationId:       id,
-		CorrelationId:     id,
-		SourceSite:        packer.Site,
-		SourceApplication: packer.Application,
-		SourceInstanceId:  "",
-		CreatedAt:         timestamppb.New(now),
-		Description:       `command(stubs.TypeA:A1, valid)`,
-		TypeId:            uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
-		Data:              []byte(`{"content":"A1"}`),
+		Header: &Header{
+			CausationId:   id,
+			CorrelationId: id,
+			Source: &Source{
+				Site:        packer.Site,
+				Application: packer.Application,
+			},
+		},
+		Body: &Body{
+			MessageId: id,
+			CreatedAt: timestamppb.New(now),
+			Message: &Message{
+				Description: `command(stubs.TypeA:A1, valid)`,
+				TypeId:      uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
+				Data:        []byte(`{"content":"A1"}`),
+			},
+		},
 	}
 
 	Expect(
@@ -103,7 +110,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 
 			ExpectPanic(
 				t,
-				"invalid source site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 				func() {
 					packer.Pack(CommandA1)
 				},
@@ -114,8 +121,13 @@ func TestPacker_packAndUnpack(t *testing.T) {
 	t.Run("func Unpack()", func(t *testing.T) {
 		t.Run("it returns an error if the message type is not registered", func(t *testing.T) {
 			env := &Envelope{
-				TypeId: uuidpb.MustParse("f1816a71-3593-4771-8d8b-327650571288"),
-				Data:   []byte(`{"content":"A1"}`),
+				Body: &Body{
+					Message: &Message{
+						Description: "<description>",
+						TypeId:      uuidpb.MustParse("f1816a71-3593-4771-8d8b-327650571288"),
+						Data:        []byte(`{"content":"A1"}`),
+					},
+				},
 			}
 
 			want := "f1816a71-3593-4771-8d8b-327650571288 is not a registered message type ID"
@@ -129,8 +141,13 @@ func TestPacker_packAndUnpack(t *testing.T) {
 
 		t.Run("it returns an error if the message cannot be unmarshaled", func(t *testing.T) {
 			env := &Envelope{
-				TypeId: uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
-				Data:   []byte(`}`),
+				Body: &Body{
+					Message: &Message{
+						Description: "<description>",
+						TypeId:      uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
+						Data:        []byte(`}`),
+					},
+				},
 			}
 
 			want := "unable to unmarshal *stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]: invalid character '}' looking for beginning of value"
@@ -156,12 +173,12 @@ func TestWithCause(t *testing.T) {
 	cause := packer.Pack(EventA1, WithCause(root))
 	got := packer.Pack(CommandA2, WithCause(cause))
 
-	if !got.CausationId.Equal(cause.MessageId) {
-		t.Fatalf("unexpected causation ID: got %s, want %s", got.CausationId, cause.MessageId)
+	if !got.Header.CausationId.Equal(cause.Body.MessageId) {
+		t.Fatalf("unexpected causation ID: got %s, want %s", got.Header.CausationId, cause.Body.MessageId)
 	}
 
-	if !got.CorrelationId.Equal(cause.CorrelationId) {
-		t.Fatalf("unexpected correlation ID: got %s, want %s", got.CorrelationId, root.MessageId)
+	if !got.Header.CorrelationId.Equal(cause.Header.CorrelationId) {
+		t.Fatalf("unexpected correlation ID: got %s, want %s", got.Header.CorrelationId, root.Body.MessageId)
 	}
 }
 
@@ -180,8 +197,8 @@ func TestWithHandler(t *testing.T) {
 
 	got := packer.Pack(CommandA1, WithHandler(handler))
 
-	if !got.SourceHandler.Equal(handler) {
-		t.Fatalf("unexpected handler: got %s, want %s", got.SourceHandler, handler)
+	if !got.Header.Source.Handler.Equal(handler) {
+		t.Fatalf("unexpected handler: got %s, want %s", got.Header.Source.Handler, handler)
 	}
 }
 
@@ -205,8 +222,8 @@ func TestWithInstanceID(t *testing.T) {
 		}),
 	)
 
-	if got.SourceInstanceId != "instance" {
-		t.Fatalf("unexpected instance ID: got %s, want instance", got.SourceInstanceId)
+	if got.Header.Source.InstanceId != "instance" {
+		t.Fatalf("unexpected instance ID: got %s, want instance", got.Header.Source.InstanceId)
 	}
 }
 
@@ -227,7 +244,7 @@ func TestWithCreatedAt(t *testing.T) {
 	got := packer.Pack(
 		CommandA1,
 		WithCreatedAt(want),
-	).CreatedAt.AsTime()
+	).Body.CreatedAt.AsTime()
 
 	if !got.Equal(want) {
 		t.Fatalf("unexpected creation time: got %s, want %s", got, want)
@@ -255,7 +272,7 @@ func TestWithScheduledFor(t *testing.T) {
 			Key:  uuidpb.Generate(),
 		}),
 		WithInstanceID("instance"),
-	).ScheduledFor.AsTime()
+	).Body.ScheduledFor.AsTime()
 
 	if !got.Equal(want) {
 		t.Fatalf("unexpected scheduled time: got %s, want %s", got, want)
@@ -272,7 +289,7 @@ func TestWithIdempotencyKey(t *testing.T) {
 
 	got := packer.Pack(CommandA1, WithIdempotencyKey("test-key"))
 
-	if got.IdempotencyKey != "test-key" {
-		t.Fatalf("unexpected idempotency key: got %q, want %q", got.IdempotencyKey, "test-key")
+	if got.Body.IdempotencyKey != "test-key" {
+		t.Fatalf("unexpected idempotency key: got %q, want %q", got.Body.IdempotencyKey, "test-key")
 	}
 }

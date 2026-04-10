@@ -55,22 +55,30 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 	id := p.generateID()
 
 	env := &Envelope{
-		MessageId:         id,
-		CorrelationId:     id,
-		CausationId:       id,
-		SourceSite:        p.Site,
-		SourceApplication: p.Application,
-		Description:       m.MessageDescription(),
-		TypeId:            uuidpb.MustParse(mt.ID()),
-		Data:              data,
+		Header: &Header{
+			CausationId:   id,
+			CorrelationId: id,
+			Source: &Source{
+				Site:        p.Site,
+				Application: p.Application,
+			},
+		},
+		Body: &Body{
+			MessageId: id,
+			Message: &Message{
+				TypeId:      uuidpb.MustParse(mt.ID()),
+				Description: m.MessageDescription(),
+				Data:        data,
+			},
+		},
 	}
 
 	for _, opt := range options {
 		opt(env)
 	}
 
-	if env.CreatedAt == nil {
-		env.CreatedAt = p.now()
+	if env.Body.CreatedAt == nil {
+		env.Body.CreatedAt = p.now()
 	}
 
 	if err := env.Validate(); err != nil {
@@ -82,16 +90,22 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 
 // Unpack returns the message contained within an envelope.
 func Unpack(env *Envelope) (dogma.Message, error) {
-	mt, ok := dogma.RegisteredMessageTypeByID(env.TypeId.AsString())
+	message := env.GetBody().GetMessage()
+
+	if err := message.validate(); err != nil {
+		return nil, fmt.Errorf("invalid message: %w", err)
+	}
+
+	mt, ok := dogma.RegisteredMessageTypeByID(message.TypeId.AsString())
 	if !ok {
 		return nil, fmt.Errorf(
 			"%s is not a registered message type ID",
-			env.TypeId,
+			message.TypeId,
 		)
 	}
 
 	m := mt.New()
-	if err := m.UnmarshalBinary(env.Data); err != nil {
+	if err := m.UnmarshalBinary(message.Data); err != nil {
 		return nil, fmt.Errorf("unable to unmarshal %T: %w", m, err)
 	}
 
@@ -122,8 +136,8 @@ type PackOption func(*Envelope)
 // WithCause sets env as the "cause" of the message being packed.
 func WithCause(env *Envelope) PackOption {
 	return func(e *Envelope) {
-		e.CausationId = env.MessageId
-		e.CorrelationId = env.CorrelationId
+		e.Header.CausationId = env.GetBody().GetMessageId()
+		e.Header.CorrelationId = env.GetHeader().GetCorrelationId()
 	}
 }
 
@@ -131,7 +145,7 @@ func WithCause(env *Envelope) PackOption {
 // message.
 func WithHandler(h *identitypb.Identity) PackOption {
 	return func(e *Envelope) {
-		e.SourceHandler = h
+		e.Header.Source.Handler = h
 	}
 }
 
@@ -139,27 +153,27 @@ func WithHandler(h *identitypb.Identity) PackOption {
 // source of the message.
 func WithInstanceID(id string) PackOption {
 	return func(e *Envelope) {
-		e.SourceInstanceId = id
+		e.Header.Source.InstanceId = id
 	}
 }
 
 // WithCreatedAt sets the creation time of a message.
 func WithCreatedAt(t time.Time) PackOption {
 	return func(e *Envelope) {
-		e.CreatedAt = timestamppb.New(t)
+		e.Body.CreatedAt = timestamppb.New(t)
 	}
 }
 
 // WithScheduledFor sets the scheduled time of a timeout message.
 func WithScheduledFor(t time.Time) PackOption {
 	return func(e *Envelope) {
-		e.ScheduledFor = timestamppb.New(t)
+		e.Body.ScheduledFor = timestamppb.New(t)
 	}
 }
 
 // WithIdempotencyKey sets the idempotency key of a command message.
 func WithIdempotencyKey(key string) PackOption {
 	return func(e *Envelope) {
-		e.IdempotencyKey = key
+		e.Body.IdempotencyKey = key
 	}
 }

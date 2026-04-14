@@ -79,10 +79,8 @@ func (x *Envelope) GetBody() *Body {
 	return nil
 }
 
-// MultiEnvelope is a container for multiple Dogma messages that were produced
-// by a single handler operation.
-//
-// It is a more efficient encoding of a slice of [Envelope] values.
+// MultiEnvelope is an efficient encoding of an ordered sequence of [Envelope]
+// values that share common header context.
 type MultiEnvelope struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Header        *Header                `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`

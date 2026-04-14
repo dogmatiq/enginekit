@@ -15,10 +15,9 @@ message Envelope {
   Body   body   = 2;
 }
 
-// MultiEnvelope is a container for multiple Dogma messages that were produced
-// by a single handler operation.
+// MultiEnvelope is an efficient encoding of an ordered sequence of [Envelope]
+// values that share common header context.
 //
-// It is a more efficient encoding of a slice of [Envelope] values.
 message MultiEnvelope {
   Header        header = 1;
   repeated Body bodies = 2;

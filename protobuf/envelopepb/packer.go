@@ -74,7 +74,7 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 	}
 
 	for _, opt := range options {
-		opt(env)
+		opt.applyToEnvelope(env)
 	}
 
 	if env.Body.CreatedAt == nil {
@@ -130,50 +130,104 @@ func (p *Packer) generateID() *uuidpb.UUID {
 	return uuidpb.Generate()
 }
 
-// PackOption is an option that alters the behavior of a Pack operation.
-type PackOption func(*Envelope)
+// PackOption is an option that alters the behavior of a [Packer.Pack]
+// operation.
+type PackOption interface {
+	applyToEnvelope(*Envelope)
+}
+
+// SourcePackOption is a [PackOption] that modifies only the source
+// information in an envelope header.
+type SourcePackOption interface {
+	PackOption
+	applyToSource(*Source)
+}
+
+// BodyPackOption is a [PackOption] that modifies only envelope bodies.
+type BodyPackOption interface {
+	PackOption
+	applyToBody(*Body)
+}
+
+type packOption func(*Envelope)
+
+func (opt packOption) applyToEnvelope(env *Envelope) {
+	opt(env)
+}
+
+type sourcePackOption func(*Source)
+
+func (opt sourcePackOption) applyToEnvelope(env *Envelope) {
+	opt(env.Header.Source)
+}
+
+func (opt sourcePackOption) applyToSource(source *Source) {
+	opt(source)
+}
+
+type bodyPackOption func(*Body)
+
+func (opt bodyPackOption) applyToEnvelope(env *Envelope) {
+	opt(env.Body)
+}
+
+func (opt bodyPackOption) applyToBody(body *Body) {
+	opt(body)
+}
 
 // WithCause sets env as the "cause" of the message being packed.
 func WithCause(env *Envelope) PackOption {
-	return func(e *Envelope) {
-		e.Header.CausationId = env.GetBody().GetMessageId()
-		e.Header.CorrelationId = env.GetHeader().GetCorrelationId()
-	}
+	return packOption(
+		func(packed *Envelope) {
+			packed.Header.CausationId = env.GetBody().GetMessageId()
+			packed.Header.CorrelationId = env.GetHeader().GetCorrelationId()
+		},
+	)
 }
 
 // WithHandler sets h as the identity of the handler that is the source of the
 // message.
-func WithHandler(h *identitypb.Identity) PackOption {
-	return func(e *Envelope) {
-		e.Header.Source.Handler = h
-	}
+func WithHandler(h *identitypb.Identity) SourcePackOption {
+	return sourcePackOption(
+		func(source *Source) {
+			source.Handler = h
+		},
+	)
 }
 
 // WithInstanceID sets the aggregate or process instance ID that is the
 // source of the message.
-func WithInstanceID(id string) PackOption {
-	return func(e *Envelope) {
-		e.Header.Source.InstanceId = id
-	}
+func WithInstanceID(id string) SourcePackOption {
+	return sourcePackOption(
+		func(source *Source) {
+			source.InstanceId = id
+		},
+	)
 }
 
 // WithCreatedAt sets the creation time of a message.
-func WithCreatedAt(t time.Time) PackOption {
-	return func(e *Envelope) {
-		e.Body.CreatedAt = timestamppb.New(t)
-	}
+func WithCreatedAt(t time.Time) BodyPackOption {
+	return bodyPackOption(
+		func(body *Body) {
+			body.CreatedAt = timestamppb.New(t)
+		},
+	)
 }
 
 // WithScheduledFor sets the scheduled time of a timeout message.
-func WithScheduledFor(t time.Time) PackOption {
-	return func(e *Envelope) {
-		e.Body.ScheduledFor = timestamppb.New(t)
-	}
+func WithScheduledFor(t time.Time) BodyPackOption {
+	return bodyPackOption(
+		func(body *Body) {
+			body.ScheduledFor = timestamppb.New(t)
+		},
+	)
 }
 
 // WithIdempotencyKey sets the idempotency key of a command message.
-func WithIdempotencyKey(key string) PackOption {
-	return func(e *Envelope) {
-		e.Body.IdempotencyKey = key
-	}
+func WithIdempotencyKey(key string) BodyPackOption {
+	return bodyPackOption(
+		func(body *Body) {
+			body.IdempotencyKey = key
+		},
+	)
 }

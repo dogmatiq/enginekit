@@ -97,6 +97,7 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Env
 }
 
 // Unpack returns the message contained within an envelope.
+// TODO: Make `UnpackCommand`, etc.
 func Unpack(env *Envelope) (dogma.Message, error) {
 	message := env.GetBody().GetMessage()
 
@@ -277,14 +278,19 @@ func appendOrReplace(values *[]*anypb.Any, value *anypb.Any) {
 }
 
 // marshalAsAny returns v as an [*anypb.Any], converting it if necessary. It
-// panics if x is nil or x cannot be marshaled.
+// panics if x is nil, if x is an empty [*anypb.Any], or if it cannot be
+// marshaled.
 func marshalAsAny(x proto.Message) *anypb.Any {
 	if x == nil {
-		panic("extension value must not be nil")
+		panic("value must not be nil")
 	}
 
-	if v, ok := x.(*anypb.Any); ok {
-		return v
+	if x, ok := x.(*anypb.Any); ok {
+		if err := validateAnyValue(x); err != nil {
+			panic("value must not be an empty google.protobuf.Any")
+		}
+
+		return x
 	}
 
 	v, err := anypb.New(x)

@@ -56,6 +56,22 @@ func TestEnvelope_Validate(t *testing.T) {
 				}),
 			},
 			{
+				"with empty extension payload",
+				newEnvelope(func(e *Envelope) {
+					e.Body.Extensions = []*anypb.Any{{
+						TypeUrl: "type.googleapis.com/example.Extension",
+					}}
+				}),
+			},
+			{
+				"with empty baggage payload",
+				newEnvelope(func(e *Envelope) {
+					e.Body.Baggage = []*anypb.Any{{
+						TypeUrl: "type.googleapis.com/example.Baggage",
+					}}
+				}),
+			},
+			{
 				"without data",
 				newEnvelope(func(e *Envelope) {
 					e.Body.Message.Data = nil
@@ -167,6 +183,34 @@ func TestEnvelope_Validate(t *testing.T) {
 					e.Body.Message.Description = ""
 				}),
 				"invalid body: invalid message: invalid description: must not be empty",
+			},
+			{
+				"empty header extension",
+				newEnvelope(func(e *Envelope) {
+					e.Header.Extensions = []*anypb.Any{{}}
+				}),
+				"invalid header: invalid extensions at index 0: type URL must not be empty",
+			},
+			{
+				"empty header baggage",
+				newEnvelope(func(e *Envelope) {
+					e.Header.Baggage = []*anypb.Any{nil}
+				}),
+				"invalid header: invalid baggage at index 0: type URL must not be empty",
+			},
+			{
+				"empty body extension",
+				newEnvelope(func(e *Envelope) {
+					e.Body.Extensions = []*anypb.Any{{}}
+				}),
+				"invalid body: invalid extensions at index 0: type URL must not be empty",
+			},
+			{
+				"empty body baggage",
+				newEnvelope(func(e *Envelope) {
+					e.Body.Baggage = []*anypb.Any{{}}
+				}),
+				"invalid body: invalid baggage at index 0: type URL must not be empty",
 			},
 			{
 				"without type ID",

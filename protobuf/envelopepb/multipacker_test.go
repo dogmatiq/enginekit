@@ -503,7 +503,7 @@ func TestEffectPacker_Pack(t *testing.T) {
 
 		Expect(
 			t,
-			"unexpected baggage extensions",
+			"unexpected baggage values",
 			got.Bodies[0].Baggage,
 			[]*anypb.Any{want},
 		)

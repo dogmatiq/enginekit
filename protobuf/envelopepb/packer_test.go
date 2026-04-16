@@ -178,6 +178,96 @@ func TestWithIdempotencyKey(t *testing.T) {
 }
 
 func TestWithExtension(t *testing.T) {
+	t.Run("it panics if x is nil", func(t *testing.T) {
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithExtension(nil)
+			},
+		)
+	})
+
+	t.Run("it panics if x is an empty any", func(t *testing.T) {
+		ExpectPanic(
+			t,
+			"value must not be an empty google.protobuf.Any",
+			func() {
+				var x *anypb.Any
+				WithExtension(x)
+			},
+		)
+
+		ExpectPanic(
+			t,
+			"value must not be an empty google.protobuf.Any",
+			func() {
+				WithExtension(&anypb.Any{})
+			},
+		)
+	})
+
+	t.Run("it accepts empty serialized values", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		got := packer.PackCommand(CommandA1, WithExtension(wrapperspb.String("")))
+
+		if len(got.Body.Extensions) != 1 {
+			t.Fatalf("unexpected extension count: got %d, want 1", len(got.Body.Extensions))
+		}
+
+		if got.Body.Extensions[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
+			t.Fatalf(
+				"unexpected extension type URL: got %q, want %q",
+				got.Body.Extensions[0].GetTypeUrl(),
+				"type.googleapis.com/google.protobuf.StringValue",
+			)
+		}
+
+		if len(got.Body.Extensions[0].GetValue()) != 0 {
+			t.Fatalf(
+				"unexpected extension payload length: got %d, want 0",
+				len(got.Body.Extensions[0].GetValue()),
+			)
+		}
+	})
+
+	t.Run("it accepts typed nil messages", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		var value *wrapperspb.StringValue
+		got := packer.PackCommand(CommandA1, WithExtension(value))
+
+		if len(got.Body.Extensions) != 1 {
+			t.Fatalf("unexpected extension count: got %d, want 1", len(got.Body.Extensions))
+		}
+
+		if got.Body.Extensions[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
+			t.Fatalf(
+				"unexpected extension type URL: got %q, want %q",
+				got.Body.Extensions[0].GetTypeUrl(),
+				"type.googleapis.com/google.protobuf.StringValue",
+			)
+		}
+
+		if len(got.Body.Extensions[0].GetValue()) != 0 {
+			t.Fatalf(
+				"unexpected extension payload length: got %d, want 0",
+				len(got.Body.Extensions[0].GetValue()),
+			)
+		}
+	})
+
 	t.Run("it adds x to the extensions", func(t *testing.T) {
 		packer := &Packer{
 			Application: &identitypb.Identity{
@@ -262,6 +352,116 @@ func TestWithExtension(t *testing.T) {
 			t,
 			"unexpected extensions",
 			got.Body.Extensions,
+			[]*anypb.Any{wantString, wantInt},
+		)
+	})
+}
+
+func TestWithBaggage(t *testing.T) {
+	t.Run("it panics if x is nil", func(t *testing.T) {
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithBaggage(nil)
+			},
+		)
+	})
+
+	t.Run("it panics if x is an empty any", func(t *testing.T) {
+		ExpectPanic(
+			t,
+			"value must not be an empty google.protobuf.Any",
+			func() {
+				WithBaggage(&anypb.Any{})
+			},
+		)
+	})
+
+	t.Run("it adds x to the baggage", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		baggage := wrapperspb.String("baggage")
+		want, err := anypb.New(baggage)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := packer.PackCommand(CommandA1, WithBaggage(baggage))
+
+		if got.Header.Baggage != nil {
+			t.Fatalf("unexpected header baggage: got %#v, want nil", got.Header.Baggage)
+		}
+
+		Expect(
+			t,
+			"unexpected baggage",
+			got.Body.Baggage,
+			[]*anypb.Any{want},
+		)
+	})
+
+	t.Run("it keeps only the last value for a type URL", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		want, err := anypb.New(wrapperspb.String("second"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := packer.PackCommand(
+			CommandA1,
+			WithBaggage(wrapperspb.String("first")),
+			WithBaggage(wrapperspb.String("second")),
+		)
+
+		Expect(
+			t,
+			"unexpected baggage",
+			got.Body.Baggage,
+			[]*anypb.Any{want},
+		)
+	})
+
+	t.Run("it replaces an existing value in place", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		wantString, err := anypb.New(wrapperspb.String("second"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		wantInt, err := anypb.New(wrapperspb.Int64(42))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := packer.PackCommand(
+			CommandA1,
+			WithBaggage(wrapperspb.String("first")),
+			WithBaggage(wrapperspb.Int64(42)),
+			WithBaggage(wrapperspb.String("second")),
+		)
+
+		Expect(
+			t,
+			"unexpected baggage",
+			got.Body.Baggage,
 			[]*anypb.Any{wantString, wantInt},
 		)
 	})

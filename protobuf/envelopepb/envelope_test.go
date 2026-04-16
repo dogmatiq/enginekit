@@ -5,10 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/protobuf/envelopepb"
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
 	identitypb "github.com/dogmatiq/enginekit/protobuf/identitypb"
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -48,9 +50,9 @@ func TestEnvelope_Validate(t *testing.T) {
 				}),
 			},
 			{
-				"without attributes",
+				"without extensions",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Extensions.Attributes = nil
+					e.Body.Extensions = nil
 				}),
 			},
 			{
@@ -197,6 +199,322 @@ func TestEnvelope_Validate(t *testing.T) {
 	})
 }
 
+func TestWireCompatibility(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		Desc             string
+		HeaderExtensions []*anypb.Any
+		HeaderBaggage    []*anypb.Any
+		BodyExtensions   []*anypb.Any
+		BodyBaggage      []*anypb.Any
+		WantExtensions   []*anypb.Any
+		WantBaggage      []*anypb.Any
+	}{
+		{
+			Desc: "header only",
+			HeaderExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionA",
+					Value:   []byte("header-a"),
+				},
+			},
+			HeaderBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageA",
+					Value:   []byte("header-a"),
+				},
+			},
+			WantExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionA",
+					Value:   []byte("header-a"),
+				},
+			},
+			WantBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageA",
+					Value:   []byte("header-a"),
+				},
+			},
+		},
+		{
+			Desc: "body only",
+			BodyExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionA",
+					Value:   []byte("body-a"),
+				},
+			},
+			BodyBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageA",
+					Value:   []byte("body-a"),
+				},
+			},
+			WantExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionA",
+					Value:   []byte("body-a"),
+				},
+			},
+			WantBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageA",
+					Value:   []byte("body-a"),
+				},
+			},
+		},
+		{
+			Desc: "split with overrides",
+			HeaderExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionA",
+					Value:   []byte("header-a"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionB",
+					Value:   []byte("header-b"),
+				},
+			},
+			HeaderBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageA",
+					Value:   []byte("header-a"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageB",
+					Value:   []byte("header-b"),
+				},
+			},
+			BodyExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionB",
+					Value:   []byte("body-b"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionC",
+					Value:   []byte("body-c"),
+				},
+			},
+			BodyBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageB",
+					Value:   []byte("body-b"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageC",
+					Value:   []byte("body-c"),
+				},
+			},
+			WantExtensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionA",
+					Value:   []byte("header-a"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionB",
+					Value:   []byte("body-b"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.ExtensionC",
+					Value:   []byte("body-c"),
+				},
+			},
+			WantBaggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageA",
+					Value:   []byte("header-a"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageB",
+					Value:   []byte("body-b"),
+				},
+				{
+					TypeUrl: "type.googleapis.com/example.BaggageC",
+					Value:   []byte("body-c"),
+				},
+			},
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.Desc, func(t *testing.T) {
+			t.Parallel()
+
+			env := newEnvelope(func(e *Envelope) {
+				e.Header.Extensions = c.HeaderExtensions
+				e.Header.Baggage = c.HeaderBaggage
+				e.Body.Extensions = c.BodyExtensions
+				e.Body.Baggage = c.BodyBaggage
+			})
+
+			expectEnvelopeWireCompatibleExtensions(
+				t,
+				env,
+				c.WantExtensions,
+				c.WantBaggage,
+			)
+
+			multi := &MultiEnvelope{
+				Header: env.Header,
+				Bodies: []*Body{env.Body},
+			}
+
+			expectSingleBodyMultiEnvelopeWireCompatibleExtensions(
+				t,
+				multi,
+				c.WantExtensions,
+				c.WantBaggage,
+			)
+		})
+	}
+}
+
+func expectEnvelopeWireCompatibleExtensions(
+	t *testing.T,
+	env *Envelope,
+	wantExtensions, wantBaggage []*anypb.Any,
+) {
+	t.Helper()
+
+	data, err := env.MarshalBinary()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var got MultiEnvelope
+	if err := got.UnmarshalBinary(data); err != nil {
+		t.Fatal(err)
+	}
+
+	expectSingleBodyMultiEnvelopeEffectiveExtensions(
+		t,
+		&got,
+		wantExtensions,
+		wantBaggage,
+	)
+}
+
+func expectSingleBodyMultiEnvelopeWireCompatibleExtensions(
+	t *testing.T,
+	env *MultiEnvelope,
+	wantExtensions, wantBaggage []*anypb.Any,
+) {
+	t.Helper()
+
+	data, err := env.MarshalBinary()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var got Envelope
+	if err := got.UnmarshalBinary(data); err != nil {
+		t.Fatal(err)
+	}
+
+	expectEffectiveExtensionsForTest(
+		t,
+		got.GetHeader().GetExtensions(),
+		got.GetBody().GetExtensions(),
+		got.GetHeader().GetBaggage(),
+		got.GetBody().GetBaggage(),
+		wantExtensions,
+		wantBaggage,
+	)
+}
+
+func expectSingleBodyMultiEnvelopeEffectiveExtensions(
+	t *testing.T,
+	env *MultiEnvelope,
+	wantExtensions, wantBaggage []*anypb.Any,
+) {
+	t.Helper()
+
+	bodies := env.GetBodies()
+	if len(bodies) != 1 {
+		t.Fatalf("unexpected body count: got %d, want 1", len(bodies))
+	}
+
+	expectEffectiveExtensionsForTest(
+		t,
+		env.GetHeader().GetExtensions(),
+		bodies[0].GetExtensions(),
+		env.GetHeader().GetBaggage(),
+		bodies[0].GetBaggage(),
+		wantExtensions,
+		wantBaggage,
+	)
+}
+
+func expectEffectiveExtensionsForTest(
+	t *testing.T,
+	headerExtensions,
+	bodyExtensions,
+	headerBaggage,
+	bodyBaggage,
+	wantExtensions,
+	wantBaggage []*anypb.Any,
+) {
+	t.Helper()
+
+	Expect(
+		t,
+		"unexpected effective extensions",
+		mergedAnyValuesByTypeURLForTest(
+			headerExtensions,
+			bodyExtensions,
+		),
+		wantExtensions,
+	)
+
+	Expect(
+		t,
+		"unexpected effective baggage",
+		mergedAnyValuesByTypeURLForTest(
+			headerBaggage,
+			bodyBaggage,
+		),
+		wantBaggage,
+	)
+}
+
+func mergedAnyValuesByTypeURLForTest(header, body []*anypb.Any) []*anypb.Any {
+	if len(header) == 0 {
+		return body
+	}
+
+	if len(body) == 0 {
+		return header
+	}
+
+	values := make([]*anypb.Any, 0, len(header)+len(body))
+
+	for _, v := range header {
+		if containsAnyValueWithTypeURLForTest(body, v.GetTypeUrl()) {
+			continue
+		}
+
+		values = append(values, v)
+	}
+
+	for _, v := range body {
+		values = append(values, v)
+	}
+
+	return values
+}
+
+func containsAnyValueWithTypeURLForTest(values []*anypb.Any, typeURL string) bool {
+	for _, v := range values {
+		if v.GetTypeUrl() == typeURL {
+			return true
+		}
+	}
+
+	return false
+}
+
 func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
 	env := &Envelope{
 		Header: &Header{
@@ -218,9 +536,17 @@ func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
 				TypeId:      uuidpb.Generate(),
 				Data:        []byte("<data>"),
 			},
-			Extensions: &Extensions{
-				Attributes: map[string]string{"<attr-key>": "<attr-value>"},
-				Baggage:    map[string]string{"<baggage-key": "<baggage-value>"},
+			Extensions: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.envelope.v1.Extension",
+					Value:   []byte("<extension-value>"),
+				},
+			},
+			Baggage: []*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/example.envelope.v1.Baggage",
+					Value:   []byte("<baggage-value>"),
+				},
 			},
 		},
 	}

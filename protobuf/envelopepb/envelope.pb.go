@@ -11,6 +11,7 @@ import (
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -284,67 +285,6 @@ func (x *Message) GetData() []byte {
 	return nil
 }
 
-// Extensions is a container for arbitrary key/value pairs associated with a
-// message and/or its causal chain.
-//
-// Keys beginning with "_" are reserved for use by the enginekit module. All
-// other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
-type Extensions struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Attributes is a set of arbitrary key/value pairs that provide additional
-	// information about the message.
-	Attributes map[string]string `protobuf:"bytes,1,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Baggage is a set of arbitrary key/value pairs that are propagated through
-	// the entire causal chain of messages.
-	Baggage       map[string]string `protobuf:"bytes,2,rep,name=baggage,proto3" json:"baggage,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Extensions) Reset() {
-	*x = Extensions{}
-	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Extensions) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Extensions) ProtoMessage() {}
-
-func (x *Extensions) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Extensions.ProtoReflect.Descriptor instead.
-func (*Extensions) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *Extensions) GetAttributes() map[string]string {
-	if x != nil {
-		return x.Attributes
-	}
-	return nil
-}
-
-func (x *Extensions) GetBaggage() map[string]string {
-	if x != nil {
-		return x.Baggage
-	}
-	return nil
-}
-
 type Header struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// CausationId is the (optional) ID of the message that was the direct cause
@@ -362,16 +302,19 @@ type Header struct {
 	CorrelationId *uuidpb.UUID `protobuf:"bytes,2,opt,name=correlation_id,json=correlationId,proto3" json:"correlation_id,omitempty"`
 	// Source identifies the origin of the messages.
 	Source *Source `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
-	// Extensions is a container for arbitrary key/value pairs associated with
-	// the messages, their causal chain, or the envelope itself.
-	Extensions    *Extensions `protobuf:"bytes,4,opt,name=extensions,proto3" json:"extensions,omitempty"`
+	// Extensions is a set of extension values associated with the messages,
+	// their causal chain, or the envelope itself.
+	Extensions []*anypb.Any `protobuf:"bytes,4,rep,name=extensions,proto3" json:"extensions,omitempty"`
+	// Baggage is a set of extension values that are propagated through the
+	// entire causal chain of messages.
+	Baggage       []*anypb.Any `protobuf:"bytes,5,rep,name=baggage,proto3" json:"baggage,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Header) Reset() {
 	*x = Header{}
-	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[5]
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +326,7 @@ func (x *Header) String() string {
 func (*Header) ProtoMessage() {}
 
 func (x *Header) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[5]
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,7 +339,7 @@ func (x *Header) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Header.ProtoReflect.Descriptor instead.
 func (*Header) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{5}
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Header) GetCausationId() *uuidpb.UUID {
@@ -420,13 +363,22 @@ func (x *Header) GetSource() *Source {
 	return nil
 }
 
-func (x *Header) GetExtensions() *Extensions {
+func (x *Header) GetExtensions() []*anypb.Any {
 	if x != nil {
 		return x.Extensions
 	}
 	return nil
 }
 
+func (x *Header) GetBaggage() []*anypb.Any {
+	if x != nil {
+		return x.Baggage
+	}
+	return nil
+}
+
+// Body contains the metadata and encoded form of a single message in an
+// [Envelope] or [MultiEnvelope].
 type Body struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// MessageId is a unique identifier for the message in this envelope.
@@ -447,19 +399,24 @@ type Body struct {
 	ScheduledFor *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=scheduled_for,json=scheduledFor,proto3" json:"scheduled_for,omitempty"`
 	// Message is the encoded representation of the [dogma.Message].
 	Message *Message `protobuf:"bytes,5,opt,name=message,proto3" json:"message,omitempty"`
-	// Extensions is a container for arbitrary key/value pairs associated with
-	// this message and/or its causal chain.
+	// Extensions is a set of extension values associated with this message.
 	//
-	// Any keys present in the [Header.Extensions] field are overridden by keys
-	// in this field.
-	Extensions    *Extensions `protobuf:"bytes,6,opt,name=extensions,proto3" json:"extensions,omitempty"`
+	// Any values in [Header.Extensions] are overridden by values in this field
+	// that have the same type URL.
+	Extensions []*anypb.Any `protobuf:"bytes,6,rep,name=extensions,proto3" json:"extensions,omitempty"`
+	// Baggage is a set of extension values associated with this message and/or
+	// its causal chain.
+	//
+	// Any values in [Header.Baggage] are overridden by values in this field
+	// that have the same type URL.
+	Baggage       []*anypb.Any `protobuf:"bytes,7,rep,name=baggage,proto3" json:"baggage,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Body) Reset() {
 	*x = Body{}
-	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[6]
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -471,7 +428,7 @@ func (x *Body) String() string {
 func (*Body) ProtoMessage() {}
 
 func (x *Body) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[6]
+	mi := &file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -484,7 +441,7 @@ func (x *Body) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Body.ProtoReflect.Descriptor instead.
 func (*Body) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{6}
+	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Body) GetMessageId() *uuidpb.UUID {
@@ -522,9 +479,16 @@ func (x *Body) GetMessage() *Message {
 	return nil
 }
 
-func (x *Body) GetExtensions() *Extensions {
+func (x *Body) GetExtensions() []*anypb.Any {
 	if x != nil {
 		return x.Extensions
+	}
+	return nil
+}
+
+func (x *Body) GetBaggage() []*anypb.Any {
+	if x != nil {
+		return x.Baggage
 	}
 	return nil
 }
@@ -533,7 +497,7 @@ var File_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto protor
 
 const file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc = "" +
 	"\n" +
-	"@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x12\x0edogma.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a@github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"d\n" +
+	"@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x12\x0edogma.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a@github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"d\n" +
 	"\bEnvelope\x12.\n" +
 	"\x06header\x18\x01 \x01(\v2\x16.dogma.protobuf.HeaderR\x06header\x12(\n" +
 	"\x04body\x18\x02 \x01(\v2\x14.dogma.protobuf.BodyR\x04body\"m\n" +
@@ -549,26 +513,15 @@ const file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawD
 	"\aMessage\x12-\n" +
 	"\atype_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\x06typeId\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04data\x18\x03 \x01(\fR\x04data\"\x96\x02\n" +
-	"\n" +
-	"Extensions\x12J\n" +
-	"\n" +
-	"attributes\x18\x01 \x03(\v2*.dogma.protobuf.Extensions.AttributesEntryR\n" +
-	"attributes\x12A\n" +
-	"\abaggage\x18\x02 \x03(\v2'.dogma.protobuf.Extensions.BaggageEntryR\abaggage\x1a=\n" +
-	"\x0fAttributesEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
-	"\fBaggageEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xea\x01\n" +
+	"\x04data\x18\x03 \x01(\fR\x04data\"\x94\x02\n" +
 	"\x06Header\x127\n" +
 	"\fcausation_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\vcausationId\x12;\n" +
 	"\x0ecorrelation_id\x18\x02 \x01(\v2\x14.dogma.protobuf.UUIDR\rcorrelationId\x12.\n" +
-	"\x06source\x18\x03 \x01(\v2\x16.dogma.protobuf.SourceR\x06source\x12:\n" +
+	"\x06source\x18\x03 \x01(\v2\x16.dogma.protobuf.SourceR\x06source\x124\n" +
 	"\n" +
-	"extensions\x18\x04 \x01(\v2\x1a.dogma.protobuf.ExtensionsR\n" +
-	"extensions\"\xcf\x02\n" +
+	"extensions\x18\x04 \x03(\v2\x14.google.protobuf.AnyR\n" +
+	"extensions\x12.\n" +
+	"\abaggage\x18\x05 \x03(\v2\x14.google.protobuf.AnyR\abaggage\"\xf9\x02\n" +
 	"\x04Body\x123\n" +
 	"\n" +
 	"message_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\tmessageId\x12'\n" +
@@ -576,10 +529,11 @@ const file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawD
 	"\n" +
 	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12?\n" +
 	"\rscheduled_for\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\fscheduledFor\x121\n" +
-	"\amessage\x18\x05 \x01(\v2\x17.dogma.protobuf.MessageR\amessage\x12:\n" +
+	"\amessage\x18\x05 \x01(\v2\x17.dogma.protobuf.MessageR\amessage\x124\n" +
 	"\n" +
-	"extensions\x18\x06 \x01(\v2\x1a.dogma.protobuf.ExtensionsR\n" +
-	"extensionsB3Z1github.com/dogmatiq/enginekit/protobuf/envelopepbb\x06proto3"
+	"extensions\x18\x06 \x03(\v2\x14.google.protobuf.AnyR\n" +
+	"extensions\x12.\n" +
+	"\abaggage\x18\a \x03(\v2\x14.google.protobuf.AnyR\abaggageB3Z1github.com/dogmatiq/enginekit/protobuf/envelopepbb\x06proto3"
 
 var (
 	file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescOnce sync.Once
@@ -593,41 +547,39 @@ func file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDe
 	return file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDescData
 }
 
-var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_goTypes = []any{
 	(*Envelope)(nil),              // 0: dogma.protobuf.Envelope
 	(*MultiEnvelope)(nil),         // 1: dogma.protobuf.MultiEnvelope
 	(*Source)(nil),                // 2: dogma.protobuf.Source
 	(*Message)(nil),               // 3: dogma.protobuf.Message
-	(*Extensions)(nil),            // 4: dogma.protobuf.Extensions
-	(*Header)(nil),                // 5: dogma.protobuf.Header
-	(*Body)(nil),                  // 6: dogma.protobuf.Body
-	nil,                           // 7: dogma.protobuf.Extensions.AttributesEntry
-	nil,                           // 8: dogma.protobuf.Extensions.BaggageEntry
-	(*identitypb.Identity)(nil),   // 9: dogma.protobuf.Identity
-	(*uuidpb.UUID)(nil),           // 10: dogma.protobuf.UUID
-	(*timestamppb.Timestamp)(nil), // 11: google.protobuf.Timestamp
+	(*Header)(nil),                // 4: dogma.protobuf.Header
+	(*Body)(nil),                  // 5: dogma.protobuf.Body
+	(*identitypb.Identity)(nil),   // 6: dogma.protobuf.Identity
+	(*uuidpb.UUID)(nil),           // 7: dogma.protobuf.UUID
+	(*anypb.Any)(nil),             // 8: google.protobuf.Any
+	(*timestamppb.Timestamp)(nil), // 9: google.protobuf.Timestamp
 }
 var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_depIdxs = []int32{
-	5,  // 0: dogma.protobuf.Envelope.header:type_name -> dogma.protobuf.Header
-	6,  // 1: dogma.protobuf.Envelope.body:type_name -> dogma.protobuf.Body
-	5,  // 2: dogma.protobuf.MultiEnvelope.header:type_name -> dogma.protobuf.Header
-	6,  // 3: dogma.protobuf.MultiEnvelope.bodies:type_name -> dogma.protobuf.Body
-	9,  // 4: dogma.protobuf.Source.site:type_name -> dogma.protobuf.Identity
-	9,  // 5: dogma.protobuf.Source.application:type_name -> dogma.protobuf.Identity
-	9,  // 6: dogma.protobuf.Source.handler:type_name -> dogma.protobuf.Identity
-	10, // 7: dogma.protobuf.Message.type_id:type_name -> dogma.protobuf.UUID
-	7,  // 8: dogma.protobuf.Extensions.attributes:type_name -> dogma.protobuf.Extensions.AttributesEntry
-	8,  // 9: dogma.protobuf.Extensions.baggage:type_name -> dogma.protobuf.Extensions.BaggageEntry
-	10, // 10: dogma.protobuf.Header.causation_id:type_name -> dogma.protobuf.UUID
-	10, // 11: dogma.protobuf.Header.correlation_id:type_name -> dogma.protobuf.UUID
-	2,  // 12: dogma.protobuf.Header.source:type_name -> dogma.protobuf.Source
-	4,  // 13: dogma.protobuf.Header.extensions:type_name -> dogma.protobuf.Extensions
-	10, // 14: dogma.protobuf.Body.message_id:type_name -> dogma.protobuf.UUID
-	11, // 15: dogma.protobuf.Body.created_at:type_name -> google.protobuf.Timestamp
-	11, // 16: dogma.protobuf.Body.scheduled_for:type_name -> google.protobuf.Timestamp
-	3,  // 17: dogma.protobuf.Body.message:type_name -> dogma.protobuf.Message
-	4,  // 18: dogma.protobuf.Body.extensions:type_name -> dogma.protobuf.Extensions
+	4,  // 0: dogma.protobuf.Envelope.header:type_name -> dogma.protobuf.Header
+	5,  // 1: dogma.protobuf.Envelope.body:type_name -> dogma.protobuf.Body
+	4,  // 2: dogma.protobuf.MultiEnvelope.header:type_name -> dogma.protobuf.Header
+	5,  // 3: dogma.protobuf.MultiEnvelope.bodies:type_name -> dogma.protobuf.Body
+	6,  // 4: dogma.protobuf.Source.site:type_name -> dogma.protobuf.Identity
+	6,  // 5: dogma.protobuf.Source.application:type_name -> dogma.protobuf.Identity
+	6,  // 6: dogma.protobuf.Source.handler:type_name -> dogma.protobuf.Identity
+	7,  // 7: dogma.protobuf.Message.type_id:type_name -> dogma.protobuf.UUID
+	7,  // 8: dogma.protobuf.Header.causation_id:type_name -> dogma.protobuf.UUID
+	7,  // 9: dogma.protobuf.Header.correlation_id:type_name -> dogma.protobuf.UUID
+	2,  // 10: dogma.protobuf.Header.source:type_name -> dogma.protobuf.Source
+	8,  // 11: dogma.protobuf.Header.extensions:type_name -> google.protobuf.Any
+	8,  // 12: dogma.protobuf.Header.baggage:type_name -> google.protobuf.Any
+	7,  // 13: dogma.protobuf.Body.message_id:type_name -> dogma.protobuf.UUID
+	9,  // 14: dogma.protobuf.Body.created_at:type_name -> google.protobuf.Timestamp
+	9,  // 15: dogma.protobuf.Body.scheduled_for:type_name -> google.protobuf.Timestamp
+	3,  // 16: dogma.protobuf.Body.message:type_name -> dogma.protobuf.Message
+	8,  // 17: dogma.protobuf.Body.extensions:type_name -> google.protobuf.Any
+	8,  // 18: dogma.protobuf.Body.baggage:type_name -> google.protobuf.Any
 	19, // [19:19] is the sub-list for method output_type
 	19, // [19:19] is the sub-list for method input_type
 	19, // [19:19] is the sub-list for extension type_name
@@ -646,7 +598,7 @@ func file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_init(
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc), len(file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

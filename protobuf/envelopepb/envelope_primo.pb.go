@@ -10,6 +10,7 @@ import (
 	identitypb "github.com/dogmatiq/enginekit/protobuf/identitypb"
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	proto "google.golang.org/protobuf/proto"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -220,51 +221,6 @@ func (b *MessageBuilder) WithData(v []byte) *MessageBuilder {
 	return b
 }
 
-type ExtensionsBuilder struct {
-	prototype Extensions
-}
-
-// NewExtensionsBuilder returns a builder that constructs [Extensions] messages.
-func NewExtensionsBuilder() *ExtensionsBuilder {
-	return &ExtensionsBuilder{}
-}
-
-// From configures the builder to use x as the prototype for new messages,
-// then returns b.
-//
-// It performs a shallow copy of x, such that any changes made via the builder
-// do not modify x. It does not make a copy of the field values themselves.
-func (b *ExtensionsBuilder) From(x *Extensions) *ExtensionsBuilder {
-	b.prototype.Attributes = x.Attributes
-	b.prototype.Baggage = x.Baggage
-	return b
-}
-
-// Build returns a new [Extensions] containing the values configured via the builder.
-//
-// Each call returns a new message, such that future changes to the builder do
-// not modify previously constructed messages.
-func (b *ExtensionsBuilder) Build() *Extensions {
-	return &Extensions{
-		Attributes: b.prototype.Attributes,
-		Baggage:    b.prototype.Baggage,
-	}
-}
-
-// WithAttributes configures the builder to set the Attributes field to v,
-// then returns b.
-func (b *ExtensionsBuilder) WithAttributes(v map[string]string) *ExtensionsBuilder {
-	b.prototype.Attributes = v
-	return b
-}
-
-// WithBaggage configures the builder to set the Baggage field to v,
-// then returns b.
-func (b *ExtensionsBuilder) WithBaggage(v map[string]string) *ExtensionsBuilder {
-	b.prototype.Baggage = v
-	return b
-}
-
 type HeaderBuilder struct {
 	prototype Header
 }
@@ -284,6 +240,7 @@ func (b *HeaderBuilder) From(x *Header) *HeaderBuilder {
 	b.prototype.CorrelationId = x.CorrelationId
 	b.prototype.Source = x.Source
 	b.prototype.Extensions = x.Extensions
+	b.prototype.Baggage = x.Baggage
 	return b
 }
 
@@ -297,6 +254,7 @@ func (b *HeaderBuilder) Build() *Header {
 		CorrelationId: b.prototype.CorrelationId,
 		Source:        b.prototype.Source,
 		Extensions:    b.prototype.Extensions,
+		Baggage:       b.prototype.Baggage,
 	}
 }
 
@@ -323,8 +281,15 @@ func (b *HeaderBuilder) WithSource(v *Source) *HeaderBuilder {
 
 // WithExtensions configures the builder to set the Extensions field to v,
 // then returns b.
-func (b *HeaderBuilder) WithExtensions(v *Extensions) *HeaderBuilder {
+func (b *HeaderBuilder) WithExtensions(v []*anypb.Any) *HeaderBuilder {
 	b.prototype.Extensions = v
+	return b
+}
+
+// WithBaggage configures the builder to set the Baggage field to v,
+// then returns b.
+func (b *HeaderBuilder) WithBaggage(v []*anypb.Any) *HeaderBuilder {
+	b.prototype.Baggage = v
 	return b
 }
 
@@ -349,6 +314,7 @@ func (b *BodyBuilder) From(x *Body) *BodyBuilder {
 	b.prototype.ScheduledFor = x.ScheduledFor
 	b.prototype.Message = x.Message
 	b.prototype.Extensions = x.Extensions
+	b.prototype.Baggage = x.Baggage
 	return b
 }
 
@@ -364,6 +330,7 @@ func (b *BodyBuilder) Build() *Body {
 		ScheduledFor:   b.prototype.ScheduledFor,
 		Message:        b.prototype.Message,
 		Extensions:     b.prototype.Extensions,
+		Baggage:        b.prototype.Baggage,
 	}
 }
 
@@ -404,8 +371,15 @@ func (b *BodyBuilder) WithMessage(v *Message) *BodyBuilder {
 
 // WithExtensions configures the builder to set the Extensions field to v,
 // then returns b.
-func (b *BodyBuilder) WithExtensions(v *Extensions) *BodyBuilder {
+func (b *BodyBuilder) WithExtensions(v []*anypb.Any) *BodyBuilder {
 	b.prototype.Extensions = v
+	return b
+}
+
+// WithBaggage configures the builder to set the Baggage field to v,
+// then returns b.
+func (b *BodyBuilder) WithBaggage(v []*anypb.Any) *BodyBuilder {
+	b.prototype.Baggage = v
 	return b
 }
 
@@ -470,22 +444,6 @@ func (x *Message) MarshalBinary() ([]byte, error) {
 //
 // It allows [*Message] to implement [encoding.BinaryUnmarshaler].
 func (x *Message) UnmarshalBinary(data []byte) error {
-	return proto.Unmarshal(data, x)
-}
-
-// MarshalBinary returns the binary representation of the message, equivalent to
-// calling proto.Marshal(x).
-//
-// It allows [*Extensions] to implement [encoding.BinaryMarshaler].
-func (x *Extensions) MarshalBinary() ([]byte, error) {
-	return proto.Marshal(x)
-}
-
-// UnmarshalBinary populates x from its binary representation, equivalent to
-// calling proto.Unmarshal(data, x).
-//
-// It allows [*Extensions] to implement [encoding.BinaryUnmarshaler].
-func (x *Extensions) UnmarshalBinary(data []byte) error {
 	return proto.Unmarshal(data, x)
 }
 
@@ -576,16 +534,6 @@ func (x *Message) SetData(v []byte) {
 	x.Data = v
 }
 
-// SetAttributes sets the x.Attributes field to v, then returns x.
-func (x *Extensions) SetAttributes(v map[string]string) {
-	x.Attributes = v
-}
-
-// SetBaggage sets the x.Baggage field to v, then returns x.
-func (x *Extensions) SetBaggage(v map[string]string) {
-	x.Baggage = v
-}
-
 // SetCausationId sets the x.CausationId field to v, then returns x.
 func (x *Header) SetCausationId(v *uuidpb.UUID) {
 	x.CausationId = v
@@ -602,8 +550,13 @@ func (x *Header) SetSource(v *Source) {
 }
 
 // SetExtensions sets the x.Extensions field to v, then returns x.
-func (x *Header) SetExtensions(v *Extensions) {
+func (x *Header) SetExtensions(v []*anypb.Any) {
 	x.Extensions = v
+}
+
+// SetBaggage sets the x.Baggage field to v, then returns x.
+func (x *Header) SetBaggage(v []*anypb.Any) {
+	x.Baggage = v
 }
 
 // SetMessageId sets the x.MessageId field to v, then returns x.
@@ -632,6 +585,11 @@ func (x *Body) SetMessage(v *Message) {
 }
 
 // SetExtensions sets the x.Extensions field to v, then returns x.
-func (x *Body) SetExtensions(v *Extensions) {
+func (x *Body) SetExtensions(v []*anypb.Any) {
 	x.Extensions = v
+}
+
+// SetBaggage sets the x.Baggage field to v, then returns x.
+func (x *Body) SetBaggage(v []*anypb.Any) {
+	x.Baggage = v
 }

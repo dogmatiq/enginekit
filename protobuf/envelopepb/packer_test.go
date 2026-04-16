@@ -10,10 +10,12 @@ import (
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func TestPacker_packAndUnpack(t *testing.T) {
+func TestPacker_PackAndUnpack(t *testing.T) {
 	id := uuidpb.Generate()
 	now := time.Now()
 
@@ -34,7 +36,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		},
 	}
 
-	got := packer.Pack(CommandA1)
+	got := packer.PackCommand(CommandA1)
 
 	if err := got.Validate(); err != nil {
 		t.Fatalf("packer produced an invalid envelope: %v", err)
@@ -79,14 +81,14 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		dogma.Message(CommandA1),
 	)
 
-	t.Run("func Pack()", func(t *testing.T) {
+	t.Run("func PackCommand()", func(t *testing.T) {
 		t.Run("it panics if passed an unregistered message", func(t *testing.T) {
 			ExpectPanic(
 				t,
 				"*envelopepb_test.T is not a registered message type",
 				func() {
 					type T struct{ dogma.Command }
-					packer.Pack(&T{})
+					packer.PackCommand(&T{})
 				},
 			)
 		})
@@ -98,7 +100,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 				func() {
 					type T struct{ CommandStub[func()] }
 					dogma.RegisterCommand[*T]("622003a4-01a5-4c77-8a4c-cb36b51994e7")
-					packer.Pack(&T{})
+					packer.PackCommand(&T{})
 				},
 			)
 		})
@@ -112,7 +114,7 @@ func TestPacker_packAndUnpack(t *testing.T) {
 				t,
 				"invalid header: invalid source: invalid site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 				func() {
-					packer.Pack(CommandA1)
+					packer.PackCommand(CommandA1)
 				},
 			)
 		})
@@ -160,125 +162,6 @@ func TestPacker_packAndUnpack(t *testing.T) {
 		})
 	})
 }
-
-func TestWithCause(t *testing.T) {
-	packer := &Packer{
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
-	}
-
-	root := packer.Pack(CommandA1)
-	cause := packer.Pack(EventA1, WithCause(root))
-	got := packer.Pack(CommandA2, WithCause(cause))
-
-	if !got.Header.CausationId.Equal(cause.Body.MessageId) {
-		t.Fatalf("unexpected causation ID: got %s, want %s", got.Header.CausationId, cause.Body.MessageId)
-	}
-
-	if !got.Header.CorrelationId.Equal(cause.Header.CorrelationId) {
-		t.Fatalf("unexpected correlation ID: got %s, want %s", got.Header.CorrelationId, root.Body.MessageId)
-	}
-}
-
-func TestWithHandler(t *testing.T) {
-	packer := &Packer{
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
-	}
-
-	handler := &identitypb.Identity{
-		Name: "handler",
-		Key:  uuidpb.Generate(),
-	}
-
-	got := packer.Pack(CommandA1, WithHandler(handler))
-
-	if !got.Header.Source.Handler.Equal(handler) {
-		t.Fatalf("unexpected handler: got %s, want %s", got.Header.Source.Handler, handler)
-	}
-}
-
-func TestWithInstanceID(t *testing.T) {
-	packer := &Packer{
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
-	}
-
-	got := packer.Pack(
-		CommandA1,
-		WithInstanceID("instance"),
-
-		// We cannot have an instance ID without saying which handler the
-		// instance is managed by.
-		WithHandler(&identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}),
-	)
-
-	if got.Header.Source.InstanceId != "instance" {
-		t.Fatalf("unexpected instance ID: got %s, want instance", got.Header.Source.InstanceId)
-	}
-}
-
-func TestWithCreatedAt(t *testing.T) {
-	packer := &Packer{
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
-		Now: func() time.Time {
-			t.Fatal("unexpected call")
-			return time.Time{}
-		},
-	}
-
-	want := time.Now().Add(-time.Hour)
-
-	got := packer.Pack(
-		CommandA1,
-		WithCreatedAt(want),
-	).Body.CreatedAt.AsTime()
-
-	if !got.Equal(want) {
-		t.Fatalf("unexpected creation time: got %s, want %s", got, want)
-	}
-}
-
-func TestWithScheduledFor(t *testing.T) {
-	packer := &Packer{
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
-	}
-
-	want := time.Now().Add(time.Hour)
-
-	got := packer.Pack(
-		TimeoutA1,
-		WithScheduledFor(want),
-
-		// We cannot have a "scheduled-for" time without saying which handler
-		// and process instance produced the timeout message.
-		WithHandler(&identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}),
-		WithInstanceID("instance"),
-	).Body.ScheduledFor.AsTime()
-
-	if !got.Equal(want) {
-		t.Fatalf("unexpected scheduled time: got %s, want %s", got, want)
-	}
-}
-
 func TestWithIdempotencyKey(t *testing.T) {
 	packer := &Packer{
 		Application: &identitypb.Identity{
@@ -287,9 +170,99 @@ func TestWithIdempotencyKey(t *testing.T) {
 		},
 	}
 
-	got := packer.Pack(CommandA1, WithIdempotencyKey("test-key"))
+	got := packer.PackCommand(CommandA1, WithIdempotencyKey("test-key"))
 
 	if got.Body.IdempotencyKey != "test-key" {
 		t.Fatalf("unexpected idempotency key: got %q, want %q", got.Body.IdempotencyKey, "test-key")
 	}
+}
+
+func TestWithExtension(t *testing.T) {
+	t.Run("it adds x to the extensions", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		extension := wrapperspb.String("extension")
+		want, err := anypb.New(extension)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := packer.PackCommand(CommandA1, WithExtension(extension))
+
+		if got.Header.Extensions != nil {
+			t.Fatalf("unexpected header extensions: got %#v, want nil", got.Header.Extensions)
+		}
+
+		Expect(
+			t,
+			"unexpected extensions",
+			got.Body.Extensions,
+			[]*anypb.Any{want},
+		)
+	})
+
+	t.Run("it keeps only the last value for a type URL", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		want, err := anypb.New(wrapperspb.String("second"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := packer.PackCommand(
+			CommandA1,
+			WithExtension(wrapperspb.String("first")),
+			WithExtension(wrapperspb.String("second")),
+		)
+
+		Expect(
+			t,
+			"unexpected extensions",
+			got.Body.Extensions,
+			[]*anypb.Any{want},
+		)
+	})
+
+	t.Run("it replaces an existing value in place", func(t *testing.T) {
+		packer := &Packer{
+			Application: &identitypb.Identity{
+				Name: "app",
+				Key:  uuidpb.Generate(),
+			},
+		}
+
+		wantString, err := anypb.New(wrapperspb.String("second"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		wantInt, err := anypb.New(wrapperspb.Int64(42))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		got := packer.PackCommand(
+			CommandA1,
+			WithExtension(wrapperspb.String("first")),
+			WithExtension(wrapperspb.Int64(42)),
+			WithExtension(wrapperspb.String("second")),
+		)
+
+		Expect(
+			t,
+			"unexpected extensions",
+			got.Body.Extensions,
+			[]*anypb.Any{wantString, wantInt},
+		)
+	})
 }

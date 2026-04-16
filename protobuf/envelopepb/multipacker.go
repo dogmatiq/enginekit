@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// A MultiPacker puts messages into a [MultiEnvelope].
-type MultiPacker struct {
+// An EffectPacker packs messages produced while handling a specific causal
+// message into a [MultiEnvelope].
+type EffectPacker struct {
 	generateID func() *uuidpb.UUID
 	now        func() *timestamppb.Timestamp
 	header     *Header
@@ -17,14 +19,22 @@ type MultiPacker struct {
 	sealed     bool
 }
 
-// CausedBy returns a [MultiPacker] that packs messages that share env as their
-// cause into a shared [MultiEnvelope].
-func (p *Packer) CausedBy(env *Envelope, options ...SourcePackOption) *MultiPacker {
-	if env == nil {
+// PackEffects returns an [EffectPacker] that packs messages produced by h while
+// handling cause.
+func (p *Packer) PackEffects(
+	cause *Envelope,
+	h *identitypb.Identity,
+	options ...PackEffectsOption,
+) *EffectPacker {
+	if h == nil {
+		panic("handler must not be nil")
+	}
+
+	if cause == nil {
 		panic("cause must not be nil")
 	}
 
-	if err := env.Validate(); err != nil {
+	if err := cause.Validate(); err != nil {
 		panic(fmt.Errorf("invalid cause envelope: %w", err))
 	}
 
@@ -42,31 +52,55 @@ func (p *Packer) CausedBy(env *Envelope, options ...SourcePackOption) *MultiPack
 	}
 
 	header := &Header{
-		CausationId:   env.Body.MessageId,
-		CorrelationId: env.Header.CorrelationId,
+		CausationId:   cause.Body.MessageId,
+		CorrelationId: cause.Header.CorrelationId,
 		Source: &Source{
 			Site:        p.Site,
 			Application: p.Application,
+			Handler:     h,
 		},
+		Baggage: flattenAnyValues(
+			cause.GetHeader().GetBaggage(),
+			cause.GetBody().GetBaggage(),
+		),
 	}
 
 	for _, opt := range options {
-		opt.applyToSource(header.Source)
+		opt.applyPackEffectsOption(header)
 	}
 
 	if err := header.validate(); err != nil {
 		panic(fmt.Errorf("invalid header: %w", err))
 	}
 
-	return &MultiPacker{
+	return &EffectPacker{
 		generateID: generateID,
 		now:        now,
 		header:     header,
 	}
 }
 
-// Pack appends m to the multi-envelope under construction.
-func (p *MultiPacker) Pack(m dogma.Message, options ...BodyPackOption) {
+// PackCommand appends m to the multi-envelope under construction.
+func (p *EffectPacker) PackCommand(m dogma.Command, options ...PackEffectCommandOption) {
+	packEffectBody(p, m, PackEffectCommandOption.applyPackEffectCommandOption, options...)
+}
+
+// PackEvent appends m to the multi-envelope under construction.
+func (p *EffectPacker) PackEvent(m dogma.Event, options ...PackEffectEventOption) {
+	packEffectBody(p, m, PackEffectEventOption.applyPackEffectEventOption, options...)
+}
+
+// PackTimeout appends m to the multi-envelope under construction.
+func (p *EffectPacker) PackTimeout(m dogma.Timeout, options ...PackEffectTimeoutOption) {
+	packEffectBody(p, m, PackEffectTimeoutOption.applyPackEffectTimeoutOption, options...)
+}
+
+func packEffectBody[T any](
+	p *EffectPacker,
+	m dogma.Message,
+	apply func(T, *Body),
+	options ...T,
+) {
 	p.mustNotBeSealed()
 
 	mt, ok := dogma.RegisteredMessageTypeOf(m)
@@ -96,7 +130,7 @@ func (p *MultiPacker) Pack(m dogma.Message, options ...BodyPackOption) {
 	}
 
 	for _, opt := range options {
-		opt.applyToBody(body)
+		apply(opt, body)
 	}
 
 	if body.CreatedAt == nil {
@@ -112,7 +146,7 @@ func (p *MultiPacker) Pack(m dogma.Message, options ...BodyPackOption) {
 
 // Seal returns a [MultiEnvelope] containing all packed messages, or false if no
 // messages were packed.
-func (p *MultiPacker) Seal() (*MultiEnvelope, bool) {
+func (p *EffectPacker) Seal() (*MultiEnvelope, bool) {
 	p.mustNotBeSealed()
 	p.sealed = true
 
@@ -126,7 +160,7 @@ func (p *MultiPacker) Seal() (*MultiEnvelope, bool) {
 	}, true
 }
 
-func (p *MultiPacker) mustNotBeSealed() {
+func (p *EffectPacker) mustNotBeSealed() {
 	if p.sealed {
 		panic("already sealed")
 	}

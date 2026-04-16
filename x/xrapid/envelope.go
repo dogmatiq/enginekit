@@ -3,6 +3,7 @@ package xrapid
 import (
 	"github.com/dogmatiq/enginekit/protobuf/envelopepb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 	"pgregory.net/rapid"
 )
 
@@ -11,6 +12,15 @@ import (
 // By design, the message type and data encoded within the envelope is not
 // necessarily valid.
 func Envelope() *rapid.Generator[*envelopepb.Envelope] {
+	anyValue := rapid.Custom(
+		func(t *rapid.T) *anypb.Any {
+			return &anypb.Any{
+				TypeUrl: rapid.StringN(1, -1, -1).Draw(t, "extension type URL"),
+				Value:   rapid.SliceOf(rapid.Byte()).Draw(t, "extension value"),
+			}
+		},
+	)
+
 	return rapid.Custom(
 		func(t *rapid.T) *envelopepb.Envelope {
 			env := &envelopepb.Envelope{
@@ -31,10 +41,8 @@ func Envelope() *rapid.Generator[*envelopepb.Envelope] {
 						TypeId:      uuidpb.Generate(),
 						Data:        rapid.SliceOf(rapid.Byte()).Draw(t, "data"),
 					},
-					Extensions: &envelopepb.Extensions{
-						Attributes: rapid.MapOf(rapid.String(), rapid.String()).Draw(t, "attributes"),
-						Baggage:    rapid.MapOf(rapid.String(), rapid.String()).Draw(t, "baggage"),
-					},
+					Extensions: rapid.SliceOf(anyValue).Draw(t, "extensions"),
+					Baggage:    rapid.SliceOf(anyValue).Draw(t, "baggage"),
 				},
 			}
 

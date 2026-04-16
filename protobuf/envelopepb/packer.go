@@ -7,6 +7,8 @@ import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/protobuf/identitypb"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -33,8 +35,8 @@ type Packer struct {
 	Now func() time.Time
 }
 
-// Pack returns an envelope containing the given message.
-func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
+// PackCommand returns an envelope containing the given command.
+func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Envelope {
 	mt, ok := dogma.RegisteredMessageTypeOf(m)
 	if !ok {
 		panic(fmt.Sprintf(
@@ -74,12 +76,18 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 	}
 
 	for _, opt := range options {
-		opt.applyToEnvelope(env)
+		opt.applyPackCommandOption(env)
 	}
 
 	if env.Body.CreatedAt == nil {
 		env.Body.CreatedAt = p.now()
 	}
+
+	// For a "single envelope" we normalize extensions and baggage into the body.
+	env.Body.Extensions = flattenAnyValues(env.Header.Extensions, env.Body.Extensions)
+	env.Body.Baggage = flattenAnyValues(env.Header.Baggage, env.Body.Baggage)
+	env.Header.Extensions = nil
+	env.Header.Baggage = nil
 
 	if err := env.Validate(); err != nil {
 		panic(err)
@@ -89,6 +97,7 @@ func (p *Packer) Pack(m dogma.Message, options ...PackOption) *Envelope {
 }
 
 // Unpack returns the message contained within an envelope.
+// TODO: Make `UnpackCommand`, etc.
 func Unpack(env *Envelope) (dogma.Message, error) {
 	message := env.GetBody().GetMessage()
 
@@ -130,104 +139,168 @@ func (p *Packer) generateID() *uuidpb.UUID {
 	return uuidpb.Generate()
 }
 
-// PackOption is an option that alters the behavior of a [Packer.Pack]
-// operation.
-type PackOption interface {
-	applyToEnvelope(*Envelope)
+// PackCommandOption is an option that modifies the behavior of
+// [Packer.PackCommand].
+type PackCommandOption interface {
+	applyPackCommandOption(*Envelope)
 }
 
-// SourcePackOption is a [PackOption] that modifies only the source
-// information in an envelope header.
-type SourcePackOption interface {
-	PackOption
-	applyToSource(*Source)
+// PackEffectsOption is an option that modifies the behavior of
+// [Packer.PackEffects].
+type PackEffectsOption interface {
+	applyPackEffectsOption(*Header)
 }
 
-// BodyPackOption is a [PackOption] that modifies only envelope bodies.
-type BodyPackOption interface {
-	PackOption
-	applyToBody(*Body)
+// PackEffectCommandOption is an option that modifies the behavior of
+// [EffectPacker.PackCommand].
+type PackEffectCommandOption interface {
+	applyPackEffectCommandOption(*Body)
 }
 
-type packOption func(*Envelope)
-
-func (opt packOption) applyToEnvelope(env *Envelope) {
-	opt(env)
+// PackEffectEventOption is an option that modifies the behavior of
+// [EffectPacker.PackEvent].
+type PackEffectEventOption interface {
+	applyPackEffectEventOption(*Body)
 }
 
-type sourcePackOption func(*Source)
-
-func (opt sourcePackOption) applyToEnvelope(env *Envelope) {
-	opt(env.Header.Source)
+// PackEffectTimeoutOption is an option that modifies the behavior of
+// [EffectPacker.PackTimeout].
+type PackEffectTimeoutOption interface {
+	applyPackEffectTimeoutOption(*Body)
 }
 
-func (opt sourcePackOption) applyToSource(source *Source) {
-	opt(source)
-}
+type (
+	packEffectsOption           func(*Header)
+	packCommandOptionFunc       func(*Body)
+	packEffectTimeoutOptionFunc func(*Body)
+	universalOption             struct {
+		applyToBodyFunc   func(*Body)
+		applyToHeaderFunc func(*Header)
+	}
+)
 
-type bodyPackOption func(*Body)
+func (o packEffectsOption) applyPackEffectsOption(header *Header)             { o(header) }
+func (o packCommandOptionFunc) applyPackCommandOption(env *Envelope)          { o(env.Body) }
+func (o packEffectTimeoutOptionFunc) applyPackEffectTimeoutOption(body *Body) { o(body) }
+func (o universalOption) applyPackCommandOption(env *Envelope)                { o.applyToBodyFunc(env.Body) }
+func (o universalOption) applyPackEffectCommandOption(body *Body)             { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectEventOption(body *Body)               { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectTimeoutOption(body *Body)             { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectsOption(header *Header)               { o.applyToHeaderFunc(header) }
 
-func (opt bodyPackOption) applyToEnvelope(env *Envelope) {
-	opt(env.Body)
-}
-
-func (opt bodyPackOption) applyToBody(body *Body) {
-	opt(body)
-}
-
-// WithCause sets env as the "cause" of the message being packed.
-func WithCause(env *Envelope) PackOption {
-	return packOption(
-		func(packed *Envelope) {
-			packed.Header.CausationId = env.GetBody().GetMessageId()
-			packed.Header.CorrelationId = env.GetHeader().GetCorrelationId()
-		},
-	)
-}
-
-// WithHandler sets h as the identity of the handler that is the source of the
-// message.
-func WithHandler(h *identitypb.Identity) SourcePackOption {
-	return sourcePackOption(
-		func(source *Source) {
-			source.Handler = h
-		},
-	)
-}
-
-// WithInstanceID sets the aggregate or process instance ID that is the
-// source of the message.
-func WithInstanceID(id string) SourcePackOption {
-	return sourcePackOption(
-		func(source *Source) {
-			source.InstanceId = id
-		},
-	)
-}
-
-// WithCreatedAt sets the creation time of a message.
-func WithCreatedAt(t time.Time) BodyPackOption {
-	return bodyPackOption(
+// WithIdempotencyKey sets the idempotency key of a command packed via
+// [Packer.PackCommand].
+func WithIdempotencyKey(key string) PackCommandOption {
+	return packCommandOptionFunc(
 		func(body *Body) {
-			body.CreatedAt = timestamppb.New(t)
+			body.IdempotencyKey = key
 		},
 	)
 }
 
-// WithScheduledFor sets the scheduled time of a timeout message.
-func WithScheduledFor(t time.Time) BodyPackOption {
-	return bodyPackOption(
+// WithInstanceID sets the aggregate or process instance ID that is the source
+// of messages packed via [Packer.PackEffects].
+func WithInstanceID(id string) PackEffectsOption {
+	return packEffectsOption(
+		func(header *Header) {
+			header.Source.InstanceId = id
+		},
+	)
+}
+
+// WithScheduledFor sets the scheduled time of a timeout packed via
+// [EffectPacker.PackTimeout].
+func WithScheduledFor(t time.Time) PackEffectTimeoutOption {
+	return packEffectTimeoutOptionFunc(
 		func(body *Body) {
 			body.ScheduledFor = timestamppb.New(t)
 		},
 	)
 }
 
-// WithIdempotencyKey sets the idempotency key of a command message.
-func WithIdempotencyKey(key string) BodyPackOption {
-	return bodyPackOption(
-		func(body *Body) {
-			body.IdempotencyKey = key
+// WithExtension adds x to the envelope's extensions.
+//
+// Extensions apply only to the envelope being packed; they are not inherited
+// by downstream messages in the causal chain.
+func WithExtension(x proto.Message) interface {
+	PackCommandOption
+	PackEffectsOption
+	PackEffectCommandOption
+	PackEffectEventOption
+	PackEffectTimeoutOption
+} {
+	v := marshalAsAny(x)
+
+	return universalOption{
+		applyToBodyFunc: func(body *Body) {
+			appendOrReplace(&body.Extensions, v)
 		},
-	)
+		applyToHeaderFunc: func(header *Header) {
+			appendOrReplace(&header.Extensions, v)
+		},
+	}
+}
+
+// WithBaggage adds x to the envelope's baggage.
+//
+// Baggage applies to the envelope being packed and is inherited by downstream
+// messages in the causal chain.
+func WithBaggage(x proto.Message) interface {
+	PackCommandOption
+	PackEffectsOption
+	PackEffectCommandOption
+	PackEffectEventOption
+	PackEffectTimeoutOption
+} {
+	v := marshalAsAny(x)
+
+	return universalOption{
+		applyToBodyFunc: func(body *Body) {
+			appendOrReplace(&body.Baggage, v)
+		},
+		applyToHeaderFunc: func(header *Header) {
+			appendOrReplace(&header.Baggage, v)
+		},
+	}
+}
+
+// appendOrReplace appends value to values if there is no existing value with
+// the same type URL, otherwise it replaces the existing value in place.
+func appendOrReplace(values *[]*anypb.Any, value *anypb.Any) {
+	for index, existing := range *values {
+		if existing.GetTypeUrl() == value.GetTypeUrl() {
+			(*values)[index] = value
+			return
+		}
+	}
+
+	*values = append(*values, value)
+}
+
+// marshalAsAny returns v as an [*anypb.Any], converting it if necessary. It
+// panics if x is nil, if x is an empty [*anypb.Any], or if it cannot be
+// marshaled.
+func marshalAsAny(x proto.Message) *anypb.Any {
+	if x == nil {
+		panic("value must not be nil")
+	}
+
+	if x, ok := x.(*anypb.Any); ok {
+		if err := validateAnyValue(x); err != nil {
+			panic("value must not be an empty google.protobuf.Any")
+		}
+
+		return x
+	}
+
+	v, err := anypb.New(x)
+	if err != nil {
+		panic(fmt.Sprintf(
+			"unable to marshal %T as google.protobuf.Any: %s",
+			x,
+			err,
+		))
+	}
+
+	return v
 }

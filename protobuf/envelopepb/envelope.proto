@@ -4,6 +4,7 @@ package dogma.protobuf;
 option go_package = "github.com/dogmatiq/enginekit/protobuf/envelopepb";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
 import "github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto";
 import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 
@@ -64,21 +65,6 @@ message Message {
   bytes data = 3;
 }
 
-// Extensions is a container for arbitrary key/value pairs associated with a
-// message and/or its causal chain.
-//
-// Keys beginning with "_" are reserved for use by the enginekit module. All
-// other keys SHOULD use reverse-domain notation, e.g. "com.example.some-key".
-message Extensions {
-  // Attributes is a set of arbitrary key/value pairs that provide additional
-  // information about the message.
-  map<string, string> attributes = 1;
-
-  // Baggage is a set of arbitrary key/value pairs that are propagated through
-  // the entire causal chain of messages.
-  map<string, string> baggage = 2;
-}
-
 message Header {
   // CausationId is the (optional) ID of the message that was the direct cause
   // of the messages.
@@ -98,11 +84,17 @@ message Header {
   // Source identifies the origin of the messages.
   Source source = 3;
 
-  // Extensions is a container for arbitrary key/value pairs associated with
-  // the messages, their causal chain, or the envelope itself.
-  Extensions extensions = 4;
+  // Extensions is a set of extension values associated with the messages,
+  // their causal chain, or the envelope itself.
+  repeated google.protobuf.Any extensions = 4;
+
+  // Baggage is a set of extension values that are propagated through the
+  // entire causal chain of messages.
+  repeated google.protobuf.Any baggage = 5;
 }
 
+// Body contains the metadata and encoded form of a single message in an
+// [Envelope] or [MultiEnvelope].
 message Body {
   // MessageId is a unique identifier for the message in this envelope.
   UUID message_id = 1;
@@ -127,10 +119,16 @@ message Body {
   // Message is the encoded representation of the [dogma.Message].
   Message message = 5;
 
-  // Extensions is a container for arbitrary key/value pairs associated with
-  // this message and/or its causal chain.
+  // Extensions is a set of extension values associated with this message.
   //
-  // Any keys present in the [Header.Extensions] field are overridden by keys
-  // in this field.
-  Extensions extensions = 6;
+  // Any values in [Header.Extensions] are overridden by values in this field
+  // that have the same type URL.
+  repeated google.protobuf.Any extensions = 6;
+
+  // Baggage is a set of extension values associated with this message and/or
+  // its causal chain.
+  //
+  // Any values in [Header.Baggage] are overridden by values in this field
+  // that have the same type URL.
+  repeated google.protobuf.Any baggage = 7;
 }

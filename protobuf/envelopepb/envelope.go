@@ -3,6 +3,8 @@ package envelopepb
 import (
 	"errors"
 	"fmt"
+
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 // Validate returns an error if x is not well-formed.
@@ -130,6 +132,14 @@ func (x *Header) validate() error {
 		return fmt.Errorf("invalid source: %w", err)
 	}
 
+	if err := validateAnyValues("extensions", x.Extensions); err != nil {
+		return err
+	}
+
+	if err := validateAnyValues("baggage", x.Baggage); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -160,6 +170,32 @@ func (x *Body) validate(header *Header) error {
 
 	if err := x.GetMessage().validate(); err != nil {
 		return fmt.Errorf("invalid message: %w", err)
+	}
+
+	if err := validateAnyValues("extensions", x.Extensions); err != nil {
+		return err
+	}
+
+	if err := validateAnyValues("baggage", x.Baggage); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateAnyValues(name string, values []*anypb.Any) error {
+	for i, v := range values {
+		if err := validateAnyValue(v); err != nil {
+			return fmt.Errorf("invalid %s at index %d: %w", name, i, err)
+		}
+	}
+
+	return nil
+}
+
+func validateAnyValue(v *anypb.Any) error {
+	if v.GetTypeUrl() == "" {
+		return errors.New("type URL must not be empty")
 	}
 
 	return nil

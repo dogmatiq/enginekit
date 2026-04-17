@@ -11,6 +11,29 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.22.0] - 2026-04-17
+
+### Added
+
+- Added `envelopepb.Header.Baggage`, `Body.Baggage`, `WithExtension()`, and
+  `WithBaggage()` for working with `google.protobuf.Any` extension values.
+- Added `envelopepb.Packer.PackEffects()` and `envelopepb.EffectPacker` for
+  packing messages produced while handling a causal message.
+
+### Changed
+
+- **[BC]** Changed `envelopepb.Header.Extensions` and `Body.Extensions` to use
+  repeated `google.protobuf.Any` values instead of the `envelopepb.Extensions`
+  wrapper.
+- **[BC]** Reworked the packer API around `envelopepb.Packer.PackCommand()`,
+  `PackEffects()`, and `EffectPacker`.
+
+### Removed
+
+- **[BC]** Removed `envelopepb.Extensions`, `envelopepb.Packer.Pack()`,
+  `CausedBy()`, `MultiPacker`, `PackOption`, `SourcePackOption`,
+  `BodyPackOption`, `WithCause()`, `WithHandler()`, and `WithCreatedAt()`.
+
 ## [0.21.0] - 2026-04-14
 
 ### Added
@@ -492,6 +515,7 @@ which itself includes a large numbers of breaking changes.
 [0.20.0]: https://github.com/dogmatiq/enginekit/releases/v0.20.0
 [0.20.1]: https://github.com/dogmatiq/enginekit/releases/v0.20.1
 [0.21.0]: https://github.com/dogmatiq/enginekit/releases/v0.21.0
+[0.22.0]: https://github.com/dogmatiq/enginekit/releases/v0.22.0
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

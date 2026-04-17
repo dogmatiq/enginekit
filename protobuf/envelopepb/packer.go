@@ -287,7 +287,7 @@ func marshalAsAny(x proto.Message) *anypb.Any {
 
 	if x, ok := x.(*anypb.Any); ok {
 		if err := validateAnyValue(x); err != nil {
-			panic("value must not be an empty google.protobuf.Any")
+			panic(err)
 		}
 
 		return x

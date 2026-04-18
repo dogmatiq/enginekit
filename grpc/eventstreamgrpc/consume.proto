@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2024";
 package dogma.eventstream.consume.v1;
 
 option go_package = "github.com/dogmatiq/enginekit/grpc/eventstreamgrpc";
@@ -57,7 +57,7 @@ message ConsumeEventsRequest {
   dogma.protobuf.UUID stream_id = 1;
 
   // Offset is the offset of the earliest event to be consumed.
-  uint64 offset = 2;
+  uint64 offset = 2 [features.field_presence = IMPLICIT];
 
   // EventTypeIds is a list of type IDs of the events to be consumed. The
   // consumer must be explicit about the event types that it understands; there
@@ -71,7 +71,7 @@ message ConsumeEventsResponse {
   // EventDelivery represents the delivery of a single event to the consumer.
   message EventDelivery {
     // Offset is the event's offset within the stream.
-    uint64 offset = 1;
+    uint64 offset = 1 [features.field_presence = IMPLICIT];
 
     // Envelope is the envelope containing the event.
     dogma.protobuf.Envelope envelope = 2;

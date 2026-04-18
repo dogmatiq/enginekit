@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2024";
 package dogmatiq.enginekit.enginetest;
 
 option go_package = "github.com/dogmatiq/enginekit/enginetest/internal/action";

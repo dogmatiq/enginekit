@@ -12,7 +12,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
-	sync "sync"
 	unsafe "unsafe"
 )
 
@@ -25,7 +24,7 @@ const (
 
 // ListStreamsRequest is the input to the ConsumeAPI.ListStreams method.
 type ListStreamsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -55,18 +54,24 @@ func (x *ListStreamsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListStreamsRequest.ProtoReflect.Descriptor instead.
-func (*ListStreamsRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{0}
+type ListStreamsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 ListStreamsRequest_builder) Build() *ListStreamsRequest {
+	m0 := &ListStreamsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 // ListStreamsResponse is the output of the ConsumeAPI.ListStreams method.
 type ListStreamsResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Streams is a list of event streams that can be consumed from this server.
-	Streams       []*Stream `protobuf:"bytes,1,rep,name=streams,proto3" json:"streams,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Streams *[]*Stream             `protobuf:"bytes,1,rep,name=streams"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *ListStreamsResponse) Reset() {
@@ -94,27 +99,41 @@ func (x *ListStreamsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ListStreamsResponse.ProtoReflect.Descriptor instead.
-func (*ListStreamsResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{1}
-}
-
 func (x *ListStreamsResponse) GetStreams() []*Stream {
 	if x != nil {
-		return x.Streams
+		if x.xxx_hidden_Streams != nil {
+			return *x.xxx_hidden_Streams
+		}
 	}
 	return nil
 }
 
+func (x *ListStreamsResponse) SetStreams(v []*Stream) {
+	x.xxx_hidden_Streams = &v
+}
+
+type ListStreamsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Streams is a list of event streams that can be consumed from this server.
+	Streams []*Stream
+}
+
+func (b0 ListStreamsResponse_builder) Build() *ListStreamsResponse {
+	m0 := &ListStreamsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Streams = &b.Streams
+	return m0
+}
+
 // Stream describes an offset-based ordered event stream.
 type Stream struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// StreamId is a unique identifier for the stream.
-	StreamId *uuidpb.UUID `protobuf:"bytes,1,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
-	// EventTypeIds is the set of type IDs of events that may appear on the stream.
-	EventTypeIds  []*uuidpb.UUID `protobuf:"bytes,2,rep,name=event_type_ids,json=eventTypeIds,proto3" json:"event_type_ids,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_StreamId     *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
+	xxx_hidden_EventTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,2,rep,name=event_type_ids,json=eventTypeIds"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *Stream) Reset() {
@@ -142,38 +161,67 @@ func (x *Stream) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Stream.ProtoReflect.Descriptor instead.
-func (*Stream) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{2}
-}
-
 func (x *Stream) GetStreamId() *uuidpb.UUID {
 	if x != nil {
-		return x.StreamId
+		return x.xxx_hidden_StreamId
 	}
 	return nil
 }
 
 func (x *Stream) GetEventTypeIds() []*uuidpb.UUID {
 	if x != nil {
-		return x.EventTypeIds
+		if x.xxx_hidden_EventTypeIds != nil {
+			return *x.xxx_hidden_EventTypeIds
+		}
 	}
 	return nil
 }
 
+func (x *Stream) SetStreamId(v *uuidpb.UUID) {
+	x.xxx_hidden_StreamId = v
+}
+
+func (x *Stream) SetEventTypeIds(v []*uuidpb.UUID) {
+	x.xxx_hidden_EventTypeIds = &v
+}
+
+func (x *Stream) HasStreamId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_StreamId != nil
+}
+
+func (x *Stream) ClearStreamId() {
+	x.xxx_hidden_StreamId = nil
+}
+
+type Stream_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// StreamId is a unique identifier for the stream.
+	StreamId *uuidpb.UUID
+	// EventTypeIds is the set of type IDs of events that may appear on the stream.
+	EventTypeIds []*uuidpb.UUID
+}
+
+func (b0 Stream_builder) Build() *Stream {
+	m0 := &Stream{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_StreamId = b.StreamId
+	x.xxx_hidden_EventTypeIds = &b.EventTypeIds
+	return m0
+}
+
 // ConsumeEventsRequest is the input to the ConsumeAPI.ConsumeEvents method.
 type ConsumeEventsRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// StreamId is the ID from which events are consumed.
-	StreamId *uuidpb.UUID `protobuf:"bytes,1,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
-	// Offset is the offset of the earliest event to be consumed.
-	Offset uint64 `protobuf:"varint,2,opt,name=offset,proto3" json:"offset,omitempty"`
-	// EventTypeIds is a list of type IDs of the events to be consumed. The
-	// consumer must be explicit about the event types that it understands; there
-	// is no mechanism to request all event types.
-	EventTypeIds  []*uuidpb.UUID `protobuf:"bytes,3,rep,name=event_type_ids,json=eventTypeIds,proto3" json:"event_type_ids,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                   protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_StreamId     *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
+	xxx_hidden_Offset       uint64                 `protobuf:"varint,2,opt,name=offset"`
+	xxx_hidden_EventTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,3,rep,name=event_type_ids,json=eventTypeIds"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
 }
 
 func (x *ConsumeEventsRequest) Reset() {
@@ -201,42 +249,82 @@ func (x *ConsumeEventsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConsumeEventsRequest.ProtoReflect.Descriptor instead.
-func (*ConsumeEventsRequest) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{3}
-}
-
 func (x *ConsumeEventsRequest) GetStreamId() *uuidpb.UUID {
 	if x != nil {
-		return x.StreamId
+		return x.xxx_hidden_StreamId
 	}
 	return nil
 }
 
 func (x *ConsumeEventsRequest) GetOffset() uint64 {
 	if x != nil {
-		return x.Offset
+		return x.xxx_hidden_Offset
 	}
 	return 0
 }
 
 func (x *ConsumeEventsRequest) GetEventTypeIds() []*uuidpb.UUID {
 	if x != nil {
-		return x.EventTypeIds
+		if x.xxx_hidden_EventTypeIds != nil {
+			return *x.xxx_hidden_EventTypeIds
+		}
 	}
 	return nil
+}
+
+func (x *ConsumeEventsRequest) SetStreamId(v *uuidpb.UUID) {
+	x.xxx_hidden_StreamId = v
+}
+
+func (x *ConsumeEventsRequest) SetOffset(v uint64) {
+	x.xxx_hidden_Offset = v
+}
+
+func (x *ConsumeEventsRequest) SetEventTypeIds(v []*uuidpb.UUID) {
+	x.xxx_hidden_EventTypeIds = &v
+}
+
+func (x *ConsumeEventsRequest) HasStreamId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_StreamId != nil
+}
+
+func (x *ConsumeEventsRequest) ClearStreamId() {
+	x.xxx_hidden_StreamId = nil
+}
+
+type ConsumeEventsRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// StreamId is the ID from which events are consumed.
+	StreamId *uuidpb.UUID
+	// Offset is the offset of the earliest event to be consumed.
+	Offset uint64
+	// EventTypeIds is a list of type IDs of the events to be consumed. The
+	// consumer must be explicit about the event types that it understands; there
+	// is no mechanism to request all event types.
+	EventTypeIds []*uuidpb.UUID
+}
+
+func (b0 ConsumeEventsRequest_builder) Build() *ConsumeEventsRequest {
+	m0 := &ConsumeEventsRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_StreamId = b.StreamId
+	x.xxx_hidden_Offset = b.Offset
+	x.xxx_hidden_EventTypeIds = &b.EventTypeIds
+	return m0
 }
 
 // ConsumeResponse is the (streaming) output of the ConsumeAPI.ConsumeEvents
 // method.
 type ConsumeEventsResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Operation:
-	//
-	//	*ConsumeEventsResponse_EventDelivery_
-	Operation     isConsumeEventsResponse_Operation `protobuf_oneof:"operation"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                protoimpl.MessageState            `protogen:"opaque.v1"`
+	xxx_hidden_Operation isConsumeEventsResponse_Operation `protobuf_oneof:"operation"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ConsumeEventsResponse) Reset() {
@@ -264,45 +352,108 @@ func (x *ConsumeEventsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConsumeEventsResponse.ProtoReflect.Descriptor instead.
-func (*ConsumeEventsResponse) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ConsumeEventsResponse) GetOperation() isConsumeEventsResponse_Operation {
-	if x != nil {
-		return x.Operation
-	}
-	return nil
-}
-
 func (x *ConsumeEventsResponse) GetEventDelivery() *ConsumeEventsResponse_EventDelivery {
 	if x != nil {
-		if x, ok := x.Operation.(*ConsumeEventsResponse_EventDelivery_); ok {
+		if x, ok := x.xxx_hidden_Operation.(*consumeEventsResponse_EventDelivery_); ok {
 			return x.EventDelivery
 		}
 	}
 	return nil
 }
 
+func (x *ConsumeEventsResponse) SetEventDelivery(v *ConsumeEventsResponse_EventDelivery) {
+	if v == nil {
+		x.xxx_hidden_Operation = nil
+		return
+	}
+	x.xxx_hidden_Operation = &consumeEventsResponse_EventDelivery_{v}
+}
+
+func (x *ConsumeEventsResponse) HasOperation() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Operation != nil
+}
+
+func (x *ConsumeEventsResponse) HasEventDelivery() bool {
+	if x == nil {
+		return false
+	}
+	_, ok := x.xxx_hidden_Operation.(*consumeEventsResponse_EventDelivery_)
+	return ok
+}
+
+func (x *ConsumeEventsResponse) ClearOperation() {
+	x.xxx_hidden_Operation = nil
+}
+
+func (x *ConsumeEventsResponse) ClearEventDelivery() {
+	if _, ok := x.xxx_hidden_Operation.(*consumeEventsResponse_EventDelivery_); ok {
+		x.xxx_hidden_Operation = nil
+	}
+}
+
+const ConsumeEventsResponse_Operation_not_set_case case_ConsumeEventsResponse_Operation = 0
+const ConsumeEventsResponse_EventDelivery_case case_ConsumeEventsResponse_Operation = 1
+
+func (x *ConsumeEventsResponse) WhichOperation() case_ConsumeEventsResponse_Operation {
+	if x == nil {
+		return ConsumeEventsResponse_Operation_not_set_case
+	}
+	switch x.xxx_hidden_Operation.(type) {
+	case *consumeEventsResponse_EventDelivery_:
+		return ConsumeEventsResponse_EventDelivery_case
+	default:
+		return ConsumeEventsResponse_Operation_not_set_case
+	}
+}
+
+type ConsumeEventsResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Fields of oneof xxx_hidden_Operation:
+	EventDelivery *ConsumeEventsResponse_EventDelivery
+	// -- end of xxx_hidden_Operation
+}
+
+func (b0 ConsumeEventsResponse_builder) Build() *ConsumeEventsResponse {
+	m0 := &ConsumeEventsResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	if b.EventDelivery != nil {
+		x.xxx_hidden_Operation = &consumeEventsResponse_EventDelivery_{b.EventDelivery}
+	}
+	return m0
+}
+
+type case_ConsumeEventsResponse_Operation protoreflect.FieldNumber
+
+func (x case_ConsumeEventsResponse_Operation) String() string {
+	md := file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[4].Descriptor()
+	if x == 0 {
+		return "not set"
+	}
+	return protoimpl.X.MessageFieldStringOf(md, protoreflect.FieldNumber(x))
+}
+
 type isConsumeEventsResponse_Operation interface {
 	isConsumeEventsResponse_Operation()
 }
 
-type ConsumeEventsResponse_EventDelivery_ struct {
-	EventDelivery *ConsumeEventsResponse_EventDelivery `protobuf:"bytes,1,opt,name=event_delivery,json=eventDelivery,proto3,oneof"`
+type consumeEventsResponse_EventDelivery_ struct {
+	EventDelivery *ConsumeEventsResponse_EventDelivery `protobuf:"bytes,1,opt,name=event_delivery,json=eventDelivery,oneof"`
 }
 
-func (*ConsumeEventsResponse_EventDelivery_) isConsumeEventsResponse_Operation() {}
+func (*consumeEventsResponse_EventDelivery_) isConsumeEventsResponse_Operation() {}
 
 // UnrecognizedStream is an error-details value for INVALID_ARGUMENT errors that
 // occurred because a consumer requested an unrecognized stream ID.
 type UnrecognizedStream struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// ApplicationKey is the ID of the unrecognized stream.
-	StreamId      *uuidpb.UUID `protobuf:"bytes,1,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_StreamId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *UnrecognizedStream) Reset() {
@@ -330,23 +481,48 @@ func (x *UnrecognizedStream) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnrecognizedStream.ProtoReflect.Descriptor instead.
-func (*UnrecognizedStream) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{5}
-}
-
 func (x *UnrecognizedStream) GetStreamId() *uuidpb.UUID {
 	if x != nil {
-		return x.StreamId
+		return x.xxx_hidden_StreamId
 	}
 	return nil
+}
+
+func (x *UnrecognizedStream) SetStreamId(v *uuidpb.UUID) {
+	x.xxx_hidden_StreamId = v
+}
+
+func (x *UnrecognizedStream) HasStreamId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_StreamId != nil
+}
+
+func (x *UnrecognizedStream) ClearStreamId() {
+	x.xxx_hidden_StreamId = nil
+}
+
+type UnrecognizedStream_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// ApplicationKey is the ID of the unrecognized stream.
+	StreamId *uuidpb.UUID
+}
+
+func (b0 UnrecognizedStream_builder) Build() *UnrecognizedStream {
+	m0 := &UnrecognizedStream{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_StreamId = b.StreamId
+	return m0
 }
 
 // NoEventTypes is an error-details value for INVALID_ARGUMENT errors that
 // occurred because a client sent a consume request without specifying any event
 // type IDs.
 type NoEventTypes struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -376,19 +552,25 @@ func (x *NoEventTypes) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use NoEventTypes.ProtoReflect.Descriptor instead.
-func (*NoEventTypes) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{6}
+type NoEventTypes_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 NoEventTypes_builder) Build() *NoEventTypes {
+	m0 := &NoEventTypes{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
 }
 
 // UnrecognizedEventType is an error-details value for INVALID_ARGUMENT errors
 // that occurred because a specific event type was not recognized by the server.
 type UnrecognizedEventType struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// EventTypeId is the ID of the unrecognized event type.
-	EventTypeId   *uuidpb.UUID `protobuf:"bytes,1,opt,name=event_type_id,json=eventTypeId,proto3" json:"event_type_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_EventTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=event_type_id,json=eventTypeId"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *UnrecognizedEventType) Reset() {
@@ -416,27 +598,50 @@ func (x *UnrecognizedEventType) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnrecognizedEventType.ProtoReflect.Descriptor instead.
-func (*UnrecognizedEventType) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{7}
-}
-
 func (x *UnrecognizedEventType) GetEventTypeId() *uuidpb.UUID {
 	if x != nil {
-		return x.EventTypeId
+		return x.xxx_hidden_EventTypeId
 	}
 	return nil
 }
 
+func (x *UnrecognizedEventType) SetEventTypeId(v *uuidpb.UUID) {
+	x.xxx_hidden_EventTypeId = v
+}
+
+func (x *UnrecognizedEventType) HasEventTypeId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_EventTypeId != nil
+}
+
+func (x *UnrecognizedEventType) ClearEventTypeId() {
+	x.xxx_hidden_EventTypeId = nil
+}
+
+type UnrecognizedEventType_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// EventTypeId is the ID of the unrecognized event type.
+	EventTypeId *uuidpb.UUID
+}
+
+func (b0 UnrecognizedEventType_builder) Build() *UnrecognizedEventType {
+	m0 := &UnrecognizedEventType{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_EventTypeId = b.EventTypeId
+	return m0
+}
+
 // EventDelivery represents the delivery of a single event to the consumer.
 type ConsumeEventsResponse_EventDelivery struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Offset is the event's offset within the stream.
-	Offset uint64 `protobuf:"varint,1,opt,name=offset,proto3" json:"offset,omitempty"`
-	// Envelope is the envelope containing the event.
-	Envelope      *envelopepb.Envelope `protobuf:"bytes,2,opt,name=envelope,proto3" json:"envelope,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Offset   uint64                 `protobuf:"varint,1,opt,name=offset"`
+	xxx_hidden_Envelope *envelopepb.Envelope   `protobuf:"bytes,2,opt,name=envelope"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *ConsumeEventsResponse_EventDelivery) Reset() {
@@ -464,23 +669,55 @@ func (x *ConsumeEventsResponse_EventDelivery) ProtoReflect() protoreflect.Messag
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConsumeEventsResponse_EventDelivery.ProtoReflect.Descriptor instead.
-func (*ConsumeEventsResponse_EventDelivery) Descriptor() ([]byte, []int) {
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP(), []int{4, 0}
-}
-
 func (x *ConsumeEventsResponse_EventDelivery) GetOffset() uint64 {
 	if x != nil {
-		return x.Offset
+		return x.xxx_hidden_Offset
 	}
 	return 0
 }
 
 func (x *ConsumeEventsResponse_EventDelivery) GetEnvelope() *envelopepb.Envelope {
 	if x != nil {
-		return x.Envelope
+		return x.xxx_hidden_Envelope
 	}
 	return nil
+}
+
+func (x *ConsumeEventsResponse_EventDelivery) SetOffset(v uint64) {
+	x.xxx_hidden_Offset = v
+}
+
+func (x *ConsumeEventsResponse_EventDelivery) SetEnvelope(v *envelopepb.Envelope) {
+	x.xxx_hidden_Envelope = v
+}
+
+func (x *ConsumeEventsResponse_EventDelivery) HasEnvelope() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Envelope != nil
+}
+
+func (x *ConsumeEventsResponse_EventDelivery) ClearEnvelope() {
+	x.xxx_hidden_Envelope = nil
+}
+
+type ConsumeEventsResponse_EventDelivery_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// Offset is the event's offset within the stream.
+	Offset uint64
+	// Envelope is the envelope containing the event.
+	Envelope *envelopepb.Envelope
+}
+
+func (b0 ConsumeEventsResponse_EventDelivery_builder) Build() *ConsumeEventsResponse_EventDelivery {
+	m0 := &ConsumeEventsResponse_EventDelivery{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Offset = b.Offset
+	x.xxx_hidden_Envelope = b.Envelope
+	return m0
 }
 
 var File_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto protoreflect.FileDescriptor
@@ -493,15 +730,15 @@ const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawD
 	"\astreams\x18\x01 \x03(\v2$.dogma.eventstream.consume.v1.StreamR\astreams\"w\n" +
 	"\x06Stream\x121\n" +
 	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12:\n" +
-	"\x0eevent_type_ids\x18\x02 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\x9d\x01\n" +
+	"\x0eevent_type_ids\x18\x02 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\xa4\x01\n" +
 	"\x14ConsumeEventsRequest\x121\n" +
-	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12\x16\n" +
-	"\x06offset\x18\x02 \x01(\x04R\x06offset\x12:\n" +
-	"\x0eevent_type_ids\x18\x03 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\xef\x01\n" +
+	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12\x1d\n" +
+	"\x06offset\x18\x02 \x01(\x04B\x05\xaa\x01\x02\b\x02R\x06offset\x12:\n" +
+	"\x0eevent_type_ids\x18\x03 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\xf6\x01\n" +
 	"\x15ConsumeEventsResponse\x12j\n" +
-	"\x0eevent_delivery\x18\x01 \x01(\v2A.dogma.eventstream.consume.v1.ConsumeEventsResponse.EventDeliveryH\x00R\reventDelivery\x1a]\n" +
-	"\rEventDelivery\x12\x16\n" +
-	"\x06offset\x18\x01 \x01(\x04R\x06offset\x124\n" +
+	"\x0eevent_delivery\x18\x01 \x01(\v2A.dogma.eventstream.consume.v1.ConsumeEventsResponse.EventDeliveryH\x00R\reventDelivery\x1ad\n" +
+	"\rEventDelivery\x12\x1d\n" +
+	"\x06offset\x18\x01 \x01(\x04B\x05\xaa\x01\x02\b\x02R\x06offset\x124\n" +
 	"\benvelope\x18\x02 \x01(\v2\x18.dogma.protobuf.EnvelopeR\benvelopeB\v\n" +
 	"\toperation\"G\n" +
 	"\x12UnrecognizedStream\x121\n" +
@@ -512,19 +749,7 @@ const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawD
 	"\n" +
 	"ConsumeAPI\x12r\n" +
 	"\vListStreams\x120.dogma.eventstream.consume.v1.ListStreamsRequest\x1a1.dogma.eventstream.consume.v1.ListStreamsResponse\x12z\n" +
-	"\rConsumeEvents\x122.dogma.eventstream.consume.v1.ConsumeEventsRequest\x1a3.dogma.eventstream.consume.v1.ConsumeEventsResponse0\x01B4Z2github.com/dogmatiq/enginekit/grpc/eventstreamgrpcb\x06proto3"
-
-var (
-	file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescOnce sync.Once
-	file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescData []byte
-)
-
-func file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescGZIP() []byte {
-	file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescOnce.Do(func() {
-		file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc), len(file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc)))
-	})
-	return file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDescData
-}
+	"\rConsumeEvents\x122.dogma.eventstream.consume.v1.ConsumeEventsRequest\x1a3.dogma.eventstream.consume.v1.ConsumeEventsResponse0\x01B4Z2github.com/dogmatiq/enginekit/grpc/eventstreamgrpcb\beditionsp\xe9\a"
 
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_goTypes = []any{
@@ -567,7 +792,7 @@ func file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_init(
 		return
 	}
 	file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[4].OneofWrappers = []any{
-		(*ConsumeEventsResponse_EventDelivery_)(nil),
+		(*consumeEventsResponse_EventDelivery_)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

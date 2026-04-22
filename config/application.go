@@ -38,7 +38,7 @@ func (a *Application) Handlers() []Handler {
 // It panics if the handlers are incomplete or invalid.
 func (a *Application) HandlerByName(name string) (Handler, bool) {
 	for _, h := range a.Handlers() {
-		if h.Identity().Name == name {
+		if h.Identity().GetName() == name {
 			return h, true
 		}
 	}

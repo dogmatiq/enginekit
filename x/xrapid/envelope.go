@@ -23,36 +23,51 @@ func Envelope() *rapid.Generator[*envelopepb.Envelope] {
 
 	return rapid.Custom(
 		func(t *rapid.T) *envelopepb.Envelope {
-			env := &envelopepb.Envelope{
-				Header: &envelopepb.Header{
-					CausationId:   uuidpb.Generate(),
-					CorrelationId: uuidpb.Generate(),
-					Source: &envelopepb.Source{
-						Site:        Nillable(Identity()).Draw(t, "source site"),
-						Application: Identity().Draw(t, "source application"),
-						Handler:     Nillable(Identity()).Draw(t, "source handler"),
-					},
-				},
-				Body: &envelopepb.Body{
-					MessageId: uuidpb.Generate(),
-					CreatedAt: Timestamp().Draw(t, "created at"),
-					Message: &envelopepb.Message{
-						Description: rapid.StringN(1, -1, -1).Draw(t, "description"),
-						TypeId:      uuidpb.Generate(),
-						Data:        rapid.SliceOf(rapid.Byte()).Draw(t, "data"),
-					},
-					Extensions: rapid.SliceOf(anyValue).Draw(t, "extensions"),
-					Baggage:    rapid.SliceOf(anyValue).Draw(t, "baggage"),
-				},
-			}
+			handler := Nillable(Identity()).Draw(t, "source handler")
 
-			if env.Header.Source.Handler != nil {
-				env.Header.Source.InstanceId = rapid.String().Draw(t, "source instance id")
+			source := envelopepb.
+				NewSourceBuilder().
+				WithSite(Nillable(Identity()).Draw(t, "source site")).
+				WithApplication(Identity().Draw(t, "source application")).
+				WithHandler(handler).
+				Build()
 
-				if env.Header.Source.InstanceId != "" {
-					env.Body.ScheduledFor = Nillable(Timestamp()).Draw(t, "scheduled for")
+			body := envelopepb.
+				NewBodyBuilder().
+				WithMessageId(uuidpb.Generate()).
+				WithCreatedAt(Timestamp().Draw(t, "created at")).
+				WithMessage(
+					envelopepb.
+						NewMessageBuilder().
+						WithDescription(rapid.StringN(1, -1, -1).Draw(t, "description")).
+						WithTypeId(uuidpb.Generate()).
+						WithData(rapid.SliceOf(rapid.Byte()).Draw(t, "data")).
+						Build(),
+				).
+				WithExtensions(rapid.SliceOf(anyValue).Draw(t, "extensions")).
+				WithBaggage(rapid.SliceOf(anyValue).Draw(t, "baggage")).
+				Build()
+
+			if handler != nil {
+				instanceID := rapid.String().Draw(t, "source instance id")
+				source.SetInstanceId(instanceID)
+				if instanceID != "" {
+					body.SetScheduledFor(Nillable(Timestamp()).Draw(t, "scheduled for"))
 				}
 			}
+
+			env := envelopepb.
+				NewEnvelopeBuilder().
+				WithHeader(
+					envelopepb.
+						NewHeaderBuilder().
+						WithCausationId(uuidpb.Generate()).
+						WithCorrelationId(uuidpb.Generate()).
+						WithSource(source).
+						Build(),
+				).
+				WithBody(body).
+				Build()
 
 			if err := env.Validate(); err != nil {
 				t.Fatalf("generated invalid envelope: %v", err)

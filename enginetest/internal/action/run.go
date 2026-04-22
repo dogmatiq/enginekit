@@ -15,12 +15,8 @@ func Run(
 	s Scope,
 	m Actionable,
 ) error {
-	type behavior interface {
-		do(Scope) error
-	}
-
 	for _, act := range m.GetActions() {
-		if err := act.GetBehavior().(behavior).do(s); err != nil {
+		if err := do(act, s); err != nil {
 			return err
 		}
 	}

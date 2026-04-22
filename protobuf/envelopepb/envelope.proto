@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2024";
 package dogma.protobuf;
 
 option go_package = "github.com/dogmatiq/enginekit/protobuf/envelopepb";
@@ -47,7 +47,7 @@ message Source {
   //
   // It is empty if the message was not produced by an aggregate or process
   // handler.
-  string instance_id = 4;
+  string instance_id = 4 [features.field_presence = IMPLICIT];
 }
 
 // Message is the serialized representation of a [dogma.Message].
@@ -58,11 +58,11 @@ message Message {
 
   // Description is a human-readable description of the message, as returned by
   // the [dogma.Message.MessageDescription] method.
-  string description = 2;
+  string description = 2 [features.field_presence = IMPLICIT];
 
   // Data is the binary message data obtained by calling
   // [dogma.Message.MarshalBinary] on the message.
-  bytes data = 3;
+  bytes data = 3 [features.field_presence = IMPLICIT];
 }
 
 message Header {
@@ -104,7 +104,7 @@ message Body {
   //
   // It is the zero-value if the message is not a command, or if the producer
   // of the message did not provide an idempotency key.
-  string idempotency_key = 2;
+  string idempotency_key = 2 [features.field_presence = IMPLICIT];
 
   // CreatedAt is the time at which the envelope was created.
   //

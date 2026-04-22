@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2024";
 package dogma.protobuf;
 
 option go_package = "github.com/dogmatiq/enginekit/protobuf/configpb";
@@ -32,7 +32,7 @@ message Application {
 
   // GoType is the fully-qualified name of the Go type that provides as the
   // application's implementation.
-  string go_type = 2;
+  string go_type = 2 [features.field_presence = IMPLICIT];
 
   // Handlers is the set of handlers within the application.
   repeated Handler handlers = 3;
@@ -49,10 +49,10 @@ message Handler {
 
   // GoType is the fully-qualified name of the Go type that provides as the
   // handler's implementation.
-  string go_type = 2;
+  string go_type = 2 [features.field_presence = IMPLICIT];
 
   // Type is the handler's type.
-  HandlerType type = 3;
+  HandlerType type = 3 [features.field_presence = IMPLICIT];
 
   // messages is the set of messages produced and consumed by this handler.
   //
@@ -60,13 +60,13 @@ message Handler {
   map<string, MessageUsage> messages = 4;
 
   // IsDisabled indicates whether the handler is disabled.
-  bool is_disabled = 5;
+  bool is_disabled = 5 [features.field_presence = IMPLICIT];
 }
 
 message MessageUsage {
   // IsProduced indicates whether the message is produced by the handler.
-  bool is_produced = 2;
+  bool is_produced = 2 [features.field_presence = IMPLICIT];
 
   // IsConsumed indicates whether the message is consumed by the handler.
-  bool is_consumed = 3;
+  bool is_consumed = 3 [features.field_presence = IMPLICIT];
 }

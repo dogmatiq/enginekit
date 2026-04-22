@@ -112,10 +112,11 @@ func resolveIdentity(e Entity) *identitypb.Identity {
 
 	id := e.EntityProperties().IdentityComponents[0]
 
-	return &identitypb.Identity{
-		Name: id.Name.Get(),
-		Key:  uuidpb.MustParse(id.Key.Get()),
-	}
+	return identitypb.
+		NewIdentityBuilder().
+		WithName(id.Name.Get()).
+		WithKey(uuidpb.MustParse(id.Key.Get())).
+		Build()
 }
 
 func resolveInterface[T any](e Entity, src optional.Optional[T]) T {

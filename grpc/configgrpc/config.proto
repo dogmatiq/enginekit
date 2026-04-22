@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2024";
 package dogma.config.v1;
 
 option go_package = "github.com/dogmatiq/enginekit/grpc/configgrpc";

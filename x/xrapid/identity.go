@@ -10,10 +10,11 @@ import (
 func Identity() *rapid.Generator[*identitypb.Identity] {
 	return rapid.Custom(
 		func(t *rapid.T) *identitypb.Identity {
-			ident := &identitypb.Identity{
-				Name: rapid.StringN(1, -1, -1).Draw(t, "identity name"),
-				Key:  uuidpb.Generate(),
-			}
+			ident := identitypb.
+				NewIdentityBuilder().
+				WithName(rapid.StringN(1, -1, -1).Draw(t, "identity name")).
+				WithKey(uuidpb.Generate()).
+				Build()
 
 			if err := ident.Validate(); err != nil {
 				t.Fatalf("generated invalid identity: %v", err)

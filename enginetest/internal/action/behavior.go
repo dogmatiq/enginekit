@@ -22,111 +22,110 @@ func Sequence(actions ...[]*Action) []*Action {
 // Fail returns an action that causes the handler to return an error.
 func Fail(message string) []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_Fail{message},
-		},
+		NewActionBuilder().
+			WithFail(message).
+			Build(),
 	}
-}
-
-func (x *Action_Fail) do(Scope) error {
-	return errors.New(x.Fail)
 }
 
 // Log returns an action that causes the handler to log a human-readable
 // message.
 func Log(message string) []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_Log{message},
-		},
+		NewActionBuilder().
+			WithLog(message).
+			Build(),
 	}
-}
-
-func (x *Action_Log) do(s Scope) error {
-	s.Log("%s", x.Log)
-	return nil
 }
 
 // ExecuteCommand returns an action that causes the handler to execute a command
 // message.
 func ExecuteCommand(c dogma.Command) []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_ExecuteCommand{toAny(c)},
-		},
+		NewActionBuilder().
+			WithExecuteCommand(toAny(c)).
+			Build(),
 	}
-}
-
-func (x *Action_ExecuteCommand) do(s Scope) error {
-	s.(executor).ExecuteCommand(fromAny[dogma.Command](x.ExecuteCommand))
-	return nil
 }
 
 // RecordEvent returns an action that causes the handler to record an event
 // message.
 func RecordEvent(e dogma.Message) []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_RecordEvent{toAny(e)},
-		},
+		NewActionBuilder().
+			WithRecordEvent(toAny(e)).
+			Build(),
 	}
-}
-
-func (x *Action_RecordEvent) do(s Scope) error {
-	s.(recorder).RecordEvent(fromAny[dogma.Event](x.RecordEvent))
-	return nil
 }
 
 // ScheduleTimeout returns an action that causes the handler to schedule a
 // timeout message.
 func ScheduleTimeout(t dogma.Timeout, at time.Time) []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_ScheduleTimeout{
-				&ScheduleTimeoutDetails{
-					Timeout: toAny(t),
-					At:      timestamppb.New(at),
-				},
-			},
-		},
+		NewActionBuilder().
+			WithScheduleTimeout(
+				NewScheduleTimeoutDetailsBuilder().
+					WithTimeout(toAny(t)).
+					WithAt(timestamppb.New(at)).
+					Build(),
+			).
+			Build(),
 	}
-}
-
-func (x *Action_ScheduleTimeout) do(s Scope) error {
-	s.(scheduler).ScheduleTimeout(
-		fromAny[dogma.Timeout](x.ScheduleTimeout.Timeout),
-		x.ScheduleTimeout.At.AsTime(),
-	)
-	return nil
 }
 
 // Destroy returns an action that causes the handler to destroy the aggregate
 // instance.
 func Destroy() []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_Destroy{},
-		},
+		NewActionBuilder().
+			WithDestroy(NewEmptyBuilder().Build()).
+			Build(),
 	}
-}
-
-func (x *Action_Destroy) do(s Scope) error {
-	s.(destroyer).Destroy()
-	return nil
 }
 
 // End returns an action that causes the handler to end the process instance.
 func End() []*Action {
 	return []*Action{
-		{
-			Behavior: &Action_End{},
-		},
+		NewActionBuilder().
+			WithEnd(NewEmptyBuilder().Build()).
+			Build(),
 	}
 }
 
-func (x *Action_End) do(s Scope) error {
-	s.(ender).End()
-	return nil
+func do(act *Action, s Scope) error {
+	return MustMap_Action_Behavior(
+		act,
+		func(message string) error {
+			return errors.New(message)
+		},
+		func(message string) error {
+			s.Log("%s", message)
+			return nil
+		},
+		func(c *anypb.Any) error {
+			s.(executor).ExecuteCommand(fromAny[dogma.Command](c))
+			return nil
+		},
+		func(e *anypb.Any) error {
+			s.(recorder).RecordEvent(fromAny[dogma.Event](e))
+			return nil
+		},
+		func(details *ScheduleTimeoutDetails) error {
+			s.(scheduler).ScheduleTimeout(
+				fromAny[dogma.Timeout](details.GetTimeout()),
+				details.GetAt().AsTime(),
+			)
+			return nil
+		},
+		func(*Empty) error {
+			s.(destroyer).Destroy()
+			return nil
+		},
+		func(*Empty) error {
+			s.(ender).End()
+			return nil
+		},
+	)
 }
 
 func toAny(m dogma.Message) *anypb.Any {

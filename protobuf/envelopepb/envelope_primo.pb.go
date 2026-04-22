@@ -29,8 +29,13 @@ func NewEnvelopeBuilder() *EnvelopeBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *EnvelopeBuilder) From(x *Envelope) *EnvelopeBuilder {
-	b.prototype.Header = x.Header
-	b.prototype.Body = x.Body
+	proto.Reset(&b.prototype)
+	if x.HasHeader() {
+		b.prototype.SetHeader(x.GetHeader())
+	}
+	if x.HasBody() {
+		b.prototype.SetBody(x.GetBody())
+	}
 	return b
 }
 
@@ -39,23 +44,27 @@ func (b *EnvelopeBuilder) From(x *Envelope) *EnvelopeBuilder {
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
 func (b *EnvelopeBuilder) Build() *Envelope {
-	return &Envelope{
-		Header: b.prototype.Header,
-		Body:   b.prototype.Body,
+	m := &Envelope{}
+	if b.prototype.HasHeader() {
+		m.SetHeader(b.prototype.GetHeader())
 	}
+	if b.prototype.HasBody() {
+		m.SetBody(b.prototype.GetBody())
+	}
+	return m
 }
 
 // WithHeader configures the builder to set the Header field to v,
 // then returns b.
 func (b *EnvelopeBuilder) WithHeader(v *Header) *EnvelopeBuilder {
-	b.prototype.Header = v
+	b.prototype.SetHeader(v)
 	return b
 }
 
 // WithBody configures the builder to set the Body field to v,
 // then returns b.
 func (b *EnvelopeBuilder) WithBody(v *Body) *EnvelopeBuilder {
-	b.prototype.Body = v
+	b.prototype.SetBody(v)
 	return b
 }
 
@@ -74,8 +83,11 @@ func NewMultiEnvelopeBuilder() *MultiEnvelopeBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *MultiEnvelopeBuilder) From(x *MultiEnvelope) *MultiEnvelopeBuilder {
-	b.prototype.Header = x.Header
-	b.prototype.Bodies = x.Bodies
+	proto.Reset(&b.prototype)
+	if x.HasHeader() {
+		b.prototype.SetHeader(x.GetHeader())
+	}
+	b.prototype.SetBodies(x.GetBodies())
 	return b
 }
 
@@ -84,23 +96,25 @@ func (b *MultiEnvelopeBuilder) From(x *MultiEnvelope) *MultiEnvelopeBuilder {
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
 func (b *MultiEnvelopeBuilder) Build() *MultiEnvelope {
-	return &MultiEnvelope{
-		Header: b.prototype.Header,
-		Bodies: b.prototype.Bodies,
+	m := &MultiEnvelope{}
+	if b.prototype.HasHeader() {
+		m.SetHeader(b.prototype.GetHeader())
 	}
+	m.SetBodies(b.prototype.GetBodies())
+	return m
 }
 
 // WithHeader configures the builder to set the Header field to v,
 // then returns b.
 func (b *MultiEnvelopeBuilder) WithHeader(v *Header) *MultiEnvelopeBuilder {
-	b.prototype.Header = v
+	b.prototype.SetHeader(v)
 	return b
 }
 
 // WithBodies configures the builder to set the Bodies field to v,
 // then returns b.
 func (b *MultiEnvelopeBuilder) WithBodies(v []*Body) *MultiEnvelopeBuilder {
-	b.prototype.Bodies = v
+	b.prototype.SetBodies(v)
 	return b
 }
 
@@ -119,10 +133,17 @@ func NewSourceBuilder() *SourceBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *SourceBuilder) From(x *Source) *SourceBuilder {
-	b.prototype.Site = x.Site
-	b.prototype.Application = x.Application
-	b.prototype.Handler = x.Handler
-	b.prototype.InstanceId = x.InstanceId
+	proto.Reset(&b.prototype)
+	if x.HasSite() {
+		b.prototype.SetSite(x.GetSite())
+	}
+	if x.HasApplication() {
+		b.prototype.SetApplication(x.GetApplication())
+	}
+	if x.HasHandler() {
+		b.prototype.SetHandler(x.GetHandler())
+	}
+	b.prototype.SetInstanceId(x.GetInstanceId())
 	return b
 }
 
@@ -131,39 +152,45 @@ func (b *SourceBuilder) From(x *Source) *SourceBuilder {
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
 func (b *SourceBuilder) Build() *Source {
-	return &Source{
-		Site:        b.prototype.Site,
-		Application: b.prototype.Application,
-		Handler:     b.prototype.Handler,
-		InstanceId:  b.prototype.InstanceId,
+	m := &Source{}
+	if b.prototype.HasSite() {
+		m.SetSite(b.prototype.GetSite())
 	}
+	if b.prototype.HasApplication() {
+		m.SetApplication(b.prototype.GetApplication())
+	}
+	if b.prototype.HasHandler() {
+		m.SetHandler(b.prototype.GetHandler())
+	}
+	m.SetInstanceId(b.prototype.GetInstanceId())
+	return m
 }
 
 // WithSite configures the builder to set the Site field to v,
 // then returns b.
 func (b *SourceBuilder) WithSite(v *identitypb.Identity) *SourceBuilder {
-	b.prototype.Site = v
+	b.prototype.SetSite(v)
 	return b
 }
 
 // WithApplication configures the builder to set the Application field to v,
 // then returns b.
 func (b *SourceBuilder) WithApplication(v *identitypb.Identity) *SourceBuilder {
-	b.prototype.Application = v
+	b.prototype.SetApplication(v)
 	return b
 }
 
 // WithHandler configures the builder to set the Handler field to v,
 // then returns b.
 func (b *SourceBuilder) WithHandler(v *identitypb.Identity) *SourceBuilder {
-	b.prototype.Handler = v
+	b.prototype.SetHandler(v)
 	return b
 }
 
 // WithInstanceId configures the builder to set the InstanceId field to v,
 // then returns b.
 func (b *SourceBuilder) WithInstanceId(v string) *SourceBuilder {
-	b.prototype.InstanceId = v
+	b.prototype.SetInstanceId(v)
 	return b
 }
 
@@ -182,9 +209,12 @@ func NewMessageBuilder() *MessageBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *MessageBuilder) From(x *Message) *MessageBuilder {
-	b.prototype.TypeId = x.TypeId
-	b.prototype.Description = x.Description
-	b.prototype.Data = x.Data
+	proto.Reset(&b.prototype)
+	if x.HasTypeId() {
+		b.prototype.SetTypeId(x.GetTypeId())
+	}
+	b.prototype.SetDescription(x.GetDescription())
+	b.prototype.SetData(x.GetData())
 	return b
 }
 
@@ -193,31 +223,33 @@ func (b *MessageBuilder) From(x *Message) *MessageBuilder {
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
 func (b *MessageBuilder) Build() *Message {
-	return &Message{
-		TypeId:      b.prototype.TypeId,
-		Description: b.prototype.Description,
-		Data:        b.prototype.Data,
+	m := &Message{}
+	if b.prototype.HasTypeId() {
+		m.SetTypeId(b.prototype.GetTypeId())
 	}
+	m.SetDescription(b.prototype.GetDescription())
+	m.SetData(b.prototype.GetData())
+	return m
 }
 
 // WithTypeId configures the builder to set the TypeId field to v,
 // then returns b.
 func (b *MessageBuilder) WithTypeId(v *uuidpb.UUID) *MessageBuilder {
-	b.prototype.TypeId = v
+	b.prototype.SetTypeId(v)
 	return b
 }
 
 // WithDescription configures the builder to set the Description field to v,
 // then returns b.
 func (b *MessageBuilder) WithDescription(v string) *MessageBuilder {
-	b.prototype.Description = v
+	b.prototype.SetDescription(v)
 	return b
 }
 
 // WithData configures the builder to set the Data field to v,
 // then returns b.
 func (b *MessageBuilder) WithData(v []byte) *MessageBuilder {
-	b.prototype.Data = v
+	b.prototype.SetData(v)
 	return b
 }
 
@@ -236,11 +268,18 @@ func NewHeaderBuilder() *HeaderBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *HeaderBuilder) From(x *Header) *HeaderBuilder {
-	b.prototype.CausationId = x.CausationId
-	b.prototype.CorrelationId = x.CorrelationId
-	b.prototype.Source = x.Source
-	b.prototype.Extensions = x.Extensions
-	b.prototype.Baggage = x.Baggage
+	proto.Reset(&b.prototype)
+	if x.HasCausationId() {
+		b.prototype.SetCausationId(x.GetCausationId())
+	}
+	if x.HasCorrelationId() {
+		b.prototype.SetCorrelationId(x.GetCorrelationId())
+	}
+	if x.HasSource() {
+		b.prototype.SetSource(x.GetSource())
+	}
+	b.prototype.SetExtensions(x.GetExtensions())
+	b.prototype.SetBaggage(x.GetBaggage())
 	return b
 }
 
@@ -249,47 +288,53 @@ func (b *HeaderBuilder) From(x *Header) *HeaderBuilder {
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
 func (b *HeaderBuilder) Build() *Header {
-	return &Header{
-		CausationId:   b.prototype.CausationId,
-		CorrelationId: b.prototype.CorrelationId,
-		Source:        b.prototype.Source,
-		Extensions:    b.prototype.Extensions,
-		Baggage:       b.prototype.Baggage,
+	m := &Header{}
+	if b.prototype.HasCausationId() {
+		m.SetCausationId(b.prototype.GetCausationId())
 	}
+	if b.prototype.HasCorrelationId() {
+		m.SetCorrelationId(b.prototype.GetCorrelationId())
+	}
+	if b.prototype.HasSource() {
+		m.SetSource(b.prototype.GetSource())
+	}
+	m.SetExtensions(b.prototype.GetExtensions())
+	m.SetBaggage(b.prototype.GetBaggage())
+	return m
 }
 
 // WithCausationId configures the builder to set the CausationId field to v,
 // then returns b.
 func (b *HeaderBuilder) WithCausationId(v *uuidpb.UUID) *HeaderBuilder {
-	b.prototype.CausationId = v
+	b.prototype.SetCausationId(v)
 	return b
 }
 
 // WithCorrelationId configures the builder to set the CorrelationId field to v,
 // then returns b.
 func (b *HeaderBuilder) WithCorrelationId(v *uuidpb.UUID) *HeaderBuilder {
-	b.prototype.CorrelationId = v
+	b.prototype.SetCorrelationId(v)
 	return b
 }
 
 // WithSource configures the builder to set the Source field to v,
 // then returns b.
 func (b *HeaderBuilder) WithSource(v *Source) *HeaderBuilder {
-	b.prototype.Source = v
+	b.prototype.SetSource(v)
 	return b
 }
 
 // WithExtensions configures the builder to set the Extensions field to v,
 // then returns b.
 func (b *HeaderBuilder) WithExtensions(v []*anypb.Any) *HeaderBuilder {
-	b.prototype.Extensions = v
+	b.prototype.SetExtensions(v)
 	return b
 }
 
 // WithBaggage configures the builder to set the Baggage field to v,
 // then returns b.
 func (b *HeaderBuilder) WithBaggage(v []*anypb.Any) *HeaderBuilder {
-	b.prototype.Baggage = v
+	b.prototype.SetBaggage(v)
 	return b
 }
 
@@ -308,13 +353,22 @@ func NewBodyBuilder() *BodyBuilder {
 // It performs a shallow copy of x, such that any changes made via the builder
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *BodyBuilder) From(x *Body) *BodyBuilder {
-	b.prototype.MessageId = x.MessageId
-	b.prototype.IdempotencyKey = x.IdempotencyKey
-	b.prototype.CreatedAt = x.CreatedAt
-	b.prototype.ScheduledFor = x.ScheduledFor
-	b.prototype.Message = x.Message
-	b.prototype.Extensions = x.Extensions
-	b.prototype.Baggage = x.Baggage
+	proto.Reset(&b.prototype)
+	if x.HasMessageId() {
+		b.prototype.SetMessageId(x.GetMessageId())
+	}
+	b.prototype.SetIdempotencyKey(x.GetIdempotencyKey())
+	if x.HasCreatedAt() {
+		b.prototype.SetCreatedAt(x.GetCreatedAt())
+	}
+	if x.HasScheduledFor() {
+		b.prototype.SetScheduledFor(x.GetScheduledFor())
+	}
+	if x.HasMessage() {
+		b.prototype.SetMessage(x.GetMessage())
+	}
+	b.prototype.SetExtensions(x.GetExtensions())
+	b.prototype.SetBaggage(x.GetBaggage())
 	return b
 }
 
@@ -323,63 +377,71 @@ func (b *BodyBuilder) From(x *Body) *BodyBuilder {
 // Each call returns a new message, such that future changes to the builder do
 // not modify previously constructed messages.
 func (b *BodyBuilder) Build() *Body {
-	return &Body{
-		MessageId:      b.prototype.MessageId,
-		IdempotencyKey: b.prototype.IdempotencyKey,
-		CreatedAt:      b.prototype.CreatedAt,
-		ScheduledFor:   b.prototype.ScheduledFor,
-		Message:        b.prototype.Message,
-		Extensions:     b.prototype.Extensions,
-		Baggage:        b.prototype.Baggage,
+	m := &Body{}
+	if b.prototype.HasMessageId() {
+		m.SetMessageId(b.prototype.GetMessageId())
 	}
+	m.SetIdempotencyKey(b.prototype.GetIdempotencyKey())
+	if b.prototype.HasCreatedAt() {
+		m.SetCreatedAt(b.prototype.GetCreatedAt())
+	}
+	if b.prototype.HasScheduledFor() {
+		m.SetScheduledFor(b.prototype.GetScheduledFor())
+	}
+	if b.prototype.HasMessage() {
+		m.SetMessage(b.prototype.GetMessage())
+	}
+	m.SetExtensions(b.prototype.GetExtensions())
+	m.SetBaggage(b.prototype.GetBaggage())
+	return m
 }
 
 // WithMessageId configures the builder to set the MessageId field to v,
 // then returns b.
 func (b *BodyBuilder) WithMessageId(v *uuidpb.UUID) *BodyBuilder {
-	b.prototype.MessageId = v
+	b.prototype.SetMessageId(v)
 	return b
 }
 
 // WithIdempotencyKey configures the builder to set the IdempotencyKey field to v,
 // then returns b.
 func (b *BodyBuilder) WithIdempotencyKey(v string) *BodyBuilder {
-	b.prototype.IdempotencyKey = v
+	b.prototype.SetIdempotencyKey(v)
 	return b
 }
 
 // WithCreatedAt configures the builder to set the CreatedAt field to v,
 // then returns b.
 func (b *BodyBuilder) WithCreatedAt(v *timestamppb.Timestamp) *BodyBuilder {
-	b.prototype.CreatedAt = v
+	b.prototype.SetCreatedAt(v)
 	return b
 }
 
 // WithScheduledFor configures the builder to set the ScheduledFor field to v,
 // then returns b.
 func (b *BodyBuilder) WithScheduledFor(v *timestamppb.Timestamp) *BodyBuilder {
-	b.prototype.ScheduledFor = v
+	b.prototype.SetScheduledFor(v)
 	return b
 }
 
 // WithMessage configures the builder to set the Message field to v,
 // then returns b.
 func (b *BodyBuilder) WithMessage(v *Message) *BodyBuilder {
-	b.prototype.Message = v
+	b.prototype.SetMessage(v)
 	return b
 }
 
 // WithExtensions configures the builder to set the Extensions field to v,
 // then returns b.
 func (b *BodyBuilder) WithExtensions(v []*anypb.Any) *BodyBuilder {
-	b.prototype.Extensions = v
+	b.prototype.SetExtensions(v)
 	return b
 }
 
 // WithBaggage configures the builder to set the Baggage field to v,
 // then returns b.
 func (b *BodyBuilder) WithBaggage(v []*anypb.Any) *BodyBuilder {
-	b.prototype.Baggage = v
+	b.prototype.SetBaggage(v)
 	return b
 }
 
@@ -477,119 +539,4 @@ func (x *Body) MarshalBinary() ([]byte, error) {
 // It allows [*Body] to implement [encoding.BinaryUnmarshaler].
 func (x *Body) UnmarshalBinary(data []byte) error {
 	return proto.Unmarshal(data, x)
-}
-
-// SetHeader sets the x.Header field to v, then returns x.
-func (x *Envelope) SetHeader(v *Header) {
-	x.Header = v
-}
-
-// SetBody sets the x.Body field to v, then returns x.
-func (x *Envelope) SetBody(v *Body) {
-	x.Body = v
-}
-
-// SetHeader sets the x.Header field to v, then returns x.
-func (x *MultiEnvelope) SetHeader(v *Header) {
-	x.Header = v
-}
-
-// SetBodies sets the x.Bodies field to v, then returns x.
-func (x *MultiEnvelope) SetBodies(v []*Body) {
-	x.Bodies = v
-}
-
-// SetSite sets the x.Site field to v, then returns x.
-func (x *Source) SetSite(v *identitypb.Identity) {
-	x.Site = v
-}
-
-// SetApplication sets the x.Application field to v, then returns x.
-func (x *Source) SetApplication(v *identitypb.Identity) {
-	x.Application = v
-}
-
-// SetHandler sets the x.Handler field to v, then returns x.
-func (x *Source) SetHandler(v *identitypb.Identity) {
-	x.Handler = v
-}
-
-// SetInstanceId sets the x.InstanceId field to v, then returns x.
-func (x *Source) SetInstanceId(v string) {
-	x.InstanceId = v
-}
-
-// SetTypeId sets the x.TypeId field to v, then returns x.
-func (x *Message) SetTypeId(v *uuidpb.UUID) {
-	x.TypeId = v
-}
-
-// SetDescription sets the x.Description field to v, then returns x.
-func (x *Message) SetDescription(v string) {
-	x.Description = v
-}
-
-// SetData sets the x.Data field to v, then returns x.
-func (x *Message) SetData(v []byte) {
-	x.Data = v
-}
-
-// SetCausationId sets the x.CausationId field to v, then returns x.
-func (x *Header) SetCausationId(v *uuidpb.UUID) {
-	x.CausationId = v
-}
-
-// SetCorrelationId sets the x.CorrelationId field to v, then returns x.
-func (x *Header) SetCorrelationId(v *uuidpb.UUID) {
-	x.CorrelationId = v
-}
-
-// SetSource sets the x.Source field to v, then returns x.
-func (x *Header) SetSource(v *Source) {
-	x.Source = v
-}
-
-// SetExtensions sets the x.Extensions field to v, then returns x.
-func (x *Header) SetExtensions(v []*anypb.Any) {
-	x.Extensions = v
-}
-
-// SetBaggage sets the x.Baggage field to v, then returns x.
-func (x *Header) SetBaggage(v []*anypb.Any) {
-	x.Baggage = v
-}
-
-// SetMessageId sets the x.MessageId field to v, then returns x.
-func (x *Body) SetMessageId(v *uuidpb.UUID) {
-	x.MessageId = v
-}
-
-// SetIdempotencyKey sets the x.IdempotencyKey field to v, then returns x.
-func (x *Body) SetIdempotencyKey(v string) {
-	x.IdempotencyKey = v
-}
-
-// SetCreatedAt sets the x.CreatedAt field to v, then returns x.
-func (x *Body) SetCreatedAt(v *timestamppb.Timestamp) {
-	x.CreatedAt = v
-}
-
-// SetScheduledFor sets the x.ScheduledFor field to v, then returns x.
-func (x *Body) SetScheduledFor(v *timestamppb.Timestamp) {
-	x.ScheduledFor = v
-}
-
-// SetMessage sets the x.Message field to v, then returns x.
-func (x *Body) SetMessage(v *Message) {
-	x.Message = v
-}
-
-// SetExtensions sets the x.Extensions field to v, then returns x.
-func (x *Body) SetExtensions(v []*anypb.Any) {
-	x.Extensions = v
-}
-
-// SetBaggage sets the x.Baggage field to v, then returns x.
-func (x *Body) SetBaggage(v []*anypb.Any) {
-	x.Baggage = v
 }

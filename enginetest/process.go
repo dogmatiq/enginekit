@@ -16,20 +16,23 @@ func testProcess(_ context.Context, t *testing.T, e *engine) {
 		t.Run("can execute commands", func(t *testing.T) {
 			t.Parallel()
 
-			expect := &testapp.GenericEvent{
-				Value: uuidpb.Generate().AsString(),
-			}
+			expect := testapp.
+				NewGenericEventBuilder().
+				WithValue(uuidpb.Generate().AsString()).
+				Build()
 
 			e.RecordEvent(
 				t,
-				&testapp.ProcessEventA{
-					InstanceId: uuidpb.Generate().AsString(),
-					Actions: action.ExecuteCommand(
-						&testapp.DoActions{
-							Actions: action.RecordEvent(expect),
-						},
-					),
-				},
+				testapp.
+					NewProcessEventABuilder().
+					WithInstanceId(uuidpb.Generate().AsString()).
+					WithActions(action.ExecuteCommand(
+						testapp.
+							NewDoActionsBuilder().
+							WithActions(action.RecordEvent(expect)).
+							Build(),
+					)).
+					Build(),
 			)
 
 			e.ExpectEvent(t, expect)
@@ -40,29 +43,34 @@ func testProcess(_ context.Context, t *testing.T, e *engine) {
 
 			processInstanceID := uuidpb.Generate().AsString()
 
-			expect := &testapp.GenericEvent{
-				Value: uuidpb.Generate().AsString(),
-			}
+			expect := testapp.
+				NewGenericEventBuilder().
+				WithValue(uuidpb.Generate().AsString()).
+				Build()
 
 			e.RecordEvent(
 				t,
-				&testapp.ProcessEventA{
-					InstanceId: processInstanceID,
-					Actions: action.ExecuteCommand(
-						&testapp.DoActions{
-							Actions: action.RecordEvent(
-								&testapp.ProcessEventA{
-									InstanceId: processInstanceID,
-									Actions: action.ExecuteCommand(
-										&testapp.DoActions{
-											Actions: action.RecordEvent(expect),
-										},
-									),
-								},
-							),
-						},
-					),
-				},
+				testapp.
+					NewProcessEventABuilder().
+					WithInstanceId(processInstanceID).
+					WithActions(action.ExecuteCommand(
+						testapp.
+							NewDoActionsBuilder().
+							WithActions(action.RecordEvent(
+								testapp.
+									NewProcessEventABuilder().
+									WithInstanceId(processInstanceID).
+									WithActions(action.ExecuteCommand(
+										testapp.
+											NewDoActionsBuilder().
+											WithActions(action.RecordEvent(expect)).
+											Build(),
+									)).
+									Build(),
+							)).
+							Build(),
+					)).
+					Build(),
 			)
 
 			e.ExpectEvent(t, expect)
@@ -75,22 +83,25 @@ func testProcess(_ context.Context, t *testing.T, e *engine) {
 
 			e.RecordEvent(
 				t,
-				&testapp.ProcessEventA{
-					InstanceId: instanceID,
-					Actions: action.Sequence(
+				testapp.
+					NewProcessEventABuilder().
+					WithInstanceId(instanceID).
+					WithActions(action.Sequence(
 						action.ExecuteCommand(
-							&testapp.DoActions{
-								Actions: action.RecordEvent(
-									&testapp.ProcessEventA{
-										InstanceId: instanceID,
-										Actions:    action.Fail("event handled for ended process instance"),
-									},
-								),
-							},
+							testapp.
+								NewDoActionsBuilder().
+								WithActions(action.RecordEvent(
+									testapp.
+										NewProcessEventABuilder().
+										WithInstanceId(instanceID).
+										WithActions(action.Fail("event handled for ended process instance")).
+										Build(),
+								)).
+								Build(),
 						),
 						action.End(),
-					),
-				},
+					)).
+					Build(),
 			)
 		})
 	})

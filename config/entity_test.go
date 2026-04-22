@@ -43,10 +43,11 @@ func testEntity[
 				t,
 				"unexpected identity",
 				entity.Identity(),
-				&identitypb.Identity{
-					Name: "name",
-					Key:  uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a"),
-				},
+				identitypb.
+					NewIdentityBuilder().
+					WithName("name").
+					WithKey(uuidpb.MustParse("19cb98d5-dd17-4daf-ae00-1b413b7b899a")).
+					Build(),
 			)
 		})
 

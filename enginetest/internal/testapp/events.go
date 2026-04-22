@@ -115,7 +115,7 @@ func (x *DoActions) Validate(dogma.CommandValidationScope) error {
 
 // MessageDescription returns a human-readable description of the message.
 func (x *GenericEvent) MessageDescription() string {
-	return x.Value
+	return x.GetValue()
 }
 
 // Validate returns an error if the message is invalid.

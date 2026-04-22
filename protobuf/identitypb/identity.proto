@@ -1,4 +1,4 @@
-syntax = "proto3";
+edition = "2024";
 package dogma.protobuf;
 
 option go_package = "github.com/dogmatiq/enginekit/protobuf/identitypb";
@@ -15,7 +15,7 @@ message Identity {
   // without ambiguity. There is no hard requirement for uniqueness.
   //
   // Entity names may be changed at any time.
-  string name = 1;
+  string name = 1 [features.field_presence = IMPLICIT];
 
   // Key is the entity's immutable, unique key.
   //

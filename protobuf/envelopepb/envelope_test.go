@@ -31,50 +31,50 @@ func TestEnvelope_Validate(t *testing.T) {
 			{
 				"without source site",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Site = nil
+					e.GetHeader().GetSource().SetSite(nil)
 				}),
 			},
 			{
 				"without source handler",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Handler = nil
-					e.Header.Source.InstanceId = ""
-					e.Body.ScheduledFor = nil
+					e.GetHeader().GetSource().SetHandler(nil)
+					e.GetHeader().GetSource().SetInstanceId("")
+					e.GetBody().SetScheduledFor(nil)
 				}),
 			},
 			{
 				"without source instance ID",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.InstanceId = ""
-					e.Body.ScheduledFor = nil
+					e.GetHeader().GetSource().SetInstanceId("")
+					e.GetBody().SetScheduledFor(nil)
 				}),
 			},
 			{
 				"without extensions",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Extensions = nil
+					e.GetBody().SetExtensions(nil)
 				}),
 			},
 			{
 				"with empty extension payload",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Extensions = []*anypb.Any{{
+					e.GetBody().SetExtensions([]*anypb.Any{{
 						TypeUrl: "type.googleapis.com/example.Extension",
-					}}
+					}})
 				}),
 			},
 			{
 				"with empty baggage payload",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Baggage = []*anypb.Any{{
+					e.GetBody().SetBaggage([]*anypb.Any{{
 						TypeUrl: "type.googleapis.com/example.Baggage",
-					}}
+					}})
 				}),
 			},
 			{
 				"without data",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Message.Data = nil
+					e.GetBody().GetMessage().SetData(nil)
 				}),
 			},
 		}
@@ -106,116 +106,116 @@ func TestEnvelope_Validate(t *testing.T) {
 			{
 				"invalid message ID",
 				newEnvelope(func(e *Envelope) {
-					e.Body.MessageId = &uuidpb.UUID{}
+					e.GetBody().SetMessageId(&uuidpb.UUID{})
 				}),
 				"invalid body: invalid message ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid causation ID",
 				newEnvelope(func(e *Envelope) {
-					e.Header.CausationId = &uuidpb.UUID{}
+					e.GetHeader().SetCausationId(&uuidpb.UUID{})
 				}),
 				"invalid header: invalid causation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid correlation ID",
 				newEnvelope(func(e *Envelope) {
-					e.Header.CorrelationId = &uuidpb.UUID{}
+					e.GetHeader().SetCorrelationId(&uuidpb.UUID{})
 				}),
 				"invalid header: invalid correlation ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
 			{
 				"invalid source site",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Site = &identitypb.Identity{}
+					e.GetHeader().GetSource().SetSite(&identitypb.Identity{})
 				}),
 				"invalid header: invalid source: invalid site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source application",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Application = &identitypb.Identity{}
+					e.GetHeader().GetSource().SetApplication(&identitypb.Identity{})
 				}),
 				"invalid header: invalid source: invalid application (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source handler",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Handler = &identitypb.Identity{}
+					e.GetHeader().GetSource().SetHandler(&identitypb.Identity{})
 				}),
 				"invalid header: invalid source: invalid handler (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"source instance ID without source handler",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Handler = nil
+					e.GetHeader().GetSource().SetHandler(nil)
 				}),
 				"invalid header: invalid source: invalid instance ID: must not be specified without a handler",
 			},
 			{
 				"scheduled-for time without source handler",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Source.Handler = nil
-					e.Header.Source.InstanceId = ""
+					e.GetHeader().GetSource().SetHandler(nil)
+					e.GetHeader().GetSource().SetInstanceId("")
 				}),
 				"invalid body: invalid scheduled-for time: must not be specified without a source handler and instance ID",
 			},
 			{
 				"invalid created-at time",
 				newEnvelope(func(e *Envelope) {
-					e.Body.CreatedAt = nil
+					e.GetBody().SetCreatedAt(nil)
 				}),
 				"invalid body: invalid created-at time: proto: invalid nil Timestamp",
 			},
 			{
 				"invalid scheduled-for time",
 				newEnvelope(func(e *Envelope) {
-					e.Body.ScheduledFor = &timestamppb.Timestamp{
+					e.GetBody().SetScheduledFor(&timestamppb.Timestamp{
 						Seconds: math.MaxInt64,
 						Nanos:   math.MaxInt32,
-					}
+					})
 				}),
 				"invalid body: invalid scheduled-for time: proto: timestamp (seconds:9223372036854775807 nanos:2147483647) after 9999-12-31",
 			},
 			{
 				"invalid description",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Message.Description = ""
+					e.GetBody().GetMessage().SetDescription("")
 				}),
 				"invalid body: invalid message: invalid description: must not be empty",
 			},
 			{
 				"empty header extension",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Extensions = []*anypb.Any{{}}
+					e.GetHeader().SetExtensions([]*anypb.Any{{}})
 				}),
 				"invalid header: invalid extensions at index 0: type URL must not be empty",
 			},
 			{
 				"empty header baggage",
 				newEnvelope(func(e *Envelope) {
-					e.Header.Baggage = []*anypb.Any{nil}
+					e.GetHeader().SetBaggage([]*anypb.Any{nil})
 				}),
 				"invalid header: invalid baggage at index 0: type URL must not be empty",
 			},
 			{
 				"empty body extension",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Extensions = []*anypb.Any{{}}
+					e.GetBody().SetExtensions([]*anypb.Any{{}})
 				}),
 				"invalid body: invalid extensions at index 0: type URL must not be empty",
 			},
 			{
 				"empty body baggage",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Baggage = []*anypb.Any{{}}
+					e.GetBody().SetBaggage([]*anypb.Any{{}})
 				}),
 				"invalid body: invalid baggage at index 0: type URL must not be empty",
 			},
 			{
 				"without type ID",
 				newEnvelope(func(e *Envelope) {
-					e.Body.Message.TypeId = nil
+					e.GetBody().GetMessage().SetTypeId(nil)
 				}),
 				"invalid body: invalid message: invalid type ID (00000000-0000-0000-0000-000000000000): UUID must use version 4 or 5",
 			},
@@ -387,10 +387,10 @@ func TestWireCompatibility(t *testing.T) {
 			t.Parallel()
 
 			env := newEnvelope(func(e *Envelope) {
-				e.Header.Extensions = c.HeaderExtensions
-				e.Header.Baggage = c.HeaderBaggage
-				e.Body.Extensions = c.BodyExtensions
-				e.Body.Baggage = c.BodyBaggage
+				e.GetHeader().SetExtensions(c.HeaderExtensions)
+				e.GetHeader().SetBaggage(c.HeaderBaggage)
+				e.GetBody().SetExtensions(c.BodyExtensions)
+				e.GetBody().SetBaggage(c.BodyBaggage)
 			})
 
 			expectEnvelopeWireCompatibleExtensions(
@@ -400,10 +400,10 @@ func TestWireCompatibility(t *testing.T) {
 				c.WantBaggage,
 			)
 
-			multi := &MultiEnvelope{
-				Header: env.Header,
-				Bodies: []*Body{env.Body},
-			}
+			multi := NewMultiEnvelopeBuilder().
+				WithHeader(env.GetHeader()).
+				WithBodies([]*Body{env.GetBody()}).
+				Build()
 
 			expectSingleBodyMultiEnvelopeWireCompatibleExtensions(
 				t,
@@ -560,40 +560,44 @@ func containsAnyValueWithTypeURLForTest(values []*anypb.Any, typeURL string) boo
 }
 
 func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
-	env := &Envelope{
-		Header: &Header{
-			CausationId:   uuidpb.Generate(),
-			CorrelationId: uuidpb.Generate(),
-			Source: &Source{
-				Site:        identitypb.New("<site-name>", uuidpb.Generate()),
-				Application: identitypb.New("<app-name>", uuidpb.Generate()),
-				Handler:     identitypb.New("<handler-name>", uuidpb.Generate()),
-				InstanceId:  "<instance>",
-			},
-		},
-		Body: &Body{
-			MessageId:    uuidpb.Generate(),
-			CreatedAt:    timestamppb.Now(),
-			ScheduledFor: timestamppb.Now(),
-			Message: &Message{
-				Description: "<description>",
-				TypeId:      uuidpb.Generate(),
-				Data:        []byte("<data>"),
-			},
-			Extensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.envelope.v1.Extension",
-					Value:   []byte("<extension-value>"),
-				},
-			},
-			Baggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.envelope.v1.Baggage",
-					Value:   []byte("<baggage-value>"),
-				},
-			},
-		},
-	}
+	env := NewEnvelopeBuilder().
+		WithHeader(
+			NewHeaderBuilder().
+				WithCausationId(uuidpb.Generate()).
+				WithCorrelationId(uuidpb.Generate()).
+				WithSource(NewSourceBuilder().
+					WithSite(identitypb.New("<site-name>", uuidpb.Generate())).
+					WithApplication(identitypb.New("<app-name>", uuidpb.Generate())).
+					WithHandler(identitypb.New("<handler-name>", uuidpb.Generate())).
+					WithInstanceId("<instance>").
+					Build()).
+				Build(),
+		).
+		WithBody(
+			NewBodyBuilder().
+				WithMessageId(uuidpb.Generate()).
+				WithCreatedAt(timestamppb.Now()).
+				WithScheduledFor(timestamppb.Now()).
+				WithMessage(NewMessageBuilder().
+					WithDescription("<description>").
+					WithTypeId(uuidpb.Generate()).
+					WithData([]byte("<data>")).
+					Build(),
+				).
+				WithExtensions([]*anypb.Any{
+					{
+						TypeUrl: "type.googleapis.com/example.envelope.v1.Extension",
+						Value:   []byte("<extension-value>"),
+					},
+				}).
+				WithBaggage([]*anypb.Any{
+					{
+						TypeUrl: "type.googleapis.com/example.envelope.v1.Baggage",
+						Value:   []byte("<baggage-value>"),
+					},
+				}).
+				Build()).
+		Build()
 
 	for _, fn := range modifiers {
 		fn(env)

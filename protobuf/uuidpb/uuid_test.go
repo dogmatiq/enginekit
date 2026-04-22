@@ -3,6 +3,7 @@ package uuidpb_test
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 	unsafe "unsafe"
 
@@ -97,10 +98,10 @@ func TestParse(t *testing.T) {
 			t.Run(c.Desc, func(t *testing.T) {
 				t.Parallel()
 
-				expect := &UUID{
-					Upper: 0xa967a8b93f9c4918,
-					Lower: 0x9a4119577be5fec5,
-				}
+				expect := NewUUIDBuilder().
+					WithUpper(0xa967a8b93f9c4918).
+					WithLower(0x9a4119577be5fec5).
+					Build()
 				actual, err := Parse(c.String)
 				if err != nil {
 					t.Fatal(err)
@@ -154,10 +155,10 @@ func TestMustParse(t *testing.T) {
 	t.Run("when the string is a valid UUID", func(t *testing.T) {
 		t.Parallel()
 
-		expect := &UUID{
-			Upper: 0xa967a8b93f9c4918,
-			Lower: 0x9a4119577be5fec5,
-		}
+		expect := NewUUIDBuilder().
+			WithUpper(0xa967a8b93f9c4918).
+			WithLower(0x9a4119577be5fec5).
+			Build()
 		actual := MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5")
 
 		if !proto.Equal(actual, expect) {
@@ -492,10 +493,10 @@ func TestFromBytes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expect := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	expect := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
 	if !proto.Equal(actual, expect) {
 		t.Fatalf("got %s, want %s", actual, expect)
@@ -518,10 +519,10 @@ func TestFromByteArray(t *testing.T) {
 	}
 
 	actual := FromByteArray(subject)
-	expect := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	expect := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
 	if !proto.Equal(actual, expect) {
 		t.Fatalf("got %s, want %s", actual, expect)
@@ -531,10 +532,10 @@ func TestFromByteArray(t *testing.T) {
 func TestAsByteArray(t *testing.T) {
 	t.Parallel()
 
-	subject := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	subject := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
 	actual := AsByteArray[[16]byte](subject)
 	expect := [16]byte{
@@ -552,10 +553,10 @@ func TestAsByteArray(t *testing.T) {
 func TestCopyBytes(t *testing.T) {
 	t.Parallel()
 
-	subject := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	subject := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
 	t.Run("fills the target slice with the UUID's bytes", func(t *testing.T) {
 		var actual [16]byte
@@ -624,10 +625,10 @@ func TestUUID_AsBytesAndAsByteArray(t *testing.T) {
 		},
 		{
 			"non-zero",
-			&UUID{
-				Upper: 0xa967a8b93f9c4918,
-				Lower: 0x9a4119577be5fec5,
-			},
+			NewUUIDBuilder().
+				WithUpper(0xa967a8b93f9c4918).
+				WithLower(0x9a4119577be5fec5).
+				Build(),
 			[]byte{
 				0xa9, 0x67, 0xa8, 0xb9,
 				0x3f, 0x9c, 0x49, 0x18,
@@ -667,10 +668,10 @@ func TestUUID_AsString(t *testing.T) {
 		{"zero", &UUID{}, "00000000-0000-0000-0000-000000000000"},
 		{
 			"non-zero",
-			&UUID{
-				Upper: 0xa967a8b93f9c4918,
-				Lower: 0x9a4119577be5fec5,
-			},
+			NewUUIDBuilder().
+				WithUpper(0xa967a8b93f9c4918).
+				WithLower(0x9a4119577be5fec5).
+				Build(),
 			"a967a8b9-3f9c-4918-9a41-19577be5fec5",
 		},
 	}
@@ -691,10 +692,10 @@ func TestUUID_AsString(t *testing.T) {
 func TestUUID_DapperString(t *testing.T) {
 	t.Parallel()
 
-	subject := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	subject := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
 	actual := dapper.Format(subject)
 	expect := "*github.com/dogmatiq/enginekit/protobuf/uuidpb.UUID [a967a8b9-3f9c-4918-9a41-19577be5fec5]"
@@ -707,10 +708,10 @@ func TestUUID_DapperString(t *testing.T) {
 func TestUUID_Format(t *testing.T) {
 	t.Parallel()
 
-	subject := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	subject := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
 	cases := []struct {
 		Desc   string
@@ -732,11 +733,6 @@ func TestUUID_Format(t *testing.T) {
 			"%#v",
 			`uuidpb.MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5")`,
 		},
-		{
-			"fallback",
-			"%v",
-			`&{{{} [] [] <nil>} 12206910828600641816 11115193218858614469 [] 0}`, // depends on protobuf internals, unfortunately
-		},
 	}
 
 	for _, c := range cases {
@@ -749,6 +745,15 @@ func TestUUID_Format(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("the %v verb uses the default protobuf formatting", func(t *testing.T) {
+		t.Parallel()
+
+		actual := fmt.Sprintf("%v", subject)
+		if !strings.HasPrefix(actual, "&{") {
+			t.Errorf("got %q, want raw struct output", actual)
+		}
+	})
 }
 
 func TestUUID_Validate(t *testing.T) {
@@ -763,17 +768,17 @@ func TestUUID_Validate(t *testing.T) {
 		}{
 			{
 				"version 4",
-				&UUID{
-					Upper: 0xa967a8b93f9c4918,
-					Lower: 0x9a4119577be5fec5,
-				},
+				NewUUIDBuilder().
+					WithUpper(0xa967a8b93f9c4918).
+					WithLower(0x9a4119577be5fec5).
+					Build(),
 			},
 			{
 				"version 5",
-				&UUID{
-					Upper: 0xbf6d549f7fa352ea,
-					Lower: 0xa9cd2817080dd532,
-				},
+				NewUUIDBuilder().
+					WithUpper(0xbf6d549f7fa352ea).
+					WithLower(0xa9cd2817080dd532).
+					Build(),
 			},
 		}
 
@@ -803,26 +808,26 @@ func TestUUID_Validate(t *testing.T) {
 			},
 			{
 				"omni UUID",
-				&UUID{
-					Upper: 0xffffffffffffffff,
-					Lower: 0xffffffffffffffff,
-				},
+				NewUUIDBuilder().
+					WithUpper(0xffffffffffffffff).
+					WithLower(0xffffffffffffffff).
+					Build(),
 				"UUID must use version 4 or 5",
 			},
 			{
 				"wrong version",
-				&UUID{
-					Upper: 0xa967a8b93f9c_f0_18,
-					Lower: 0x9a4119577be5fec5,
-				},
+				NewUUIDBuilder().
+					WithUpper(0xa967a8b93f9c_f0_18).
+					WithLower(0x9a4119577be5fec5).
+					Build(),
 				"UUID must use version 4 or 5",
 			},
 			{
 				"wrong variant",
-				&UUID{
-					Upper: 0xa967a8b93f9c4918,
-					Lower: 0xc0_4119577be5fec5,
-				},
+				NewUUIDBuilder().
+					WithUpper(0xa967a8b93f9c4918).
+					WithLower(0xc0_4119577be5fec5).
+					Build(),
 				"UUID must use RFC 9562 variant",
 			},
 		}
@@ -846,15 +851,15 @@ func TestUUID_Validate(t *testing.T) {
 func TestUUID_Equal(t *testing.T) {
 	t.Parallel()
 
-	a := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	a := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
-	b := &UUID{
-		Upper: 0x3f9c4918a967a8b9,
-		Lower: 0x7be5fec59a411957,
-	}
+	b := NewUUIDBuilder().
+		WithUpper(0x3f9c4918a967a8b9).
+		WithLower(0x7be5fec59a411957).
+		Build()
 
 	if a.Equal(b) {
 		t.Fatal("did not expect a == b")
@@ -868,15 +873,15 @@ func TestUUID_Equal(t *testing.T) {
 func TestUUID_Less(t *testing.T) {
 	t.Parallel()
 
-	a := &UUID{
-		Upper: 0xa967a8b93f9c4918,
-		Lower: 0x9a4119577be5fec5,
-	}
+	a := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
 
-	b := &UUID{
-		Upper: 0x3f9c4918a967a8b9,
-		Lower: 0x7be5fec59a411957,
-	}
+	b := NewUUIDBuilder().
+		WithUpper(0x3f9c4918a967a8b9).
+		WithLower(0x7be5fec59a411957).
+		Build()
 
 	if a.Less(b) {
 		t.Fatal("did not expect a < b")
@@ -895,20 +900,20 @@ func TestUUID_Compare(t *testing.T) {
 	t.Parallel()
 
 	t.Run("compares both the upper and lower parts", func(t *testing.T) {
-		a := &UUID{
-			Upper: 0xa967a8b93f9c4918,
-			Lower: 0x9a4119577be5fec5,
-		}
+		a := NewUUIDBuilder().
+			WithUpper(0xa967a8b93f9c4918).
+			WithLower(0x9a4119577be5fec5).
+			Build()
 
-		b := &UUID{
-			Upper: 0x3f9c4918a967a8b9,
-			Lower: 0x7be5fec59a411957,
-		}
+		b := NewUUIDBuilder().
+			WithUpper(0x3f9c4918a967a8b9).
+			WithLower(0x7be5fec59a411957).
+			Build()
 
-		c := &UUID{
-			Upper: 0x3f9c4918a967a8b9,
-			Lower: 0x0000fec59a411957,
-		}
+		c := NewUUIDBuilder().
+			WithUpper(0x3f9c4918a967a8b9).
+			WithLower(0x0000fec59a411957).
+			Build()
 
 		if a.Compare(b) < 0 {
 			t.Fatal("did not expect a < b")

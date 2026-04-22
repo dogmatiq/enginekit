@@ -89,9 +89,10 @@ func (e *engine) ExecuteCommand(t *testing.T, c command) {
 }
 
 func (e *engine) RecordEvent(t *testing.T, ev event) {
-	c := &testapp.DoActions{
-		Actions: action.RecordEvent(ev),
-	}
+	c := testapp.
+		NewDoActionsBuilder().
+		WithActions(action.RecordEvent(ev)).
+		Build()
 	if err := e.Executor.ExecuteCommand(e.ctx, c); err != nil {
 		t.Fatal("failed to record event", err)
 	}

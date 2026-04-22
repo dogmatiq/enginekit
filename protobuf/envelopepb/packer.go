@@ -56,38 +56,42 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Env
 
 	id := p.generateID()
 
-	env := &Envelope{
-		Header: &Header{
-			CausationId:   id,
-			CorrelationId: id,
-			Source: &Source{
-				Site:        p.Site,
-				Application: p.Application,
-			},
-		},
-		Body: &Body{
-			MessageId: id,
-			Message: &Message{
-				TypeId:      uuidpb.MustParse(mt.ID()),
-				Description: m.MessageDescription(),
-				Data:        data,
-			},
-		},
-	}
+	env := NewEnvelopeBuilder().
+		WithHeader(
+			NewHeaderBuilder().
+				WithCausationId(id).
+				WithCorrelationId(id).
+				WithSource(NewSourceBuilder().
+					WithSite(p.Site).
+					WithApplication(p.Application).
+					Build()).
+				Build(),
+		).
+		WithBody(
+			NewBodyBuilder().
+				WithMessageId(id).
+				WithMessage(NewMessageBuilder().
+					WithTypeId(uuidpb.MustParse(mt.ID())).
+					WithDescription(m.MessageDescription()).
+					WithData(data).
+					Build()).
+				Build(),
+		).
+		Build()
 
 	for _, opt := range options {
 		opt.applyPackCommandOption(env)
 	}
 
-	if env.Body.CreatedAt == nil {
-		env.Body.CreatedAt = p.now()
+	if !env.GetBody().HasCreatedAt() {
+		env.GetBody().SetCreatedAt(p.now())
 	}
 
 	// For a "single envelope" we normalize extensions and baggage into the body.
-	env.Body.Extensions = flattenAnyValues(env.Header.Extensions, env.Body.Extensions)
-	env.Body.Baggage = flattenAnyValues(env.Header.Baggage, env.Body.Baggage)
-	env.Header.Extensions = nil
-	env.Header.Baggage = nil
+	env.GetBody().SetExtensions(flattenAnyValues(env.GetHeader().GetExtensions(), env.GetBody().GetExtensions()))
+	env.GetBody().SetBaggage(flattenAnyValues(env.GetHeader().GetBaggage(), env.GetBody().GetBaggage()))
+	env.GetHeader().SetExtensions(nil)
+	env.GetHeader().SetBaggage(nil)
 
 	if err := env.Validate(); err != nil {
 		panic(err)
@@ -105,16 +109,16 @@ func Unpack(env *Envelope) (dogma.Message, error) {
 		return nil, fmt.Errorf("invalid message: %w", err)
 	}
 
-	mt, ok := dogma.RegisteredMessageTypeByID(message.TypeId.AsString())
+	mt, ok := dogma.RegisteredMessageTypeByID(message.GetTypeId().AsString())
 	if !ok {
 		return nil, fmt.Errorf(
 			"%s is not a registered message type ID",
-			message.TypeId,
+			message.GetTypeId(),
 		)
 	}
 
 	m := mt.New()
-	if err := m.UnmarshalBinary(message.Data); err != nil {
+	if err := m.UnmarshalBinary(message.GetData()); err != nil {
 		return nil, fmt.Errorf("unable to unmarshal %T: %w", m, err)
 	}
 
@@ -180,9 +184,9 @@ type (
 )
 
 func (o packEffectsOption) applyPackEffectsOption(header *Header)             { o(header) }
-func (o packCommandOptionFunc) applyPackCommandOption(env *Envelope)          { o(env.Body) }
+func (o packCommandOptionFunc) applyPackCommandOption(env *Envelope)          { o(env.GetBody()) }
 func (o packEffectTimeoutOptionFunc) applyPackEffectTimeoutOption(body *Body) { o(body) }
-func (o universalOption) applyPackCommandOption(env *Envelope)                { o.applyToBodyFunc(env.Body) }
+func (o universalOption) applyPackCommandOption(env *Envelope)                { o.applyToBodyFunc(env.GetBody()) }
 func (o universalOption) applyPackEffectCommandOption(body *Body)             { o.applyToBodyFunc(body) }
 func (o universalOption) applyPackEffectEventOption(body *Body)               { o.applyToBodyFunc(body) }
 func (o universalOption) applyPackEffectTimeoutOption(body *Body)             { o.applyToBodyFunc(body) }
@@ -193,7 +197,7 @@ func (o universalOption) applyPackEffectsOption(header *Header)               { 
 func WithIdempotencyKey(key string) PackCommandOption {
 	return packCommandOptionFunc(
 		func(body *Body) {
-			body.IdempotencyKey = key
+			body.SetIdempotencyKey(key)
 		},
 	)
 }
@@ -203,7 +207,7 @@ func WithIdempotencyKey(key string) PackCommandOption {
 func WithInstanceID(id string) PackEffectsOption {
 	return packEffectsOption(
 		func(header *Header) {
-			header.Source.InstanceId = id
+			header.GetSource().SetInstanceId(id)
 		},
 	)
 }
@@ -213,7 +217,7 @@ func WithInstanceID(id string) PackEffectsOption {
 func WithScheduledFor(t time.Time) PackEffectTimeoutOption {
 	return packEffectTimeoutOptionFunc(
 		func(body *Body) {
-			body.ScheduledFor = timestamppb.New(t)
+			body.SetScheduledFor(timestamppb.New(t))
 		},
 	)
 }
@@ -233,10 +237,10 @@ func WithExtension(x proto.Message) interface {
 
 	return universalOption{
 		applyToBodyFunc: func(body *Body) {
-			appendOrReplace(&body.Extensions, v)
+			body.SetExtensions(appendOrReplace(body.GetExtensions(), v))
 		},
 		applyToHeaderFunc: func(header *Header) {
-			appendOrReplace(&header.Extensions, v)
+			header.SetExtensions(appendOrReplace(header.GetExtensions(), v))
 		},
 	}
 }
@@ -256,25 +260,25 @@ func WithBaggage(x proto.Message) interface {
 
 	return universalOption{
 		applyToBodyFunc: func(body *Body) {
-			appendOrReplace(&body.Baggage, v)
+			body.SetBaggage(appendOrReplace(body.GetBaggage(), v))
 		},
 		applyToHeaderFunc: func(header *Header) {
-			appendOrReplace(&header.Baggage, v)
+			header.SetBaggage(appendOrReplace(header.GetBaggage(), v))
 		},
 	}
 }
 
 // appendOrReplace appends value to values if there is no existing value with
 // the same type URL, otherwise it replaces the existing value in place.
-func appendOrReplace(values *[]*anypb.Any, value *anypb.Any) {
-	for index, existing := range *values {
+func appendOrReplace(values []*anypb.Any, value *anypb.Any) []*anypb.Any {
+	for index, existing := range values {
 		if existing.GetTypeUrl() == value.GetTypeUrl() {
-			(*values)[index] = value
-			return
+			values[index] = value
+			return values
 		}
 	}
 
-	*values = append(*values, value)
+	return append(values, value)
 }
 
 // marshalAsAny returns v as an [*anypb.Any], converting it if necessary. It
@@ -286,8 +290,8 @@ func marshalAsAny(x proto.Message) *anypb.Any {
 	}
 
 	if x, ok := x.(*anypb.Any); ok {
-		if err := validateAnyValue(x); err != nil {
-			panic(err)
+		if x.GetTypeUrl() == "" {
+			panic("value must not be an empty google.protobuf.Any")
 		}
 
 		return x

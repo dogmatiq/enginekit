@@ -38,24 +38,28 @@ func Derive[T ~string | ~[]byte](ns *UUID, names ...T) *UUID {
 		data[8] = (data[8] & 0x3f) | 0x80 // Variant is 10 (RFC 9562)
 	}
 
-	return &UUID{
-		Upper: uint64(data[0])<<56 |
-			uint64(data[1])<<48 |
-			uint64(data[2])<<40 |
-			uint64(data[3])<<32 |
-			uint64(data[4])<<24 |
-			uint64(data[5])<<16 |
-			uint64(data[6])<<8 |
-			uint64(data[7]),
-		Lower: uint64(data[8])<<56 |
-			uint64(data[9])<<48 |
-			uint64(data[10])<<40 |
-			uint64(data[11])<<32 |
-			uint64(data[12])<<24 |
-			uint64(data[13])<<16 |
-			uint64(data[14])<<8 |
-			uint64(data[15]),
-	}
+	return NewUUIDBuilder().
+		WithUpper(
+			uint64(data[0])<<56 |
+				uint64(data[1])<<48 |
+				uint64(data[2])<<40 |
+				uint64(data[3])<<32 |
+				uint64(data[4])<<24 |
+				uint64(data[5])<<16 |
+				uint64(data[6])<<8 |
+				uint64(data[7]),
+		).
+		WithLower(
+			uint64(data[8])<<56 |
+				uint64(data[9])<<48 |
+				uint64(data[10])<<40 |
+				uint64(data[11])<<32 |
+				uint64(data[12])<<24 |
+				uint64(data[13])<<16 |
+				uint64(data[14])<<8 |
+				uint64(data[15]),
+		).
+		Build()
 }
 
 // Parse parses an RFC 9562 "hex-and-dash" UUID string.
@@ -64,14 +68,16 @@ func Parse(str string) (*UUID, error) {
 		return nil, errors.New("invalid UUID format, expected 36 characters")
 	}
 
-	uuid := &UUID{}
-	target := &uuid.Upper
-	shift := 60
+	var (
+		upper, lower uint64
+		target       = &upper
+		shift        = 60
+	)
 
 	for index := range 36 {
 		switch index {
 		case 18:
-			target = &uuid.Lower
+			target = &lower
 			shift = 60
 			fallthrough
 		case 8, 13, 23:
@@ -89,7 +95,10 @@ func Parse(str string) (*UUID, error) {
 		}
 	}
 
-	return uuid, nil
+	return NewUUIDBuilder().
+		WithUpper(upper).
+		WithLower(lower).
+		Build(), nil
 }
 
 // MustParse parses an RFC 9562 "hex-and-dash" UUID string, or panics if unable
@@ -218,46 +227,54 @@ func FromBytes[T ~[]B, B byte](data T) (*UUID, error) {
 		return nil, fmt.Errorf("slice must be exactly 16 bytes, got %d", len(data))
 	}
 
-	return &UUID{
-		Upper: uint64(data[0])<<56 |
-			uint64(data[1])<<48 |
-			uint64(data[2])<<40 |
-			uint64(data[3])<<32 |
-			uint64(data[4])<<24 |
-			uint64(data[5])<<16 |
-			uint64(data[6])<<8 |
-			uint64(data[7]),
-		Lower: uint64(data[8])<<56 |
-			uint64(data[9])<<48 |
-			uint64(data[10])<<40 |
-			uint64(data[11])<<32 |
-			uint64(data[12])<<24 |
-			uint64(data[13])<<16 |
-			uint64(data[14])<<8 |
-			uint64(data[15]),
-	}, nil
+	return NewUUIDBuilder().
+		WithUpper(
+			uint64(data[0])<<56 |
+				uint64(data[1])<<48 |
+				uint64(data[2])<<40 |
+				uint64(data[3])<<32 |
+				uint64(data[4])<<24 |
+				uint64(data[5])<<16 |
+				uint64(data[6])<<8 |
+				uint64(data[7]),
+		).
+		WithLower(
+			uint64(data[8])<<56 |
+				uint64(data[9])<<48 |
+				uint64(data[10])<<40 |
+				uint64(data[11])<<32 |
+				uint64(data[12])<<24 |
+				uint64(data[13])<<16 |
+				uint64(data[14])<<8 |
+				uint64(data[15]),
+		).
+		Build(), nil
 }
 
 // FromByteArray returns a UUID from a byte array.
 func FromByteArray[T ~[16]B, B byte](data T) *UUID {
-	return &UUID{
-		Upper: uint64(data[0])<<56 |
-			uint64(data[1])<<48 |
-			uint64(data[2])<<40 |
-			uint64(data[3])<<32 |
-			uint64(data[4])<<24 |
-			uint64(data[5])<<16 |
-			uint64(data[6])<<8 |
-			uint64(data[7]),
-		Lower: uint64(data[8])<<56 |
-			uint64(data[9])<<48 |
-			uint64(data[10])<<40 |
-			uint64(data[11])<<32 |
-			uint64(data[12])<<24 |
-			uint64(data[13])<<16 |
-			uint64(data[14])<<8 |
-			uint64(data[15]),
-	}
+	return NewUUIDBuilder().
+		WithUpper(
+			uint64(data[0])<<56 |
+				uint64(data[1])<<48 |
+				uint64(data[2])<<40 |
+				uint64(data[3])<<32 |
+				uint64(data[4])<<24 |
+				uint64(data[5])<<16 |
+				uint64(data[6])<<8 |
+				uint64(data[7]),
+		).
+		WithLower(
+			uint64(data[8])<<56 |
+				uint64(data[9])<<48 |
+				uint64(data[10])<<40 |
+				uint64(data[11])<<32 |
+				uint64(data[12])<<24 |
+				uint64(data[13])<<16 |
+				uint64(data[14])<<8 |
+				uint64(data[15]),
+		).
+		Build()
 }
 
 // AsByteArray returns the UUID as a byte array.
@@ -265,23 +282,26 @@ func AsByteArray[T ~[16]B, B ~byte](x *UUID) T {
 	var data T
 
 	if x != nil {
-		data[0] = B(x.Upper >> 56)
-		data[1] = B(x.Upper >> 48)
-		data[2] = B(x.Upper >> 40)
-		data[3] = B(x.Upper >> 32)
-		data[4] = B(x.Upper >> 24)
-		data[5] = B(x.Upper >> 16)
-		data[6] = B(x.Upper >> 8)
-		data[7] = B(x.Upper)
+		upper := x.GetUpper()
+		lower := x.GetLower()
 
-		data[8] = B(x.Lower >> 56)
-		data[9] = B(x.Lower >> 48)
-		data[10] = B(x.Lower >> 40)
-		data[11] = B(x.Lower >> 32)
-		data[12] = B(x.Lower >> 24)
-		data[13] = B(x.Lower >> 16)
-		data[14] = B(x.Lower >> 8)
-		data[15] = B(x.Lower)
+		data[0] = B(upper >> 56)
+		data[1] = B(upper >> 48)
+		data[2] = B(upper >> 40)
+		data[3] = B(upper >> 32)
+		data[4] = B(upper >> 24)
+		data[5] = B(upper >> 16)
+		data[6] = B(upper >> 8)
+		data[7] = B(upper)
+
+		data[8] = B(lower >> 56)
+		data[9] = B(lower >> 48)
+		data[10] = B(lower >> 40)
+		data[11] = B(lower >> 32)
+		data[12] = B(lower >> 24)
+		data[13] = B(lower >> 16)
+		data[14] = B(lower >> 8)
+		data[15] = B(lower)
 	}
 
 	return data

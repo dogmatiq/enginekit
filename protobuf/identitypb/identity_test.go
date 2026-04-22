@@ -33,26 +33,26 @@ func TestIdentity_Validate(t *testing.T) {
 		}{
 			{
 				"too short",
-				&Identity{
-					Name: "",
-					Key:  uuidpb.Generate(),
-				},
+				NewIdentityBuilder().
+					WithName("").
+					WithKey(uuidpb.Generate()).
+					Build(),
 				"invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"too long",
-				&Identity{
-					Name: strings.Repeat("*", 256),
-					Key:  uuidpb.Generate(),
-				},
+				NewIdentityBuilder().
+					WithName(strings.Repeat("*", 256)).
+					WithKey(uuidpb.Generate()).
+					Build(),
 				"invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid key",
-				&Identity{
-					Name: "<name>",
-					Key:  &uuidpb.UUID{},
-				},
+				NewIdentityBuilder().
+					WithName("<name>").
+					WithKey(&uuidpb.UUID{}).
+					Build(),
 				"invalid key: UUID must use version 4 or 5",
 			},
 		}
@@ -88,13 +88,14 @@ func TestIdentity_ParseAndMustParse(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			expect := &Identity{
-				Name: "<name>",
-				Key: &uuidpb.UUID{
-					Upper: 0xa967a8b93f9c4918,
-					Lower: 0x9a4119577be5fec5,
-				},
-			}
+			expect := NewIdentityBuilder().
+				WithName("<name>").
+				WithKey(uuidpb.
+					NewUUIDBuilder().
+					WithUpper(0xa967a8b93f9c4918).
+					WithLower(0x9a4119577be5fec5).
+					Build()).
+				Build()
 
 			if !actual.Equal(expect) {
 				t.Fatalf("unexpected identiy: got %s, want %s", actual, expect)
@@ -109,13 +110,14 @@ func TestIdentity_ParseAndMustParse(t *testing.T) {
 				"a967a8b9-3f9c-4918-9a41-19577be5fec5",
 			)
 
-			expect := &Identity{
-				Name: "<name>",
-				Key: &uuidpb.UUID{
-					Upper: 0xa967a8b93f9c4918,
-					Lower: 0x9a4119577be5fec5,
-				},
-			}
+			expect := NewIdentityBuilder().
+				WithName("<name>").
+				WithKey(uuidpb.
+					NewUUIDBuilder().
+					WithUpper(0xa967a8b93f9c4918).
+					WithLower(0x9a4119577be5fec5).
+					Build()).
+				Build()
 
 			if !actual.Equal(expect) {
 				t.Fatalf("unexpected identiy: got %s, want %s", actual, expect)
@@ -195,10 +197,11 @@ func TestIdentity_Format(t *testing.T) {
 
 	subject := New(
 		"<name>",
-		&uuidpb.UUID{
-			Upper: 0xa967a8b93f9c4918,
-			Lower: 0x9a4119577be5fec5,
-		},
+		uuidpb.
+			NewUUIDBuilder().
+			WithUpper(0xa967a8b93f9c4918).
+			WithLower(0x9a4119577be5fec5).
+			Build(),
 	)
 
 	cases := []struct {
@@ -207,19 +210,14 @@ func TestIdentity_Format(t *testing.T) {
 		Want   string
 	}{
 		{
-			"string",
+			"it formats as a slash-separated name/key string",
 			"%s",
 			`<name>/a967a8b9-3f9c-4918-9a41-19577be5fec5`,
 		},
 		{
-			"go string",
+			"it formats as a Go constructor expression",
 			"%#v",
 			`identitypb.New("<name>", uuidpb.MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5"))`,
-		},
-		{
-			"fallback",
-			"%v",
-			`&{{{} [] [] <nil>} <name> &{{{} [] [] <nil>} 12206910828600641816 11115193218858614469 [] 0} [] 0}`, // depends on protobuf internals, unfortunately
 		},
 	}
 
@@ -233,25 +231,34 @@ func TestIdentity_Format(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("the %v verb uses the default protobuf formatting", func(t *testing.T) {
+		t.Parallel()
+
+		actual := fmt.Sprintf("%v", subject)
+		if !strings.HasPrefix(actual, "&{") {
+			t.Errorf("got %q, want raw struct output", actual)
+		}
+	})
 }
 
 func TestIdentity_Equal(t *testing.T) {
 	t.Parallel()
 
-	a := &Identity{
-		Name: "<a>",
-		Key:  uuidpb.Generate(),
-	}
+	a := NewIdentityBuilder().
+		WithName("<a>").
+		WithKey(uuidpb.Generate()).
+		Build()
 
-	b1 := &Identity{
-		Name: "<b>",
-		Key:  uuidpb.Generate(),
-	}
+	b1 := NewIdentityBuilder().
+		WithName("<b>").
+		WithKey(uuidpb.Generate()).
+		Build()
 
-	b2 := &Identity{
-		Name: b1.Name,
-		Key:  proto.Clone(b1.Key).(*uuidpb.UUID),
-	}
+	b2 := NewIdentityBuilder().
+		WithName(b1.GetName()).
+		WithKey(proto.Clone(b1.GetKey()).(*uuidpb.UUID)).
+		Build()
 
 	if !a.Equal(a) {
 		t.Fatal("expected a == a")

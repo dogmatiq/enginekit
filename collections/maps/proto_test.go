@@ -17,9 +17,9 @@ func TestProtoMap(t *testing.T) {
 		func(x, y *ProtoStubA) bool { return proto.Equal(x, y) },
 		rapid.Custom(
 			func(t *rapid.T) *ProtoStubA {
-				return &ProtoStubA{
-					Value: rapid.String().Draw(t, "value"),
-				}
+				return NewProtoStubABuilder().
+					WithValue(rapid.String().Draw(t, "value")).
+					Build()
 			},
 		),
 	)

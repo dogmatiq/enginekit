@@ -66,7 +66,7 @@ func (x *IntegrationCommandA) MessageDescription() string {
 
 // Validate returns an error if the message is invalid.
 func (x *IntegrationCommandA) Validate(dogma.CommandValidationScope) error {
-	if x.IsInvalid {
+	if x.GetIsInvalid() {
 		return ErrInvalidIntegrationMessage
 	}
 	return nil
@@ -79,7 +79,7 @@ func (x *IntegrationCommandB) MessageDescription() string {
 
 // Validate returns an error if the message is invalid.
 func (x *IntegrationCommandB) Validate(dogma.CommandValidationScope) error {
-	if x.IsInvalid {
+	if x.GetIsInvalid() {
 		return ErrInvalidIntegrationMessage
 	}
 	return nil
@@ -87,7 +87,7 @@ func (x *IntegrationCommandB) Validate(dogma.CommandValidationScope) error {
 
 // MessageDescription returns a human-readable description of the message.
 func (x *IntegrationEventA) MessageDescription() string {
-	return fmt.Sprintf("integration event A: %s", x.Value)
+	return fmt.Sprintf("integration event A: %s", x.GetValue())
 }
 
 // Validate returns an error if the message is invalid.
@@ -97,7 +97,7 @@ func (x *IntegrationEventA) Validate(dogma.EventValidationScope) error {
 
 // MessageDescription returns a human-readable description of the message.
 func (x *IntegrationEventB) MessageDescription() string {
-	return fmt.Sprintf("integration event B: %s", x.Value)
+	return fmt.Sprintf("integration event B: %s", x.GetValue())
 }
 
 // Validate returns an error if the message is invalid.

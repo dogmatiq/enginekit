@@ -123,5 +123,8 @@ func asKey(u *UUID) key {
 
 // asUUID converts a key back to a UUID.
 func (k key) asUUID() *UUID {
-	return &UUID{Upper: k.upper, Lower: k.lower}
+	return NewUUIDBuilder().
+		WithUpper(k.upper).
+		WithLower(k.lower).
+		Build()
 }

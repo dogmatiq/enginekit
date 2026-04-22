@@ -16,15 +16,17 @@ func testIntegration(_ context.Context, t *testing.T, e *engine) {
 		t.Run("can record events", func(t *testing.T) {
 			t.Parallel()
 
-			expect := &testapp.IntegrationEventA{
-				Value: uuidpb.Generate().AsString(),
-			}
+			expect := testapp.
+				NewIntegrationEventABuilder().
+				WithValue(uuidpb.Generate().AsString()).
+				Build()
 
 			e.ExecuteCommand(
 				t,
-				&testapp.IntegrationCommandA{
-					Actions: action.RecordEvent(expect),
-				},
+				testapp.
+					NewIntegrationCommandABuilder().
+					WithActions(action.RecordEvent(expect)).
+					Build(),
 			)
 
 			e.ExpectEvent(t, expect)

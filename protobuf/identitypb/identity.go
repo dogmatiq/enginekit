@@ -9,10 +9,10 @@ import (
 
 // New returns a new identity with the given name and key.
 func New(name string, key *uuidpb.UUID) *Identity {
-	x := &Identity{
-		Name: name,
-		Key:  key,
-	}
+	x := NewIdentityBuilder().
+		WithName(name).
+		WithKey(key).
+		Build()
 
 	if err := x.Validate(); err != nil {
 		panic(x)
@@ -29,10 +29,10 @@ func Parse(name, key string) (*Identity, error) {
 		return nil, fmt.Errorf("invalid key: %w", err)
 	}
 
-	x := &Identity{
-		Name: name,
-		Key:  k,
-	}
+	x := NewIdentityBuilder().
+		WithName(name).
+		WithKey(k).
+		Build()
 
 	if err := x.Validate(); err != nil {
 		return nil, err

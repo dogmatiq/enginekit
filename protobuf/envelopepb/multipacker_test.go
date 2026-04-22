@@ -17,10 +17,11 @@ import (
 func TestPacker_CausedBy(t *testing.T) {
 	t.Run("it panics if the handler is nil", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		cause := packer.PackCommand(CommandA1)
@@ -36,16 +37,18 @@ func TestPacker_CausedBy(t *testing.T) {
 
 	t.Run("it panics if the cause is nil", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		ExpectPanic(
 			t,
@@ -58,16 +61,18 @@ func TestPacker_CausedBy(t *testing.T) {
 
 	t.Run("it panics if the cause envelope is invalid", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		ExpectPanic(
 			t,
@@ -84,18 +89,21 @@ func TestPacker_CausedBy(t *testing.T) {
 		now := time.Now()
 
 		ids := []*uuidpb.UUID{causeID, packedID}
-		site := &identitypb.Identity{
-			Name: "site",
-			Key:  uuidpb.Generate(),
-		}
-		application := &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		}
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		site := identitypb.
+			NewIdentityBuilder().
+			WithName("site").
+			WithKey(uuidpb.Generate()).
+			Build()
+		application := identitypb.
+			NewIdentityBuilder().
+			WithName("app").
+			WithKey(uuidpb.Generate()).
+			Build()
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		packer := &Packer{
 			Site:        site,
@@ -113,8 +121,8 @@ func TestPacker_CausedBy(t *testing.T) {
 		cause := packer.PackCommand(CommandA1)
 		ep := packer.PackEffects(cause, handler)
 
-		packer.Site = &identitypb.Identity{Name: "other-site", Key: uuidpb.Generate()}
-		packer.Application = &identitypb.Identity{Name: "other-app", Key: uuidpb.Generate()}
+		packer.Site = identitypb.NewIdentityBuilder().WithName("other-site").WithKey(uuidpb.Generate()).Build()
+		packer.Application = identitypb.NewIdentityBuilder().WithName("other-app").WithKey(uuidpb.Generate()).Build()
 		packer.GenerateID = func() *uuidpb.UUID {
 			return uuidpb.Generate()
 		}
@@ -133,43 +141,46 @@ func TestPacker_CausedBy(t *testing.T) {
 			t.Fatal("expected a non-nil multi-envelope")
 		}
 
-		if !got.Header.Source.Site.Equal(site) {
-			t.Fatalf("unexpected site: got %s, want %s", got.Header.Source.Site, site)
+		if !got.GetHeader().GetSource().GetSite().Equal(site) {
+			t.Fatalf("unexpected site: got %s, want %s", got.GetHeader().GetSource().GetSite(), site)
 		}
 
-		if !got.Header.Source.Application.Equal(application) {
-			t.Fatalf("unexpected application: got %s, want %s", got.Header.Source.Application, application)
+		if !got.GetHeader().GetSource().GetApplication().Equal(application) {
+			t.Fatalf("unexpected application: got %s, want %s", got.GetHeader().GetSource().GetApplication(), application)
 		}
 
-		if !got.Header.Source.Handler.Equal(handler) {
-			t.Fatalf("unexpected handler: got %s, want %s", got.Header.Source.Handler, handler)
+		if !got.GetHeader().GetSource().GetHandler().Equal(handler) {
+			t.Fatalf("unexpected handler: got %s, want %s", got.GetHeader().GetSource().GetHandler(), handler)
 		}
 
-		if !got.Bodies[0].MessageId.Equal(packedID) {
-			t.Fatalf("unexpected packed message ID: got %s, want %s", got.Bodies[0].MessageId, packedID)
+		if !got.GetBodies()[0].GetMessageId().Equal(packedID) {
+			t.Fatalf("unexpected packed message ID: got %s, want %s", got.GetBodies()[0].GetMessageId(), packedID)
 		}
 
-		if !got.Bodies[0].CreatedAt.AsTime().Equal(now) {
-			t.Fatalf("unexpected created-at: got %s, want %s", got.Bodies[0].CreatedAt.AsTime(), now)
+		if !got.GetBodies()[0].GetCreatedAt().AsTime().Equal(now) {
+			t.Fatalf("unexpected created-at: got %s, want %s", got.GetBodies()[0].GetCreatedAt().AsTime(), now)
 		}
 	})
 
 	t.Run("it applies effect packer options to the shared source", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handlerA := &identitypb.Identity{
-			Name: "handler-a",
-			Key:  uuidpb.Generate(),
-		}
-		handlerB := &identitypb.Identity{
-			Name: "handler-b",
-			Key:  uuidpb.Generate(),
-		}
+		handlerA := identitypb.
+			NewIdentityBuilder().
+			WithName("handler-a").
+			WithKey(uuidpb.Generate()).
+			Build()
+		handlerB := identitypb.
+			NewIdentityBuilder().
+			WithName("handler-b").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 
@@ -197,28 +208,28 @@ func TestPacker_CausedBy(t *testing.T) {
 			t.Fatal("expected right multi-envelope")
 		}
 
-		if !leftEnv.Header.Source.Handler.Equal(handlerA) {
-			t.Fatalf("unexpected left handler: got %s, want %s", leftEnv.Header.Source.Handler, handlerA)
+		if !leftEnv.GetHeader().GetSource().GetHandler().Equal(handlerA) {
+			t.Fatalf("unexpected left handler: got %s, want %s", leftEnv.GetHeader().GetSource().GetHandler(), handlerA)
 		}
 
-		if leftEnv.Header.Source.InstanceId != "instance-a" {
-			t.Fatalf("unexpected left instance ID: got %q, want %q", leftEnv.Header.Source.InstanceId, "instance-a")
+		if leftEnv.GetHeader().GetSource().GetInstanceId() != "instance-a" {
+			t.Fatalf("unexpected left instance ID: got %q, want %q", leftEnv.GetHeader().GetSource().GetInstanceId(), "instance-a")
 		}
 
-		leftScheduledFor := leftEnv.Bodies[0].ScheduledFor.AsTime()
+		leftScheduledFor := leftEnv.GetBodies()[0].GetScheduledFor().AsTime()
 		if leftScheduledFor.IsZero() {
 			t.Fatal("expected left scheduled-for time")
 		}
 
-		if !rightEnv.Header.Source.Handler.Equal(handlerB) {
-			t.Fatalf("unexpected right handler: got %s, want %s", rightEnv.Header.Source.Handler, handlerB)
+		if !rightEnv.GetHeader().GetSource().GetHandler().Equal(handlerB) {
+			t.Fatalf("unexpected right handler: got %s, want %s", rightEnv.GetHeader().GetSource().GetHandler(), handlerB)
 		}
 
-		if rightEnv.Header.Source.InstanceId != "instance-b" {
-			t.Fatalf("unexpected right instance ID: got %q, want %q", rightEnv.Header.Source.InstanceId, "instance-b")
+		if rightEnv.GetHeader().GetSource().GetInstanceId() != "instance-b" {
+			t.Fatalf("unexpected right instance ID: got %q, want %q", rightEnv.GetHeader().GetSource().GetInstanceId(), "instance-b")
 		}
 
-		rightScheduledFor := rightEnv.Bodies[0].ScheduledFor.AsTime()
+		rightScheduledFor := rightEnv.GetBodies()[0].GetScheduledFor().AsTime()
 		if rightScheduledFor.IsZero() {
 			t.Fatal("expected right scheduled-for time")
 		}
@@ -226,10 +237,11 @@ func TestPacker_CausedBy(t *testing.T) {
 
 	t.Run("it applies extension and baggage options to the header", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		extension := wrapperspb.String("extension")
@@ -244,10 +256,11 @@ func TestPacker_CausedBy(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 		ep := packer.PackEffects(
@@ -266,41 +279,43 @@ func TestPacker_CausedBy(t *testing.T) {
 		Expect(
 			t,
 			"unexpected header extensions",
-			got.Header.Extensions,
+			got.GetHeader().GetExtensions(),
 			[]*anypb.Any{wantExtension},
 		)
 
 		Expect(
 			t,
 			"unexpected header baggage",
-			got.Header.Baggage,
+			got.GetHeader().GetBaggage(),
 			[]*anypb.Any{wantBaggage},
 		)
 
-		if got.Bodies[0].Extensions != nil || got.Bodies[0].Baggage != nil {
+		if got.GetBodies()[0].GetExtensions() != nil || got.GetBodies()[0].GetBaggage() != nil {
 			t.Fatalf(
 				"unexpected body extension state: got extensions %#v, baggage %#v, want nil",
-				got.Bodies[0].Extensions,
-				got.Bodies[0].Baggage,
+				got.GetBodies()[0].GetExtensions(),
+				got.GetBodies()[0].GetBaggage(),
 			)
 		}
 	})
 
 	t.Run("it keeps only the last baggage value for a type URL when propagating from the cause", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
-		cause.Header.Baggage = []*anypb.Any{
+		cause.GetHeader().SetBaggage([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.BaggageA",
 				Value:   []byte("header-a-1"),
@@ -313,9 +328,9 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.BaggageB",
 				Value:   []byte("header-b"),
 			},
-		}
+		})
 
-		cause.Body.Baggage = []*anypb.Any{
+		cause.GetBody().SetBaggage([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.BaggageB",
 				Value:   []byte("body-b-1"),
@@ -328,7 +343,7 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.BaggageC",
 				Value:   []byte("body-c"),
 			},
-		}
+		})
 
 		ep := packer.PackEffects(cause, handler)
 		ep.PackCommand(CommandA2)
@@ -341,7 +356,7 @@ func TestPacker_CausedBy(t *testing.T) {
 		Expect(
 			t,
 			"unexpected propagated baggage",
-			got.Header.Baggage,
+			got.GetHeader().GetBaggage(),
 			[]*anypb.Any{
 				{
 					TypeUrl: "type.googleapis.com/example.BaggageA",
@@ -361,19 +376,21 @@ func TestPacker_CausedBy(t *testing.T) {
 
 	t.Run("it propagates baggage but not extensions from the cause", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
-		cause.Header.Extensions = []*anypb.Any{
+		cause.GetHeader().SetExtensions([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.ExtensionA",
 				Value:   []byte("header-a"),
@@ -382,9 +399,9 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.ExtensionB",
 				Value:   []byte("header-b"),
 			},
-		}
+		})
 
-		cause.Header.Baggage = []*anypb.Any{
+		cause.GetHeader().SetBaggage([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.BaggageA",
 				Value:   []byte("header-a"),
@@ -393,9 +410,9 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.BaggageB",
 				Value:   []byte("header-b"),
 			},
-		}
+		})
 
-		cause.Body.Extensions = []*anypb.Any{
+		cause.GetBody().SetExtensions([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.ExtensionB",
 				Value:   []byte("body-b"),
@@ -404,9 +421,9 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.ExtensionC",
 				Value:   []byte("body-c"),
 			},
-		}
+		})
 
-		cause.Body.Baggage = []*anypb.Any{
+		cause.GetBody().SetBaggage([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.BaggageB",
 				Value:   []byte("body-b"),
@@ -415,7 +432,7 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.BaggageC",
 				Value:   []byte("body-c"),
 			},
-		}
+		})
 
 		ep := packer.PackEffects(cause, handler)
 		ep.PackCommand(CommandA2)
@@ -450,16 +467,18 @@ func TestPacker_CausedBy(t *testing.T) {
 func TestEffectPacker_Pack(t *testing.T) {
 	t.Run("it panics if the body is invalid", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 		ep := packer.PackEffects(cause, handler)
@@ -475,10 +494,11 @@ func TestEffectPacker_Pack(t *testing.T) {
 
 	t.Run("it applies baggage options to the body", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		baggage := wrapperspb.String("baggage")
@@ -487,10 +507,11 @@ func TestEffectPacker_Pack(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 		ep := packer.PackEffects(cause, handler)
@@ -504,7 +525,7 @@ func TestEffectPacker_Pack(t *testing.T) {
 		Expect(
 			t,
 			"unexpected baggage values",
-			got.Bodies[0].Baggage,
+			got.GetBodies()[0].GetBaggage(),
 			[]*anypb.Any{want},
 		)
 	})
@@ -519,14 +540,16 @@ func TestEffectPacker_Seal(t *testing.T) {
 
 		ids := []*uuidpb.UUID{id0, id1, id2}
 		packer := &Packer{
-			Site: &identitypb.Identity{
-				Name: "site",
-				Key:  uuidpb.Generate(),
-			},
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Site: identitypb.
+				NewIdentityBuilder().
+				WithName("site").
+				WithKey(uuidpb.Generate()).
+				Build(),
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 			GenerateID: func() *uuidpb.UUID {
 				id := ids[0]
 				ids = ids[1:]
@@ -537,10 +560,11 @@ func TestEffectPacker_Seal(t *testing.T) {
 			},
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 
@@ -561,37 +585,39 @@ func TestEffectPacker_Seal(t *testing.T) {
 			t.Fatalf("effect packer produced an invalid envelope: %v", err)
 		}
 
-		want := &MultiEnvelope{
-			Header: &Header{
-				CausationId:   cause.Body.MessageId,
-				CorrelationId: cause.Header.CorrelationId,
-				Source: &Source{
-					Site:        packer.Site,
-					Application: packer.Application,
-					Handler:     handler,
-				},
-			},
-			Bodies: []*Body{
-				{
-					MessageId: id1,
-					CreatedAt: timestamppb.New(now),
-					Message: &Message{
-						Description: `command(stubs.TypeA:A1, valid)`,
-						TypeId:      uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
-						Data:        []byte(`{"content":"A1"}`),
-					},
-				},
-				{
-					MessageId: id2,
-					CreatedAt: timestamppb.New(now),
-					Message: &Message{
-						Description: `command(stubs.TypeA:A2, valid)`,
-						TypeId:      uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
-						Data:        []byte(`{"content":"A2"}`),
-					},
-				},
-			},
-		}
+		want := NewMultiEnvelopeBuilder().
+			WithHeader(
+				NewHeaderBuilder().
+					WithCausationId(cause.GetBody().GetMessageId()).
+					WithCorrelationId(cause.GetHeader().GetCorrelationId()).
+					WithSource(NewSourceBuilder().
+						WithSite(packer.Site).
+						WithApplication(packer.Application).
+						WithHandler(handler).
+						Build()).
+					Build(),
+			).
+			WithBodies([]*Body{
+				NewBodyBuilder().
+					WithMessageId(id1).
+					WithCreatedAt(timestamppb.New(now)).
+					WithMessage(NewMessageBuilder().
+						WithDescription(`command(stubs.TypeA:A1, valid)`).
+						WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+						WithData([]byte(`{"content":"A1"}`)).
+						Build()).
+					Build(),
+				NewBodyBuilder().
+					WithMessageId(id2).
+					WithCreatedAt(timestamppb.New(now)).
+					WithMessage(NewMessageBuilder().
+						WithDescription(`command(stubs.TypeA:A2, valid)`).
+						WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+						WithData([]byte(`{"content":"A2"}`)).
+						Build()).
+					Build(),
+			}).
+			Build()
 
 		Expect(
 			t,
@@ -603,16 +629,18 @@ func TestEffectPacker_Seal(t *testing.T) {
 
 	t.Run("it returns no envelope when empty", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 		got, ok := packer.PackEffects(cause, handler).Seal()
@@ -628,16 +656,18 @@ func TestEffectPacker_Seal(t *testing.T) {
 
 	t.Run("it panics after sealing", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
-		handler := &identitypb.Identity{
-			Name: "handler",
-			Key:  uuidpb.Generate(),
-		}
+		handler := identitypb.
+			NewIdentityBuilder().
+			WithName("handler").
+			WithKey(uuidpb.Generate()).
+			Build()
 
 		cause := packer.PackCommand(CommandA1)
 

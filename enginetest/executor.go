@@ -25,9 +25,12 @@ func testCommandExecutor(ctx context.Context, t *testing.T, e *engine) {
 			Expect  string
 		}{
 			{
-				Name:    "panics if passed an invalid command",
-				Command: &testapp.IntegrationCommandA{IsInvalid: true},
-				Expect:  testapp.ErrInvalidIntegrationMessage.Error(),
+				Name: "panics if passed an invalid command",
+				Command: testapp.
+					NewIntegrationCommandABuilder().
+					WithIsInvalid(true).
+					Build(),
+				Expect: testapp.ErrInvalidIntegrationMessage.Error(),
 			},
 			{
 				Name:    "panics if passed an unrecognized command",

@@ -5,8 +5,11 @@ option go_package = "github.com/dogmatiq/enginekit/protobuf/envelopepb";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
+import "google/protobuf/go_features.proto";
 import "github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto";
 import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
+
+option features.(pb.go).api_level = API_OPAQUE;
 
 // Envelope is a container for a Dogma message and its meta-data.
 //

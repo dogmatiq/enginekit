@@ -20,14 +20,16 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 	now := time.Now()
 
 	packer := &Packer{
-		Site: &identitypb.Identity{
-			Name: "site",
-			Key:  uuidpb.Generate(),
-		},
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
+		Site: identitypb.
+			NewIdentityBuilder().
+			WithName("site").
+			WithKey(uuidpb.Generate()).
+			Build(),
+		Application: identitypb.
+			NewIdentityBuilder().
+			WithName("app").
+			WithKey(uuidpb.Generate()).
+			Build(),
 		GenerateID: func() *uuidpb.UUID {
 			return id
 		},
@@ -42,25 +44,29 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		t.Fatalf("packer produced an invalid envelope: %v", err)
 	}
 
-	want := &Envelope{
-		Header: &Header{
-			CausationId:   id,
-			CorrelationId: id,
-			Source: &Source{
-				Site:        packer.Site,
-				Application: packer.Application,
-			},
-		},
-		Body: &Body{
-			MessageId: id,
-			CreatedAt: timestamppb.New(now),
-			Message: &Message{
-				Description: `command(stubs.TypeA:A1, valid)`,
-				TypeId:      uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
-				Data:        []byte(`{"content":"A1"}`),
-			},
-		},
-	}
+	want := NewEnvelopeBuilder().
+		WithHeader(
+			NewHeaderBuilder().
+				WithCausationId(id).
+				WithCorrelationId(id).
+				WithSource(NewSourceBuilder().
+					WithSite(packer.Site).
+					WithApplication(packer.Application).
+					Build()).
+				Build(),
+		).
+		WithBody(
+			NewBodyBuilder().
+				WithMessageId(id).
+				WithCreatedAt(timestamppb.New(now)).
+				WithMessage(NewMessageBuilder().
+					WithDescription(`command(stubs.TypeA:A1, valid)`).
+					WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+					WithData([]byte(`{"content":"A1"}`)).
+					Build()).
+				Build(),
+		).
+		Build()
 
 	Expect(
 		t,
@@ -122,15 +128,15 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 
 	t.Run("func Unpack()", func(t *testing.T) {
 		t.Run("it returns an error if the message type is not registered", func(t *testing.T) {
-			env := &Envelope{
-				Body: &Body{
-					Message: &Message{
-						Description: "<description>",
-						TypeId:      uuidpb.MustParse("f1816a71-3593-4771-8d8b-327650571288"),
-						Data:        []byte(`{"content":"A1"}`),
-					},
-				},
-			}
+			env := NewEnvelopeBuilder().
+				WithBody(NewBodyBuilder().
+					WithMessage(NewMessageBuilder().
+						WithDescription("<description>").
+						WithTypeId(uuidpb.MustParse("f1816a71-3593-4771-8d8b-327650571288")).
+						WithData([]byte(`{"content":"A1"}`)).
+						Build()).
+					Build()).
+				Build()
 
 			want := "f1816a71-3593-4771-8d8b-327650571288 is not a registered message type ID"
 
@@ -142,15 +148,15 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		})
 
 		t.Run("it returns an error if the message cannot be unmarshaled", func(t *testing.T) {
-			env := &Envelope{
-				Body: &Body{
-					Message: &Message{
-						Description: "<description>",
-						TypeId:      uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]()),
-						Data:        []byte(`}`),
-					},
-				},
-			}
+			env := NewEnvelopeBuilder().
+				WithBody(NewBodyBuilder().
+					WithMessage(NewMessageBuilder().
+						WithDescription("<description>").
+						WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+						WithData([]byte(`}`)).
+						Build()).
+					Build()).
+				Build()
 
 			want := "unable to unmarshal *stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]: invalid character '}' looking for beginning of value"
 
@@ -164,16 +170,17 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 }
 func TestWithIdempotencyKey(t *testing.T) {
 	packer := &Packer{
-		Application: &identitypb.Identity{
-			Name: "app",
-			Key:  uuidpb.Generate(),
-		},
+		Application: identitypb.
+			NewIdentityBuilder().
+			WithName("app").
+			WithKey(uuidpb.Generate()).
+			Build(),
 	}
 
 	got := packer.PackCommand(CommandA1, WithIdempotencyKey("test-key"))
 
-	if got.Body.IdempotencyKey != "test-key" {
-		t.Fatalf("unexpected idempotency key: got %q, want %q", got.Body.IdempotencyKey, "test-key")
+	if got.GetBody().GetIdempotencyKey() != "test-key" {
+		t.Fatalf("unexpected idempotency key: got %q, want %q", got.GetBody().GetIdempotencyKey(), "test-key")
 	}
 }
 
@@ -209,71 +216,74 @@ func TestWithExtension(t *testing.T) {
 
 	t.Run("it accepts empty serialized values", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		got := packer.PackCommand(CommandA1, WithExtension(wrapperspb.String("")))
 
-		if len(got.Body.Extensions) != 1 {
-			t.Fatalf("unexpected extension count: got %d, want 1", len(got.Body.Extensions))
+		if len(got.GetBody().GetExtensions()) != 1 {
+			t.Fatalf("unexpected extension count: got %d, want 1", len(got.GetBody().GetExtensions()))
 		}
 
-		if got.Body.Extensions[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
+		if got.GetBody().GetExtensions()[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
 			t.Fatalf(
 				"unexpected extension type URL: got %q, want %q",
-				got.Body.Extensions[0].GetTypeUrl(),
+				got.GetBody().GetExtensions()[0].GetTypeUrl(),
 				"type.googleapis.com/google.protobuf.StringValue",
 			)
 		}
 
-		if len(got.Body.Extensions[0].GetValue()) != 0 {
+		if len(got.GetBody().GetExtensions()[0].GetValue()) != 0 {
 			t.Fatalf(
 				"unexpected extension payload length: got %d, want 0",
-				len(got.Body.Extensions[0].GetValue()),
+				len(got.GetBody().GetExtensions()[0].GetValue()),
 			)
 		}
 	})
 
 	t.Run("it accepts typed nil messages", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		var value *wrapperspb.StringValue
 		got := packer.PackCommand(CommandA1, WithExtension(value))
 
-		if len(got.Body.Extensions) != 1 {
-			t.Fatalf("unexpected extension count: got %d, want 1", len(got.Body.Extensions))
+		if len(got.GetBody().GetExtensions()) != 1 {
+			t.Fatalf("unexpected extension count: got %d, want 1", len(got.GetBody().GetExtensions()))
 		}
 
-		if got.Body.Extensions[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
+		if got.GetBody().GetExtensions()[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
 			t.Fatalf(
 				"unexpected extension type URL: got %q, want %q",
-				got.Body.Extensions[0].GetTypeUrl(),
+				got.GetBody().GetExtensions()[0].GetTypeUrl(),
 				"type.googleapis.com/google.protobuf.StringValue",
 			)
 		}
 
-		if len(got.Body.Extensions[0].GetValue()) != 0 {
+		if len(got.GetBody().GetExtensions()[0].GetValue()) != 0 {
 			t.Fatalf(
 				"unexpected extension payload length: got %d, want 0",
-				len(got.Body.Extensions[0].GetValue()),
+				len(got.GetBody().GetExtensions()[0].GetValue()),
 			)
 		}
 	})
 
 	t.Run("it adds x to the extensions", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		extension := wrapperspb.String("extension")
@@ -284,24 +294,25 @@ func TestWithExtension(t *testing.T) {
 
 		got := packer.PackCommand(CommandA1, WithExtension(extension))
 
-		if got.Header.Extensions != nil {
-			t.Fatalf("unexpected header extensions: got %#v, want nil", got.Header.Extensions)
+		if got.GetHeader().GetExtensions() != nil {
+			t.Fatalf("unexpected header extensions: got %#v, want nil", got.GetHeader().GetExtensions())
 		}
 
 		Expect(
 			t,
 			"unexpected extensions",
-			got.Body.Extensions,
+			got.GetBody().GetExtensions(),
 			[]*anypb.Any{want},
 		)
 	})
 
 	t.Run("it keeps only the last value for a type URL", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		want, err := anypb.New(wrapperspb.String("second"))
@@ -318,17 +329,18 @@ func TestWithExtension(t *testing.T) {
 		Expect(
 			t,
 			"unexpected extensions",
-			got.Body.Extensions,
+			got.GetBody().GetExtensions(),
 			[]*anypb.Any{want},
 		)
 	})
 
 	t.Run("it replaces an existing value in place", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		wantString, err := anypb.New(wrapperspb.String("second"))
@@ -351,7 +363,7 @@ func TestWithExtension(t *testing.T) {
 		Expect(
 			t,
 			"unexpected extensions",
-			got.Body.Extensions,
+			got.GetBody().GetExtensions(),
 			[]*anypb.Any{wantString, wantInt},
 		)
 	})
@@ -380,10 +392,11 @@ func TestWithBaggage(t *testing.T) {
 
 	t.Run("it adds x to the baggage", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		baggage := wrapperspb.String("baggage")
@@ -394,24 +407,25 @@ func TestWithBaggage(t *testing.T) {
 
 		got := packer.PackCommand(CommandA1, WithBaggage(baggage))
 
-		if got.Header.Baggage != nil {
-			t.Fatalf("unexpected header baggage: got %#v, want nil", got.Header.Baggage)
+		if got.GetHeader().GetBaggage() != nil {
+			t.Fatalf("unexpected header baggage: got %#v, want nil", got.GetHeader().GetBaggage())
 		}
 
 		Expect(
 			t,
 			"unexpected baggage",
-			got.Body.Baggage,
+			got.GetBody().GetBaggage(),
 			[]*anypb.Any{want},
 		)
 	})
 
 	t.Run("it keeps only the last value for a type URL", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		want, err := anypb.New(wrapperspb.String("second"))
@@ -428,17 +442,18 @@ func TestWithBaggage(t *testing.T) {
 		Expect(
 			t,
 			"unexpected baggage",
-			got.Body.Baggage,
+			got.GetBody().GetBaggage(),
 			[]*anypb.Any{want},
 		)
 	})
 
 	t.Run("it replaces an existing value in place", func(t *testing.T) {
 		packer := &Packer{
-			Application: &identitypb.Identity{
-				Name: "app",
-				Key:  uuidpb.Generate(),
-			},
+			Application: identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build(),
 		}
 
 		wantString, err := anypb.New(wrapperspb.String("second"))
@@ -461,7 +476,7 @@ func TestWithBaggage(t *testing.T) {
 		Expect(
 			t,
 			"unexpected baggage",
-			got.Body.Baggage,
+			got.GetBody().GetBaggage(),
 			[]*anypb.Any{wantString, wantInt},
 		)
 	})

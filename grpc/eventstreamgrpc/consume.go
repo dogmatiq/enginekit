@@ -11,9 +11,11 @@ import (
 func UnrecognizedStreamError(id *uuidpb.UUID) error {
 	s, err := status.
 		New(codes.NotFound, "unrecognized stream").
-		WithDetails(&UnrecognizedStream{
-			StreamId: id,
-		})
+		WithDetails(
+			NewUnrecognizedStreamBuilder().
+				WithStreamId(id).
+				Build(),
+		)
 
 	if err != nil {
 		panic(err)
@@ -41,9 +43,11 @@ func NoEventTypesError() error {
 func UnrecognizedEventTypeError(id *uuidpb.UUID) error {
 	s, err := status.
 		New(codes.InvalidArgument, "unrecognized event type").
-		WithDetails(&UnrecognizedEventType{
-			EventTypeId: id,
-		})
+		WithDetails(
+			NewUnrecognizedEventTypeBuilder().
+				WithEventTypeId(id).
+				Build(),
+		)
 
 	if err != nil {
 		panic(err)

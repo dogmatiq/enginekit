@@ -72,7 +72,7 @@ func (x *Source) validate() error {
 		return errors.New("must not be nil")
 	}
 
-	if x.Site != nil {
+	if x.HasSite() {
 		if err := x.GetSite().Validate(); err != nil {
 			return fmt.Errorf("invalid site (%s): %w", x.GetSite(), err)
 		}
@@ -132,11 +132,11 @@ func (x *Header) validate() error {
 		return fmt.Errorf("invalid source: %w", err)
 	}
 
-	if err := validateAnyValues("extensions", x.Extensions); err != nil {
+	if err := validateAnyValues("extensions", x.GetExtensions()); err != nil {
 		return err
 	}
 
-	if err := validateAnyValues("baggage", x.Baggage); err != nil {
+	if err := validateAnyValues("baggage", x.GetBaggage()); err != nil {
 		return err
 	}
 
@@ -157,7 +157,7 @@ func (x *Body) validate(header *Header) error {
 		return fmt.Errorf("invalid created-at time: %w", err)
 	}
 
-	if x.ScheduledFor != nil {
+	if x.HasScheduledFor() {
 		if err := x.GetScheduledFor().CheckValid(); err != nil {
 			return fmt.Errorf("invalid scheduled-for time: %w", err)
 		}
@@ -172,11 +172,11 @@ func (x *Body) validate(header *Header) error {
 		return fmt.Errorf("invalid message: %w", err)
 	}
 
-	if err := validateAnyValues("extensions", x.Extensions); err != nil {
+	if err := validateAnyValues("extensions", x.GetExtensions()); err != nil {
 		return err
 	}
 
-	if err := validateAnyValues("baggage", x.Baggage); err != nil {
+	if err := validateAnyValues("baggage", x.GetBaggage()); err != nil {
 		return err
 	}
 

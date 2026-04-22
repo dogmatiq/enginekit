@@ -51,19 +51,19 @@ func (p *Packer) PackEffects(
 		}
 	}
 
-	header := &Header{
-		CausationId:   cause.Body.MessageId,
-		CorrelationId: cause.Header.CorrelationId,
-		Source: &Source{
-			Site:        p.Site,
-			Application: p.Application,
-			Handler:     h,
-		},
-		Baggage: flattenAnyValues(
+	header := NewHeaderBuilder().
+		WithCausationId(cause.GetBody().GetMessageId()).
+		WithCorrelationId(cause.GetHeader().GetCorrelationId()).
+		WithSource(NewSourceBuilder().
+			WithSite(p.Site).
+			WithApplication(p.Application).
+			WithHandler(h).
+			Build()).
+		WithBaggage(flattenAnyValues(
 			cause.GetHeader().GetBaggage(),
 			cause.GetBody().GetBaggage(),
-		),
-	}
+		)).
+		Build()
 
 	for _, opt := range options {
 		opt.applyPackEffectsOption(header)
@@ -120,21 +120,23 @@ func packEffectBody[T any](
 		))
 	}
 
-	body := &Body{
-		MessageId: p.generateID(),
-		Message: &Message{
-			TypeId:      uuidpb.MustParse(mt.ID()),
-			Description: m.MessageDescription(),
-			Data:        data,
-		},
-	}
+	body := NewBodyBuilder().
+		WithMessageId(p.generateID()).
+		WithMessage(
+			NewMessageBuilder().
+				WithTypeId(uuidpb.MustParse(mt.ID())).
+				WithDescription(m.MessageDescription()).
+				WithData(data).
+				Build(),
+		).
+		Build()
 
 	for _, opt := range options {
 		apply(opt, body)
 	}
 
-	if body.CreatedAt == nil {
-		body.CreatedAt = p.now()
+	if !body.HasCreatedAt() {
+		body.SetCreatedAt(p.now())
 	}
 
 	if err := body.validate(p.header); err != nil {
@@ -154,10 +156,10 @@ func (p *EffectPacker) Seal() (*MultiEnvelope, bool) {
 		return nil, false
 	}
 
-	return &MultiEnvelope{
-		Header: p.header,
-		Bodies: p.bodies,
-	}, true
+	return NewMultiEnvelopeBuilder().
+		WithHeader(p.header).
+		WithBodies(p.bodies).
+		Build(), true
 }
 
 func (p *EffectPacker) mustNotBeSealed() {

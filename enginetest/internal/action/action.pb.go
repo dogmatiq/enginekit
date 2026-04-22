@@ -9,7 +9,6 @@ package action
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/gofeaturespb"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
@@ -546,7 +545,7 @@ var File_github_com_dogmatiq_enginekit_enginetest_internal_action_action_proto p
 
 const file_github_com_dogmatiq_enginekit_enginetest_internal_action_action_proto_rawDesc = "" +
 	"\n" +
-	"Egithub.com/dogmatiq/enginekit/enginetest/internal/action/action.proto\x12\x1ddogmatiq.enginekit.enginetest\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a!google/protobuf/go_features.proto\"\x9a\x03\n" +
+	"Egithub.com/dogmatiq/enginekit/enginetest/internal/action/action.proto\x12\x1ddogmatiq.enginekit.enginetest\x1a\x19google/protobuf/any.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9a\x03\n" +
 	"\x06Action\x12\x14\n" +
 	"\x04fail\x18\x01 \x01(\tH\x00R\x04fail\x12\x12\n" +
 	"\x03log\x18\x02 \x01(\tH\x00R\x03log\x12?\n" +
@@ -560,7 +559,7 @@ const file_github_com_dogmatiq_enginekit_enginetest_internal_action_action_proto
 	"\x16ScheduleTimeoutDetails\x12.\n" +
 	"\atimeout\x18\x01 \x01(\v2\x14.google.protobuf.AnyR\atimeout\x12*\n" +
 	"\x02at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02at\"\a\n" +
-	"\x05EmptyBBZ8github.com/dogmatiq/enginekit/enginetest/internal/action\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe9\a"
+	"\x05EmptyB:Z8github.com/dogmatiq/enginekit/enginetest/internal/actionb\beditionsp\xe9\a"
 
 var file_github_com_dogmatiq_enginekit_enginetest_internal_action_action_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_github_com_dogmatiq_enginekit_enginetest_internal_action_action_proto_goTypes = []any{

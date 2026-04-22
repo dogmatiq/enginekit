@@ -11,7 +11,6 @@ import (
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/gofeaturespb"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
@@ -844,7 +843,7 @@ var File_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto protor
 
 const file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawDesc = "" +
 	"\n" +
-	"@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x12\x0edogma.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a!google/protobuf/go_features.proto\x1a@github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"d\n" +
+	"@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x12\x0edogma.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x19google/protobuf/any.proto\x1a@github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"d\n" +
 	"\bEnvelope\x12.\n" +
 	"\x06header\x18\x01 \x01(\v2\x16.dogma.protobuf.HeaderR\x06header\x12(\n" +
 	"\x04body\x18\x02 \x01(\v2\x14.dogma.protobuf.BodyR\x04body\"m\n" +
@@ -880,7 +879,7 @@ const file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_rawD
 	"\n" +
 	"extensions\x18\x06 \x03(\v2\x14.google.protobuf.AnyR\n" +
 	"extensions\x12.\n" +
-	"\abaggage\x18\a \x03(\v2\x14.google.protobuf.AnyR\abaggageB;Z1github.com/dogmatiq/enginekit/protobuf/envelopepb\x92\x03\x05\xd2>\x02\x10\x03b\beditionsp\xe9\a"
+	"\abaggage\x18\a \x03(\v2\x14.google.protobuf.AnyR\abaggageB3Z1github.com/dogmatiq/enginekit/protobuf/envelopepbb\beditionsp\xe9\a"
 
 var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_github_com_dogmatiq_enginekit_protobuf_envelopepb_envelope_proto_goTypes = []any{

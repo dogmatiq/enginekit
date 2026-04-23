@@ -9,7 +9,17 @@ import (
 
 // ProcessRootStub is a test implementation of [dogma.ProcessRoot].
 type ProcessRootStub struct {
-	Value any `json:"value,omitempty"`
+	Value                          any           `json:"value,omitempty"`
+	ProcessInstanceDescriptionFunc func() string `json:"-"`
+}
+
+// ProcessInstanceDescription returns a human-readable description of the
+// process instance's current state.
+func (r *ProcessRootStub) ProcessInstanceDescription() string {
+	if r.ProcessInstanceDescriptionFunc != nil {
+		return r.ProcessInstanceDescriptionFunc()
+	}
+	return ""
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].

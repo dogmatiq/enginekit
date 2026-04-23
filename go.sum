@@ -10,6 +10,8 @@ github.com/dogmatiq/jumble v0.1.0 h1:Cb3ExfxY+AoUP4G9/sOwoOdYX8o+kOLK8+dhXAry+QA
 github.com/dogmatiq/jumble v0.1.0/go.mod h1:FCGV2ImXu8zvThxhd4QLstiEdu74vbIVw9bFJSBcKr4=
 github.com/dogmatiq/primo v0.3.3-0.20260421105956-5493471fb92a h1:xYW6Dhi1JjHd79nfny4UL65B8MXpdtovW7ZMgZX1b00=
 github.com/dogmatiq/primo v0.3.3-0.20260421105956-5493471fb92a/go.mod h1:0nluSgXdgPy+j17H/xlmngE8MOe47bLdpjaIG0sKFho=
+github.com/dogmatiq/primo v0.4.0 h1:UcjQouSDNskd5MtB0teMCbcqpxMEtlIxZN4tpie2V24=
+github.com/dogmatiq/primo v0.4.0/go.mod h1:0nluSgXdgPy+j17H/xlmngE8MOe47bLdpjaIG0sKFho=
 github.com/dogmatiq/spruce v0.2.3 h1:sm5WLRYTtrNiIePLDXeElChI+/cXK3w4Wy1qL+quBQ0=
 github.com/dogmatiq/spruce v0.2.3/go.mod h1:za5ZdNvh+FRWg4B3DCn8jfNB2LVR/9Dk3fkuHVDJLrk=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=

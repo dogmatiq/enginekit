@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.23.1] - 2026-04-24
+
+### Fixed
+
+- Fixed reference to untagged `dogmatiq/primo` dependency in `go.mod` file.
+
 ## [0.23.0] - 2026-04-24
 
 ### Added
@@ -529,6 +535,7 @@ which itself includes a large numbers of breaking changes.
 [0.21.0]: https://github.com/dogmatiq/enginekit/releases/v0.21.0
 [0.22.0]: https://github.com/dogmatiq/enginekit/releases/v0.22.0
 [0.23.0]: https://github.com/dogmatiq/enginekit/releases/v0.23.0
+[0.23.1]: https://github.com/dogmatiq/enginekit/releases/v0.23.1
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

@@ -11,6 +11,18 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.23.0] - 2026-04-24
+
+### Added
+
+- Added `AggregateRootStub.AggregateInstanceDescription()` and
+  `ProcessRootStub.ProcessInstanceDescription()`.
+
+### Changed
+
+- **[BC]** Migrated all `.proto` files to [edition 2024](https://protobuf.dev/editions/overview/).
+  All generated code now exposes [opaque protobuf API](https://protobuf.dev/reference/go/go-generated-opaque/).
+
 ## [0.22.0] - 2026-04-17
 
 ### Added
@@ -516,6 +528,7 @@ which itself includes a large numbers of breaking changes.
 [0.20.1]: https://github.com/dogmatiq/enginekit/releases/v0.20.1
 [0.21.0]: https://github.com/dogmatiq/enginekit/releases/v0.21.0
 [0.22.0]: https://github.com/dogmatiq/enginekit/releases/v0.22.0
+[0.23.0]: https://github.com/dogmatiq/enginekit/releases/v0.23.0
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

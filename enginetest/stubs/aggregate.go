@@ -8,11 +8,21 @@ import (
 
 // AggregateRootStub is a test implementation of [dogma.AggregateRoot].
 type AggregateRootStub struct {
-	AppliedEvents  []dogma.Event     `json:"applied_events,omitempty"`
-	ApplyEventFunc func(dogma.Event) `json:"-"`
+	AppliedEvents                    []dogma.Event     `json:"applied_events,omitempty"`
+	ApplyEventFunc                   func(dogma.Event) `json:"-"`
+	AggregateInstanceDescriptionFunc func() string     `json:"-"`
 }
 
 var _ dogma.AggregateRoot = &AggregateRootStub{}
+
+// AggregateInstanceDescription returns a human-readable description of the
+// aggregate instance's current state.
+func (r *AggregateRootStub) AggregateInstanceDescription() string {
+	if r.AggregateInstanceDescriptionFunc != nil {
+		return r.AggregateInstanceDescriptionFunc()
+	}
+	return ""
+}
 
 // ApplyEvent updates aggregate instance to reflect the occurrence of an event.
 func (r *AggregateRootStub) ApplyEvent(e dogma.Event) {

@@ -9,15 +9,15 @@ import (
 
 // ProcessRootStub is a test implementation of [dogma.ProcessRoot].
 type ProcessRootStub struct {
-	Value                          any           `json:"value,omitempty"`
-	ProcessInstanceDescriptionFunc func() string `json:"-"`
+	Value                          any               `json:"value,omitempty"`
+	ProcessInstanceDescriptionFunc func(bool) string `json:"-"`
 }
 
 // ProcessInstanceDescription returns a human-readable description of the
 // process instance's current state.
-func (r *ProcessRootStub) ProcessInstanceDescription() string {
+func (r *ProcessRootStub) ProcessInstanceDescription(ended bool) string {
 	if r.ProcessInstanceDescriptionFunc != nil {
-		return r.ProcessInstanceDescriptionFunc()
+		return r.ProcessInstanceDescriptionFunc(ended)
 	}
 	return ""
 }

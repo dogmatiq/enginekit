@@ -107,7 +107,7 @@ func TestFromProcess(t *testing.T) {
 			Expect(
 				t,
 				"unexpected config",
-				FromProcess[dogma.ProcessRoot](c.Handler),
+				FromProcess(c.Handler),
 				c.Want(c.Handler),
 			)
 		})

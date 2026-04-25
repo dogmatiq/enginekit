@@ -93,7 +93,6 @@ func setSource[T any](
 	}
 
 	unwrapped := dogma.UnwrapHandler(v)
-
 	*typeName = optional.Some(typename.Of(unwrapped))
 	*source = optional.Some(v)
 }

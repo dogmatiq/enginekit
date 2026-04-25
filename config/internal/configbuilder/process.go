@@ -24,7 +24,7 @@ func (b *ProcessBuilder) TypeName(n string) {
 }
 
 // Source sets the source value to h.
-func (b *ProcessBuilder) Source(h dogma.ProcessMessageHandler) {
+func (b *ProcessBuilder) Source(h dogma.ProcessMessageHandler[dogma.ProcessRoot]) {
 	setSource(&b.target.TypeName, &b.target.Source, h)
 }
 

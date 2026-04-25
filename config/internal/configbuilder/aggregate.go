@@ -24,7 +24,7 @@ func (b *AggregateBuilder) TypeName(n string) {
 }
 
 // Source sets the source value to h.
-func (b *AggregateBuilder) Source(h dogma.AggregateMessageHandler) {
+func (b *AggregateBuilder) Source(h dogma.AggregateMessageHandler[dogma.AggregateRoot]) {
 	setSource(&b.target.TypeName, &b.target.Source, h)
 }
 

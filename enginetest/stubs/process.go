@@ -36,34 +36,34 @@ var _ dogma.ProcessRoot = &ProcessRootStub{}
 
 // ProcessMessageHandlerStub is a test implementation of
 // [dogma.ProcessMessageHandler].
-type ProcessMessageHandlerStub struct {
-	NewFunc                  func() dogma.ProcessRoot
+type ProcessMessageHandlerStub[R dogma.ProcessRoot] struct {
+	NewFunc                  func() R
 	ConfigureFunc            func(dogma.ProcessConfigurer)
 	RouteEventToInstanceFunc func(context.Context, dogma.Event) (string, bool, error)
-	HandleEventFunc          func(context.Context, dogma.ProcessRoot, dogma.ProcessEventScope, dogma.Event) error
-	HandleTimeoutFunc        func(context.Context, dogma.ProcessRoot, dogma.ProcessTimeoutScope, dogma.Timeout) error
+	HandleEventFunc          func(context.Context, R, dogma.ProcessEventScope[R], dogma.Event) error
+	HandleTimeoutFunc        func(context.Context, R, dogma.ProcessTimeoutScope[R], dogma.Timeout) error
 }
 
-var _ dogma.ProcessMessageHandler = &ProcessMessageHandlerStub{}
+var _ dogma.ProcessMessageHandler[*ProcessRootStub] = &ProcessMessageHandlerStub[*ProcessRootStub]{}
 
 // Configure describes the handler's configuration to the engine.
-func (h *ProcessMessageHandlerStub) Configure(c dogma.ProcessConfigurer) {
+func (h *ProcessMessageHandlerStub[R]) Configure(c dogma.ProcessConfigurer) {
 	if h.ConfigureFunc != nil {
 		h.ConfigureFunc(c)
 	}
 }
 
 // New returns a process root instance in its initial state.
-func (h *ProcessMessageHandlerStub) New() dogma.ProcessRoot {
+func (h *ProcessMessageHandlerStub[R]) New() R {
 	if h.NewFunc != nil {
 		return h.NewFunc()
 	}
-	return &ProcessRootStub{}
+	return newRoot[R]()
 }
 
 // RouteEventToInstance returns the ID of the instance that handles a specific
 // event.
-func (h *ProcessMessageHandlerStub) RouteEventToInstance(
+func (h *ProcessMessageHandlerStub[R]) RouteEventToInstance(
 	ctx context.Context,
 	e dogma.Event,
 ) (string, bool, error) {
@@ -74,10 +74,10 @@ func (h *ProcessMessageHandlerStub) RouteEventToInstance(
 }
 
 // HandleEvent begins or continues the process in response to an event.
-func (h *ProcessMessageHandlerStub) HandleEvent(
+func (h *ProcessMessageHandlerStub[R]) HandleEvent(
 	ctx context.Context,
-	r dogma.ProcessRoot,
-	s dogma.ProcessEventScope,
+	r R,
+	s dogma.ProcessEventScope[R],
 	e dogma.Event,
 ) error {
 	if h.HandleEventFunc != nil {
@@ -87,10 +87,10 @@ func (h *ProcessMessageHandlerStub) HandleEvent(
 }
 
 // HandleTimeout continues the process in response to a timeout.
-func (h *ProcessMessageHandlerStub) HandleTimeout(
+func (h *ProcessMessageHandlerStub[R]) HandleTimeout(
 	ctx context.Context,
-	r dogma.ProcessRoot,
-	s dogma.ProcessTimeoutScope,
+	r R,
+	s dogma.ProcessTimeoutScope[R],
 	t dogma.Timeout,
 ) error {
 	if h.HandleTimeoutFunc != nil {

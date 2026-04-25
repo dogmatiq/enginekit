@@ -60,8 +60,8 @@ var (
 
 	_ EntityBuilder[*config.Application, dogma.Application] = (*ApplicationBuilder)(nil)
 
-	_ HandlerBuilder[*config.Aggregate, dogma.AggregateMessageHandler]                              = (*AggregateBuilder)(nil)
-	_ HandlerBuilder[*config.Process, dogma.ProcessMessageHandler]                                  = (*ProcessBuilder)(nil)
+	_ HandlerBuilder[*config.Aggregate, dogma.AggregateMessageHandler[dogma.AggregateRoot]]         = (*AggregateBuilder)(nil)
+	_ HandlerBuilder[*config.Process, dogma.ProcessMessageHandler[dogma.ProcessRoot]]               = (*ProcessBuilder)(nil)
 	_ HandlerBuilderWithConcurrencyPreference[*config.Integration, dogma.IntegrationMessageHandler] = (*IntegrationBuilder)(nil)
 	_ HandlerBuilderWithConcurrencyPreference[*config.Projection, dogma.ProjectionMessageHandler]   = (*ProjectionBuilder)(nil)
 
@@ -92,6 +92,7 @@ func setSource[T any](
 		panic("source must not be nil")
 	}
 
-	*typeName = optional.Some(typename.Of(v))
+	unwrapped := dogma.UnwrapHandler(v)
+	*typeName = optional.Some(typename.Of(unwrapped))
 	*source = optional.Some(v)
 }

@@ -13,8 +13,8 @@ import (
 
 func TestFromApplication(t *testing.T) {
 	var (
-		aggregate   dogma.AggregateMessageHandler   = &AggregateMessageHandlerStub{}
-		process     dogma.ProcessMessageHandler     = &ProcessMessageHandlerStub{}
+		aggregate   = &AggregateMessageHandlerStub[*AggregateRootStub]{}
+		process     = &ProcessMessageHandlerStub[*ProcessRootStub]{}
 		integration dogma.IntegrationMessageHandler = &IntegrationMessageHandlerStub{}
 		projection  dogma.ProjectionMessageHandler  = &ProjectionMessageHandlerStub{}
 	)
@@ -77,18 +77,18 @@ func TestFromApplication(t *testing.T) {
 						&config.Aggregate{
 							HandlerCommon: config.HandlerCommon{
 								EntityCommon: config.EntityCommon{
-									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateRootStub]"),
 								},
 							},
-							Source: optional.Some(aggregate),
+							Source: optional.Some(dogma.UntypedAggregateMessageHandler(aggregate)),
 						},
 						&config.Process{
 							HandlerCommon: config.HandlerCommon{
 								EntityCommon: config.EntityCommon{
-									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+									TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessRootStub]"),
 								},
 							},
-							Source: optional.Some(process),
+							Source: optional.Some(dogma.UntypedProcessMessageHandler(process)),
 						},
 						&config.Integration{
 							HandlerCommon: config.HandlerCommon{

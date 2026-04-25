@@ -28,7 +28,7 @@ func TestRouteType(t *testing.T) {
 func TestRouteSet(t *testing.T) {
 	t.Run("func MessageTypeSet()", func(t *testing.T) {
 		t.Run("it returns the message types in the route set", func(t *testing.T) {
-			h := &AggregateMessageHandlerStub{
+			h := &AggregateMessageHandlerStub[*AggregateRootStub]{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 					c.Routes(

@@ -10,7 +10,7 @@ import (
 // [dogma.ProcessMessageHandler].
 type Process struct {
 	HandlerCommon
-	Source optional.Optional[dogma.ProcessMessageHandler]
+	Source optional.Optional[dogma.ProcessMessageHandler[dogma.ProcessRoot]]
 }
 
 // Identity returns the entity's identity.
@@ -41,8 +41,8 @@ func (h *Process) IsDisabled() bool {
 	return resolveIsDisabled(h)
 }
 
-// Interface returns the [dogma.Application] that the entity represents.
-func (h *Process) Interface() dogma.ProcessMessageHandler {
+// Interface returns the [dogma.ProcessMessageHandler] that the entity represents.
+func (h *Process) Interface() dogma.ProcessMessageHandler[dogma.ProcessRoot] {
 	return resolveInterface(h, h.Source)
 }
 

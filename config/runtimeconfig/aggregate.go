@@ -8,7 +8,7 @@ import (
 
 // FromAggregate returns a new [config.Aggregate] that represents the
 // configuration of the given [dogma.AggregateMessageHandler].
-func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
+func FromAggregate[R dogma.AggregateRoot](h dogma.AggregateMessageHandler[R]) *config.Aggregate {
 	return configbuilder.Aggregate(
 		func(b *configbuilder.AggregateBuilder) {
 			buildAggregate(b, h)
@@ -16,12 +16,13 @@ func FromAggregate(h dogma.AggregateMessageHandler) *config.Aggregate {
 	)
 }
 
-func buildAggregate(b *configbuilder.AggregateBuilder, h dogma.AggregateMessageHandler) {
+func buildAggregate[R dogma.AggregateRoot](b *configbuilder.AggregateBuilder, h dogma.AggregateMessageHandler[R]) {
 	if h == nil {
 		b.Partial()
 	} else {
+		x := dogma.UntypedAggregateMessageHandler(h)
 		c := newHandlerConfigurer[dogma.AggregateRoute](b)
-		b.Source(h)
-		h.Configure(c)
+		b.Source(x)
+		x.Configure(c)
 	}
 }

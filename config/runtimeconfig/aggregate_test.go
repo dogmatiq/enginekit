@@ -10,20 +10,18 @@ import (
 	. "github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/dogmatiq/enginekit/optional"
-	// "github.com/dogmatiq/enginekit/message"
-	// "github.com/dogmatiq/enginekit/optional"
 )
 
 func TestFromAggregate(t *testing.T) {
 	cases := []struct {
 		Name    string
-		Handler dogma.AggregateMessageHandler
-		Want    func(h dogma.AggregateMessageHandler) *config.Aggregate
+		Handler dogma.AggregateMessageHandler[dogma.AggregateRoot]
+		Want    func(h dogma.AggregateMessageHandler[dogma.AggregateRoot]) *config.Aggregate
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.AggregateMessageHandler) *config.Aggregate {
+			func(dogma.AggregateMessageHandler[dogma.AggregateRoot]) *config.Aggregate {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
@@ -37,12 +35,12 @@ func TestFromAggregate(t *testing.T) {
 		},
 		{
 			"unconfigured handler",
-			&AggregateMessageHandlerStub{},
-			func(h dogma.AggregateMessageHandler) *config.Aggregate {
+			dogma.UntypedAggregateMessageHandler(&AggregateMessageHandlerStub[*AggregateRootStub]{}),
+			func(h dogma.AggregateMessageHandler[dogma.AggregateRoot]) *config.Aggregate {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateRootStub]"),
 						},
 					},
 					Source: optional.Some(h),
@@ -51,7 +49,7 @@ func TestFromAggregate(t *testing.T) {
 		},
 		{
 			"configured handler",
-			&AggregateMessageHandlerStub{
+			dogma.UntypedAggregateMessageHandler(&AggregateMessageHandlerStub[*AggregateRootStub]{
 				ConfigureFunc: func(c dogma.AggregateConfigurer) {
 					c.Identity("aggregate", "d9d75a75-7839-4b3e-a7e5-c8884b88ea57")
 					c.Routes(
@@ -60,12 +58,12 @@ func TestFromAggregate(t *testing.T) {
 					)
 					c.Disable()
 				},
-			},
-			func(app dogma.AggregateMessageHandler) *config.Aggregate {
+			}),
+			func(h dogma.AggregateMessageHandler[dogma.AggregateRoot]) *config.Aggregate {
 				return &config.Aggregate{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub"),
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateRootStub]"),
 							IdentityComponents: []*config.Identity{
 								{
 									Name: optional.Some("aggregate"),
@@ -91,7 +89,7 @@ func TestFromAggregate(t *testing.T) {
 							{Value: optional.Some(true)},
 						},
 					},
-					Source: optional.Some(app),
+					Source: optional.Some(h),
 				}
 			},
 		},

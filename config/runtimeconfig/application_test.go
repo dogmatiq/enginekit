@@ -13,8 +13,8 @@ import (
 
 func TestFromApplication(t *testing.T) {
 	var (
-		aggregate   = &AggregateMessageHandlerStub[*AggregateRootStub]{}
-		process     = &ProcessMessageHandlerStub[*ProcessRootStub]{}
+		aggregate                                   = &AggregateMessageHandlerStub[*AggregateRootStub]{}
+		process                                     = &ProcessMessageHandlerStub[*ProcessRootStub]{}
 		integration dogma.IntegrationMessageHandler = &IntegrationMessageHandlerStub{}
 		projection  dogma.ProjectionMessageHandler  = &ProjectionMessageHandlerStub{}
 	)

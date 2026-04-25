@@ -15,13 +15,13 @@ import (
 func TestFromProcess(t *testing.T) {
 	cases := []struct {
 		Name    string
-		Handler dogma.ProcessMessageHandler
-		Want    func(h dogma.ProcessMessageHandler) *config.Process
+		Handler dogma.ProcessMessageHandler[dogma.ProcessRoot]
+		Want    func(h dogma.ProcessMessageHandler[dogma.ProcessRoot]) *config.Process
 	}{
 		{
 			"nil handler",
 			nil,
-			func(dogma.ProcessMessageHandler) *config.Process {
+			func(dogma.ProcessMessageHandler[dogma.ProcessRoot]) *config.Process {
 				return &config.Process{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
@@ -35,12 +35,12 @@ func TestFromProcess(t *testing.T) {
 		},
 		{
 			"unconfigured handler",
-			&ProcessMessageHandlerStub{},
-			func(h dogma.ProcessMessageHandler) *config.Process {
+			dogma.UntypedProcessMessageHandler(&ProcessMessageHandlerStub[*ProcessRootStub]{}),
+			func(h dogma.ProcessMessageHandler[dogma.ProcessRoot]) *config.Process {
 				return &config.Process{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessRootStub]"),
 						},
 					},
 					Source: optional.Some(h),
@@ -49,7 +49,7 @@ func TestFromProcess(t *testing.T) {
 		},
 		{
 			"configured handler",
-			&ProcessMessageHandlerStub{
+			dogma.UntypedProcessMessageHandler(&ProcessMessageHandlerStub[*ProcessRootStub]{
 				ConfigureFunc: func(c dogma.ProcessConfigurer) {
 					c.Identity("projection", "050415ad-ce90-496f-8987-40467e5415e0")
 					c.Routes(
@@ -59,12 +59,12 @@ func TestFromProcess(t *testing.T) {
 					)
 					c.Disable()
 				},
-			},
-			func(h dogma.ProcessMessageHandler) *config.Process {
+			}),
+			func(h dogma.ProcessMessageHandler[dogma.ProcessRoot]) *config.Process {
 				return &config.Process{
 					HandlerCommon: config.HandlerCommon{
 						EntityCommon: config.EntityCommon{
-							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub"),
+							TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.ProcessRootStub]"),
 							IdentityComponents: []*config.Identity{
 								{
 									Name: optional.Some("projection"),
@@ -107,7 +107,7 @@ func TestFromProcess(t *testing.T) {
 			Expect(
 				t,
 				"unexpected config",
-				FromProcess(c.Handler),
+				FromProcess[dogma.ProcessRoot](c.Handler),
 				c.Want(c.Handler),
 			)
 		})

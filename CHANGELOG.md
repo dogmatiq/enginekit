@@ -11,6 +11,22 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Changed
+
+- **Breaking:** `config.Aggregate.Source` is now
+  `optional.Optional[dogma.AggregateMessageHandler[dogma.AggregateRoot]]`.
+- **Breaking:** `config.Process.Source` is now
+  `optional.Optional[dogma.ProcessMessageHandler[dogma.ProcessRoot]]`.
+- **Breaking:** `runtimeconfig.FromAggregate()` and
+  `runtimeconfig.FromProcess()` are now generic, accepting
+  `dogma.AggregateMessageHandler[R]` and `dogma.ProcessMessageHandler[R]`
+  respectively.
+- **Breaking:** `AggregateMessageHandlerStub` and
+  `ProcessMessageHandlerStub` are now generic, parameterized by their root
+  type.
+
 ## [0.23.2] - 2026-04-24
 
 - Added `ended` parameter to `ProcessRootStub.ProcessInstanceDescription()`.

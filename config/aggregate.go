@@ -10,7 +10,7 @@ import (
 // [dogma.AggregateMessageHandler].
 type Aggregate struct {
 	HandlerCommon
-	Source optional.Optional[dogma.AggregateMessageHandler]
+	Source optional.Optional[dogma.AggregateMessageHandler[dogma.AggregateRoot]]
 }
 
 // Identity returns the entity's identity.
@@ -41,8 +41,8 @@ func (h *Aggregate) IsDisabled() bool {
 	return resolveIsDisabled(h)
 }
 
-// Interface returns the [dogma.Application] that the entity represents.
-func (h *Aggregate) Interface() dogma.AggregateMessageHandler {
+// Interface returns the [dogma.AggregateMessageHandler] that the entity represents.
+func (h *Aggregate) Interface() dogma.AggregateMessageHandler[dogma.AggregateRoot] {
 	return resolveInterface(h, h.Source)
 }
 

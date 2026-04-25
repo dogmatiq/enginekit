@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/enginetest/stubs"
 	"github.com/dogmatiq/enginekit/message"
 	"github.com/google/go-cmp/cmp"
@@ -30,10 +31,13 @@ func Expect(
 			cmpopts.EquateErrors(),
 			cmp.Comparer(func(a, b message.Type) bool { return a == b }),
 			cmp.Comparer(func(a, b *stubs.ApplicationStub) bool { return a == b }),
-			cmp.Comparer(func(a, b *stubs.AggregateMessageHandlerStub) bool { return a == b }),
-			cmp.Comparer(func(a, b *stubs.ProcessMessageHandlerStub) bool { return a == b }),
+			cmp.Comparer(func(a, b *stubs.AggregateMessageHandlerStub[*stubs.AggregateRootStub]) bool { return a == b }),
+			cmp.Comparer(func(a, b *stubs.ProcessMessageHandlerStub[*stubs.ProcessRootStub]) bool { return a == b }),
 			cmp.Comparer(func(a, b *stubs.IntegrationMessageHandlerStub) bool { return a == b }),
 			cmp.Comparer(func(a, b *stubs.ProjectionMessageHandlerStub) bool { return a == b }),
+			cmp.Comparer(func(a, b interface{ UnwrapHandler() any }) bool {
+				return dogma.UnwrapHandler(a) == dogma.UnwrapHandler(b)
+			}),
 			cmp.Exporter(
 				func(t reflect.Type) bool {
 					return t.PkgPath() == "github.com/dogmatiq/enginekit/optional"

@@ -8,7 +8,7 @@ import (
 )
 
 type processA struct {
-	dogma.NoTimeoutMessagesBehavior
+	dogma.NoTimeoutMessagesBehavior[dogma.StatelessProcessRoot]
 	dogma.StatelessProcessBehavior
 }
 
@@ -34,8 +34,8 @@ func (h *processA) RouteEventToInstance(
 
 func (h *processA) HandleEvent(
 	_ context.Context,
-	_ dogma.ProcessRoot,
-	s dogma.ProcessEventScope,
+	_ dogma.StatelessProcessRoot,
+	s dogma.ProcessEventScope[dogma.StatelessProcessRoot],
 	e dogma.Event,
 ) error {
 	switch e := e.(type) {

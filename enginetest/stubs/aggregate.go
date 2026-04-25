@@ -45,33 +45,33 @@ func (r *AggregateRootStub) UnmarshalBinary(data []byte) error {
 
 // AggregateMessageHandlerStub is a test implementation of
 // [dogma.AggregateMessageHandler].
-type AggregateMessageHandlerStub struct {
-	NewFunc                    func() dogma.AggregateRoot
+type AggregateMessageHandlerStub[R dogma.AggregateRoot] struct {
+	NewFunc                    func() R
 	ConfigureFunc              func(dogma.AggregateConfigurer)
 	RouteCommandToInstanceFunc func(dogma.Command) string
-	HandleCommandFunc          func(dogma.AggregateRoot, dogma.AggregateCommandScope, dogma.Command)
+	HandleCommandFunc          func(R, dogma.AggregateCommandScope[R], dogma.Command)
 }
 
-var _ dogma.AggregateMessageHandler = &AggregateMessageHandlerStub{}
+var _ dogma.AggregateMessageHandler[*AggregateRootStub] = &AggregateMessageHandlerStub[*AggregateRootStub]{}
 
 // Configure describes the handler's configuration to the engine.
-func (h *AggregateMessageHandlerStub) Configure(c dogma.AggregateConfigurer) {
+func (h *AggregateMessageHandlerStub[R]) Configure(c dogma.AggregateConfigurer) {
 	if h.ConfigureFunc != nil {
 		h.ConfigureFunc(c)
 	}
 }
 
 // New returns an aggregate root instance in its initial state.
-func (h *AggregateMessageHandlerStub) New() dogma.AggregateRoot {
+func (h *AggregateMessageHandlerStub[R]) New() R {
 	if h.NewFunc != nil {
 		return h.NewFunc()
 	}
-	return &AggregateRootStub{}
+	return newRoot[R]()
 }
 
 // RouteCommandToInstance returns the ID of the instance that handles a specific
 // command.
-func (h *AggregateMessageHandlerStub) RouteCommandToInstance(c dogma.Command) string {
+func (h *AggregateMessageHandlerStub[R]) RouteCommandToInstance(c dogma.Command) string {
 	if h.RouteCommandToInstanceFunc == nil {
 		panic(dogma.UnexpectedMessage)
 	}
@@ -79,9 +79,9 @@ func (h *AggregateMessageHandlerStub) RouteCommandToInstance(c dogma.Command) st
 }
 
 // HandleCommand executes business logic in response to a command.
-func (h *AggregateMessageHandlerStub) HandleCommand(
-	r dogma.AggregateRoot,
-	s dogma.AggregateCommandScope,
+func (h *AggregateMessageHandlerStub[R]) HandleCommand(
+	r R,
+	s dogma.AggregateCommandScope[R],
 	c dogma.Command,
 ) {
 	if h.HandleCommandFunc != nil {

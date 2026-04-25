@@ -32,7 +32,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME NAME
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf") // <-- SAME NAME
 									c.Routes(
@@ -52,7 +52,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("name", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
 						c.Routes(
-							dogma.ViaProcess(&ProcessMessageHandlerStub{
+							dogma.ViaProcess(&ProcessMessageHandlerStub[*ProcessRootStub]{
 								ConfigureFunc: func(c dogma.ProcessConfigurer) {
 									c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
 									c.Routes(
@@ -62,7 +62,7 @@ func TestApplication(t *testing.T) {
 									)
 								},
 							}),
-							dogma.ViaProcess(&ProcessMessageHandlerStub{
+							dogma.ViaProcess(&ProcessMessageHandlerStub[*ProcessRootStub]{
 								ConfigureFunc: func(c dogma.ProcessConfigurer) {
 									c.Identity("process2", "f2c9acdd-93a8-4ca0-9014-56aaae16a3af")
 									c.Routes(
@@ -112,12 +112,12 @@ func TestApplication(t *testing.T) {
 			},
 			{
 				Name:  "application must not contain invalid handlers",
-				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub is invalid: no handles-command routes`,
+				Error: `application:ApplicationStub is invalid: aggregate:AggregateMessageHandlerStub[AggregateRootStub] is invalid: no handles-command routes`,
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "fe78acbf-dfd4-490a-bf99-93b6acf9f891")
 									c.Routes(
@@ -137,7 +137,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca") // <-- SAME IDENTITY KEY
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "14769F7F-87FE-48DD-916E-5BCAB6BA6ACA") // <-- SAME IDENTITY KEY (note: non-canonical UUID)
 									c.Routes(
@@ -157,7 +157,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("handler", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db") // <-- SAME IDENTITY NAME
 									c.Routes(
@@ -186,7 +186,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db") // <-- SAME IDENTITY KEY
 									c.Routes(
@@ -215,7 +215,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db")
 									c.Routes(
@@ -244,7 +244,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "14769f7f-87fe-48dd-916e-5bcab6ba6aca")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "4f2a6c38-0651-4ca5-b6a1-1edf4b2624db")
 									c.Routes(
@@ -278,7 +278,7 @@ func TestApplication(t *testing.T) {
 				Description: multiline(
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - valid identity app/c85acb36-e47b-4ef6-b46b-64d847a853b7`,
-					`  - valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+					`  - valid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateRootStub]`,
 					`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
 					`      - valid handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					`      - valid records-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
@@ -287,7 +287,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "c85acb36-e47b-4ef6-b46b-64d847a853b7")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
 									c.Routes(
@@ -362,7 +362,7 @@ func TestApplication(t *testing.T) {
 				Description: multiline(
 					`valid application *github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub`,
 					`  - valid identity app/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
-					`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub`,
+					`  - invalid aggregate *github.com/dogmatiq/enginekit/enginetest/stubs.AggregateMessageHandlerStub[*github.com/dogmatiq/enginekit/enginetest/stubs.AggregateRootStub]`,
 					`      - no records-event routes`,
 					`      - valid identity aggregate/8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4`,
 					`      - valid handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
@@ -371,7 +371,7 @@ func TestApplication(t *testing.T) {
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 						c.Identity("app", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
 						c.Routes(
-							dogma.ViaAggregate(&AggregateMessageHandlerStub{
+							dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 								ConfigureFunc: func(c dogma.AggregateConfigurer) {
 									c.Identity("aggregate", "8bb5eaf2-6b36-42bd-a1b3-90c27c9c80d4")
 									c.Routes(
@@ -387,7 +387,7 @@ func TestApplication(t *testing.T) {
 	)
 
 	t.Run("func HandlerByName()", func(t *testing.T) {
-		h := &AggregateMessageHandlerStub{
+		h := &AggregateMessageHandlerStub[*AggregateRootStub]{
 			ConfigureFunc: func(c dogma.AggregateConfigurer) {
 				c.Identity("name", "40ddf2a2-f053-485c-8621-1fc8a58f8ddf")
 				c.Routes(
@@ -428,7 +428,7 @@ func TestApplication(t *testing.T) {
 				ConfigureFunc: func(c dogma.ApplicationConfigurer) {
 					c.Identity("app", "04c64a99-2b48-4cd5-a62a-85c6cb1d5e35")
 					c.Routes(
-						dogma.ViaAggregate(&AggregateMessageHandlerStub{
+						dogma.ViaAggregate(&AggregateMessageHandlerStub[*AggregateRootStub]{
 							ConfigureFunc: func(c dogma.AggregateConfigurer) {
 								c.Identity("aggregate", "6a006c20-075f-4706-8230-4188b42b60aa")
 								c.Routes(
@@ -438,7 +438,7 @@ func TestApplication(t *testing.T) {
 								)
 							},
 						}),
-						dogma.ViaProcess(&ProcessMessageHandlerStub{
+						dogma.ViaProcess(&ProcessMessageHandlerStub[*ProcessRootStub]{
 							ConfigureFunc: func(c dogma.ProcessConfigurer) {
 								c.Identity("process1", "3614c386-4d8d-4a1d-88fa-10f94313c803")
 								c.Routes(

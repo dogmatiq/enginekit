@@ -8,7 +8,7 @@ import (
 
 // FromProcess returns a new [config.Process] that represents the configuration
 // of the given [dogma.ProcessMessageHandler].
-func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
+func FromProcess[R dogma.ProcessRoot](h dogma.ProcessMessageHandler[R]) *config.Process {
 	return configbuilder.Process(
 		func(b *configbuilder.ProcessBuilder) {
 			buildProcess(b, h)
@@ -16,12 +16,13 @@ func FromProcess(h dogma.ProcessMessageHandler) *config.Process {
 	)
 }
 
-func buildProcess(b *configbuilder.ProcessBuilder, h dogma.ProcessMessageHandler) {
+func buildProcess[R dogma.ProcessRoot](b *configbuilder.ProcessBuilder, h dogma.ProcessMessageHandler[R]) {
 	if h == nil {
 		b.Partial()
 	} else {
+		x := dogma.UntypedProcessMessageHandler(h)
 		c := newHandlerConfigurer[dogma.ProcessRoute](b)
-		b.Source(h)
-		h.Configure(c)
+		b.Source(x)
+		x.Configure(c)
 	}
 }

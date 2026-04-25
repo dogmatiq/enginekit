@@ -78,14 +78,12 @@ func validateEntity[T any](
 	validateComponent(ctx)
 	validateEntityIdentities(ctx, e)
 
-	n, hasN := e.EntityProperties().TypeName.TryGet()
-	s, hasS := src.TryGet()
+	hasN := e.EntityProperties().TypeName.IsPresent()
+	hasS := src.IsPresent()
 
 	if hasS {
 		if !hasN {
 			ctx.Malformed("Source is present, but TypeName is not")
-		} else if n != typename.Of(s) {
-			ctx.Malformed("TypeName does not match Source: %q != %q", n, typename.Of(s))
 		}
 	} else if ctx.Options.ForExecution {
 		ctx.Absent(reflect.TypeFor[T]().String() + " value")

@@ -395,4 +395,20 @@ func TestIntegration(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("func Validate()", func(t *testing.T) {
+		t.Run("it panics if the source is present but the typename is not", func(t *testing.T) {
+			test.ExpectPanic(
+				t,
+				`malformed configuration representation: there is a problem with the *config.Integration value (and not necessarily the configuration it represents): Source is present, but TypeName is not`,
+				func() {
+					Validate(&Integration{
+						Source: optional.Some[dogma.IntegrationMessageHandler](
+							&IntegrationMessageHandlerStub{},
+						),
+					})
+				},
+			)
+		})
+	})
 }

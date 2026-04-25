@@ -10,6 +10,7 @@ import (
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
 	"github.com/dogmatiq/enginekit/internal/test"
 	"github.com/dogmatiq/enginekit/message"
+	"github.com/dogmatiq/enginekit/optional"
 )
 
 func TestApplication(t *testing.T) {
@@ -486,6 +487,22 @@ func TestApplication(t *testing.T) {
 				`projection is invalid: route is invalid: route type is unavailable`,
 				func() {
 					entity.RouteSet()
+				},
+			)
+		})
+	})
+
+	t.Run("func Validate()", func(t *testing.T) {
+		t.Run("it panics if the source is present but the typename is not", func(t *testing.T) {
+			test.ExpectPanic(
+				t,
+				`malformed configuration representation: there is a problem with the *config.Application value (and not necessarily the configuration it represents): Source is present, but TypeName is not`,
+				func() {
+					Validate(&Application{
+						Source: optional.Some[dogma.Application](
+							&ApplicationStub{},
+						),
+					})
 				},
 			)
 		})

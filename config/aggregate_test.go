@@ -448,4 +448,20 @@ func TestAggregate(t *testing.T) {
 			}
 		})
 	})
+
+	t.Run("func Validate()", func(t *testing.T) {
+		t.Run("it panics if the source is present but the typename is not", func(t *testing.T) {
+			test.ExpectPanic(
+				t,
+				`malformed configuration representation: there is a problem with the *config.Aggregate value (and not necessarily the configuration it represents): Source is present, but TypeName is not`,
+				func() {
+					Validate(&Aggregate{
+						Source: optional.Some[dogma.AggregateMessageHandler[dogma.AggregateRoot]](
+							&AggregateMessageHandlerStub[dogma.AggregateRoot]{},
+						),
+					})
+				},
+			)
+		})
+	})
 }

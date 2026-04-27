@@ -11,6 +11,15 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `config.UntypedAggregateMessageHandler` and
+  `UntypedProcessMessageHandler` interfaces.
+- Added `Implementation()` method to `config.Aggregate`, `Process`,
+  `Integration`, and `Projection` types.
+
 ## [0.24.0] - 2026-04-25
 
 ### Changed

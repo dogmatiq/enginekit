@@ -46,6 +46,16 @@ func (h *Aggregate) Interface() dogma.AggregateMessageHandler[dogma.AggregateRoo
 	return resolveInterface(h, h.Source)
 }
 
+// Implementation returns the unwrapped implementation of the handler.
+//
+// It returns the handler value as provided by the application, without the
+// type-erasure wrapper applied by [dogma.UntypedAggregateMessageHandler].
+//
+// It panics if the configuration was not built from a live handler.
+func (h *Aggregate) Implementation() UntypedAggregateMessageHandler {
+	return dogma.UnwrapHandler(h.Interface()).(UntypedAggregateMessageHandler)
+}
+
 func (h *Aggregate) String() string {
 	return stringifyEntity(h)
 }

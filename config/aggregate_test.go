@@ -464,4 +464,24 @@ func TestAggregate(t *testing.T) {
 			)
 		})
 	})
+
+	t.Run("func Implementation()", func(t *testing.T) {
+		t.Run("it returns the unwrapped handler", func(t *testing.T) {
+			inner := &AggregateMessageHandlerStub[*AggregateRootStub]{
+				ConfigureFunc: func(c dogma.AggregateConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[*CommandStub[TypeA]](),
+						dogma.RecordsEvent[*EventStub[TypeA]](),
+					)
+				},
+			}
+
+			cfg := runtimeconfig.FromAggregate(inner)
+
+			if cfg.Implementation() != inner {
+				t.Fatal("expected Implementation() to return the unwrapped handler")
+			}
+		})
+	})
 }

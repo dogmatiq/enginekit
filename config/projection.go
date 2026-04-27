@@ -55,6 +55,13 @@ func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return resolveInterface(h, h.Source)
 }
 
+// Implementation returns the unwrapped implementation of the handler.
+//
+// It panics if the configuration was not built from a live handler.
+func (h *Projection) Implementation() dogma.ProjectionMessageHandler {
+	return dogma.UnwrapHandler(h.Interface()).(dogma.ProjectionMessageHandler)
+}
+
 func (h *Projection) String() string {
 	return stringifyEntity(h)
 }

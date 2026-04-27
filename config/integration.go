@@ -55,6 +55,13 @@ func (h *Integration) Interface() dogma.IntegrationMessageHandler {
 	return resolveInterface(h, h.Source)
 }
 
+// Implementation returns the unwrapped implementation of the handler.
+//
+// It panics if the configuration was not built from a live handler.
+func (h *Integration) Implementation() dogma.IntegrationMessageHandler {
+	return dogma.UnwrapHandler(h.Interface()).(dogma.IntegrationMessageHandler)
+}
+
 func (h *Integration) String() string {
 	return stringifyEntity(h)
 }

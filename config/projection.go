@@ -50,14 +50,13 @@ func (h *Projection) ConcurrencyPreference() dogma.ConcurrencyPreference {
 	return resolveConcurrencyPreference(h, h.ConcurrencyPreferences)
 }
 
-// Interface returns the [dogma.Application] that the entity represents.
+// Interface returns the [dogma.ProjectionMessageHandler] that the entity
+// represents.
 func (h *Projection) Interface() dogma.ProjectionMessageHandler {
 	return resolveInterface(h, h.Source)
 }
 
 // Implementation returns the unwrapped implementation of the handler.
-//
-// It panics if the configuration was not built from a live handler.
 func (h *Projection) Implementation() dogma.ProjectionMessageHandler {
 	return dogma.UnwrapHandler(h.Interface()).(dogma.ProjectionMessageHandler)
 }

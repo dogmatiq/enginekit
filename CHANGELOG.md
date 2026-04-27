@@ -15,10 +15,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Added `config.UntypedAggregateMessageHandler` and
-  `UntypedProcessMessageHandler` interfaces.
-- Added `Implementation()` method to `config.Aggregate`, `Process`,
-  `Integration`, and `Projection` types.
+- Added `UntypedAggregateMessageHandler` and `UntypedProcessMessageHandler`
+  interfaces to the `config` package.
+- Added `Implementation()` method to `Aggregate`, `Process`, `Integration`, and
+  `Projection` types in the `config` package.
 
 ## [0.24.0] - 2026-04-25
 

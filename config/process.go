@@ -50,8 +50,6 @@ func (h *Process) Interface() dogma.ProcessMessageHandler[dogma.ProcessRoot] {
 //
 // It returns the handler value as provided by the application, without the
 // type-erasure wrapper applied by [dogma.UntypedProcessMessageHandler].
-//
-// It panics if the configuration was not built from a live handler.
 func (h *Process) Implementation() UntypedProcessMessageHandler {
 	return dogma.UnwrapHandler(h.Interface()).(UntypedProcessMessageHandler)
 }

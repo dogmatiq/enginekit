@@ -50,14 +50,13 @@ func (h *Integration) ConcurrencyPreference() dogma.ConcurrencyPreference {
 	return resolveConcurrencyPreference(h, h.ConcurrencyPreferences)
 }
 
-// Interface returns the [dogma.Application] that the entity represents.
+// Interface returns the [dogma.IntegrationMessageHandler] that the entity
+// represents.
 func (h *Integration) Interface() dogma.IntegrationMessageHandler {
 	return resolveInterface(h, h.Source)
 }
 
 // Implementation returns the unwrapped implementation of the handler.
-//
-// It panics if the configuration was not built from a live handler.
 func (h *Integration) Implementation() dogma.IntegrationMessageHandler {
 	return dogma.UnwrapHandler(h.Interface()).(dogma.IntegrationMessageHandler)
 }

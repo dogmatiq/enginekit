@@ -483,4 +483,25 @@ func TestProcess(t *testing.T) {
 			)
 		})
 	})
+
+	t.Run("func Implementation()", func(t *testing.T) {
+		t.Run("it returns the unwrapped handler", func(t *testing.T) {
+			inner := &ProcessMessageHandlerStub[*ProcessRootStub]{
+				ConfigureFunc: func(c dogma.ProcessConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesEvent[*EventStub[TypeA]](),
+						dogma.ExecutesCommand[*CommandStub[TypeA]](),
+						dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
+					)
+				},
+			}
+
+			cfg := runtimeconfig.FromProcess(inner)
+
+			if cfg.Implementation() != inner {
+				t.Fatal("expected Implementation() to return the unwrapped handler")
+			}
+		})
+	})
 }

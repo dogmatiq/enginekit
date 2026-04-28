@@ -411,4 +411,23 @@ func TestIntegration(t *testing.T) {
 			)
 		})
 	})
+
+	t.Run("func Implementation()", func(t *testing.T) {
+		t.Run("it returns the unwrapped handler", func(t *testing.T) {
+			inner := &IntegrationMessageHandlerStub{
+				ConfigureFunc: func(c dogma.IntegrationConfigurer) {
+					c.Identity("name", "19cb98d5-dd17-4daf-ae00-1b413b7b899a")
+					c.Routes(
+						dogma.HandlesCommand[*CommandStub[TypeA]](),
+					)
+				},
+			}
+
+			cfg := runtimeconfig.FromIntegration(inner)
+
+			if cfg.Implementation() != inner {
+				t.Fatal("expected Implementation() to return the unwrapped handler")
+			}
+		})
+	})
 }

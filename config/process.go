@@ -46,6 +46,14 @@ func (h *Process) Interface() dogma.ProcessMessageHandler[dogma.ProcessRoot] {
 	return resolveInterface(h, h.Source)
 }
 
+// Implementation returns the unwrapped implementation of the handler.
+//
+// It returns the handler value as provided by the application, without the
+// type-erasure wrapper applied by [dogma.UntypedProcessMessageHandler].
+func (h *Process) Implementation() UntypedProcessMessageHandler {
+	return dogma.UnwrapHandler(h.Interface()).(UntypedProcessMessageHandler)
+}
+
 func (h *Process) String() string {
 	return stringifyEntity(h)
 }

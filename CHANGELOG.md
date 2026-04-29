@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Removed
+
+- **[BC]** Removed the `enginetest/uuidtest` package. Use `stubs.UUIDSequence`
+  instead.
+
 ## [0.24.1] - 2026-04-28
 
 ### Added

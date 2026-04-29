@@ -1,3 +1,3 @@
-// Package enginetest provides reusable acceptance tests for verifying engine
-// implementations.
+// Package enginetest provides utilities for testing Dogma engines and
+// engine-adjacent components.
 package enginetest

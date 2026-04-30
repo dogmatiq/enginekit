@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	unsafe "unsafe"
 
 	"github.com/dogmatiq/dapper"
 	. "github.com/dogmatiq/enginekit/protobuf/uuidpb"
@@ -144,10 +143,8 @@ func TestParse_OnlyAllocatesTheUUID(t *testing.T) {
 		Parse("a967a8b9-3f9c-4918-9a41-19577be5fec5")
 	})
 
-	const size = unsafe.Sizeof(UUID{})
-
-	if allocs > float64(size) {
-		t.Fatalf("expected maximum allocation of %d bytes, got %f", size, allocs)
+	if allocs != 1 {
+		t.Fatalf("expected exactly 1 allocation, got %f", allocs)
 	}
 }
 
@@ -686,6 +683,66 @@ func TestUUID_AsString(t *testing.T) {
 				t.Fatalf("got %q, want %q", actual, c.Expect)
 			}
 		})
+	}
+}
+
+func TestUUID_MarshalText(t *testing.T) {
+	t.Parallel()
+
+	subject := NewUUIDBuilder().
+		WithUpper(0xa967a8b93f9c4918).
+		WithLower(0x9a4119577be5fec5).
+		Build()
+
+	text, err := subject.MarshalText()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got, want := string(text), "a967a8b9-3f9c-4918-9a41-19577be5fec5"; got != want {
+		t.Fatalf("got %q, want %q", got, want)
+	}
+}
+
+func TestUUID_UnmarshalText(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it populates the UUID from text", func(t *testing.T) {
+		t.Parallel()
+
+		var subject UUID
+		if err := subject.UnmarshalText([]byte("a967a8b9-3f9c-4918-9a41-19577be5fec5")); err != nil {
+			t.Fatal(err)
+		}
+
+		if got, want := subject.GetUpper(), uint64(0xa967a8b93f9c4918); got != want {
+			t.Fatalf("upper: got %#x, want %#x", got, want)
+		}
+		if got, want := subject.GetLower(), uint64(0x9a4119577be5fec5); got != want {
+			t.Fatalf("lower: got %#x, want %#x", got, want)
+		}
+	})
+
+	t.Run("it returns an error for invalid text", func(t *testing.T) {
+		t.Parallel()
+
+		var subject UUID
+		if err := subject.UnmarshalText([]byte("not-a-uuid")); err == nil {
+			t.Fatal("expected an error")
+		}
+	})
+}
+
+func TestUUID_UnmarshalText_DoesNotAlloc(t *testing.T) {
+	text := []byte("a967a8b9-3f9c-4918-9a41-19577be5fec5")
+	var subject UUID
+
+	allocs := testing.AllocsPerRun(100, func() {
+		subject.UnmarshalText(text)
+	})
+
+	if allocs != 0 {
+		t.Fatalf("expected zero allocations, got %f", allocs)
 	}
 }
 

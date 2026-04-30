@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
@@ -76,14 +77,15 @@ func (x *Identity) Validate() error {
 // The text representation is the UUID key followed by a space and the name,
 // e.g. "5195fe85-eb3f-4121-84b0-be72cbc5722f handler-name".
 func (x *Identity) MarshalText() ([]byte, error) {
-	text, err := x.GetKey().MarshalText()
-	if err != nil {
+	if err := x.Validate(); err != nil {
 		return nil, err
 	}
 
-	text = slices.Grow(text, 1+len(x.xxx_hidden_Name))
+	name := x.GetName()
+	text, _ := x.GetKey().MarshalText()
+	text = slices.Grow(text, 1+len(name))
 	text = append(text, ' ')
-	text = append(text, x.xxx_hidden_Name...)
+	text = append(text, name...)
 
 	return text, nil
 }
@@ -122,7 +124,13 @@ func (x *Identity) Format(f fmt.State, verb rune) {
 			name = "?"
 		}
 
-		fmt.Fprintf(f, "%s %s", x.GetKey(), name)
+		var b strings.Builder
+		key, _ := x.GetKey().MarshalText()
+		b.Write(key)
+		b.WriteByte(' ')
+		b.WriteString(name)
+
+		fmt.Fprintf(f, format, b.String())
 		return
 	}
 

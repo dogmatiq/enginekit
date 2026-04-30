@@ -267,6 +267,19 @@ func TestIdentity_MarshalText(t *testing.T) {
 			t.Fatalf("got %q, want %q", text, want)
 		}
 	})
+
+	t.Run("it returns an error for an invalid identity", func(t *testing.T) {
+		t.Parallel()
+
+		subject := NewIdentityBuilder().
+			WithName("").
+			WithKey(uuidpb.Generate()).
+			Build()
+
+		if _, err := subject.MarshalText(); err == nil {
+			t.Fatal("expected an error")
+		}
+	})
 }
 
 func TestIdentity_MarshalText_OnlyAllocatesTheResultAndUUIDText(t *testing.T) {

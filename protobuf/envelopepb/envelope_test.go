@@ -129,21 +129,21 @@ func TestEnvelope_Validate(t *testing.T) {
 				newEnvelope(func(e *Envelope) {
 					e.GetHeader().GetSource().SetSite(&identitypb.Identity{})
 				}),
-				"invalid header: invalid source: invalid site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid site (00000000-0000-0000-0000-000000000000 ?): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source application",
 				newEnvelope(func(e *Envelope) {
 					e.GetHeader().GetSource().SetApplication(&identitypb.Identity{})
 				}),
-				"invalid header: invalid source: invalid application (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid application (00000000-0000-0000-0000-000000000000 ?): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"invalid source handler",
 				newEnvelope(func(e *Envelope) {
 					e.GetHeader().GetSource().SetHandler(&identitypb.Identity{})
 				}),
-				"invalid header: invalid source: invalid handler (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid handler (00000000-0000-0000-0000-000000000000 ?): invalid name: must be between 1 and 255 bytes",
 			},
 			{
 				"source instance ID without source handler",

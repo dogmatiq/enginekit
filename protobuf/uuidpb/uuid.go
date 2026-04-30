@@ -64,41 +64,11 @@ func Derive[T ~string | ~[]byte](ns *UUID, names ...T) *UUID {
 
 // Parse parses an RFC 9562 "hex-and-dash" UUID string.
 func Parse(str string) (*UUID, error) {
-	if len(str) != 36 {
-		return nil, errors.New("invalid UUID format, expected 36 characters")
+	uuid := &UUID{}
+	if err := uuid.UnmarshalText([]byte(str)); err != nil {
+		return nil, err
 	}
-
-	var (
-		upper, lower uint64
-		target       = &upper
-		shift        = 60
-	)
-
-	for index := range 36 {
-		switch index {
-		case 18:
-			target = &lower
-			shift = 60
-			fallthrough
-		case 8, 13, 23:
-			if str[index] != '-' {
-				return nil, fmt.Errorf("invalid UUID format, expected hyphen at position %d", index)
-			}
-		default:
-			value, err := fromHex(str, index)
-			if err != nil {
-				return nil, err
-			}
-
-			*target |= uint64(value) << shift
-			shift -= 4
-		}
-	}
-
-	return NewUUIDBuilder().
-		WithUpper(upper).
-		WithLower(lower).
-		Build(), nil
+	return uuid, nil
 }
 
 // MustParse parses an RFC 9562 "hex-and-dash" UUID string, or panics if unable
@@ -329,7 +299,52 @@ func (x *UUID) AsByteArray() [16]byte {
 
 // AsString returns the UUID as an RFC 9562 string.
 func (x *UUID) AsString() string {
-	return asString(x.GetUpper(), x.GetLower())
+	data := asHex(x.GetUpper(), x.GetLower())
+	return string(data[:])
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (x *UUID) MarshalText() ([]byte, error) {
+	data := asHex(x.GetUpper(), x.GetLower())
+	return data[:], nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (x *UUID) UnmarshalText(text []byte) error {
+	if len(text) != 36 {
+		return errors.New("invalid UUID format, expected 36 characters")
+	}
+
+	x.xxx_hidden_Upper = 0
+	x.xxx_hidden_Lower = 0
+
+	var (
+		target = &x.xxx_hidden_Upper
+		shift  = 60
+	)
+
+	for index, digit := range text {
+		switch index {
+		case 18:
+			target = &x.xxx_hidden_Lower
+			shift = 60
+			fallthrough
+		case 8, 13, 23:
+			if digit != '-' {
+				return fmt.Errorf("invalid UUID format, expected hyphen at position %d", index)
+			}
+		default:
+			value := fromHexMap[digit]
+			if value == bad {
+				return fmt.Errorf("invalid UUID format, expected hex digit at position %d", index)
+			}
+
+			*target |= uint64(value) << shift
+			shift -= 4
+		}
+	}
+
+	return nil
 }
 
 // DapperString implements [github.com/dogmatiq/dapper.Stringer].
@@ -474,12 +489,13 @@ type plain struct {
 
 // DapperString implements [github.com/dogmatiq/dapper.Stringer].
 func (k plain) DapperString() string {
-	return asString(k.upper, k.lower)
+	data := asHex(k.upper, k.lower)
+	return string(data[:])
 }
 
-// asString returns the string representation of a UUID with the given upper and
-// lower components.
-func asString(upper, lower uint64) string {
+// asHex returns the RFC 9562 "hex-and-dash" representation of a UUID with
+// the given upper and lower components.
+func asHex(upper, lower uint64) [36]byte {
 	var str [36]byte
 
 	source := &upper
@@ -500,7 +516,7 @@ func asString(upper, lower uint64) string {
 		}
 	}
 
-	return string(str[:])
+	return str
 }
 
 func compare(

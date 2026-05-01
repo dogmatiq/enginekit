@@ -118,7 +118,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 
 			ExpectPanic(
 				t,
-				"invalid header: invalid source: invalid site (/00000000-0000-0000-0000-000000000000): invalid name: must be between 1 and 255 bytes",
+				"invalid header: invalid source: invalid site (00000000-0000-0000-0000-000000000000 ?): invalid name: must be between 1 and 255 bytes",
 				func() {
 					packer.PackCommand(CommandA1)
 				},

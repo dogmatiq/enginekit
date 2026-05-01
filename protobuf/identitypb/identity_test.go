@@ -210,9 +210,9 @@ func TestIdentity_Format(t *testing.T) {
 		Want   string
 	}{
 		{
-			"it formats as a slash-separated name/key string",
+			"it formats as a UUID-prefixed string",
 			"%s",
-			`<name>/a967a8b9-3f9c-4918-9a41-19577be5fec5`,
+			`a967a8b9-3f9c-4918-9a41-19577be5fec5 <name>`,
 		},
 		{
 			"it formats as a Go constructor expression",
@@ -240,6 +240,123 @@ func TestIdentity_Format(t *testing.T) {
 			t.Errorf("got %q, want raw struct output", actual)
 		}
 	})
+}
+
+func TestIdentity_MarshalText(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it produces the expected text", func(t *testing.T) {
+		t.Parallel()
+
+		subject := New(
+			"<name>",
+			uuidpb.
+				NewUUIDBuilder().
+				WithUpper(0xa967a8b93f9c4918).
+				WithLower(0x9a4119577be5fec5).
+				Build(),
+		)
+
+		text, err := subject.MarshalText()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		want := "a967a8b9-3f9c-4918-9a41-19577be5fec5 <name>"
+		if string(text) != want {
+			t.Fatalf("got %q, want %q", text, want)
+		}
+	})
+
+	t.Run("it returns an error for an invalid identity", func(t *testing.T) {
+		t.Parallel()
+
+		subject := NewIdentityBuilder().
+			WithName("").
+			WithKey(uuidpb.Generate()).
+			Build()
+
+		if _, err := subject.MarshalText(); err == nil {
+			t.Fatal("expected an error")
+		}
+	})
+}
+
+func TestIdentity_MarshalText_OnlyAllocatesTheResultAndUUIDText(t *testing.T) {
+	subject := New("<name>", uuidpb.Generate())
+
+	allocs := testing.AllocsPerRun(100, func() {
+		subject.MarshalText()
+	})
+
+	if allocs != 2 {
+		t.Fatalf("expected 2 allocations, got %f", allocs)
+	}
+}
+
+func TestIdentity_UnmarshalText(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it parses a valid identity", func(t *testing.T) {
+		t.Parallel()
+
+		var subject Identity
+		err := subject.UnmarshalText([]byte("a967a8b9-3f9c-4918-9a41-19577be5fec5 <name>"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		expect := New(
+			"<name>",
+			uuidpb.
+				NewUUIDBuilder().
+				WithUpper(0xa967a8b93f9c4918).
+				WithLower(0x9a4119577be5fec5).
+				Build(),
+		)
+
+		if !subject.Equal(expect) {
+			t.Fatalf("got %s, want %s", &subject, expect)
+		}
+	})
+
+	t.Run("it returns an error for invalid input", func(t *testing.T) {
+		t.Parallel()
+
+		cases := []struct {
+			Desc  string
+			Input string
+		}{
+			{"too short", "abc"},
+			{"missing space after UUID", "a967a8b9-3f9c-4918-9a41-19577be5fec5x"},
+			{"malformed UUID", "not-a-valid-uuid-at-all-nope-nope!! <name>"},
+			{"empty name", "a967a8b9-3f9c-4918-9a41-19577be5fec5 "},
+		}
+
+		for _, c := range cases {
+			t.Run(c.Desc, func(t *testing.T) {
+				t.Parallel()
+
+				var subject Identity
+				if err := subject.UnmarshalText([]byte(c.Input)); err == nil {
+					t.Fatal("expected an error")
+				}
+			})
+		}
+	})
+}
+
+func TestIdentity_UnmarshalText_OnlyAllocatesTheNameAndKey(t *testing.T) {
+	text := []byte("a967a8b9-3f9c-4918-9a41-19577be5fec5 <name>")
+	subject := New("<name>", uuidpb.Generate())
+
+	allocs := testing.AllocsPerRun(100, func() {
+		subject.UnmarshalText(text)
+	})
+
+	if allocs != 2 {
+		t.Fatalf("expected 2 allocations, got %f", allocs)
+	}
 }
 
 func TestIdentity_Equal(t *testing.T) {

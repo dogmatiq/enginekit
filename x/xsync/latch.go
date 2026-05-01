@@ -1,6 +1,7 @@
 package xsync
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 )
@@ -48,6 +49,16 @@ func (l *Latch) IsSet() bool {
 // Wait blocks until the latch is set.
 func (l *Latch) Wait() {
 	<-l.Chan()
+}
+
+// WaitContext blocks until the latch is set or ctx is canceled.
+func (l *Latch) WaitContext(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-l.Chan():
+		return nil
+	}
 }
 
 // Chan returns a channel that is closed when the latch is set.

@@ -38,8 +38,15 @@ func (a *Future[T]) Ready() <-chan struct{} {
 	return a.stored()
 }
 
-// Wait blocks until the value becomes available or the context is canceled.
-func (a *Future[T]) Wait(ctx context.Context) (T, error) {
+// Wait blocks until the value becomes available.
+func (a *Future[T]) Wait() T {
+	<-a.stored()
+	return *a.ptr.Load()
+}
+
+// WaitContext blocks until the value becomes available or the context is
+// canceled.
+func (a *Future[T]) WaitContext(ctx context.Context) (T, error) {
 	if p := a.ptr.Load(); p != nil {
 		return *p, nil
 	}

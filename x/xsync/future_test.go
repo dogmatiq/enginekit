@@ -15,17 +15,9 @@ func TestFuture(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		var f Future[int]
 
-		cancelled, cancel := context.WithCancel(t.Context())
-		cancel()
-
 		_, ok := f.Load()
 		if ok {
 			t.Fatal("did not expect load to succeed")
-		}
-
-		_, err := f.Wait(cancelled)
-		if err != context.Canceled {
-			t.Fatalf("unexpected error: got %v, want %v", err, context.Canceled)
 		}
 
 		want := 42
@@ -33,10 +25,7 @@ func TestFuture(t *testing.T) {
 		g, ctx := errgroup.WithContext(t.Context())
 
 		g.Go(func() error {
-			v, err := f.Wait(ctx)
-			if err != nil {
-				return fmt.Errorf("unexpected error waiting for future in background: %v", err)
-			}
+			v := f.Wait()
 
 			if v != want {
 				return fmt.Errorf("unexpected value after waiting for future in background: got %v, want %v", v, want)
@@ -74,18 +63,57 @@ func TestFuture(t *testing.T) {
 			t.Fatalf("unexpected value: got %v, want %v", v, want)
 		}
 
-		// Should not block despite context being cancelled.
-		v, err = f.Wait(cancelled)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if v != want {
-			t.Fatalf("unexpected value: got %v, want %v", v, want)
-		}
-
 		if err := g.Wait(); err != nil {
 			t.Fatal(err)
 		}
+	})
+
+	t.Run("WaitContext()", func(t *testing.T) {
+		t.Run("returns value when ready", func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				var f Future[int]
+
+				want := 42
+				var got int
+				var waitErr error
+
+				go func() {
+					got, waitErr = f.WaitContext(context.Background())
+				}()
+
+				synctest.Wait()
+				f.Store(want)
+				synctest.Wait()
+
+				if waitErr != nil {
+					t.Fatalf("unexpected error: %v", waitErr)
+				}
+
+				if got != want {
+					t.Fatalf("unexpected value: got %v, want %v", got, want)
+				}
+			})
+		})
+
+		t.Run("returns context error when canceled", func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				var f Future[int]
+
+				ctx, cancel := context.WithCancel(context.Background())
+
+				var waitErr error
+				go func() {
+					_, waitErr = f.WaitContext(ctx)
+				}()
+
+				synctest.Wait()
+				cancel()
+				synctest.Wait()
+
+				if waitErr != context.Canceled {
+					t.Fatalf("unexpected error: got %v, want %v", waitErr, context.Canceled)
+				}
+			})
+		})
 	})
 }

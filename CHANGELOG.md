@@ -11,18 +11,21 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
-## [Unreleased]
+## [0.25.0] - 2026-05-01
 
 ### Added
 
 - Added `MarshalText()` and `UnmarshalText()` methods to `uuidpb.UUID` and
   `identitypb.Identity`, implementing the `encoding.TextMarshaler` and
   `encoding.TextUnmarshaler` interfaces.
+- Added `Latch.WaitContext()`.
+- Added `Future.Wait()`.
 
 ### Changed
 
 - Changed `identitypb.Identity.Format()` to use `<uuid> <name>` representation
   for the `%s` verb, with `?` as a placeholder when the name is empty.
+- **[BC]** Renamed `Future.Wait()` to `Future.WaitContext()`.
 
 ## [0.24.1] - 2026-04-28
 
@@ -575,6 +578,7 @@ which itself includes a large numbers of breaking changes.
 [0.23.2]: https://github.com/dogmatiq/enginekit/releases/v0.23.2
 [0.24.0]: https://github.com/dogmatiq/enginekit/releases/v0.24.0
 [0.24.1]: https://github.com/dogmatiq/enginekit/releases/v0.24.1
+[0.25.0]: https://github.com/dogmatiq/enginekit/releases/v0.25.0
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

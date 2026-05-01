@@ -1,6 +1,7 @@
 package xsync_test
 
 import (
+	"context"
 	"testing"
 	"testing/synctest"
 
@@ -93,6 +94,48 @@ func TestLatch(t *testing.T) {
 			if !latch.IsSet() {
 				t.Fatal("expected latch to be set")
 			}
+		})
+	})
+
+	t.Run("WaitContext()", func(t *testing.T) {
+		t.Run("returns nil when the latch is set", func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				var latch Latch
+
+				var waitErr error
+				go func() {
+					waitErr = latch.WaitContext(context.Background())
+				}()
+
+				synctest.Wait()
+				latch.Set()
+				synctest.Wait()
+
+				if waitErr != nil {
+					t.Fatalf("unexpected error: %v", waitErr)
+				}
+			})
+		})
+
+		t.Run("returns context error when canceled", func(t *testing.T) {
+			synctest.Test(t, func(t *testing.T) {
+				var latch Latch
+
+				ctx, cancel := context.WithCancel(context.Background())
+
+				var waitErr error
+				go func() {
+					waitErr = latch.WaitContext(ctx)
+				}()
+
+				synctest.Wait()
+				cancel()
+				synctest.Wait()
+
+				if waitErr != context.Canceled {
+					t.Fatalf("unexpected error: got %v, want %v", waitErr, context.Canceled)
+				}
+			})
 		})
 	})
 }

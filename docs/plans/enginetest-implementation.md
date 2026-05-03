@@ -13,30 +13,48 @@ versus replay.
 
 ## Package Layout
 
-The `enginetest` package exports a single function:
+The public entry point lives in `enginetest/blackbox`. The name `blackbox`
+signals intent and makes the eventual move to `dogmatiq/dogma` easy — only
+the directory moves, not its name.
+
+Each obligation group lives in its own package under
+`enginetest/blackbox/internal/`. The `internal/` placement prevents external
+code from importing the sub-groups directly. Each sub-package:
+
+- exports a single `Run` function
+- defines its own message types with domain-relevant names (no generic
+  `TypeA`/`TypeB` stubs)
+- registers those types with hardcoded UUIDs
+- depends only on `github.com/dogmatiq/dogma` and the standard library
+  (the stubs package is a temporary dependency during development in
+  `enginekit`; it must be removed before the package moves to `dogma`)
+
+The top-level `blackbox` package exports a single function:
 
 ```go
+package blackbox
+
 func Run(t *testing.T, setup func(t *testing.T, app dogma.Application) dogma.CommandExecutor)
 ```
 
 `Run` delegates to unexported per-group functions. Each group lives in its
 own file:
 
-| File                  | Function              | Obligation Group  |
-| --------------------- | --------------------- | ----------------- |
-| `run.go`              | `Run`                 | entry point       |
-| `commandexecutor.go`  | `runCommandExecutor`  | CommandExecutor   |
-| `aggregate.go`        | `runAggregate`        | Aggregate         |
-| `integration.go`      | `runIntegration`      | Integration       |
-| `process.go`          | `runProcess`          | Process           |
-| `projection.go`       | `runProjection`       | Projection        |
-| `messageownership.go` | `runMessageOwnership` | Message Ownership |
-| `messageorder.go`     | `runMessageOrder`     | Message Order     |
+| Package                                         | Obligation Group  |
+| ----------------------------------------------- | ----------------- |
+| `enginetest/blackbox`                           | entry point       |
+| `enginetest/blackbox/internal/commandexecutor`  | CommandExecutor   |
+| `enginetest/blackbox/internal/integration`      | Integration       |
+| `enginetest/blackbox/internal/aggregate`        | Aggregate         |
+| `enginetest/blackbox/internal/process`          | Process           |
+| `enginetest/blackbox/internal/projection`       | Projection        |
+| `enginetest/blackbox/internal/messageownership` | Message Ownership |
+| `enginetest/blackbox/internal/messageorder`     | Message Order     |
 
-Each per-group function receives the same `setup` function and calls
-`t.Run` once per obligation. Every `t.Run` gets its own fresh `setup` call,
-its own `dogma.Application`, and its own handler stubs. There is no shared
-state between subtests.
+Each sub-package's `Run` function receives the same `setup` function and
+calls `t.Run` once per obligation. Every `t.Run` gets its own fresh `setup`
+call, its own `dogma.Application`, and its own handler implementations.
+There is no shared state between subtests.
 
 No registry, scenario struct, or indirection — just direct function calls.
 
@@ -45,26 +63,29 @@ No registry, scenario struct, or indirection — just direct function calls.
 Groups are implemented in order of increasing complexity. Each round nails
 down style and terminology before moving to the next.
 
-1. CommandExecutor
-2. Integration
-3. Aggregate
-4. Process
-5. Projection
-6. Message Ownership
-7. Message Order
+1. [x] CommandExecutor
+2. [x] Integration
+3. [ ] Aggregate
+4. [ ] Process
+5. [ ] Projection
+6. [ ] Message Ownership
+7. [ ] Message Order
 
 ## Message Types
 
-Tests reuse the pre-registered letter-based stubs — `CommandStub[TypeA]`,
-`EventStub[TypeB]`, and so on. Each scenario starts from `TypeA` and uses
-as many letters as it needs. Letter choice is arbitrary per scenario but
-should be mnemonic where practical — `TypeC` for "credit", `TypeW` for
-"withdrawal."
+Each sub-package defines its own concrete message types with domain-relevant
+names. Generic letter-suffix types (`TypeA`, `TypeB`) are not used — names
+should reflect the obligation being tested. For example, the integration
+package might define `ChargeCard` (command) and `CardCharged` (event) for
+the atomicity test, or simply `TriggerCommand` / `CommandTriggered` when no
+domain metaphor is natural.
 
-Custom type parameters (e.g., `CommandStub[*mutableData]`) are used only
-when the letter types are insufficient — for example, message ownership
-tests that require mutable content. These custom types are defined in the
-file that uses them and registered with a hardcoded UUID.
+Each type is registered with a hardcoded UUID. Since types are registered
+globally, UUIDs must be unique across all sub-packages. By convention each
+sub-package owns a dedicated UUID namespace.
+
+No cross-package message type sharing. If two sub-packages need the same
+logical message shape, they each define their own type.
 
 ## Handler Identities
 
@@ -121,6 +142,16 @@ noting the untested direction.
 
 ## Obligation-Specific Notes
 
+### Message Content Preservation
+
+Each handler-type test suite includes at least one scenario where the
+command and/or event types carry a real field (e.g., a string ID). The
+handler asserts that the value it receives matches what the caller sent.
+This verifies the engine's marshal/unmarshal cycle preserves content.
+
+Other scenarios may use empty structs when content fidelity is not the
+subject under test.
+
 ### CommandExecutor — WithIdempotencyKey
 
 The handler records events and increments a call counter. The test executes
@@ -130,18 +161,28 @@ that the second call returns `ErrEventObserverNotSatisfied`.
 
 ### Integration — Exactly-Once Events
 
-The handler calls `RecordEvent` and then returns an error on the first
-invocation, forcing the engine to retry. On the second invocation, it calls
-`RecordEvent` with a different event and returns nil. The test asserts that
-only the second invocation's events are persisted.
+**Abandoned.** Testing the "events from a failed invocation are discarded"
+obligation requires the engine to retry a failed `HandleCommand` call.
+Retry behavior is not uniformly testable at this abstraction level — some
+engines (e.g., testkit) surface errors immediately by design, and
+production engines may retry after a delay. See the [Untestable Obligations]
+section of `enginetest.md` for full reasoning.
+
+The atomicity obligation (all events from a successful invocation are
+persisted) is tested instead.
 
 ### Aggregate — Event Replay
 
 The test sends two commands to the same aggregate instance. It verifies
-that `ApplyEvent` is called (via the `AggregateRootStub`'s
-`AppliedEvents` field) and that the root state is correct when the second
-`HandleCommand` is called. The test does not distinguish replay from
-caching — only the observable state matters.
+that `ApplyEvent` is called and that the root state is correct when the
+second `HandleCommand` is called. The test does not distinguish replay
+from caching — only the observable state matters.
+
+The root type used in this test implements `MarshalBinary` /
+`UnmarshalBinary` with real field values, acting as a snapshot smoke test.
+The engine may or may not invoke marshaling; either way, correctness must
+hold. The test does not assert that snapshotting occurred — only that the
+final state is correct.
 
 ### Process — End
 
@@ -159,10 +200,15 @@ Three subtests:
 ### Process — State Persistence
 
 The test sends two events to the same process instance. The first handler
-call modifies the `ProcessRootStub.Value` field. The second handler call
-asserts that the root's `Value` reflects the first call's changes — proving
-the engine round-tripped the state through `MarshalBinary` /
-`UnmarshalBinary`.
+call modifies a field on the root. The second handler call asserts that
+the root reflects those changes — proving the engine round-tripped the
+state between invocations.
+
+The root type implements `MarshalBinary` / `UnmarshalBinary` with real
+field values. The engine may persist state by snapshotting or by replaying
+events through the root; either way correctness must hold. The test does
+not assert that snapshotting occurred — only that the final state is
+correct.
 
 ### Projection — OCC Conflict
 
@@ -213,14 +259,15 @@ use (
 )
 ```
 
-A temporary test file in the `testkit` clone calls `enginetest.Run` against
+A temporary test file in the `testkit` clone calls `blackbox.Run` against
 `testkit`'s engine. The `go.work` file resolves `enginekit` to the local
 clone, so changes are tested immediately.
 
 In steady state, `testkit` (and any other engine) imports
-`enginekit/enginetest` and runs the suite in its own test files. The
-`go.work` file is not committed.
+`enginekit/enginetest/blackbox` and runs the suite in its own test files.
+The `go.work` file is not committed.
 
 <!-- references -->
 
 [enginetest.md]: enginetest.md
+[Untestable Obligations]: enginetest.md#untestable-obligations

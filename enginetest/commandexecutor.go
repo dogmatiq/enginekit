@@ -5,7 +5,6 @@ import (
 	"errors"
 	"sync/atomic"
 	"testing"
-	"time"
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/enginetest/stubs"
@@ -19,48 +18,6 @@ func runCommandExecutor(
 
 	t.Run("CommandExecutor", func(t *testing.T) {
 		t.Run("func ExecuteCommand()", func(t *testing.T) {
-			t.Run("it routes the command to the correct handler", func(t *testing.T) {
-				called := make(chan struct{}, 1)
-
-				handler := &stubs.IntegrationMessageHandlerStub{
-					ConfigureFunc: func(c dogma.IntegrationConfigurer) {
-						c.Identity("handler", "a7665b1b-14d1-46e7-8667-8bd7252fd059")
-						c.Routes(
-							dogma.HandlesCommand[*stubs.CommandStub[stubs.TypeA]](),
-						)
-					},
-					HandleCommandFunc: func(context.Context, dogma.IntegrationCommandScope, dogma.Command) error {
-						called <- struct{}{}
-						return nil
-					},
-				}
-
-				app := &stubs.ApplicationStub{
-					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
-						c.Identity("app", "4ea05b58-e949-4aaf-8493-74b3521e8906")
-						c.Routes(
-							dogma.ViaIntegration(handler),
-						)
-					},
-				}
-
-				executor := setup(t, app)
-
-				err := executor.ExecuteCommand(
-					t.Context(),
-					&stubs.CommandStub[stubs.TypeA]{},
-				)
-				if err != nil {
-					t.Fatal(err)
-				}
-
-				select {
-				case <-called:
-				case <-time.After(5 * time.Second):
-					t.Fatal("timed out waiting for handler to be called")
-				}
-			})
-
 			t.Run("when the command has no route", func(t *testing.T) {
 				t.Run("it panics", func(t *testing.T) {
 					handler := &stubs.IntegrationMessageHandlerStub{
@@ -202,7 +159,7 @@ func runCommandExecutor(
 						t.Context(),
 						&stubs.CommandStub[stubs.TypeA]{},
 						dogma.WithEventObserver(
-							func(_ context.Context, _ *stubs.EventStub[stubs.TypeB]) (bool, error) {
+							func(context.Context, *stubs.EventStub[stubs.TypeB]) (bool, error) {
 								observed = true
 								return true, nil
 							},
@@ -243,7 +200,7 @@ func runCommandExecutor(
 							t.Context(),
 							&stubs.CommandStub[stubs.TypeA]{},
 							dogma.WithEventObserver(
-								func(_ context.Context, _ *stubs.EventStub[stubs.TypeA]) (bool, error) {
+								func(context.Context, *stubs.EventStub[stubs.TypeA]) (bool, error) {
 									return false, nil
 								},
 							),
@@ -291,7 +248,7 @@ func runCommandExecutor(
 						&stubs.CommandStub[stubs.TypeA]{},
 						dogma.WithIdempotencyKey("dedup-key"),
 						dogma.WithEventObserver(
-							func(_ context.Context, _ *stubs.EventStub[stubs.TypeA]) (bool, error) {
+							func(context.Context, *stubs.EventStub[stubs.TypeA]) (bool, error) {
 								return true, nil
 							},
 						),
@@ -309,7 +266,7 @@ func runCommandExecutor(
 						&stubs.CommandStub[stubs.TypeA]{},
 						dogma.WithIdempotencyKey("dedup-key"),
 						dogma.WithEventObserver(
-							func(_ context.Context, _ *stubs.EventStub[stubs.TypeA]) (bool, error) {
+							func(context.Context, *stubs.EventStub[stubs.TypeA]) (bool, error) {
 								return true, nil
 							},
 						),

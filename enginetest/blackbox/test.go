@@ -1,9 +1,11 @@
-package enginetest
+package blackbox
 
 import (
 	"testing"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/commandexecutor"
+	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/integration"
 )
 
 // Run runs the engine acceptance test suite.
@@ -16,5 +18,6 @@ func Run(
 	setup func(t *testing.T, app dogma.Application) dogma.CommandExecutor,
 ) {
 	t.Helper()
-	runCommandExecutor(t, setup)
+	commandexecutor.Run(t, setup)
+	integration.Run(t, setup)
 }

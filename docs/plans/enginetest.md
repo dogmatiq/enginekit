@@ -25,7 +25,11 @@ reason:
   channels, and closures.
 - **Messages must round-trip.** The engine is expected to marshal and
   unmarshal messages ([ADR-28]). Test message types must implement
-  `MarshalBinary` and `UnmarshalBinary` correctly.
+  `MarshalBinary` and `UnmarshalBinary` correctly. At least one test
+  scenario per handler type uses messages and roots with real field values
+  to verify that content is preserved through the marshal/unmarshal cycle.
+  Empty structs are acceptable for other scenarios where content fidelity
+  is not the subject of the test.
 
 ## Public API
 
@@ -146,6 +150,13 @@ and recording events.
   _Source: `AggregateMessageHandler.HandleCommand` doc comment — "r
   reflects the state of the targeted instance after applying its historical
   events."_
+- If the engine supports snapshotting, it must not affect the correctness
+  of `HandleCommand`. A root that implements `MarshalBinary` /
+  `UnmarshalBinary` with real state must receive the correct state
+  regardless of whether the engine restores it from a snapshot or from
+  event replay. This is tested as a smoke test — the test does not force
+  a snapshot/restore cycle, but the root's marshaling code is reachable
+  if the engine chooses to use it.
 
 ### Integration
 
@@ -164,6 +175,7 @@ handling commands and optionally recording events.
   _Source: `IntegrationMessageHandler.HandleCommand` doc comment — "the
   engine atomically persists the events recorded by exactly one successful
   invocation."_
+  **Untestable at this abstraction level — see [Untestable Obligations].**
 
 ### Process
 
@@ -199,6 +211,12 @@ commands.
   _Source: `ProcessMessageHandler.HandleEvent` doc comment — "r reflects
   the state of the targeted instance after handling any prior Event or
   Timeout messages"; [ADR-28]._
+- A root that implements `MarshalBinary` / `UnmarshalBinary` with real
+  state must survive round-tripping without loss of correctness. This is
+  tested as a smoke test alongside the state persistence test — the same
+  test that verifies state across invocations uses a root that implements
+  real marshaling, ensuring the marshal/unmarshal path is exercised if
+  the engine chooses to use it.
 
 ### Projection
 
@@ -263,6 +281,43 @@ doc comments._
   scheduled time. **[ADR only]**
   _Source: [ADR-23]. This specific guarantee is not restated in the
   `HandleTimeout` doc comment._
+
+## Untestable Obligations
+
+Some obligations are real and must be satisfied by conforming engines, but
+cannot be verified by this black-box acceptance suite. They are documented
+here so they are not lost, and so future work can revisit them.
+
+### Future: engine capabilities
+
+Some of these obligations may become conditionally testable if engines can
+declare which optional behaviors they support. The suite would then enable
+the corresponding tests only when the capability is declared — allowing
+stronger testing of engines that make stronger guarantees without
+penalizing engines that don't.
+
+### Integration — events from a failed invocation are discarded
+
+The `IntegrationMessageHandler.HandleCommand` doc comment states:
+
+> The engine atomically persists the events recorded by exactly one
+> successful invocation of this method for each command message.
+
+The "exactly one successful" clause implies that events recorded during a
+failed invocation (one that returns a non-nil error) must be discarded.
+
+Testing this requires the engine to retry a failed invocation. Retry is not
+uniformly testable at this abstraction level:
+
+- Some engines (e.g., testkit) surface handler errors immediately by
+  design. Silently retrying would suppress failures during testing and
+  undermine the engine's core value.
+- Production engines may retry after a delay, making any black-box test
+  either slow, timing-sensitive, or flaky.
+
+The "all events or none" direction of atomicity (a successful invocation
+persists all of its events) is tested directly in the Integration suite.
+Only the rollback-on-failure direction is untestable here.
 
 <!-- references -->
 

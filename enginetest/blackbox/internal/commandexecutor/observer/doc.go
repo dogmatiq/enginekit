@@ -1,2 +1,2 @@
-// Package observer tests the WithEventObserver obligation of CommandExecutor.
+// Package observer tests the WithEventObserver option of CommandExecutor.
 package observer

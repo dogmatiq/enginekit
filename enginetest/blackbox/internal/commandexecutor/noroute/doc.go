@@ -1,3 +1,3 @@
-// Package noroute tests the obligation that executing a command with no route
+// Package noroute tests that executing a command with no route panics.
 // causes the engine to panic.
 package noroute

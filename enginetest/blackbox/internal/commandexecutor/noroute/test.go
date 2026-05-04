@@ -6,7 +6,7 @@ import (
 	"github.com/dogmatiq/dogma"
 )
 
-// Run runs the no-route obligation tests.
+// Run runs the no-route tests.
 func Run(
 	t *testing.T,
 	setup func(t *testing.T, app dogma.Application) dogma.CommandExecutor,

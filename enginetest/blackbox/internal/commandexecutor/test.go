@@ -9,7 +9,7 @@ import (
 	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/commandexecutor/observer"
 )
 
-// Run runs the CommandExecutor obligation tests against the engine provided by
+// Run runs the CommandExecutor tests against the engine provided by
 // setup.
 func Run(
 	t *testing.T,

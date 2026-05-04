@@ -1,2 +1,2 @@
-// Package idempotency tests the WithIdempotencyKey obligation of CommandExecutor.
+// Package idempotency tests the WithIdempotencyKey option of CommandExecutor.
 package idempotency

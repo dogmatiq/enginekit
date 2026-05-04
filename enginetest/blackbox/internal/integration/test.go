@@ -8,7 +8,7 @@ import (
 	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/integration/routing"
 )
 
-// Run runs the Integration obligation tests against the engine provided by
+// Run runs the Integration handler tests against the engine provided by
 // setup.
 func Run(
 	t *testing.T,

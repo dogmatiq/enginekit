@@ -1,15 +1,15 @@
 # Engine Acceptance Test Suite — Implementation Plan
 
-This document describes how the obligations in [enginetest.md] are
+This document describes how the engine behavior requirements in [enginetest.md] are
 implemented as Go tests. Read that document first — it defines the
-obligations and their sources.
+requirements and their sources.
 
 ## Design Principles
 
 The test suite is a "very thorough smoke test." It verifies every
-obligation that is observable from outside the engine. It does not inject
-engine-internal failures or test implementation details such as caching
-versus replay.
+engine behavior requirement that is observable from outside the engine. It
+does not inject engine-internal failures or test implementation details such
+as caching versus replay.
 
 ## Package Layout
 
@@ -17,7 +17,7 @@ The public entry point lives in `enginetest/blackbox`. The name `blackbox`
 signals intent and makes the eventual move to `dogmatiq/dogma` easy — only
 the directory moves, not its name.
 
-Each obligation group lives in its own package under
+Each handler group lives in its own package under
 `enginetest/blackbox/internal/`. The `internal/` placement prevents external
 code from importing the sub-groups directly. Each sub-package:
 
@@ -37,10 +37,10 @@ package blackbox
 func Run(t *testing.T, setup func(t *testing.T, app dogma.Application) dogma.CommandExecutor)
 ```
 
-`Run` delegates to unexported per-group functions. Each group lives in its
+`Run` delegates to per-handler-type packages. Each group lives in its
 own file:
 
-| Package                                         | Obligation Group  |
+| Package                                         | Handler / Feature |
 | ----------------------------------------------- | ----------------- |
 | `enginetest/blackbox`                           | entry point       |
 | `enginetest/blackbox/internal/commandexecutor`  | CommandExecutor   |
@@ -52,7 +52,7 @@ own file:
 | `enginetest/blackbox/internal/messageorder`     | Message Order     |
 
 Each sub-package's `Run` function receives the same `setup` function and
-calls `t.Run` once per obligation. Every `t.Run` gets its own fresh `setup`
+calls `t.Run` once per test. Every `t.Run` gets its own fresh `setup`
 call, its own `dogma.Application`, and its own handler implementations.
 There is no shared state between subtests.
 
@@ -65,9 +65,9 @@ down style and terminology before moving to the next.
 
 1. [x] CommandExecutor
 2. [x] Integration
-3. [ ] Aggregate
-4. [ ] Process
-5. [ ] Projection
+3. [x] Aggregate
+4. [x] Process
+5. [x] Projection
 6. [ ] Message Ownership
 7. [ ] Message Order
 
@@ -186,16 +186,19 @@ final state is correct.
 
 ### Process — End
 
-Three subtests:
+Two subtests are implemented:
 
-1. After `End`, the instance's pending timeouts are canceled and its state
-   is discarded.
-2. Calling `ExecuteCommand` or `ScheduleTimeout` after `End` on the same
-   scope causes a panic. The handler stub uses `defer`/`recover` inside the
-   handler function and flags whether the expected panic occurred.
-3. Future events targeting the ended instance are ignored. This is a
-   negative assertion — decision on whether to test it with a short timeout
-   or omit it entirely is deferred.
+1. Calling `ExecuteCommand` after `End` on the same scope causes a panic.
+   The handler stub uses `defer`/`recover` inside the handler function and
+   flags whether the expected panic occurred.
+2. Future events targeting the ended instance are ignored. Tested with a
+   100 ms wall-clock timeout as a negative assertion.
+
+The third planned subtest — "pending timeouts are canceled after `End`" —
+is not implemented. It requires a timeout to have been scheduled before
+`End` is called and for the engine to prove it never delivers. That is a
+negative assertion with no causal sync point, making it inherently racy
+under real engines. It is deferred.
 
 ### Process — State Persistence
 
@@ -212,17 +215,15 @@ correct.
 
 ### Projection — OCC Conflict
 
-Three subtests covering the OCC checkpoint protocol:
+**Partially implemented.** Only the normal path is tested:
 
 1. Normal — handler returns `offset + 1`. The engine advances.
-2. Backward — handler returns an offset less than `offset + 1`. The engine
-   replays events from the returned offset.
-3. Forward — handler returns an offset greater than `offset + 1`. The
-   engine skips ahead to the returned offset.
 
-The projection stub tracks call counts and conditionally returns abnormal
-checkpoints. It records the offsets and events it receives so the test can
-assert replay or skip behavior.
+The backward and forward conflict paths (returning an offset other than
+`offset + 1`) are not testable at this abstraction level. Testkit treats
+any non-`(offset + 1)` return value as an error rather than a replay or
+skip signal, so the behavior cannot be observed through the
+`CommandExecutor` interface.
 
 ### Message Ownership — Mutable Content
 

@@ -8,7 +8,7 @@ import (
 	"github.com/dogmatiq/dogma"
 )
 
-// Run runs the WithEventObserver obligation tests.
+// Run runs the WithEventObserver tests.
 func Run(
 	t *testing.T,
 	setup func(t *testing.T, app dogma.Application) dogma.CommandExecutor,

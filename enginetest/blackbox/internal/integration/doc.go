@@ -1,2 +1,2 @@
-// Package integration contains the Integration handler obligation tests.
+// Package integration tests IntegrationMessageHandler behavior.
 package integration

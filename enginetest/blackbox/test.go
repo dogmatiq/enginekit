@@ -4,8 +4,11 @@ import (
 	"testing"
 
 	"github.com/dogmatiq/dogma"
+	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/aggregate"
 	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/commandexecutor"
 	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/integration"
+	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/process"
+	"github.com/dogmatiq/enginekit/enginetest/blackbox/internal/projection"
 )
 
 // Run runs the engine acceptance test suite.
@@ -20,4 +23,7 @@ func Run(
 	t.Helper()
 	commandexecutor.Run(t, setup)
 	integration.Run(t, setup)
+	aggregate.Run(t, setup)
+	process.Run(t, setup)
+	projection.Run(t, setup)
 }

@@ -1,2 +1,2 @@
-// Package commandexecutor contains the CommandExecutor obligation tests.
+// Package commandexecutor tests CommandExecutor behavior.
 package commandexecutor

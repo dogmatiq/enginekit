@@ -43,7 +43,7 @@ const (
 	SchedulesDeadlineRouteType
 )
 
-// RouteTypes returns a list of all [HandlerType] values.
+// RouteTypes returns a list of all [RouteType] values.
 func RouteTypes() iter.Seq[RouteType] {
 	return enum.Range(HandlesCommandRouteType, SchedulesDeadlineRouteType)
 }

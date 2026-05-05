@@ -31,7 +31,7 @@ func (s *CommandStub[T]) MessageDescription() string {
 	)
 }
 
-// Validate returns a non-nil error if c.Invalid is not empty.
+// Validate returns a non-nil error if s.ValidationError is not empty.
 func (s *CommandStub[T]) Validate(dogma.CommandValidationScope) error {
 	if s.ValidationError != "" {
 		return errors.New(s.ValidationError)
@@ -69,7 +69,7 @@ func (s *EventStub[T]) MessageDescription() string {
 	)
 }
 
-// Validate returns a non-nil error if c.Invalid is not empty.
+// Validate returns a non-nil error if s.ValidationError is not empty.
 func (s *EventStub[T]) Validate(dogma.EventValidationScope) error {
 	if s.ValidationError != "" {
 		return errors.New(s.ValidationError)
@@ -107,7 +107,7 @@ func (s *DeadlineStub[T]) MessageDescription() string {
 	)
 }
 
-// Validate returns a non-nil error if c.Invalid is not empty.
+// Validate returns a non-nil error if s.ValidationError is not empty.
 func (s *DeadlineStub[T]) Validate(dogma.DeadlineValidationScope) error {
 	if s.ValidationError != "" {
 		return errors.New(s.ValidationError)

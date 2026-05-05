@@ -23,7 +23,7 @@ func TypeFor[T dogma.Message]() Type {
 
 // TypeOf returns the message type of m.
 //
-// It panics if T does not implement [dogma.Command], [dogma.Event] or
+// It panics if m does not implement [dogma.Command], [dogma.Event] or
 // [dogma.Deadline], or if m is nil.
 func TypeOf(m dogma.Message) Type {
 	return TypeFromReflect(reflect.TypeOf(m))
@@ -32,7 +32,7 @@ func TypeOf(m dogma.Message) Type {
 // TypeFromReflect returns the message type for the Go type represented by r.
 //
 // It panics if r does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Deadline], or if m is nil.
+// [dogma.Deadline], or if r is nil.
 func TypeFromReflect(r reflect.Type) Type {
 	guardAgainstNonMessage(r)
 	return Type{r}
@@ -46,7 +46,7 @@ func (t Type) Name() Name {
 
 // Kind returns the kind of the message represented by t.
 //
-// It panics of t does not implement [dogma.Command], [dogma.Event] or
+// It panics if t does not implement [dogma.Command], [dogma.Event] or
 // [dogma.Deadline].
 func (t Type) Kind() Kind {
 	return kindFromReflect(t.r)

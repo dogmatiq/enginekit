@@ -29,7 +29,7 @@ func TestTypeFor(t *testing.T) {
 	})
 
 	t.Run("it panics if the message does not implement any of the more specific interfaces", func(t *testing.T) {
-		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Deadline")
 		TypeFor[*partialMessage]()
 	})
 }
@@ -45,7 +45,7 @@ func TestTypeOf(t *testing.T) {
 	})
 
 	t.Run("it panics if the message does not implement any of the more specific interfaces", func(t *testing.T) {
-		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Deadline")
 		TypeOf(&partialMessage{})
 	})
 }
@@ -66,12 +66,12 @@ func TestTypeFromReflect(t *testing.T) {
 	})
 
 	t.Run("it panics if the type is not a message", func(t *testing.T) {
-		defer expectPanic(t, "int does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		defer expectPanic(t, "int does not implement dogma.Command, dogma.Event or dogma.Deadline")
 		TypeFromReflect(reflect.TypeFor[int]())
 	})
 
 	t.Run("it panics if the type does not implement any of the more specific interfaces", func(t *testing.T) {
-		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Timeout")
+		defer expectPanic(t, "*message_test.partialMessage does not implement dogma.Command, dogma.Event or dogma.Deadline")
 		TypeFromReflect(reflect.TypeFor[*partialMessage]())
 	})
 }

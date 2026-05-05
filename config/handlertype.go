@@ -53,9 +53,9 @@ func (t HandlerType) RouteCapabilities() RouteCapabilities {
 				RecordsEventRouteType:   RouteTypeRequired,
 			},
 			map[RouteType]RouteCapability{
-				HandlesEventRouteType:     RouteTypeRequired,
-				ExecutesCommandRouteType:  RouteTypeRequired,
-				SchedulesTimeoutRouteType: RouteTypeAllowed,
+				HandlesEventRouteType:      RouteTypeRequired,
+				ExecutesCommandRouteType:   RouteTypeRequired,
+				SchedulesDeadlineRouteType: RouteTypeAllowed,
 			},
 			map[RouteType]RouteCapability{
 				HandlesCommandRouteType: RouteTypeRequired,

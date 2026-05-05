@@ -90,9 +90,9 @@ func (p *EffectPacker) PackEvent(m dogma.Event, options ...PackEffectEventOption
 	packEffectBody(p, m, PackEffectEventOption.applyPackEffectEventOption, options...)
 }
 
-// PackTimeout appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackTimeout(m dogma.Timeout, options ...PackEffectTimeoutOption) {
-	packEffectBody(p, m, PackEffectTimeoutOption.applyPackEffectTimeoutOption, options...)
+// PackDeadline appends m to the multi-envelope under construction.
+func (p *EffectPacker) PackDeadline(m dogma.Deadline, options ...PackEffectDeadlineOption) {
+	packEffectBody(p, m, PackEffectDeadlineOption.applyPackEffectDeadlineOption, options...)
 }
 
 func packEffectBody[T any](

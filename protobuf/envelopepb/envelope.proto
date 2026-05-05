@@ -111,7 +111,7 @@ message Body {
   // This is typically the point at which the message first enters the engine.
   google.protobuf.Timestamp created_at = 3;
 
-  // ScheduledFor is the time at which a timeout message is scheduled to occur.
+  // ScheduledFor is the time at which a deadline is reached.
   //
   // It is the zero-value if the message is a command or event.
   google.protobuf.Timestamp scheduled_for = 4;

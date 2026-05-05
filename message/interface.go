@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	commandInterface = reflect.TypeFor[dogma.Command]()
-	eventInterface   = reflect.TypeFor[dogma.Event]()
-	timeoutInterface = reflect.TypeFor[dogma.Timeout]()
+	commandInterface  = reflect.TypeFor[dogma.Command]()
+	eventInterface    = reflect.TypeFor[dogma.Event]()
+	deadlineInterface = reflect.TypeFor[dogma.Deadline]()
 )
 
 // tryInterfaceOf returns the message interface that r implements, or nil if it
@@ -28,8 +28,8 @@ func tryInterfaceOf(r reflect.Type) reflect.Type {
 		return eventInterface
 	}
 
-	if r.Implements(timeoutInterface) {
-		return timeoutInterface
+	if r.Implements(deadlineInterface) {
+		return deadlineInterface
 	}
 
 	return nil
@@ -42,7 +42,7 @@ func interfaceOf(r reflect.Type) reflect.Type {
 		return i
 	}
 
-	panic(fmt.Sprintf("%s does not implement dogma.Command, dogma.Event or dogma.Timeout", r))
+	panic(fmt.Sprintf("%s does not implement dogma.Command, dogma.Event or dogma.Deadline", r))
 }
 
 func guardAgainstNonMessage(r reflect.Type) {

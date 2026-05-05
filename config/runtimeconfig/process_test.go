@@ -55,7 +55,7 @@ func TestFromProcess(t *testing.T) {
 					c.Routes(
 						dogma.HandlesEvent[*EventStub[TypeA]](),
 						dogma.ExecutesCommand[*CommandStub[TypeA]](),
-						dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
+						dogma.SchedulesDeadline[*DeadlineStub[TypeA]](),
 					)
 					c.Disable()
 				},
@@ -86,10 +86,10 @@ func TestFromProcess(t *testing.T) {
 								MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 							},
 							{
-								RouteType:       optional.Some(config.SchedulesTimeoutRouteType),
-								MessageTypeID:   optional.Some(MessageTypeID[*TimeoutStub[TypeA]]()),
-								MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
-								MessageType:     optional.Some(message.TypeFor[*TimeoutStub[TypeA]]()),
+								RouteType:       optional.Some(config.SchedulesDeadlineRouteType),
+								MessageTypeID:   optional.Some(MessageTypeID[*DeadlineStub[TypeA]]()),
+								MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
+								MessageType:     optional.Some(message.TypeFor[*DeadlineStub[TypeA]]()),
 							},
 						},
 						DisabledFlags: []*config.Flag[config.Disabled]{

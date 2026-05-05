@@ -18,9 +18,9 @@ func SwitchByKind(
 	k Kind,
 	command func(),
 	event func(),
-	timeout func(),
+	deadline func(),
 ) {
-	enum.Switch(k, command, event, timeout)
+	enum.Switch(k, command, event, deadline)
 }
 
 // MapByKind maps k to a value of type T.
@@ -29,8 +29,8 @@ func SwitchByKind(
 // even if new [Kind] values are added in the future.
 //
 // It panics if k is not a valid [Kind].
-func MapByKind[T any](k Kind, command, event, timeout T) T {
-	return enum.Map(k, command, event, timeout)
+func MapByKind[T any](k Kind, command, event, deadline T) T {
+	return enum.Map(k, command, event, deadline)
 }
 
 // SwitchByKindOf invokes one of the provided functions based on the [Kind] of m.
@@ -39,12 +39,12 @@ func MapByKind[T any](k Kind, command, event, timeout T) T {
 // [Kind] values are added in the future.
 //
 // It panics if the function associated with m's kind is nil, or if m does not
-// implement [dogma.Command], [dogma.Event] or [dogma.Timeout].
+// implement [dogma.Command], [dogma.Event] or [dogma.Deadline].
 func SwitchByKindOf(
 	m dogma.Message,
 	command func(dogma.Command),
 	event func(dogma.Event),
-	timeout func(dogma.Timeout),
+	deadline func(dogma.Deadline),
 ) {
 	switch m := m.(type) {
 	case dogma.Command:
@@ -57,14 +57,14 @@ func SwitchByKindOf(
 			panic("no case function was provided for dogma.Event")
 		}
 		event(m)
-	case dogma.Timeout:
-		if timeout == nil {
-			panic("no case function was provided for dogma.Timeout")
+	case dogma.Deadline:
+		if deadline == nil {
+			panic("no case function was provided for dogma.Deadline")
 		}
-		timeout(m)
+		deadline(m)
 	default:
 		panic(fmt.Sprintf(
-			"%T implements dogma.Message, but does not implement dogma.Command, dogma.Event or dogma.Timeout",
+			"%T implements dogma.Message, but does not implement dogma.Command, dogma.Event or dogma.Deadline",
 			m,
 		))
 	}
@@ -77,18 +77,18 @@ func SwitchByKindOf(
 // [Kind] values are added in the future.
 //
 // It panics if the function associated with m's kind is nil, or if m does not
-// implement [dogma.Command], [dogma.Event] or [dogma.Timeout].
+// implement [dogma.Command], [dogma.Event] or [dogma.Deadline].
 func MapByKindOf[T any](
 	m dogma.Message,
 	command func(dogma.Command) T,
 	event func(dogma.Event) T,
-	timeout func(dogma.Timeout) T,
+	deadline func(dogma.Deadline) T,
 ) (result T) {
 	SwitchByKindOf(
 		m,
 		enum.AssignResult(command, &result),
 		enum.AssignResult(event, &result),
-		enum.AssignResult(timeout, &result),
+		enum.AssignResult(deadline, &result),
 	)
 
 	return result
@@ -101,18 +101,18 @@ func MapByKindOf[T any](
 // [Kind] values are added in the future.
 //
 // It panics if the function associated with m's kind is nil, or if m does not
-// implement [dogma.Command], [dogma.Event] or [dogma.Timeout].
+// implement [dogma.Command], [dogma.Event] or [dogma.Deadline].
 func MapByKindOfWithErr[T any](
 	m dogma.Message,
 	command func(dogma.Command) (T, error),
 	event func(dogma.Event) (T, error),
-	timeout func(dogma.Timeout) (T, error),
+	deadline func(dogma.Deadline) (T, error),
 ) (result T, err error) {
 	SwitchByKindOf(
 		m,
 		enum.AssignResultErr(command, &result, &err),
 		enum.AssignResultErr(event, &result, &err),
-		enum.AssignResultErr(timeout, &result, &err),
+		enum.AssignResultErr(deadline, &result, &err),
 	)
 
 	return result, err

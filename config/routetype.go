@@ -36,16 +36,16 @@ const (
 	// It is associated with routes configured by [dogma.RecordsEvent].
 	RecordsEventRouteType
 
-	// SchedulesTimeoutRouteType is a [RouteType] that indicates a [Handler]
-	// schedules a specific type of [dogma.Timeout] message.
+	// SchedulesDeadlineRouteType is a [RouteType] that indicates a [Handler]
+	// schedules a specific type of [dogma.Deadline] message.
 	//
-	// It is associated with routes configured by [dogma.SchedulesTimeout].
-	SchedulesTimeoutRouteType
+	// It is associated with routes configured by [dogma.SchedulesDeadline].
+	SchedulesDeadlineRouteType
 )
 
 // RouteTypes returns a list of all [HandlerType] values.
 func RouteTypes() iter.Seq[RouteType] {
-	return enum.Range(HandlesCommandRouteType, SchedulesTimeoutRouteType)
+	return enum.Range(HandlesCommandRouteType, SchedulesDeadlineRouteType)
 }
 
 // Direction returns the direction in which messages flow for the route type.
@@ -68,7 +68,7 @@ func (r RouteType) MessageKind() message.Kind {
 		message.EventKind,
 		message.CommandKind,
 		message.EventKind,
-		message.TimeoutKind,
+		message.DeadlineKind,
 	)
 }
 
@@ -79,7 +79,7 @@ func (r RouteType) String() string {
 		"handles-event",
 		"executes-command",
 		"records-event",
-		"schedules-timeout",
+		"schedules-deadline",
 	)
 }
 
@@ -96,7 +96,7 @@ func SwitchByRouteType(
 	handlesEvent func(),
 	executesCommand func(),
 	recordsEvent func(),
-	schedulesTimeout func(),
+	schedulesDeadline func(),
 ) {
 	enum.Switch(
 		t,
@@ -104,7 +104,7 @@ func SwitchByRouteType(
 		handlesEvent,
 		executesCommand,
 		recordsEvent,
-		schedulesTimeout,
+		schedulesDeadline,
 	)
 }
 
@@ -120,7 +120,7 @@ func MapByRouteType[T any](
 	handlesEvent T,
 	executesCommand T,
 	recordsEvent T,
-	schedulesTimeout T,
+	schedulesDeadline T,
 ) T {
 	return enum.Map(
 		t,
@@ -128,6 +128,6 @@ func MapByRouteType[T any](
 		handlesEvent,
 		executesCommand,
 		recordsEvent,
-		schedulesTimeout,
+		schedulesDeadline,
 	)
 }

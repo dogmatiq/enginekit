@@ -189,14 +189,14 @@ func TestPacker_CausedBy(t *testing.T) {
 			handlerA,
 			WithInstanceID("instance-a"),
 		)
-		left.PackTimeout(TimeoutA1, WithScheduledFor(time.Now().Add(time.Hour)))
+		left.PackDeadline(DeadlineA1, WithScheduledFor(time.Now().Add(time.Hour)))
 
 		right := packer.PackEffects(
 			cause,
 			handlerB,
 			WithInstanceID("instance-b"),
 		)
-		right.PackTimeout(TimeoutA2, WithScheduledFor(time.Now().Add(2*time.Hour)))
+		right.PackDeadline(DeadlineA2, WithScheduledFor(time.Now().Add(2*time.Hour)))
 
 		leftEnv, ok := left.Seal()
 		if !ok {
@@ -487,7 +487,7 @@ func TestEffectPacker_Pack(t *testing.T) {
 			t,
 			"invalid body: invalid scheduled-for time: must not be specified without a source handler and instance ID",
 			func() {
-				ep.PackTimeout(TimeoutA1, WithScheduledFor(time.Now().Add(time.Hour)))
+				ep.PackDeadline(DeadlineA1, WithScheduledFor(time.Now().Add(time.Hour)))
 			},
 		)
 	})

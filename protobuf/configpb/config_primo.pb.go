@@ -213,9 +213,9 @@ type (
 	// MessageKind_EVENT_Case is a type that statically associates a function
 	// with a [MessageKind_EVENT] value.
 	MessageKind_EVENT_Case struct{}
-	// MessageKind_TIMEOUT_Case is a type that statically associates a function
-	// with a [MessageKind_TIMEOUT] value.
-	MessageKind_TIMEOUT_Case struct{}
+	// MessageKind_DEADLINE_Case is a type that statically associates a function
+	// with a [MessageKind_DEADLINE] value.
+	MessageKind_DEADLINE_Case struct{}
 )
 
 // Switch_MessageKind dispatches to a function based on the value of v.
@@ -227,7 +227,7 @@ func Switch_MessageKind(
 	caseUNKNOWN_MESSAGE_KIND func(MessageKind_UNKNOWN_MESSAGE_KIND_Case),
 	caseCOMMAND func(MessageKind_COMMAND_Case),
 	caseEVENT func(MessageKind_EVENT_Case),
-	caseTIMEOUT func(MessageKind_TIMEOUT_Case),
+	caseDEADLINE func(MessageKind_DEADLINE_Case),
 ) {
 	switch v {
 	case MessageKind_UNKNOWN_MESSAGE_KIND:
@@ -236,8 +236,8 @@ func Switch_MessageKind(
 		caseCOMMAND(MessageKind_COMMAND_Case{})
 	case MessageKind_EVENT:
 		caseEVENT(MessageKind_EVENT_Case{})
-	case MessageKind_TIMEOUT:
-		caseTIMEOUT(MessageKind_TIMEOUT_Case{})
+	case MessageKind_DEADLINE:
+		caseDEADLINE(MessageKind_DEADLINE_Case{})
 	default:
 		panic(fmt.Sprintf("Switch_MessageKind: %d is not a valid MessageKind", v))
 	}
@@ -253,7 +253,7 @@ func Map_MessageKind[T any](
 	caseUNKNOWN_MESSAGE_KIND func(MessageKind_UNKNOWN_MESSAGE_KIND_Case) T,
 	caseCOMMAND func(MessageKind_COMMAND_Case) T,
 	caseEVENT func(MessageKind_EVENT_Case) T,
-	caseTIMEOUT func(MessageKind_TIMEOUT_Case) T,
+	caseDEADLINE func(MessageKind_DEADLINE_Case) T,
 ) T {
 	switch v {
 	case MessageKind_UNKNOWN_MESSAGE_KIND:
@@ -262,8 +262,8 @@ func Map_MessageKind[T any](
 		return caseCOMMAND(MessageKind_COMMAND_Case{})
 	case MessageKind_EVENT:
 		return caseEVENT(MessageKind_EVENT_Case{})
-	case MessageKind_TIMEOUT:
-		return caseTIMEOUT(MessageKind_TIMEOUT_Case{})
+	case MessageKind_DEADLINE:
+		return caseDEADLINE(MessageKind_DEADLINE_Case{})
 	default:
 		panic(fmt.Sprintf("Map_MessageKind: %d is not a valid MessageKind", v))
 	}

@@ -15,7 +15,7 @@ func TestKind_string(t *testing.T) {
 	}{
 		{CommandKind, "command"},
 		{EventKind, "event"},
-		{TimeoutKind, "timeout"},
+		{DeadlineKind, "deadline"},
 	}
 
 	for _, c := range cases {
@@ -33,7 +33,7 @@ func TestKind_symbol(t *testing.T) {
 	}{
 		{CommandKind, "?"},
 		{EventKind, "!"},
-		{TimeoutKind, "@"},
+		{DeadlineKind, "@"},
 	}
 
 	for _, c := range cases {
@@ -53,7 +53,7 @@ func TestKindFor(t *testing.T) {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
-	if want, got := TimeoutKind, KindFor[*TimeoutStub[TypeA]](); got != want {
+	if want, got := DeadlineKind, KindFor[*DeadlineStub[TypeA]](); got != want {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
@@ -65,7 +65,7 @@ func TestKindFor(t *testing.T) {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
-	if want, got := TimeoutKind, KindFor[dogma.Timeout](); got != want {
+	if want, got := DeadlineKind, KindFor[dogma.Deadline](); got != want {
 		t.Fatalf("unexpected result: got %q, want %q", got, want)
 	}
 
@@ -87,7 +87,7 @@ func TestKindOf(t *testing.T) {
 	}{
 		{CommandA1, CommandKind},
 		{EventA1, EventKind},
-		{TimeoutA1, TimeoutKind},
+		{DeadlineA1, DeadlineKind},
 	}
 
 	for _, c := range cases {

@@ -8,7 +8,7 @@ import (
 )
 
 // Type is the representation of a Go type that implements [dogma.Command],
-// [dogma.Event] or [dogma.Timeout].
+// [dogma.Event] or [dogma.Deadline].
 type Type struct {
 	r reflect.Type
 }
@@ -16,7 +16,7 @@ type Type struct {
 // TypeFor returns the message type for T.
 //
 // It panics if T does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Timeout].
+// [dogma.Deadline].
 func TypeFor[T dogma.Message]() Type {
 	return TypeFromReflect(reflect.TypeFor[T]())
 }
@@ -24,7 +24,7 @@ func TypeFor[T dogma.Message]() Type {
 // TypeOf returns the message type of m.
 //
 // It panics if T does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Timeout], or if m is nil.
+// [dogma.Deadline], or if m is nil.
 func TypeOf(m dogma.Message) Type {
 	return TypeFromReflect(reflect.TypeOf(m))
 }
@@ -32,7 +32,7 @@ func TypeOf(m dogma.Message) Type {
 // TypeFromReflect returns the message type for the Go type represented by r.
 //
 // It panics if r does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Timeout], or if m is nil.
+// [dogma.Deadline], or if m is nil.
 func TypeFromReflect(r reflect.Type) Type {
 	guardAgainstNonMessage(r)
 	return Type{r}
@@ -47,7 +47,7 @@ func (t Type) Name() Name {
 // Kind returns the kind of the message represented by t.
 //
 // It panics of t does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Timeout].
+// [dogma.Deadline].
 func (t Type) Kind() Kind {
 	return kindFromReflect(t.r)
 }

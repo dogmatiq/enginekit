@@ -55,7 +55,7 @@ type EventStub[T any] struct {
 	ValidationError string `json:"validation_error,omitempty"`
 }
 
-// MessageDescription returns a description of the command.
+// MessageDescription returns a description of the event.
 func (s *EventStub[T]) MessageDescription() string {
 	validity := "valid"
 	if s.ValidationError != "" {
@@ -87,13 +87,13 @@ func (s *EventStub[T]) UnmarshalBinary(data []byte) error {
 	return json.Unmarshal(data, s)
 }
 
-// DeadlineStub is a test implementation of [dogma.Test].
+// DeadlineStub is a test implementation of [dogma.Deadline].
 type DeadlineStub[T any] struct {
 	Content         T      `json:"content,omitempty"`
 	ValidationError string `json:"validation_error,omitempty"`
 }
 
-// MessageDescription returns a description of the command.
+// MessageDescription returns a description of the deadline message.
 func (s *DeadlineStub[T]) MessageDescription() string {
 	validity := "valid"
 	if s.ValidationError != "" {

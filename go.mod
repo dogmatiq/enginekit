@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/dogmatiq/dapper v0.6.0
-	github.com/dogmatiq/dogma v0.23.1-0.20260504211425-3d26b0bed430
+	github.com/dogmatiq/dogma v0.24.0
 	github.com/dogmatiq/primo v0.4.0
 	github.com/dogmatiq/spruce v0.2.3
 	github.com/google/go-cmp v0.7.0

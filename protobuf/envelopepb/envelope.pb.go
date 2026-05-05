@@ -806,7 +806,7 @@ type Body_builder struct {
 	//
 	// This is typically the point at which the message first enters the engine.
 	CreatedAt *timestamppb.Timestamp
-	// ScheduledFor is the time at which a timeout message is scheduled to occur.
+	// ScheduledFor is the time at which a deadline is reached.
 	//
 	// It is the zero-value if the message is a command or event.
 	ScheduledFor *timestamppb.Timestamp

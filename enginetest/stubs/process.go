@@ -41,7 +41,7 @@ type ProcessMessageHandlerStub[R dogma.ProcessRoot] struct {
 	ConfigureFunc            func(dogma.ProcessConfigurer)
 	RouteEventToInstanceFunc func(context.Context, dogma.Event) (string, bool, error)
 	HandleEventFunc          func(context.Context, R, dogma.ProcessEventScope[R], dogma.Event) error
-	HandleTimeoutFunc        func(context.Context, R, dogma.ProcessTimeoutScope[R], dogma.Timeout) error
+	HandleDeadlineFunc       func(context.Context, R, dogma.ProcessDeadlineScope[R], dogma.Deadline) error
 }
 
 var _ dogma.ProcessMessageHandler[*ProcessRootStub] = &ProcessMessageHandlerStub[*ProcessRootStub]{}
@@ -86,15 +86,15 @@ func (h *ProcessMessageHandlerStub[R]) HandleEvent(
 	return nil
 }
 
-// HandleTimeout continues the process in response to a timeout.
-func (h *ProcessMessageHandlerStub[R]) HandleTimeout(
+// HandleDeadline continues the process when a deadline is reached.
+func (h *ProcessMessageHandlerStub[R]) HandleDeadline(
 	ctx context.Context,
 	r R,
-	s dogma.ProcessTimeoutScope[R],
-	t dogma.Timeout,
+	s dogma.ProcessDeadlineScope[R],
+	d dogma.Deadline,
 ) error {
-	if h.HandleTimeoutFunc != nil {
-		return h.HandleTimeoutFunc(ctx, r, s, t)
+	if h.HandleDeadlineFunc != nil {
+		return h.HandleDeadlineFunc(ctx, r, s, d)
 	}
 	return nil
 }

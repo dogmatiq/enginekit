@@ -55,13 +55,13 @@ func TestRoute(t *testing.T) {
 				},
 			},
 			{
-				Name:        "schedules timeout",
-				String:      `route:schedules-timeout:TimeoutStub[TypeA]`,
-				Description: `valid schedules-timeout route for *github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Name:        "schedules deadline",
+				String:      `route:schedules-deadline:DeadlineStub[TypeA]`,
+				Description: `valid schedules-deadline route for *github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: &Route{
-					RouteType:       optional.Some(SchedulesTimeoutRouteType),
-					MessageTypeName: optional.Some(typename.For[*TimeoutStub[TypeA]]()),
-					MessageType:     optional.Some(message.TypeFor[*TimeoutStub[TypeA]]()),
+					RouteType:       optional.Some(SchedulesDeadlineRouteType),
+					MessageTypeName: optional.Some(typename.For[*DeadlineStub[TypeA]]()),
+					MessageType:     optional.Some(message.TypeFor[*DeadlineStub[TypeA]]()),
 				},
 			},
 			{

@@ -22,14 +22,14 @@ const (
 )
 
 // MessageKind is an enumeration of the kinds of message, represented by the
-// [dogma.Command], [dogma.Event], and [dogma.Timeout] interfaces.
+// [dogma.Command], [dogma.Event], and [dogma.Deadline] interfaces.
 type MessageKind int32
 
 const (
 	MessageKind_UNKNOWN_MESSAGE_KIND MessageKind = 0
 	MessageKind_COMMAND              MessageKind = 1
 	MessageKind_EVENT                MessageKind = 2
-	MessageKind_TIMEOUT              MessageKind = 3
+	MessageKind_DEADLINE             MessageKind = 3
 )
 
 // Enum value maps for MessageKind.
@@ -38,13 +38,13 @@ var (
 		0: "UNKNOWN_MESSAGE_KIND",
 		1: "COMMAND",
 		2: "EVENT",
-		3: "TIMEOUT",
+		3: "DEADLINE",
 	}
 	MessageKind_value = map[string]int32{
 		"UNKNOWN_MESSAGE_KIND": 0,
 		"COMMAND":              1,
 		"EVENT":                2,
-		"TIMEOUT":              3,
+		"DEADLINE":             3,
 	}
 )
 
@@ -475,12 +475,12 @@ const file_github_com_dogmatiq_enginekit_protobuf_configpb_config_proto_rawDesc 
 	"\vis_produced\x18\x02 \x01(\bB\x05\xaa\x01\x02\b\x02R\n" +
 	"isProduced\x12&\n" +
 	"\vis_consumed\x18\x03 \x01(\bB\x05\xaa\x01\x02\b\x02R\n" +
-	"isConsumed*L\n" +
+	"isConsumed*M\n" +
 	"\vMessageKind\x12\x18\n" +
 	"\x14UNKNOWN_MESSAGE_KIND\x10\x00\x12\v\n" +
 	"\aCOMMAND\x10\x01\x12\t\n" +
-	"\x05EVENT\x10\x02\x12\v\n" +
-	"\aTIMEOUT\x10\x03*d\n" +
+	"\x05EVENT\x10\x02\x12\f\n" +
+	"\bDEADLINE\x10\x03*d\n" +
 	"\vHandlerType\x12\x18\n" +
 	"\x14UNKNOWN_HANDLER_TYPE\x10\x00\x12\r\n" +
 	"\tAGGREGATE\x10\x01\x12\v\n" +

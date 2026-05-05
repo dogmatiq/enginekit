@@ -47,7 +47,7 @@ func TestApplication(t *testing.T) {
 				}),
 			},
 			{
-				Name:  "multiple processes may schedule the same type of timeout message",
+				Name:  "multiple processes may schedule the same type of deadline message",
 				Error: "",
 				Component: runtimeconfig.FromApplication(&ApplicationStub{
 					ConfigureFunc: func(c dogma.ApplicationConfigurer) {
@@ -59,7 +59,7 @@ func TestApplication(t *testing.T) {
 									c.Routes(
 										dogma.HandlesEvent[*EventStub[TypeA]](),
 										dogma.ExecutesCommand[*CommandStub[TypeA]](),
-										dogma.SchedulesTimeout[*TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+										dogma.SchedulesDeadline[*DeadlineStub[TypeA]](), // <-- SAME MESSAGE TYPE
 									)
 								},
 							}),
@@ -69,7 +69,7 @@ func TestApplication(t *testing.T) {
 									c.Routes(
 										dogma.HandlesEvent[*EventStub[TypeA]](),
 										dogma.ExecutesCommand[*CommandStub[TypeA]](),
-										dogma.SchedulesTimeout[*TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+										dogma.SchedulesDeadline[*DeadlineStub[TypeA]](), // <-- SAME MESSAGE TYPE
 									)
 								},
 							}),
@@ -445,7 +445,7 @@ func TestApplication(t *testing.T) {
 								c.Routes(
 									dogma.HandlesEvent[*EventStub[TypeB]](),
 									dogma.ExecutesCommand[*CommandStub[TypeB]](),
-									dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
+									dogma.SchedulesDeadline[*DeadlineStub[TypeA]](),
 								)
 							},
 						}),
@@ -460,11 +460,11 @@ func TestApplication(t *testing.T) {
 				"unexpected routes",
 				entity.RouteSet().MessageTypes(),
 				map[message.Type]RouteDirection{
-					message.TypeFor[*CommandStub[TypeA]](): InboundDirection,
-					message.TypeFor[*EventStub[TypeA]]():   OutboundDirection,
-					message.TypeFor[*EventStub[TypeB]]():   InboundDirection | OutboundDirection,
-					message.TypeFor[*CommandStub[TypeB]](): OutboundDirection,
-					message.TypeFor[*TimeoutStub[TypeA]](): InboundDirection | OutboundDirection,
+					message.TypeFor[*CommandStub[TypeA]]():  InboundDirection,
+					message.TypeFor[*EventStub[TypeA]]():    OutboundDirection,
+					message.TypeFor[*EventStub[TypeB]]():    InboundDirection | OutboundDirection,
+					message.TypeFor[*CommandStub[TypeB]]():  OutboundDirection,
+					message.TypeFor[*DeadlineStub[TypeA]](): InboundDirection | OutboundDirection,
 				},
 			)
 		})

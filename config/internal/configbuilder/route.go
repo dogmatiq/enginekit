@@ -31,8 +31,8 @@ func (b *RouteBuilder) AsPerRoute(r dogma.MessageRoute) {
 		b.target.RouteType = optional.Some(config.HandlesEventRouteType)
 	case dogma.ExecutesCommandRoute:
 		b.target.RouteType = optional.Some(config.ExecutesCommandRouteType)
-	case dogma.SchedulesTimeoutRoute:
-		b.target.RouteType = optional.Some(config.SchedulesTimeoutRouteType)
+	case dogma.SchedulesDeadlineRoute:
+		b.target.RouteType = optional.Some(config.SchedulesDeadlineRouteType)
 	default:
 		panic("unsupported route type")
 	}

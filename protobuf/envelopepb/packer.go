@@ -167,30 +167,30 @@ type PackEffectEventOption interface {
 	applyPackEffectEventOption(*Body)
 }
 
-// PackEffectTimeoutOption is an option that modifies the behavior of
-// [EffectPacker.PackTimeout].
-type PackEffectTimeoutOption interface {
-	applyPackEffectTimeoutOption(*Body)
+// PackEffectDeadlineOption is an option that modifies the behavior of
+// [EffectPacker.PackDeadline].
+type PackEffectDeadlineOption interface {
+	applyPackEffectDeadlineOption(*Body)
 }
 
 type (
-	packEffectsOption           func(*Header)
-	packCommandOptionFunc       func(*Body)
-	packEffectTimeoutOptionFunc func(*Body)
-	universalOption             struct {
+	packEffectsOption            func(*Header)
+	packCommandOptionFunc        func(*Body)
+	packEffectDeadlineOptionFunc func(*Body)
+	universalOption              struct {
 		applyToBodyFunc   func(*Body)
 		applyToHeaderFunc func(*Header)
 	}
 )
 
-func (o packEffectsOption) applyPackEffectsOption(header *Header)             { o(header) }
-func (o packCommandOptionFunc) applyPackCommandOption(env *Envelope)          { o(env.GetBody()) }
-func (o packEffectTimeoutOptionFunc) applyPackEffectTimeoutOption(body *Body) { o(body) }
-func (o universalOption) applyPackCommandOption(env *Envelope)                { o.applyToBodyFunc(env.GetBody()) }
-func (o universalOption) applyPackEffectCommandOption(body *Body)             { o.applyToBodyFunc(body) }
-func (o universalOption) applyPackEffectEventOption(body *Body)               { o.applyToBodyFunc(body) }
-func (o universalOption) applyPackEffectTimeoutOption(body *Body)             { o.applyToBodyFunc(body) }
-func (o universalOption) applyPackEffectsOption(header *Header)               { o.applyToHeaderFunc(header) }
+func (o packEffectsOption) applyPackEffectsOption(header *Header)               { o(header) }
+func (o packCommandOptionFunc) applyPackCommandOption(env *Envelope)            { o(env.GetBody()) }
+func (o packEffectDeadlineOptionFunc) applyPackEffectDeadlineOption(body *Body) { o(body) }
+func (o universalOption) applyPackCommandOption(env *Envelope)                  { o.applyToBodyFunc(env.GetBody()) }
+func (o universalOption) applyPackEffectCommandOption(body *Body)               { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectEventOption(body *Body)                 { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectDeadlineOption(body *Body)              { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectsOption(header *Header)                 { o.applyToHeaderFunc(header) }
 
 // WithIdempotencyKey sets the idempotency key of a command packed via
 // [Packer.PackCommand].
@@ -212,10 +212,10 @@ func WithInstanceID(id string) PackEffectsOption {
 	)
 }
 
-// WithScheduledFor sets the scheduled time of a timeout packed via
-// [EffectPacker.PackTimeout].
-func WithScheduledFor(t time.Time) PackEffectTimeoutOption {
-	return packEffectTimeoutOptionFunc(
+// WithScheduledFor sets the time at which a deadline is reached when packed
+// via [EffectPacker.PackDeadline].
+func WithScheduledFor(t time.Time) PackEffectDeadlineOption {
+	return packEffectDeadlineOptionFunc(
 		func(body *Body) {
 			body.SetScheduledFor(timestamppb.New(t))
 		},
@@ -231,7 +231,7 @@ func WithExtension(x proto.Message) interface {
 	PackEffectsOption
 	PackEffectCommandOption
 	PackEffectEventOption
-	PackEffectTimeoutOption
+	PackEffectDeadlineOption
 } {
 	v := marshalAsAny(x)
 
@@ -254,7 +254,7 @@ func WithBaggage(x proto.Message) interface {
 	PackEffectsOption
 	PackEffectCommandOption
 	PackEffectEventOption
-	PackEffectTimeoutOption
+	PackEffectDeadlineOption
 } {
 	v := marshalAsAny(x)
 

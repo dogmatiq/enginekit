@@ -35,7 +35,7 @@ func TestProcess(t *testing.T) {
 						c.Routes(
 							dogma.HandlesEvent[*EventStub[TypeA]](),
 							dogma.ExecutesCommand[*CommandStub[TypeA]](),
-							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
+							dogma.SchedulesDeadline[*DeadlineStub[TypeA]](),
 						)
 					},
 				}),
@@ -210,16 +210,16 @@ func TestProcess(t *testing.T) {
 				}),
 			},
 			{
-				Name:  "process must not have multiple routes for the same timeout type",
-				Error: `process:ProcessMessageHandlerStub[ProcessRootStub] is invalid: multiple schedules-timeout routes for *github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+				Name:  "process must not have multiple routes for the same deadline type",
+				Error: `process:ProcessMessageHandlerStub[ProcessRootStub] is invalid: multiple schedules-deadline routes for *github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub[*ProcessRootStub]{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
 						c.Identity("handler", "d1e04684-ec56-44a7-8c7d-f111b2d6b2d2")
 						c.Routes(
 							dogma.HandlesEvent[*EventStub[TypeA]](),
 							dogma.ExecutesCommand[*CommandStub[TypeA]](),
-							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
-							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.SchedulesDeadline[*DeadlineStub[TypeA]](), // <-- SAME MESSAGE TYPE
+							dogma.SchedulesDeadline[*DeadlineStub[TypeA]](), // <-- SAME MESSAGE TYPE
 						)
 					},
 				}),
@@ -250,8 +250,8 @@ func TestProcess(t *testing.T) {
 						)
 						b.Route(
 							func(b *configbuilder.RouteBuilder) {
-								b.RouteType(SchedulesTimeoutRouteType)
-								b.MessageTypeName("pkg.SomeTimeout")
+								b.RouteType(SchedulesDeadlineRouteType)
+								b.MessageTypeName("pkg.SomeDeadline")
 							},
 						)
 						b.Route(
@@ -277,7 +277,7 @@ func TestProcess(t *testing.T) {
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					`  - valid executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
-					`  - valid schedules-timeout route for *github.com/dogmatiq/enginekit/enginetest/stubs.TimeoutStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
+					`  - valid schedules-deadline route for *github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 				),
 				Component: runtimeconfig.FromProcess(&ProcessMessageHandlerStub[*ProcessRootStub]{
 					ConfigureFunc: func(c dogma.ProcessConfigurer) {
@@ -285,7 +285,7 @@ func TestProcess(t *testing.T) {
 						c.Routes(
 							dogma.HandlesEvent[*EventStub[TypeA]](),
 							dogma.ExecutesCommand[*CommandStub[TypeA]](),
-							dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
+							dogma.SchedulesDeadline[*DeadlineStub[TypeA]](),
 						)
 					},
 				}),
@@ -319,7 +319,7 @@ func TestProcess(t *testing.T) {
 					`  - valid identity name/19cb98d5-dd17-4daf-ae00-1b413b7b899a`,
 					`  - valid handles-event route for pkg.SomeEvent (type unavailable)`,
 					`  - valid executes-command route for pkg.SomeCommand (type unavailable)`,
-					`  - valid schedules-timeout route for pkg.SomeTimeout (type unavailable)`,
+					`  - valid schedules-deadline route for pkg.SomeDeadline (type unavailable)`,
 				),
 				Component: configbuilder.Process(func(b *configbuilder.ProcessBuilder) {
 					b.TypeName("pkg.SomeProcess")
@@ -336,8 +336,8 @@ func TestProcess(t *testing.T) {
 						b.MessageTypeName("pkg.SomeCommand")
 					})
 					b.Route(func(b *configbuilder.RouteBuilder) {
-						b.RouteType(SchedulesTimeoutRouteType)
-						b.MessageTypeName("pkg.SomeTimeout")
+						b.RouteType(SchedulesDeadlineRouteType)
+						b.MessageTypeName("pkg.SomeDeadline")
 					})
 				}),
 			},
@@ -492,7 +492,7 @@ func TestProcess(t *testing.T) {
 					c.Routes(
 						dogma.HandlesEvent[*EventStub[TypeA]](),
 						dogma.ExecutesCommand[*CommandStub[TypeA]](),
-						dogma.SchedulesTimeout[*TimeoutStub[TypeA]](),
+						dogma.SchedulesDeadline[*DeadlineStub[TypeA]](),
 					)
 				},
 			}

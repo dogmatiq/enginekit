@@ -6,12 +6,12 @@ option go_package = "github.com/dogmatiq/enginekit/protobuf/configpb";
 import "github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto";
 
 // MessageKind is an enumeration of the kinds of message, represented by the
-// [dogma.Command], [dogma.Event], and [dogma.Timeout] interfaces.
+// [dogma.Command], [dogma.Event], and [dogma.Deadline] interfaces.
 enum MessageKind {
   UNKNOWN_MESSAGE_KIND = 0;
   COMMAND = 1;
   EVENT = 2;
-  TIMEOUT = 3;
+  DEADLINE = 3;
 }
 
 // HandlerType is an enumeration of the types of handlers that an application

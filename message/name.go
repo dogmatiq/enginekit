@@ -8,13 +8,13 @@ import (
 )
 
 // Name is the fully-qualified name of a Go type that implements
-// [dogma.Command], [dogma.Event] or [dogma.Timeout].
+// [dogma.Command], [dogma.Event] or [dogma.Deadline].
 type Name string
 
 // NameFor returns the [Name] of T.
 //
 // It panics if T does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Timeout].
+// [dogma.Deadline].
 func NameFor[T dogma.Message]() Name {
 	return nameFromReflect(reflect.TypeFor[T]())
 }
@@ -22,7 +22,7 @@ func NameFor[T dogma.Message]() Name {
 // NameOf returns the fully-qualified type name of m.
 //
 // It panics if m does not implement [dogma.Command], [dogma.Event] or
-// [dogma.Timeout].
+// [dogma.Deadline].
 func NameOf(m dogma.Message) Name {
 	return nameFromReflect(reflect.TypeOf(m))
 }

@@ -29,7 +29,7 @@ func TestSwitchByKindOf(t *testing.T) {
 			CommandA1,
 			func(m dogma.Command) { message = m },
 			func(m dogma.Event) { t.Fatal("unexpected call to event case") },
-			func(m dogma.Timeout) { t.Fatal("unexpected call to timeout case") },
+			func(m dogma.Deadline) { t.Fatal("unexpected call to deadline case") },
 		)
 
 		if message != CommandA1 {
@@ -44,7 +44,7 @@ func TestSwitchByKindOf(t *testing.T) {
 			EventA1,
 			func(m dogma.Command) { t.Fatal("unexpected call to command case") },
 			func(m dogma.Event) { message = m },
-			func(m dogma.Timeout) { t.Fatal("unexpected call to timeout case") },
+			func(m dogma.Deadline) { t.Fatal("unexpected call to deadline case") },
 		)
 
 		if message != EventA1 {
@@ -52,18 +52,18 @@ func TestSwitchByKindOf(t *testing.T) {
 		}
 	})
 
-	t.Run("when the message is a timeout", func(t *testing.T) {
-		var message dogma.Timeout
+	t.Run("when the message is a deadline", func(t *testing.T) {
+		var message dogma.Deadline
 
 		SwitchByKindOf(
-			TimeoutA1,
+			DeadlineA1,
 			func(m dogma.Command) { t.Fatal("unexpected call to command case") },
 			func(m dogma.Event) { t.Fatal("unexpected call to event case") },
-			func(m dogma.Timeout) { message = m },
+			func(m dogma.Deadline) { message = m },
 		)
 
-		if message != TimeoutA1 {
-			t.Fatal("timeout case was not called with the expected message")
+		if message != DeadlineA1 {
+			t.Fatal("deadline case was not called with the expected message")
 		}
 	})
 
@@ -74,7 +74,7 @@ func TestSwitchByKindOf(t *testing.T) {
 		}{
 			{CommandA1, `no case function was provided for dogma.Command`},
 			{EventA1, `no case function was provided for dogma.Event`},
-			{TimeoutA1, `no case function was provided for dogma.Timeout`},
+			{DeadlineA1, `no case function was provided for dogma.Deadline`},
 		}
 
 		for _, c := range cases {
@@ -101,7 +101,7 @@ func TestSwitchByKindOf(t *testing.T) {
 			nil,
 			func(m dogma.Command) { t.Fatal("unexpected call to command case") },
 			func(m dogma.Event) { t.Fatal("unexpected call to event case") },
-			func(m dogma.Timeout) { t.Fatal("unexpected call to timeout case") },
+			func(m dogma.Deadline) { t.Fatal("unexpected call to deadline case") },
 		)
 	})
 }
@@ -113,7 +113,7 @@ func TestMapByKindOf(t *testing.T) {
 	}{
 		{CommandA1, "command"},
 		{EventA1, "event"},
-		{TimeoutA1, "timeout"},
+		{DeadlineA1, "deadline"},
 	}
 
 	for _, c := range cases {
@@ -121,7 +121,7 @@ func TestMapByKindOf(t *testing.T) {
 			c.Message,
 			func(m dogma.Command) string { return "command" },
 			func(m dogma.Event) string { return "event" },
-			func(m dogma.Timeout) string { return "timeout" },
+			func(m dogma.Deadline) string { return "deadline" },
 		)
 
 		if got != c.Want {
@@ -136,7 +136,7 @@ func TestMapByKindOf(t *testing.T) {
 		}{
 			{CommandA1, `no case function was provided for dogma.Command`},
 			{EventA1, `no case function was provided for dogma.Event`},
-			{TimeoutA1, `no case function was provided for dogma.Timeout`},
+			{DeadlineA1, `no case function was provided for dogma.Deadline`},
 		}
 
 		for _, c := range cases {
@@ -163,7 +163,7 @@ func TestMapByKindOf(t *testing.T) {
 			nil,
 			func(m dogma.Command) string { t.Fatal("unexpected call to command case"); return "" },
 			func(m dogma.Event) string { t.Fatal("unexpected call to event case"); return "" },
-			func(m dogma.Timeout) string { t.Fatal("unexpected call to timeout case"); return "" },
+			func(m dogma.Deadline) string { t.Fatal("unexpected call to deadline case"); return "" },
 		)
 	})
 }
@@ -175,7 +175,7 @@ func TestMapByKindOfWithErr(t *testing.T) {
 	}{
 		{CommandA1, "command"},
 		{EventA1, "event"},
-		{TimeoutA1, "timeout"},
+		{DeadlineA1, "deadline"},
 	}
 
 	for _, c := range cases {
@@ -183,7 +183,7 @@ func TestMapByKindOfWithErr(t *testing.T) {
 			c.Message,
 			func(m dogma.Command) (string, error) { return "command", errors.New("command") },
 			func(m dogma.Event) (string, error) { return "event", errors.New("event") },
-			func(m dogma.Timeout) (string, error) { return "timeout", errors.New("timeout") },
+			func(m dogma.Deadline) (string, error) { return "deadline", errors.New("deadline") },
 		)
 
 		if got != c.Want {
@@ -206,7 +206,7 @@ func TestMapByKindOfWithErr(t *testing.T) {
 		}{
 			{CommandA1, `no case function was provided for dogma.Command`},
 			{EventA1, `no case function was provided for dogma.Event`},
-			{TimeoutA1, `no case function was provided for dogma.Timeout`},
+			{DeadlineA1, `no case function was provided for dogma.Deadline`},
 		}
 
 		for _, c := range cases {
@@ -233,7 +233,7 @@ func TestMapByKindOfWithErr(t *testing.T) {
 			nil,
 			func(m dogma.Command) (string, error) { t.Fatal("unexpected call to command case"); return "", nil },
 			func(m dogma.Event) (string, error) { t.Fatal("unexpected call to event case"); return "", nil },
-			func(m dogma.Timeout) (string, error) { t.Fatal("unexpected call to timeout case"); return "", nil },
+			func(m dogma.Deadline) (string, error) { t.Fatal("unexpected call to deadline case"); return "", nil },
 		)
 	})
 }

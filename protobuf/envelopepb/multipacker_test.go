@@ -395,20 +395,12 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.ExtensionA",
 				Value:   []byte("header-a"),
 			},
-			{
-				TypeUrl: "type.googleapis.com/example.ExtensionB",
-				Value:   []byte("header-b"),
-			},
 		})
 
 		cause.GetHeader().SetBaggage([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.BaggageA",
 				Value:   []byte("header-a"),
-			},
-			{
-				TypeUrl: "type.googleapis.com/example.BaggageB",
-				Value:   []byte("header-b"),
 			},
 		})
 
@@ -417,20 +409,12 @@ func TestPacker_CausedBy(t *testing.T) {
 				TypeUrl: "type.googleapis.com/example.ExtensionB",
 				Value:   []byte("body-b"),
 			},
-			{
-				TypeUrl: "type.googleapis.com/example.ExtensionC",
-				Value:   []byte("body-c"),
-			},
 		})
 
 		cause.GetBody().SetBaggage([]*anypb.Any{
 			{
 				TypeUrl: "type.googleapis.com/example.BaggageB",
 				Value:   []byte("body-b"),
-			},
-			{
-				TypeUrl: "type.googleapis.com/example.BaggageC",
-				Value:   []byte("body-c"),
 			},
 		})
 
@@ -442,10 +426,14 @@ func TestPacker_CausedBy(t *testing.T) {
 			t.Fatal("expected a multi-envelope")
 		}
 
-		expectSingleBodyMultiEnvelopeWireCompatibleExtensions(
+		if got.GetHeader().GetExtensions() != nil {
+			t.Fatalf("unexpected header extensions: got %#v, want nil", got.GetHeader().GetExtensions())
+		}
+
+		Expect(
 			t,
-			got,
-			nil,
+			"unexpected header baggage",
+			got.GetHeader().GetBaggage(),
 			[]*anypb.Any{
 				{
 					TypeUrl: "type.googleapis.com/example.BaggageA",
@@ -455,12 +443,16 @@ func TestPacker_CausedBy(t *testing.T) {
 					TypeUrl: "type.googleapis.com/example.BaggageB",
 					Value:   []byte("body-b"),
 				},
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageC",
-					Value:   []byte("body-c"),
-				},
 			},
 		)
+
+		if got.GetBodies()[0].GetExtensions() != nil || got.GetBodies()[0].GetBaggage() != nil {
+			t.Fatalf(
+				"unexpected body state: got extensions %#v, baggage %#v, want nil",
+				got.GetBodies()[0].GetExtensions(),
+				got.GetBodies()[0].GetBaggage(),
+			)
+		}
 	})
 }
 

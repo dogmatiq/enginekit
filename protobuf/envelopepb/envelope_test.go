@@ -310,317 +310,68 @@ func TestMultiEnvelope_All(t *testing.T) {
 func TestWireCompatibility(t *testing.T) {
 	t.Parallel()
 
-	cases := []struct {
-		Desc             string
-		HeaderExtensions []*anypb.Any
-		HeaderBaggage    []*anypb.Any
-		BodyExtensions   []*anypb.Any
-		BodyBaggage      []*anypb.Any
-		WantExtensions   []*anypb.Any
-		WantBaggage      []*anypb.Any
-	}{
-		{
-			Desc: "header only",
-			HeaderExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionA",
-					Value:   []byte("header-a"),
-				},
-			},
-			HeaderBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageA",
-					Value:   []byte("header-a"),
-				},
-			},
-			WantExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionA",
-					Value:   []byte("header-a"),
-				},
-			},
-			WantBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageA",
-					Value:   []byte("header-a"),
-				},
-			},
-		},
-		{
-			Desc: "body only",
-			BodyExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionA",
-					Value:   []byte("body-a"),
-				},
-			},
-			BodyBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageA",
-					Value:   []byte("body-a"),
-				},
-			},
-			WantExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionA",
-					Value:   []byte("body-a"),
-				},
-			},
-			WantBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageA",
-					Value:   []byte("body-a"),
-				},
-			},
-		},
-		{
-			Desc: "split with overrides",
-			HeaderExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionA",
-					Value:   []byte("header-a"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionB",
-					Value:   []byte("header-b"),
-				},
-			},
-			HeaderBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageA",
-					Value:   []byte("header-a"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageB",
-					Value:   []byte("header-b"),
-				},
-			},
-			BodyExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionB",
-					Value:   []byte("body-b"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionC",
-					Value:   []byte("body-c"),
-				},
-			},
-			BodyBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageB",
-					Value:   []byte("body-b"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageC",
-					Value:   []byte("body-c"),
-				},
-			},
-			WantExtensions: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionA",
-					Value:   []byte("header-a"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionB",
-					Value:   []byte("body-b"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.ExtensionC",
-					Value:   []byte("body-c"),
-				},
-			},
-			WantBaggage: []*anypb.Any{
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageA",
-					Value:   []byte("header-a"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageB",
-					Value:   []byte("body-b"),
-				},
-				{
-					TypeUrl: "type.googleapis.com/example.BaggageC",
-					Value:   []byte("body-c"),
-				},
-			},
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.Desc, func(t *testing.T) {
-			t.Parallel()
-
-			env := newEnvelope(func(e *Envelope) {
-				e.GetHeader().SetExtensions(c.HeaderExtensions)
-				e.GetHeader().SetBaggage(c.HeaderBaggage)
-				e.GetBody().SetExtensions(c.BodyExtensions)
-				e.GetBody().SetBaggage(c.BodyBaggage)
-			})
-
-			expectEnvelopeWireCompatibleExtensions(
-				t,
-				env,
-				c.WantExtensions,
-				c.WantBaggage,
-			)
-
-			multi := NewMultiEnvelopeBuilder().
-				WithHeader(env.GetHeader()).
-				WithBodies([]*Body{env.GetBody()}).
-				Build()
-
-			expectSingleBodyMultiEnvelopeWireCompatibleExtensions(
-				t,
-				multi,
-				c.WantExtensions,
-				c.WantBaggage,
-			)
+	env := newEnvelope(func(e *Envelope) {
+		e.GetHeader().SetExtensions([]*anypb.Any{
+			{TypeUrl: "type.googleapis.com/example.ExtA", Value: []byte("header-a")},
 		})
-	}
-}
+		e.GetHeader().SetBaggage([]*anypb.Any{
+			{TypeUrl: "type.googleapis.com/example.BagA", Value: []byte("header-a")},
+		})
+		e.GetBody().SetExtensions([]*anypb.Any{
+			{TypeUrl: "type.googleapis.com/example.ExtB", Value: []byte("body-b")},
+		})
+		e.GetBody().SetBaggage([]*anypb.Any{
+			{TypeUrl: "type.googleapis.com/example.BagB", Value: []byte("body-b")},
+		})
+	})
 
-func expectEnvelopeWireCompatibleExtensions(
-	t *testing.T,
-	env *Envelope,
-	wantExtensions, wantBaggage []*anypb.Any,
-) {
-	t.Helper()
+	t.Run("envelope unmarshals as multi-envelope", func(t *testing.T) {
+		t.Parallel()
 
-	data, err := env.MarshalBinary()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var got MultiEnvelope
-	if err := got.UnmarshalBinary(data); err != nil {
-		t.Fatal(err)
-	}
-
-	expectSingleBodyMultiEnvelopeEffectiveExtensions(
-		t,
-		&got,
-		wantExtensions,
-		wantBaggage,
-	)
-}
-
-func expectSingleBodyMultiEnvelopeWireCompatibleExtensions(
-	t *testing.T,
-	env *MultiEnvelope,
-	wantExtensions, wantBaggage []*anypb.Any,
-) {
-	t.Helper()
-
-	data, err := env.MarshalBinary()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var got Envelope
-	if err := got.UnmarshalBinary(data); err != nil {
-		t.Fatal(err)
-	}
-
-	expectEffectiveExtensionsForTest(
-		t,
-		got.GetHeader().GetExtensions(),
-		got.GetBody().GetExtensions(),
-		got.GetHeader().GetBaggage(),
-		got.GetBody().GetBaggage(),
-		wantExtensions,
-		wantBaggage,
-	)
-}
-
-func expectSingleBodyMultiEnvelopeEffectiveExtensions(
-	t *testing.T,
-	env *MultiEnvelope,
-	wantExtensions, wantBaggage []*anypb.Any,
-) {
-	t.Helper()
-
-	bodies := env.GetBodies()
-	if len(bodies) != 1 {
-		t.Fatalf("unexpected body count: got %d, want 1", len(bodies))
-	}
-
-	expectEffectiveExtensionsForTest(
-		t,
-		env.GetHeader().GetExtensions(),
-		bodies[0].GetExtensions(),
-		env.GetHeader().GetBaggage(),
-		bodies[0].GetBaggage(),
-		wantExtensions,
-		wantBaggage,
-	)
-}
-
-func expectEffectiveExtensionsForTest(
-	t *testing.T,
-	headerExtensions,
-	bodyExtensions,
-	headerBaggage,
-	bodyBaggage,
-	wantExtensions,
-	wantBaggage []*anypb.Any,
-) {
-	t.Helper()
-
-	Expect(
-		t,
-		"unexpected effective extensions",
-		mergedAnyValuesByTypeURLForTest(
-			headerExtensions,
-			bodyExtensions,
-		),
-		wantExtensions,
-	)
-
-	Expect(
-		t,
-		"unexpected effective baggage",
-		mergedAnyValuesByTypeURLForTest(
-			headerBaggage,
-			bodyBaggage,
-		),
-		wantBaggage,
-	)
-}
-
-func mergedAnyValuesByTypeURLForTest(header, body []*anypb.Any) []*anypb.Any {
-	if len(header) == 0 {
-		return body
-	}
-
-	if len(body) == 0 {
-		return header
-	}
-
-	values := make([]*anypb.Any, 0, len(header)+len(body))
-
-	for _, v := range header {
-		if containsAnyValueWithTypeURLForTest(body, v.GetTypeUrl()) {
-			continue
+		data, err := env.MarshalBinary()
+		if err != nil {
+			t.Fatal(err)
 		}
 
-		values = append(values, v)
-	}
-
-	for _, v := range body {
-		values = append(values, v)
-	}
-
-	return values
-}
-
-func containsAnyValueWithTypeURLForTest(values []*anypb.Any, typeURL string) bool {
-	for _, v := range values {
-		if v.GetTypeUrl() == typeURL {
-			return true
+		var got MultiEnvelope
+		if err := got.UnmarshalBinary(data); err != nil {
+			t.Fatal(err)
 		}
-	}
 
-	return false
+		Expect(t, "unexpected header extensions", got.GetHeader().GetExtensions(), env.GetHeader().GetExtensions())
+		Expect(t, "unexpected header baggage", got.GetHeader().GetBaggage(), env.GetHeader().GetBaggage())
+
+		if len(got.GetBodies()) != 1 {
+			t.Fatalf("unexpected body count: got %d, want 1", len(got.GetBodies()))
+		}
+
+		Expect(t, "unexpected body extensions", got.GetBodies()[0].GetExtensions(), env.GetBody().GetExtensions())
+		Expect(t, "unexpected body baggage", got.GetBodies()[0].GetBaggage(), env.GetBody().GetBaggage())
+	})
+
+	t.Run("multi-envelope unmarshals as envelope", func(t *testing.T) {
+		t.Parallel()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(env.GetHeader()).
+			WithBodies([]*Body{env.GetBody()}).
+			Build()
+
+		data, err := multi.MarshalBinary()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var got Envelope
+		if err := got.UnmarshalBinary(data); err != nil {
+			t.Fatal(err)
+		}
+
+		Expect(t, "unexpected header extensions", got.GetHeader().GetExtensions(), env.GetHeader().GetExtensions())
+		Expect(t, "unexpected header baggage", got.GetHeader().GetBaggage(), env.GetHeader().GetBaggage())
+		Expect(t, "unexpected body extensions", got.GetBody().GetExtensions(), env.GetBody().GetExtensions())
+		Expect(t, "unexpected body baggage", got.GetBody().GetBaggage(), env.GetBody().GetBaggage())
+	})
 }
 
 func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {

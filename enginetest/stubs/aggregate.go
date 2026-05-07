@@ -2,15 +2,16 @@ package stubs
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/dogmatiq/dogma"
 )
 
 // AggregateRootStub is a test implementation of [dogma.AggregateRoot].
 type AggregateRootStub struct {
-	AppliedEvents                    []dogma.Event     `json:"applied_events,omitempty"`
-	ApplyEventFunc                   func(dogma.Event) `json:"-"`
-	AggregateInstanceDescriptionFunc func() string     `json:"-"`
+	AppliedEvents                    []dogma.Event
+	ApplyEventFunc                   func(dogma.Event)
+	AggregateInstanceDescriptionFunc func() string
 }
 
 var _ dogma.AggregateRoot = &AggregateRootStub{}
@@ -35,12 +36,53 @@ func (r *AggregateRootStub) ApplyEvent(e dogma.Event) {
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
 func (r *AggregateRootStub) MarshalBinary() ([]byte, error) {
-	return json.Marshal(r)
+	type envelope struct {
+		TypeID string `json:"type_id"`
+		Data   []byte `json:"data"`
+	}
+
+	var envelopes []envelope
+	for _, ev := range r.AppliedEvents {
+		mt, ok := dogma.RegisteredMessageTypeOf(ev)
+		if !ok {
+			return nil, fmt.Errorf("event type %T is not registered", ev)
+		}
+		data, err := ev.MarshalBinary()
+		if err != nil {
+			return nil, err
+		}
+		envelopes = append(envelopes, envelope{TypeID: mt.ID(), Data: data})
+	}
+
+	return json.Marshal(envelopes)
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
 func (r *AggregateRootStub) UnmarshalBinary(data []byte) error {
-	return json.Unmarshal(data, r)
+	type envelope struct {
+		TypeID string `json:"type_id"`
+		Data   []byte `json:"data"`
+	}
+
+	var envelopes []envelope
+	if err := json.Unmarshal(data, &envelopes); err != nil {
+		return err
+	}
+
+	r.AppliedEvents = nil
+	for _, env := range envelopes {
+		mt, ok := dogma.RegisteredMessageTypeByID(env.TypeID)
+		if !ok {
+			return fmt.Errorf("unknown message type ID: %s", env.TypeID)
+		}
+		ev := mt.New().(dogma.Event)
+		if err := ev.UnmarshalBinary(env.Data); err != nil {
+			return err
+		}
+		r.AppliedEvents = append(r.AppliedEvents, ev)
+	}
+
+	return nil
 }
 
 // AggregateMessageHandlerStub is a test implementation of

@@ -12,6 +12,8 @@ type AggregateRootStub struct {
 	AppliedEvents                    []dogma.Event
 	ApplyEventFunc                   func(dogma.Event)
 	AggregateInstanceDescriptionFunc func() string
+	MarshalBinaryFunc                func() ([]byte, error)
+	UnmarshalBinaryFunc              func([]byte) error
 }
 
 var _ dogma.AggregateRoot = &AggregateRootStub{}
@@ -36,6 +38,10 @@ func (r *AggregateRootStub) ApplyEvent(e dogma.Event) {
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
 func (r *AggregateRootStub) MarshalBinary() ([]byte, error) {
+	if r.MarshalBinaryFunc != nil {
+		return r.MarshalBinaryFunc()
+	}
+
 	type envelope struct {
 		TypeID string `json:"type_id"`
 		Data   []byte `json:"data"`
@@ -47,11 +53,16 @@ func (r *AggregateRootStub) MarshalBinary() ([]byte, error) {
 		if !ok {
 			return nil, fmt.Errorf("event type %T is not registered", ev)
 		}
+
 		data, err := ev.MarshalBinary()
 		if err != nil {
 			return nil, err
 		}
-		envelopes = append(envelopes, envelope{TypeID: mt.ID(), Data: data})
+
+		envelopes = append(
+			envelopes,
+			envelope{mt.ID(), data},
+		)
 	}
 
 	return json.Marshal(envelopes)
@@ -59,6 +70,10 @@ func (r *AggregateRootStub) MarshalBinary() ([]byte, error) {
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
 func (r *AggregateRootStub) UnmarshalBinary(data []byte) error {
+	if r.UnmarshalBinaryFunc != nil {
+		return r.UnmarshalBinaryFunc(data)
+	}
+
 	type envelope struct {
 		TypeID string `json:"type_id"`
 		Data   []byte `json:"data"`
@@ -75,10 +90,16 @@ func (r *AggregateRootStub) UnmarshalBinary(data []byte) error {
 		if !ok {
 			return fmt.Errorf("unknown message type ID: %s", env.TypeID)
 		}
-		ev := mt.New().(dogma.Event)
+
+		ev, ok := mt.New().(dogma.Event)
+		if !ok {
+			return fmt.Errorf("message type %s is not a dogma.Event", env.TypeID)
+		}
+
 		if err := ev.UnmarshalBinary(env.Data); err != nil {
 			return err
 		}
+
 		r.AppliedEvents = append(r.AppliedEvents, ev)
 	}
 

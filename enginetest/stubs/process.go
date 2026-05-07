@@ -9,8 +9,10 @@ import (
 
 // ProcessRootStub is a test implementation of [dogma.ProcessRoot].
 type ProcessRootStub struct {
-	Value                          any               `json:"value,omitempty"`
-	ProcessInstanceDescriptionFunc func(bool) string `json:"-"`
+	Value                          any                    `json:"value,omitempty"`
+	ProcessInstanceDescriptionFunc func(bool) string      `json:"-"`
+	MarshalBinaryFunc              func() ([]byte, error) `json:"-"`
+	UnmarshalBinaryFunc            func([]byte) error     `json:"-"`
 }
 
 // ProcessInstanceDescription returns a human-readable description of the
@@ -24,11 +26,17 @@ func (r *ProcessRootStub) ProcessInstanceDescription(ended bool) string {
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
 func (r *ProcessRootStub) MarshalBinary() ([]byte, error) {
+	if r.MarshalBinaryFunc != nil {
+		return r.MarshalBinaryFunc()
+	}
 	return json.Marshal(r)
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
 func (r *ProcessRootStub) UnmarshalBinary(data []byte) error {
+	if r.UnmarshalBinaryFunc != nil {
+		return r.UnmarshalBinaryFunc(data)
+	}
 	return json.Unmarshal(data, r)
 }
 

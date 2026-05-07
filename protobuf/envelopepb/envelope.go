@@ -3,6 +3,7 @@ package envelopepb
 import (
 	"errors"
 	"fmt"
+	"iter"
 
 	"google.golang.org/protobuf/types/known/anypb"
 )
@@ -64,6 +65,22 @@ func (x *MultiEnvelope) Validate() error {
 	}
 
 	return nil
+}
+
+// All returns an iterator over each message in x as a standalone [Envelope].
+func (x *MultiEnvelope) All() iter.Seq[*Envelope] {
+	return func(yield func(*Envelope) bool) {
+		for _, b := range x.GetBodies() {
+			env := NewEnvelopeBuilder().
+				WithHeader(x.GetHeader()).
+				WithBody(b).
+				Build()
+
+			if !yield(env) {
+				return
+			}
+		}
+	}
 }
 
 // validate returns an error if x is not well-formed.

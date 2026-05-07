@@ -243,6 +243,70 @@ func TestEnvelope_Validate(t *testing.T) {
 	})
 }
 
+func TestMultiEnvelope_All(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it yields each body as a standalone envelope", func(t *testing.T) {
+		t.Parallel()
+
+		body1 := newEnvelope().GetBody()
+		body2 := newEnvelope().GetBody()
+		header := newEnvelope().GetHeader()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(header).
+			WithBodies([]*Body{body1, body2}).
+			Build()
+
+		var got []*Envelope
+		for env := range multi.All() {
+			got = append(got, env)
+		}
+
+		Expect(t, "unexpected envelope count", len(got), 2)
+		Expect(t, "unexpected envelope[0] header", got[0].GetHeader(), header)
+		Expect(t, "unexpected envelope[0] body", got[0].GetBody(), body1)
+		Expect(t, "unexpected envelope[1] header", got[1].GetHeader(), header)
+		Expect(t, "unexpected envelope[1] body", got[1].GetBody(), body2)
+	})
+
+	t.Run("it stops early when yield returns false", func(t *testing.T) {
+		t.Parallel()
+
+		body1 := newEnvelope().GetBody()
+		body2 := newEnvelope().GetBody()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(newEnvelope().GetHeader()).
+			WithBodies([]*Body{body1, body2}).
+			Build()
+
+		var got []*Envelope
+		for env := range multi.All() {
+			got = append(got, env)
+			break
+		}
+
+		Expect(t, "unexpected envelope count", len(got), 1)
+		Expect(t, "unexpected envelope[0] body", got[0].GetBody(), body1)
+	})
+
+	t.Run("it yields nothing when there are no bodies", func(t *testing.T) {
+		t.Parallel()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(newEnvelope().GetHeader()).
+			Build()
+
+		var got []*Envelope
+		for env := range multi.All() {
+			got = append(got, env)
+		}
+
+		Expect(t, "unexpected envelope count", len(got), 0)
+	})
+}
+
 func TestWireCompatibility(t *testing.T) {
 	t.Parallel()
 

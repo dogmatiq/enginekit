@@ -102,6 +102,9 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Env
 }
 
 // Unpack returns the message contained within an envelope.
+//
+// T may be a message interface such as [dogma.Command] or a concrete message
+// type.
 func Unpack[T dogma.Message](env *Envelope) (T, error) {
 	var zero T
 

@@ -11,11 +11,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
-## [Unreleased]
+## [0.26.3] - 2026-05-09
 
 ### Changed
 
-- `envelopepb.Unpack` is now generic: `Unpack[T dogma.Message](env) (T, error)`.
+- `envelopepb.Unpack()` is now generic: `Unpack[T dogma.Message](env) (T, error)`.
   `T` may be a message interface such as `dogma.Command` or a concrete message
   type.
 
@@ -621,6 +621,7 @@ which itself includes a large numbers of breaking changes.
 [0.26.0]: https://github.com/dogmatiq/enginekit/releases/v0.26.0
 [0.26.1]: https://github.com/dogmatiq/enginekit/releases/v0.26.1
 [0.26.2]: https://github.com/dogmatiq/enginekit/releases/v0.26.2
+[0.26.3]: https://github.com/dogmatiq/enginekit/releases/v0.26.3
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

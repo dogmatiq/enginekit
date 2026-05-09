@@ -15,7 +15,9 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Changed
 
-- `envelopepb.Unpack` is now generic: `Unpack[T dogma.Message](env) (T, error)`. `T` may be a message interface such as `dogma.Command` or a concrete message type.
+- `envelopepb.Unpack` is now generic: `Unpack[T dogma.Message](env) (T, error)`.
+  `T` may be a message interface such as `dogma.Command` or a concrete message
+  type.
 
 ## [0.26.2] - 2026-05-08
 

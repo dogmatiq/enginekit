@@ -74,8 +74,6 @@ func setTypeName[T any](
 	n string,
 ) {
 	if n == "" {
-		// TODO: validate that this is actually a well-formed fully-qualified
-		// type name, with optional asterisk prefix.
 		panic("concrete type name must not be empty")
 	}
 

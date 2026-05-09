@@ -2,6 +2,7 @@ package envelopepb
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/dogmatiq/dogma"
@@ -101,28 +102,53 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Env
 }
 
 // Unpack returns the message contained within an envelope.
-// TODO: Make `UnpackCommand`, etc.
-func Unpack(env *Envelope) (dogma.Message, error) {
+//
+// T may be a message interface such as [dogma.Command] or a concrete message
+// type.
+func Unpack[T dogma.Message](env *Envelope) (T, error) {
+	var zero T
+
 	message := env.GetBody().GetMessage()
 
 	if err := message.validate(); err != nil {
-		return nil, fmt.Errorf("invalid message: %w", err)
+		return zero, fmt.Errorf(
+			"unable to unpack envelope as %s: %w",
+			reflect.TypeFor[T](),
+			err,
+		)
 	}
 
 	mt, ok := dogma.RegisteredMessageTypeByID(message.GetTypeId().AsString())
 	if !ok {
-		return nil, fmt.Errorf(
-			"%s is not a registered message type ID",
+		return zero, fmt.Errorf(
+			"unable to unpack envelope as %s: %s is not a registered message type ID",
+			reflect.TypeFor[T](),
 			message.GetTypeId(),
 		)
 	}
 
 	m := mt.New()
-	if err := m.UnmarshalBinary(message.GetData()); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal %T: %w", m, err)
+
+	v, ok := any(m).(T)
+	if !ok {
+		return zero, fmt.Errorf(
+			"unable to unpack envelope as %s: message type %s is registered as %T",
+			reflect.TypeFor[T](),
+			message.GetTypeId(),
+			m,
+		)
 	}
 
-	return m, nil
+	if err := m.UnmarshalBinary(message.GetData()); err != nil {
+		return zero, fmt.Errorf(
+			"unable to unpack envelope as %s: unable to unmarshal %T: %w",
+			reflect.TypeFor[T](),
+			m,
+			err,
+		)
+	}
+
+	return v, nil
 }
 
 // now returns the current time.

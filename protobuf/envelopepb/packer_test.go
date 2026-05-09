@@ -1,6 +1,7 @@
 package envelopepb_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -75,7 +76,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		want,
 	)
 
-	gotMessage, err := Unpack(want)
+	gotMessage, err := Unpack[dogma.Message](want)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,6 +128,78 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 	})
 
 	t.Run("func Unpack()", func(t *testing.T) {
+		t.Run("it unpacks to the requested type", func(t *testing.T) {
+			cases := []struct {
+				Name    string
+				Message dogma.Message
+				Unpack  func(*Envelope) (dogma.Message, error)
+			}{
+				{
+					"dogma.Message",
+					CommandA1,
+					func(env *Envelope) (dogma.Message, error) {
+						return Unpack[dogma.Message](env)
+					},
+				},
+				{
+					"dogma.Command",
+					CommandA1,
+					func(env *Envelope) (dogma.Message, error) {
+						return Unpack[dogma.Command](env)
+					},
+				},
+				{
+					"dogma.Event",
+					EventA1,
+					func(env *Envelope) (dogma.Message, error) {
+						return Unpack[dogma.Event](env)
+					},
+				},
+				{
+					"dogma.Deadline",
+					DeadlineA1,
+					func(env *Envelope) (dogma.Message, error) {
+						return Unpack[dogma.Deadline](env)
+					},
+				},
+				{
+					"concrete type",
+					CommandA1,
+					func(env *Envelope) (dogma.Message, error) {
+						return Unpack[*CommandStub[TypeA]](env)
+					},
+				},
+			}
+
+			for _, c := range cases {
+				t.Run(c.Name, func(t *testing.T) {
+					mt, ok := dogma.RegisteredMessageTypeOf(c.Message)
+					if !ok {
+						t.Fatalf("%T is not a registered message type", c.Message)
+					}
+
+					data, err := c.Message.MarshalBinary()
+					if err != nil {
+						t.Fatal(err)
+					}
+
+					env := NewEnvelopeBuilder().
+						WithBody(NewBodyBuilder().
+							WithMessage(NewMessageBuilder().
+								WithTypeId(uuidpb.MustParse(mt.ID())).
+								WithDescription(c.Message.MessageDescription()).
+								WithData(data).
+								Build()).
+							Build()).
+						Build()
+
+					if _, err := c.Unpack(env); err != nil {
+						t.Fatal(err)
+					}
+				})
+			}
+		})
+
 		t.Run("it returns an error if the message type is not registered", func(t *testing.T) {
 			env := NewEnvelopeBuilder().
 				WithBody(NewBodyBuilder().
@@ -138,9 +211,9 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 					Build()).
 				Build()
 
-			want := "f1816a71-3593-4771-8d8b-327650571288 is not a registered message type ID"
+			want := "unable to unpack envelope as dogma.Message: f1816a71-3593-4771-8d8b-327650571288 is not a registered message type ID"
 
-			if _, err := Unpack(env); err == nil {
+			if _, err := Unpack[dogma.Message](env); err == nil {
 				t.Fatal("expected an error")
 			} else if err.Error() != want {
 				t.Fatalf("unexpected error: got %q, want %q", err, want)
@@ -158,9 +231,45 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 					Build()).
 				Build()
 
-			want := "unable to unmarshal *stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]: invalid character '}' looking for beginning of value"
+			want := fmt.Sprintf(
+				"unable to unpack envelope as dogma.Message: unable to unmarshal %T: invalid character '}' looking for beginning of value",
+				CommandA1,
+			)
 
-			if _, err := Unpack(env); err == nil {
+			if _, err := Unpack[dogma.Message](env); err == nil {
+				t.Fatal("expected an error")
+			} else if err.Error() != want {
+				t.Fatalf("unexpected error: got %q, want %q", err, want)
+			}
+		})
+
+		t.Run("it returns an error if the message is not the expected interface type", func(t *testing.T) {
+			env := packer.PackCommand(CommandA1)
+
+			want := fmt.Sprintf(
+				"unable to unpack envelope as dogma.Event: message type %s is registered as %T",
+				MessageTypeID[*CommandStub[TypeA]](),
+				CommandA1,
+			)
+
+			if _, err := Unpack[dogma.Event](env); err == nil {
+				t.Fatal("expected an error")
+			} else if err.Error() != want {
+				t.Fatalf("unexpected error: got %q, want %q", err, want)
+			}
+		})
+
+		t.Run("it returns an error if the message is not the expected concrete type", func(t *testing.T) {
+			env := packer.PackCommand(CommandA1)
+
+			want := fmt.Sprintf(
+				"unable to unpack envelope as %T: message type %s is registered as %T",
+				(*CommandStub[TypeB])(nil),
+				MessageTypeID[*CommandStub[TypeA]](),
+				CommandA1,
+			)
+
+			if _, err := Unpack[*CommandStub[TypeB]](env); err == nil {
 				t.Fatal("expected an error")
 			} else if err.Error() != want {
 				t.Fatalf("unexpected error: got %q, want %q", err, want)

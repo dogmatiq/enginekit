@@ -112,5 +112,5 @@ type UnrecognizedConcurrencyPreference struct {
 }
 
 func (e UnrecognizedConcurrencyPreference) Error() string {
-	return fmt.Sprintf("invalid concurrency preference (%q), expected dogma.MinimizeConcurrency or dogma.MaximizeConcurrency", e.InvalidValue)
+	return fmt.Sprintf("invalid concurrency preference (%v), expected dogma.MinimizeConcurrency or dogma.MaximizeConcurrency", e.InvalidValue)
 }

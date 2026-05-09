@@ -135,7 +135,7 @@ func slogAttrFromLogValue(name string, v log.Value) slog.Attr {
 				),
 			)
 		}
-		return slogGroupAttrs(name, attrs)
+		return slog.GroupAttrs(name, attrs...)
 
 	case log.KindMap:
 		var attrs []slog.Attr
@@ -148,20 +148,9 @@ func slogAttrFromLogValue(name string, v log.Value) slog.Attr {
 				),
 			)
 		}
-		return slogGroupAttrs(name, attrs)
+		return slog.GroupAttrs(name, attrs...)
 
 	default:
 		return slog.String(name, v.String())
-	}
-}
-
-// slogGroupAttrs is an implementation of [slog.GroupAttrs] for Go versions
-// prior to 1.25.
-//
-// TODO: remove this when go.mod is updated to Go 1.25 or later.
-func slogGroupAttrs(name string, attrs []slog.Attr) slog.Attr {
-	return slog.Attr{
-		Key:   name,
-		Value: slog.GroupValue(attrs...),
 	}
 }

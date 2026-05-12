@@ -17,7 +17,7 @@ func TestSetBaggage(t *testing.T) {
 		}
 
 		body := NewBodyBuilder().Build()
-		SetBaggage[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+		SetBaggage(body, wrapperspb.String("hello"))
 
 		Expect(
 			t,
@@ -35,8 +35,8 @@ func TestSetBaggage(t *testing.T) {
 			}
 
 			body := NewBodyBuilder().Build()
-			SetBaggage[*wrapperspb.StringValue](body, wrapperspb.String("first"))
-			SetBaggage[*wrapperspb.StringValue](body, wrapperspb.String("second"))
+			SetBaggage(body, wrapperspb.String("first"))
+			SetBaggage(body, wrapperspb.String("second"))
 
 			Expect(
 				t,
@@ -60,8 +60,8 @@ func TestSetBaggage(t *testing.T) {
 			}
 
 			body := NewBodyBuilder().Build()
-			SetBaggage[*wrapperspb.Int64Value](body, wrapperspb.Int64(42))
-			SetBaggage[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+			SetBaggage(body, wrapperspb.Int64(42))
+			SetBaggage(body, wrapperspb.String("hello"))
 
 			Expect(
 				t,
@@ -78,7 +78,7 @@ func TestSetBaggage(t *testing.T) {
 				t,
 				"value must not be nil",
 				func() {
-					SetBaggage[*wrapperspb.StringValue](NewBodyBuilder().Build(), nil)
+					SetBaggage(NewBodyBuilder().Build(), (*wrapperspb.StringValue)(nil))
 				},
 			)
 		})
@@ -89,7 +89,7 @@ func TestGetBaggage(t *testing.T) {
 	t.Run("when a matching baggage value is present", func(t *testing.T) {
 		t.Run("it returns the value and true", func(t *testing.T) {
 			body := NewBodyBuilder().Build()
-			SetBaggage[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+			SetBaggage(body, wrapperspb.String("hello"))
 
 			got, ok, err := GetBaggage[*wrapperspb.StringValue](body)
 			if err != nil {
@@ -128,7 +128,7 @@ func TestGetBaggage(t *testing.T) {
 	t.Run("when only baggage values of other types are present", func(t *testing.T) {
 		t.Run("it returns false", func(t *testing.T) {
 			body := NewBodyBuilder().Build()
-			SetBaggage[*wrapperspb.Int64Value](body, wrapperspb.Int64(42))
+			SetBaggage(body, wrapperspb.Int64(42))
 
 			got, ok, err := GetBaggage[*wrapperspb.StringValue](body)
 			if err != nil {
@@ -146,7 +146,7 @@ func TestGetBaggage(t *testing.T) {
 	t.Run("when a value of the requested type has been set as an extension", func(t *testing.T) {
 		t.Run("it returns false (baggage and extensions are distinct)", func(t *testing.T) {
 			body := NewBodyBuilder().Build()
-			SetExtension[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+			SetExtension(body, wrapperspb.String("hello"))
 
 			_, ok, err := GetBaggage[*wrapperspb.StringValue](body)
 			if err != nil {

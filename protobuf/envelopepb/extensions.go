@@ -2,7 +2,7 @@ package envelopepb
 
 import "google.golang.org/protobuf/proto"
 
-// SetExtension sets x as an extension on b. If an extension with the same
+// SetExtension sets x as an extension on body. If an extension with the same
 // type URL is already present, it is replaced.
 //
 // It panics if x is nil.
@@ -12,7 +12,11 @@ func SetExtension[
 		proto.Message
 	},
 	E any,
-](body *Body, x proto.Message) {
+](body *Body, x T) {
+	if x == nil {
+		panic("value must not be nil")
+	}
+
 	body.SetExtensions(
 		appendOrReplace(
 			body.GetExtensions(),
@@ -21,8 +25,11 @@ func SetExtension[
 	)
 }
 
-// GetExtension reads an extension matching out's type into out, returning true
-// if such an extension was found and successfully unmarshalled.
+// GetExtension returns the extension matching T from body's extensions.
+//
+// The second return value reports whether an extension of the matching type
+// was present. The third return value is non-nil if the extension was present
+// but could not be unmarshalled.
 func GetExtension[
 	T interface {
 		*E

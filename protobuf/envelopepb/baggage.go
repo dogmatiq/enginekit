@@ -2,8 +2,8 @@ package envelopepb
 
 import "google.golang.org/protobuf/proto"
 
-// SetBaggage sets x as a baggage value on b. If a baggage value with the same
-// type URL is already present, it is replaced.
+// SetBaggage sets x as a baggage value on body. If a baggage value with the
+// same type URL is already present, it is replaced.
 //
 // It panics if x is nil.
 func SetBaggage[
@@ -12,7 +12,11 @@ func SetBaggage[
 		proto.Message
 	},
 	E any,
-](body *Body, x proto.Message) {
+](body *Body, x T) {
+	if x == nil {
+		panic("value must not be nil")
+	}
+
 	body.SetBaggage(
 		appendOrReplace(
 			body.GetBaggage(),
@@ -21,8 +25,11 @@ func SetBaggage[
 	)
 }
 
-// GetBaggage reads a baggage value matching out's type into out, returning true
-// if such a value was found and successfully unmarshalled.
+// GetBaggage returns the baggage value matching T from body's baggage.
+//
+// The second return value reports whether a baggage value of the matching
+// type was present. The third return value is non-nil if the baggage value
+// was present but could not be unmarshalled.
 func GetBaggage[
 	T interface {
 		*E

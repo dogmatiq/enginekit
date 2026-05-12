@@ -5,6 +5,7 @@ import (
 
 	. "github.com/dogmatiq/enginekit/internal/test"
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
+	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -17,7 +18,7 @@ func TestSetExtension(t *testing.T) {
 		}
 
 		body := NewBodyBuilder().Build()
-		SetExtension[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+		SetExtension(body, wrapperspb.String("hello"))
 
 		Expect(
 			t,
@@ -35,8 +36,8 @@ func TestSetExtension(t *testing.T) {
 			}
 
 			body := NewBodyBuilder().Build()
-			SetExtension[*wrapperspb.StringValue](body, wrapperspb.String("first"))
-			SetExtension[*wrapperspb.StringValue](body, wrapperspb.String("second"))
+			SetExtension(body, wrapperspb.String("first"))
+			SetExtension(body, wrapperspb.String("second"))
 
 			Expect(
 				t,
@@ -60,8 +61,8 @@ func TestSetExtension(t *testing.T) {
 			}
 
 			body := NewBodyBuilder().Build()
-			SetExtension[*wrapperspb.Int64Value](body, wrapperspb.Int64(42))
-			SetExtension[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+			SetExtension(body, wrapperspb.Int64(42))
+			SetExtension(body, wrapperspb.String("hello"))
 
 			Expect(
 				t,
@@ -78,7 +79,7 @@ func TestSetExtension(t *testing.T) {
 				t,
 				"value must not be nil",
 				func() {
-					SetExtension[*wrapperspb.StringValue](NewBodyBuilder().Build(), nil)
+					SetExtension(NewBodyBuilder().Build(), (*wrapperspb.StringValue)(nil))
 				},
 			)
 		})
@@ -89,7 +90,7 @@ func TestGetExtension(t *testing.T) {
 	t.Run("when a matching extension is present", func(t *testing.T) {
 		t.Run("it returns the value and true", func(t *testing.T) {
 			body := NewBodyBuilder().Build()
-			SetExtension[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+			SetExtension(body, wrapperspb.String("hello"))
 
 			got, ok, err := GetExtension[*wrapperspb.StringValue](body)
 			if err != nil {
@@ -128,7 +129,7 @@ func TestGetExtension(t *testing.T) {
 	t.Run("when only extensions of other types are present", func(t *testing.T) {
 		t.Run("it returns false", func(t *testing.T) {
 			body := NewBodyBuilder().Build()
-			SetExtension[*wrapperspb.Int64Value](body, wrapperspb.Int64(42))
+			SetExtension(body, wrapperspb.Int64(42))
 
 			got, ok, err := GetExtension[*wrapperspb.StringValue](body)
 			if err != nil {
@@ -146,7 +147,7 @@ func TestGetExtension(t *testing.T) {
 	t.Run("when a value of the requested type has been set as baggage", func(t *testing.T) {
 		t.Run("it returns false (baggage and extensions are distinct)", func(t *testing.T) {
 			body := NewBodyBuilder().Build()
-			SetBaggage[*wrapperspb.StringValue](body, wrapperspb.String("hello"))
+			SetBaggage(body, wrapperspb.String("hello"))
 
 			_, ok, err := GetExtension[*wrapperspb.StringValue](body)
 			if err != nil {
@@ -155,6 +156,49 @@ func TestGetExtension(t *testing.T) {
 			if ok {
 				t.Fatal("expected to find no matching extension")
 			}
+		})
+	})
+}
+
+func TestEventStreamPosition(t *testing.T) {
+	t.Run("when wrapped in anypb.Any", func(t *testing.T) {
+		t.Run("it has a stable, fully-qualified type URL", func(t *testing.T) {
+			a, err := anypb.New(&EventStreamPosition{})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			const want = "type.googleapis.com/dogma.protobuf.EventStreamPosition"
+			if a.GetTypeUrl() != want {
+				t.Fatalf("unexpected type URL:\n got: %s\nwant: %s", a.GetTypeUrl(), want)
+			}
+		})
+	})
+
+	t.Run("when attached as an extension via SetExtension", func(t *testing.T) {
+		t.Run("it round-trips via GetExtension", func(t *testing.T) {
+			want := NewEventStreamPositionBuilder().
+				WithStreamId(uuidpb.Generate()).
+				WithOffset(42).
+				Build()
+
+			body := NewBodyBuilder().Build()
+			SetExtension(body, want)
+
+			got, ok, err := GetExtension[*EventStreamPosition](body)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !ok {
+				t.Fatal("expected to find an EventStreamPosition")
+			}
+
+			Expect(
+				t,
+				"unexpected position",
+				got,
+				want,
+			)
 		})
 	})
 }

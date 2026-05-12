@@ -78,7 +78,7 @@ func TestSetBaggage(t *testing.T) {
 				t,
 				"value must not be nil",
 				func() {
-					SetBaggage(NewBodyBuilder().Build(), (*wrapperspb.StringValue)(nil))
+					SetBaggage[*wrapperspb.StringValue](NewBodyBuilder().Build(), nil)
 				},
 			)
 		})

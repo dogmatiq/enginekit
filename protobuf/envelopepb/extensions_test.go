@@ -79,7 +79,7 @@ func TestSetExtension(t *testing.T) {
 				t,
 				"value must not be nil",
 				func() {
-					SetExtension(NewBodyBuilder().Build(), (*wrapperspb.StringValue)(nil))
+					SetExtension[*wrapperspb.StringValue](NewBodyBuilder().Build(), nil)
 				},
 			)
 		})

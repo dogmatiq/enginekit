@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added generic `envelopepb.SetExtension[T]()`, `GetExtension[T]()`,
+  `SetBaggage[T]()` and `GetBaggage[T]()` helpers for attaching and reading
+  extensions/baggage on an `envelopepb.Body` after packing.
+- Added `envelopepb.EventStreamPosition`, an extension message that identifies
+  the stream from which an event was obtained, and the event's offset within
+  that stream.
+
 ## [0.26.3] - 2026-05-09
 
 ### Changed

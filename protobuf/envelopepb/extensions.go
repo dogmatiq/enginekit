@@ -1,45 +1,50 @@
 package envelopepb
 
-import (
-	anypb "google.golang.org/protobuf/types/known/anypb"
-)
+import "google.golang.org/protobuf/proto"
 
-// flattenAnyValues merges two slices of [*anypb.Any] values from a [Header] and
-// [Body] into a single slice.
+// SetExtension sets x as an extension on body. If an extension with the same
+// type URL is already present, it is replaced.
 //
-// Later values override earlier values with the same type URL, so body values
-// override header values and the last repeated value in either location wins.
-func flattenAnyValues(header, body []*anypb.Any) []*anypb.Any {
-	total := len(header) + len(body)
-	if total == 0 {
-		return nil
+// It panics if x is nil.
+func SetExtension[
+	T interface {
+		*E
+		proto.Message
+	},
+	E any,
+](body *Body, x T) {
+	if x == nil {
+		panic("value must not be nil")
 	}
 
-	result := make([]*anypb.Any, total)
-	start := total
+	body.SetExtensions(
+		appendOrReplace(
+			body.GetExtensions(),
+			marshalAsAny(x),
+		),
+	)
+}
 
-	isSeen := func(v *anypb.Any) bool {
-		for _, x := range result[start:] {
-			if x.GetTypeUrl() == v.GetTypeUrl() {
-				return true
-			}
+// GetExtension returns the extension matching T from body's extensions.
+//
+// The second return value reports whether an extension of the matching type
+// was present. The third return value is non-nil if the extension was present
+// but could not be unmarshalled.
+func GetExtension[
+	T interface {
+		*E
+		proto.Message
+	},
+	E any,
+](body *Body) (T, bool, error) {
+	var out T
+
+	for _, ext := range body.GetExtensions() {
+		if ext.MessageIs(out) {
+			out = new(E)
+			return out, true, ext.UnmarshalTo(out)
 		}
-
-		return false
 	}
 
-	appendLastWins := func(values []*anypb.Any) {
-		for idx := len(values) - 1; idx >= 0; idx-- {
-			v := values[idx]
-			if !isSeen(v) {
-				start--
-				result[start] = v
-			}
-		}
-	}
-
-	appendLastWins(body)
-	appendLastWins(header)
-
-	return result[start:]
+	return nil, false, nil
 }

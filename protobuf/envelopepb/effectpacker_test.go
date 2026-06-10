@@ -521,6 +521,231 @@ func TestEffectPacker_Pack(t *testing.T) {
 			[]*anypb.Any{want},
 		)
 	})
+
+	t.Run("func PackCommand()", func(t *testing.T) {
+		t.Run("it returns the expected envelope", func(t *testing.T) {
+			id0 := uuidpb.Generate()
+			id1 := uuidpb.Generate()
+			now := time.Now()
+
+			ids := []*uuidpb.UUID{id0, id1}
+			site := identitypb.
+				NewIdentityBuilder().
+				WithName("site").
+				WithKey(uuidpb.Generate()).
+				Build()
+			application := identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build()
+			handler := identitypb.
+				NewIdentityBuilder().
+				WithName("handler").
+				WithKey(uuidpb.Generate()).
+				Build()
+
+			packer := &Packer{
+				Site:        site,
+				Application: application,
+				GenerateID: func() *uuidpb.UUID {
+					id := ids[0]
+					ids = ids[1:]
+					return id
+				},
+				Now: func() time.Time {
+					return now
+				},
+			}
+
+			cause := packer.PackCommand(CommandA1)
+			ep := packer.PackEffects(cause, handler)
+			got := ep.PackCommand(CommandA2)
+
+			want := NewEnvelopeBuilder().
+				WithHeader(
+					NewHeaderBuilder().
+						WithCausationId(cause.GetBody().GetMessageId()).
+						WithCorrelationId(cause.GetHeader().GetCorrelationId()).
+						WithSource(NewSourceBuilder().
+							WithSite(site).
+							WithApplication(application).
+							WithHandler(handler).
+							Build()).
+						Build(),
+				).
+				WithBody(
+					NewBodyBuilder().
+						WithMessageId(id1).
+						WithCreatedAt(timestamppb.New(now)).
+						WithMessage(NewMessageBuilder().
+							WithDescription(`command(stubs.TypeA:A2, valid)`).
+							WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+							WithData([]byte(`{"content":"A2"}`)).
+							Build()).
+						Build(),
+				).
+				Build()
+
+			Expect(
+				t,
+				"unexpected envelope",
+				got,
+				want,
+			)
+		})
+	})
+
+	t.Run("func PackEvent()", func(t *testing.T) {
+		t.Run("it returns the expected envelope", func(t *testing.T) {
+			id0 := uuidpb.Generate()
+			id1 := uuidpb.Generate()
+			now := time.Now()
+
+			ids := []*uuidpb.UUID{id0, id1}
+			site := identitypb.
+				NewIdentityBuilder().
+				WithName("site").
+				WithKey(uuidpb.Generate()).
+				Build()
+			application := identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build()
+			handler := identitypb.
+				NewIdentityBuilder().
+				WithName("handler").
+				WithKey(uuidpb.Generate()).
+				Build()
+
+			packer := &Packer{
+				Site:        site,
+				Application: application,
+				GenerateID: func() *uuidpb.UUID {
+					id := ids[0]
+					ids = ids[1:]
+					return id
+				},
+				Now: func() time.Time {
+					return now
+				},
+			}
+
+			cause := packer.PackCommand(CommandA1)
+			ep := packer.PackEffects(cause, handler)
+			got := ep.PackEvent(EventA1)
+
+			want := NewEnvelopeBuilder().
+				WithHeader(
+					NewHeaderBuilder().
+						WithCausationId(cause.GetBody().GetMessageId()).
+						WithCorrelationId(cause.GetHeader().GetCorrelationId()).
+						WithSource(NewSourceBuilder().
+							WithSite(site).
+							WithApplication(application).
+							WithHandler(handler).
+							Build()).
+						Build(),
+				).
+				WithBody(
+					NewBodyBuilder().
+						WithMessageId(id1).
+						WithCreatedAt(timestamppb.New(now)).
+						WithMessage(NewMessageBuilder().
+							WithDescription(`event(stubs.TypeA:A1, valid)`).
+							WithTypeId(uuidpb.MustParse(MessageTypeID[*EventStub[TypeA]]())).
+							WithData([]byte(`{"content":"A1"}`)).
+							Build()).
+						Build(),
+				).
+				Build()
+
+			Expect(
+				t,
+				"unexpected envelope",
+				got,
+				want,
+			)
+		})
+	})
+
+	t.Run("func PackDeadline()", func(t *testing.T) {
+		t.Run("it returns the expected envelope", func(t *testing.T) {
+			id0 := uuidpb.Generate()
+			id1 := uuidpb.Generate()
+			now := time.Now()
+			scheduledFor := now.Add(time.Hour)
+
+			ids := []*uuidpb.UUID{id0, id1}
+			site := identitypb.
+				NewIdentityBuilder().
+				WithName("site").
+				WithKey(uuidpb.Generate()).
+				Build()
+			application := identitypb.
+				NewIdentityBuilder().
+				WithName("app").
+				WithKey(uuidpb.Generate()).
+				Build()
+			handler := identitypb.
+				NewIdentityBuilder().
+				WithName("handler").
+				WithKey(uuidpb.Generate()).
+				Build()
+
+			packer := &Packer{
+				Site:        site,
+				Application: application,
+				GenerateID: func() *uuidpb.UUID {
+					id := ids[0]
+					ids = ids[1:]
+					return id
+				},
+				Now: func() time.Time {
+					return now
+				},
+			}
+
+			cause := packer.PackCommand(CommandA1)
+			ep := packer.PackEffects(cause, handler, WithInstanceID("instance"))
+			got := ep.PackDeadline(DeadlineA1, WithScheduledFor(scheduledFor))
+
+			want := NewEnvelopeBuilder().
+				WithHeader(
+					NewHeaderBuilder().
+						WithCausationId(cause.GetBody().GetMessageId()).
+						WithCorrelationId(cause.GetHeader().GetCorrelationId()).
+						WithSource(NewSourceBuilder().
+							WithSite(site).
+							WithApplication(application).
+							WithHandler(handler).
+							WithInstanceId("instance").
+							Build()).
+						Build(),
+				).
+				WithBody(
+					NewBodyBuilder().
+						WithMessageId(id1).
+						WithCreatedAt(timestamppb.New(now)).
+						WithScheduledFor(timestamppb.New(scheduledFor)).
+						WithMessage(NewMessageBuilder().
+							WithDescription(`deadline(stubs.TypeA:A1, valid)`).
+							WithTypeId(uuidpb.MustParse(MessageTypeID[*DeadlineStub[TypeA]]())).
+							WithData([]byte(`{"content":"A1"}`)).
+							Build()).
+						Build(),
+				).
+				Build()
+
+			Expect(
+				t,
+				"unexpected envelope",
+				got,
+				want,
+			)
+		})
+	})
 }
 
 func TestEffectPacker_Seal(t *testing.T) {

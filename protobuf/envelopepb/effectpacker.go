@@ -81,18 +81,18 @@ func (p *Packer) PackEffects(
 }
 
 // PackCommand appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackCommand(m dogma.Command, options ...PackEffectCommandOption) {
-	packEffectBody(p, m, PackEffectCommandOption.applyPackEffectCommandOption, options...)
+func (p *EffectPacker) PackCommand(m dogma.Command, options ...PackEffectCommandOption) *Envelope {
+	return packEffectBody(p, m, PackEffectCommandOption.applyPackEffectCommandOption, options...)
 }
 
 // PackEvent appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackEvent(m dogma.Event, options ...PackEffectEventOption) {
-	packEffectBody(p, m, PackEffectEventOption.applyPackEffectEventOption, options...)
+func (p *EffectPacker) PackEvent(m dogma.Event, options ...PackEffectEventOption) *Envelope {
+	return packEffectBody(p, m, PackEffectEventOption.applyPackEffectEventOption, options...)
 }
 
 // PackDeadline appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackDeadline(m dogma.Deadline, options ...PackEffectDeadlineOption) {
-	packEffectBody(p, m, PackEffectDeadlineOption.applyPackEffectDeadlineOption, options...)
+func (p *EffectPacker) PackDeadline(m dogma.Deadline, options ...PackEffectDeadlineOption) *Envelope {
+	return packEffectBody(p, m, PackEffectDeadlineOption.applyPackEffectDeadlineOption, options...)
 }
 
 func packEffectBody[T any](
@@ -100,7 +100,7 @@ func packEffectBody[T any](
 	m dogma.Message,
 	apply func(T, *Body),
 	options ...T,
-) {
+) *Envelope {
 	p.mustNotBeSealed()
 
 	mt, ok := dogma.RegisteredMessageTypeOf(m)
@@ -144,6 +144,11 @@ func packEffectBody[T any](
 	}
 
 	p.bodies = append(p.bodies, body)
+
+	return NewEnvelopeBuilder().
+		WithHeader(p.header).
+		WithBody(body).
+		Build()
 }
 
 // Seal returns a [MultiEnvelope] containing all packed messages, or false if no

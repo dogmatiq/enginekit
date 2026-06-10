@@ -11,6 +11,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.26.5] - 2026-06-10
+
+### Changed
+
+- `envelopepb.EffectPacker.PackCommand()`, `PackEvent()`, and
+  `PackDeadline()` now return the packed envelope.
+
 ## [0.26.4] - 2026-05-16
 
 ### Added
@@ -634,6 +641,7 @@ which itself includes a large numbers of breaking changes.
 [0.26.2]: https://github.com/dogmatiq/enginekit/releases/v0.26.2
 [0.26.3]: https://github.com/dogmatiq/enginekit/releases/v0.26.3
 [0.26.4]: https://github.com/dogmatiq/enginekit/releases/v0.26.4
+[0.26.5]: https://github.com/dogmatiq/enginekit/releases/v0.26.5
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

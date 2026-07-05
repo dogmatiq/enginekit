@@ -68,10 +68,10 @@ func (b0 ListStreamsRequest_builder) Build() *ListStreamsRequest {
 
 // ListStreamsResponse is the output of the ConsumeAPI.ListStreams method.
 type ListStreamsResponse struct {
-	state              protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Streams *[]*Stream             `protobuf:"bytes,1,rep,name=streams"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Stream *Stream                `protobuf:"bytes,1,opt,name=stream"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ListStreamsResponse) Reset() {
@@ -99,31 +99,40 @@ func (x *ListStreamsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ListStreamsResponse) GetStreams() []*Stream {
+func (x *ListStreamsResponse) GetStream() *Stream {
 	if x != nil {
-		if x.xxx_hidden_Streams != nil {
-			return *x.xxx_hidden_Streams
-		}
+		return x.xxx_hidden_Stream
 	}
 	return nil
 }
 
-func (x *ListStreamsResponse) SetStreams(v []*Stream) {
-	x.xxx_hidden_Streams = &v
+func (x *ListStreamsResponse) SetStream(v *Stream) {
+	x.xxx_hidden_Stream = v
+}
+
+func (x *ListStreamsResponse) HasStream() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Stream != nil
+}
+
+func (x *ListStreamsResponse) ClearStream() {
+	x.xxx_hidden_Stream = nil
 }
 
 type ListStreamsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Streams is a list of event streams that can be consumed from this server.
-	Streams []*Stream
+	// Stream is an event stream that can be consumed from this server.
+	Stream *Stream
 }
 
 func (b0 ListStreamsResponse_builder) Build() *ListStreamsResponse {
 	m0 := &ListStreamsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Streams = &b.Streams
+	x.xxx_hidden_Stream = b.Stream
 	return m0
 }
 
@@ -725,9 +734,9 @@ var File_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto protor
 const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc = "" +
 	"\n" +
 	"@github.com/dogmatiq/enginekit/grpc/eventstreamgrpc/consume.proto\x12\x1cdogma.eventstream.consume.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"\x14\n" +
-	"\x12ListStreamsRequest\"U\n" +
-	"\x13ListStreamsResponse\x12>\n" +
-	"\astreams\x18\x01 \x03(\v2$.dogma.eventstream.consume.v1.StreamR\astreams\"w\n" +
+	"\x12ListStreamsRequest\"S\n" +
+	"\x13ListStreamsResponse\x12<\n" +
+	"\x06stream\x18\x01 \x01(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"w\n" +
 	"\x06Stream\x121\n" +
 	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12:\n" +
 	"\x0eevent_type_ids\x18\x02 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\xa4\x01\n" +
@@ -745,10 +754,10 @@ const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawD
 	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\"\x0e\n" +
 	"\fNoEventTypes\"Q\n" +
 	"\x15UnrecognizedEventType\x128\n" +
-	"\revent_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\veventTypeId2\xfc\x01\n" +
+	"\revent_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\veventTypeId2\xfe\x01\n" +
 	"\n" +
-	"ConsumeAPI\x12r\n" +
-	"\vListStreams\x120.dogma.eventstream.consume.v1.ListStreamsRequest\x1a1.dogma.eventstream.consume.v1.ListStreamsResponse\x12z\n" +
+	"ConsumeAPI\x12t\n" +
+	"\vListStreams\x120.dogma.eventstream.consume.v1.ListStreamsRequest\x1a1.dogma.eventstream.consume.v1.ListStreamsResponse0\x01\x12z\n" +
 	"\rConsumeEvents\x122.dogma.eventstream.consume.v1.ConsumeEventsRequest\x1a3.dogma.eventstream.consume.v1.ConsumeEventsResponse0\x01B4Z2github.com/dogmatiq/enginekit/grpc/eventstreamgrpcb\beditionsp\xe9\a"
 
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
@@ -766,7 +775,7 @@ var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_goType
 	(*envelopepb.Envelope)(nil),                 // 10: dogma.protobuf.Envelope
 }
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_depIdxs = []int32{
-	2,  // 0: dogma.eventstream.consume.v1.ListStreamsResponse.streams:type_name -> dogma.eventstream.consume.v1.Stream
+	2,  // 0: dogma.eventstream.consume.v1.ListStreamsResponse.stream:type_name -> dogma.eventstream.consume.v1.Stream
 	9,  // 1: dogma.eventstream.consume.v1.Stream.stream_id:type_name -> dogma.protobuf.UUID
 	9,  // 2: dogma.eventstream.consume.v1.Stream.event_type_ids:type_name -> dogma.protobuf.UUID
 	9,  // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest.stream_id:type_name -> dogma.protobuf.UUID

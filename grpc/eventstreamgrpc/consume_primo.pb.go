@@ -69,7 +69,9 @@ func NewListStreamsResponseBuilder() *ListStreamsResponseBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *ListStreamsResponseBuilder) From(x *ListStreamsResponse) *ListStreamsResponseBuilder {
 	proto.Reset(&b.prototype)
-	b.prototype.SetStreams(x.GetStreams())
+	if x.HasStream() {
+		b.prototype.SetStream(x.GetStream())
+	}
 	return b
 }
 
@@ -79,14 +81,16 @@ func (b *ListStreamsResponseBuilder) From(x *ListStreamsResponse) *ListStreamsRe
 // not modify previously constructed messages.
 func (b *ListStreamsResponseBuilder) Build() *ListStreamsResponse {
 	m := &ListStreamsResponse{}
-	m.SetStreams(b.prototype.GetStreams())
+	if b.prototype.HasStream() {
+		m.SetStream(b.prototype.GetStream())
+	}
 	return m
 }
 
-// WithStreams configures the builder to set the Streams field to v,
+// WithStream configures the builder to set the Stream field to v,
 // then returns b.
-func (b *ListStreamsResponseBuilder) WithStreams(v []*Stream) *ListStreamsResponseBuilder {
-	b.prototype.SetStreams(v)
+func (b *ListStreamsResponseBuilder) WithStream(v *Stream) *ListStreamsResponseBuilder {
+	b.prototype.SetStream(v)
 	return b
 }
 
@@ -473,14 +477,14 @@ var _ ConsumeAPIClient = (*ConsumeAPIClientStub)(nil)
 
 type ConsumeAPIClientStub struct {
 	// ListStreamsFunc is a function that implements the ListStreams RPC method.
-	ListStreamsFunc func(ctx context.Context, req *ListStreamsRequest, options ...grpc.CallOption) (*ListStreamsResponse, error)
+	ListStreamsFunc func(ctx context.Context, req *ListStreamsRequest, options ...grpc.CallOption) (ConsumeAPI_ListStreamsClient, error)
 
 	// ConsumeEventsFunc is a function that implements the ConsumeEvents RPC method.
 	ConsumeEventsFunc func(ctx context.Context, req *ConsumeEventsRequest, options ...grpc.CallOption) (ConsumeAPI_ConsumeEventsClient, error)
 }
 
 // ListStreams calls c.ListStreamsFunc if it is non-nil. Otherwise, it returns an error.
-func (c *ConsumeAPIClientStub) ListStreams(ctx context.Context, req *ListStreamsRequest, options ...grpc.CallOption) (*ListStreamsResponse, error) {
+func (c *ConsumeAPIClientStub) ListStreams(ctx context.Context, req *ListStreamsRequest, options ...grpc.CallOption) (ConsumeAPI_ListStreamsClient, error) {
 	if c.ListStreamsFunc == nil {
 		return nil, status.Error(codes.Unimplemented, "method ListStreams not implemented")
 	}

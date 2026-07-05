@@ -11,7 +11,9 @@ import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 // stream.
 service ConsumeAPI {
   // ListStreams lists the streams that the server provides.
-  rpc ListStreams(ListStreamsRequest) returns (ListStreamsResponse);
+  //
+  // The server may add additional streams at any time.
+  rpc ListStreams(ListStreamsRequest) returns (stream ListStreamsResponse);
 
   // Consume starts consuming from a specific offset within an event stream.
   //
@@ -39,8 +41,8 @@ message ListStreamsRequest {}
 
 // ListStreamsResponse is the output of the ConsumeAPI.ListStreams method.
 message ListStreamsResponse {
-  // Streams is a list of event streams that can be consumed from this server.
-  repeated Stream streams = 1;
+  // Stream is an event stream that can be consumed from this server.
+  Stream stream = 1;
 }
 
 // Stream describes an offset-based ordered event stream.

@@ -47,8 +47,8 @@ message ListStreamsResponse {
 
 // Stream describes an offset-based ordered event stream.
 message Stream {
-  // StreamId is a unique identifier for the stream.
-  dogma.protobuf.UUID stream_id = 1;
+  // Id is a unique identifier for the stream.
+  dogma.protobuf.UUID id = 1;
 
   // NextOffset is the offset of the next event that will be written to the
   // stream. The first event in the stream is at offset zero; therefore, this

@@ -158,7 +158,7 @@ func (b0 ListStreamsResponse_builder) Build() *ListStreamsResponse {
 // Stream describes an offset-based ordered event stream.
 type Stream struct {
 	state                 protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_StreamId   *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
+	xxx_hidden_Id         *uuidpb.UUID           `protobuf:"bytes,1,opt,name=id"`
 	xxx_hidden_NextOffset uint64                 `protobuf:"varint,2,opt,name=next_offset,json=nextOffset"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
@@ -189,9 +189,9 @@ func (x *Stream) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *Stream) GetStreamId() *uuidpb.UUID {
+func (x *Stream) GetId() *uuidpb.UUID {
 	if x != nil {
-		return x.xxx_hidden_StreamId
+		return x.xxx_hidden_Id
 	}
 	return nil
 }
@@ -203,30 +203,30 @@ func (x *Stream) GetNextOffset() uint64 {
 	return 0
 }
 
-func (x *Stream) SetStreamId(v *uuidpb.UUID) {
-	x.xxx_hidden_StreamId = v
+func (x *Stream) SetId(v *uuidpb.UUID) {
+	x.xxx_hidden_Id = v
 }
 
 func (x *Stream) SetNextOffset(v uint64) {
 	x.xxx_hidden_NextOffset = v
 }
 
-func (x *Stream) HasStreamId() bool {
+func (x *Stream) HasId() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_StreamId != nil
+	return x.xxx_hidden_Id != nil
 }
 
-func (x *Stream) ClearStreamId() {
-	x.xxx_hidden_StreamId = nil
+func (x *Stream) ClearId() {
+	x.xxx_hidden_Id = nil
 }
 
 type Stream_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// StreamId is a unique identifier for the stream.
-	StreamId *uuidpb.UUID
+	// Id is a unique identifier for the stream.
+	Id *uuidpb.UUID
 	// NextOffset is the offset of the next event that will be written to the
 	// stream. The first event in the stream is at offset zero; therefore, this
 	// value is equivalent to the number of events that have been written to the
@@ -238,7 +238,7 @@ func (b0 Stream_builder) Build() *Stream {
 	m0 := &Stream{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_StreamId = b.StreamId
+	x.xxx_hidden_Id = b.Id
 	x.xxx_hidden_NextOffset = b.NextOffset
 	return m0
 }
@@ -458,9 +458,9 @@ const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawD
 	"\x12ListStreamsRequest\x12>\n" +
 	"\x10message_type_ids\x18\x01 \x03(\v2\x14.dogma.protobuf.UUIDR\x0emessageTypeIds\"S\n" +
 	"\x13ListStreamsResponse\x12<\n" +
-	"\x06stream\x18\x01 \x01(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"c\n" +
-	"\x06Stream\x121\n" +
-	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12&\n" +
+	"\x06stream\x18\x01 \x01(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"V\n" +
+	"\x06Stream\x12$\n" +
+	"\x02id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\x02id\x12&\n" +
 	"\vnext_offset\x18\x02 \x01(\x04B\x05\xaa\x01\x02\b\x02R\n" +
 	"nextOffset\"\xbd\x01\n" +
 	"\x14ConsumeEventsRequest\x121\n" +
@@ -488,7 +488,7 @@ var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_goType
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_depIdxs = []int32{
 	5, // 0: dogma.eventstream.consume.v1.ListStreamsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
 	2, // 1: dogma.eventstream.consume.v1.ListStreamsResponse.stream:type_name -> dogma.eventstream.consume.v1.Stream
-	5, // 2: dogma.eventstream.consume.v1.Stream.stream_id:type_name -> dogma.protobuf.UUID
+	5, // 2: dogma.eventstream.consume.v1.Stream.id:type_name -> dogma.protobuf.UUID
 	5, // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest.stream_id:type_name -> dogma.protobuf.UUID
 	5, // 4: dogma.eventstream.consume.v1.ConsumeEventsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
 	6, // 5: dogma.eventstream.consume.v1.ConsumeEventsResponse.envelopes:type_name -> dogma.protobuf.MultiEnvelope

@@ -110,8 +110,8 @@ func NewStreamBuilder() *StreamBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *StreamBuilder) From(x *Stream) *StreamBuilder {
 	proto.Reset(&b.prototype)
-	if x.HasStreamId() {
-		b.prototype.SetStreamId(x.GetStreamId())
+	if x.HasId() {
+		b.prototype.SetId(x.GetId())
 	}
 	b.prototype.SetNextOffset(x.GetNextOffset())
 	return b
@@ -123,17 +123,17 @@ func (b *StreamBuilder) From(x *Stream) *StreamBuilder {
 // not modify previously constructed messages.
 func (b *StreamBuilder) Build() *Stream {
 	m := &Stream{}
-	if b.prototype.HasStreamId() {
-		m.SetStreamId(b.prototype.GetStreamId())
+	if b.prototype.HasId() {
+		m.SetId(b.prototype.GetId())
 	}
 	m.SetNextOffset(b.prototype.GetNextOffset())
 	return m
 }
 
-// WithStreamId configures the builder to set the StreamId field to v,
+// WithId configures the builder to set the Id field to v,
 // then returns b.
-func (b *StreamBuilder) WithStreamId(v *uuidpb.UUID) *StreamBuilder {
-	b.prototype.SetStreamId(v)
+func (b *StreamBuilder) WithId(v *uuidpb.UUID) *StreamBuilder {
+	b.prototype.SetId(v)
 	return b
 }
 

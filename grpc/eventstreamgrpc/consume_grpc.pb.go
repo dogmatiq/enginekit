@@ -27,10 +27,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// ConsumeAPI is a service for consuming event messages from a offset-based,
+// ConsumeAPI is a service for consuming event messages from offset-based,
 // ordered event streams.
 type ConsumeAPIClient interface {
-	// ListStreams returns a the event streams that may contain events whose
+	// ListStreams returns the event streams that may contain events whose
 	// message type IDs are among those specified in the [ListStreamsRequest].
 	ListStreams(ctx context.Context, in *ListStreamsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListStreamsResponse], error)
 	// ConsumeEvents returns events in order, starting from a specific offset
@@ -99,10 +99,10 @@ type ConsumeAPI_ConsumeEventsClient = grpc.ServerStreamingClient[ConsumeEventsRe
 // All implementations should embed UnimplementedConsumeAPIServer
 // for forward compatibility.
 //
-// ConsumeAPI is a service for consuming event messages from a offset-based,
+// ConsumeAPI is a service for consuming event messages from offset-based,
 // ordered event streams.
 type ConsumeAPIServer interface {
-	// ListStreams returns a the event streams that may contain events whose
+	// ListStreams returns the event streams that may contain events whose
 	// message type IDs are among those specified in the [ListStreamsRequest].
 	ListStreams(*ListStreamsRequest, grpc.ServerStreamingServer[ListStreamsResponse]) error
 	// ConsumeEvents returns events in order, starting from a specific offset

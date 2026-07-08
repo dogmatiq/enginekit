@@ -27,30 +27,25 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// ConsumeAPI is a service for consuming events from an offset-based ordered
-// stream.
+// ConsumeAPI is a service for consuming event messages from a offset-based,
+// ordered event streams.
 type ConsumeAPIClient interface {
-	// ListStreams lists the streams that the server provides.
-	//
-	// The server may add additional streams at any time.
+	// ListStreams returns a the event streams that may contain events whose
+	// message type IDs are among those specified in the [ListStreamsRequest].
 	ListStreams(ctx context.Context, in *ListStreamsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListStreamsResponse], error)
-	// Consume starts consuming from a specific offset within an event stream.
+	// ConsumeEvents returns events in order, starting from a specific offset
+	// within an event stream.
 	//
-	// If the requested stream ID is unknown to the server it MUST return a
-	// NOT_FOUND error with an attached [UnrecognizedStream] value. See
-	// [UnrecognizedStreamError].
+	// The server delivers every event at or after the requested checkpoint offset
+	// whose message type ID is among those specified in the
+	// [ConsumeEventsRequest]. If no such events remain in the event stream, and
+	// the server cannot produce new events with any of the requested message type
+	// IDs, it closes the gRPC stream.
 	//
-	// If the requested offset is beyond the end of the stream, the server SHOULD
-	// keep the stream open and send new events as they are written to the stream.
+	// If the requested stream ID is not recognized a NOT_FOUND error occurs.
 	//
-	// The requested type IDs MUST be a subset of those type IDs associated with
-	// the stream, as per the result of the ListStreams operation. If any other
-	// type IDs are requested the server MUST return an INVALID_ARGUMENT error
-	// with an attached [UnrecognizedEventType] value for each unrecognized type
-	// ID. See [UnrecognizedEventTypeError].
-	//
-	// If no type IDs are specified the server MUST return an INVALID_ARGUMENT
-	// error with an attached [NoEventTypes] value. See [NoEventTypesError].
+	// If the requested offset is beyond the end of the stream an OUT_OF_RANGE
+	// error occurs.
 	ConsumeEvents(ctx context.Context, in *ConsumeEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ConsumeEventsResponse], error)
 }
 
@@ -104,30 +99,25 @@ type ConsumeAPI_ConsumeEventsClient = grpc.ServerStreamingClient[ConsumeEventsRe
 // All implementations should embed UnimplementedConsumeAPIServer
 // for forward compatibility.
 //
-// ConsumeAPI is a service for consuming events from an offset-based ordered
-// stream.
+// ConsumeAPI is a service for consuming event messages from a offset-based,
+// ordered event streams.
 type ConsumeAPIServer interface {
-	// ListStreams lists the streams that the server provides.
-	//
-	// The server may add additional streams at any time.
+	// ListStreams returns a the event streams that may contain events whose
+	// message type IDs are among those specified in the [ListStreamsRequest].
 	ListStreams(*ListStreamsRequest, grpc.ServerStreamingServer[ListStreamsResponse]) error
-	// Consume starts consuming from a specific offset within an event stream.
+	// ConsumeEvents returns events in order, starting from a specific offset
+	// within an event stream.
 	//
-	// If the requested stream ID is unknown to the server it MUST return a
-	// NOT_FOUND error with an attached [UnrecognizedStream] value. See
-	// [UnrecognizedStreamError].
+	// The server delivers every event at or after the requested checkpoint offset
+	// whose message type ID is among those specified in the
+	// [ConsumeEventsRequest]. If no such events remain in the event stream, and
+	// the server cannot produce new events with any of the requested message type
+	// IDs, it closes the gRPC stream.
 	//
-	// If the requested offset is beyond the end of the stream, the server SHOULD
-	// keep the stream open and send new events as they are written to the stream.
+	// If the requested stream ID is not recognized a NOT_FOUND error occurs.
 	//
-	// The requested type IDs MUST be a subset of those type IDs associated with
-	// the stream, as per the result of the ListStreams operation. If any other
-	// type IDs are requested the server MUST return an INVALID_ARGUMENT error
-	// with an attached [UnrecognizedEventType] value for each unrecognized type
-	// ID. See [UnrecognizedEventTypeError].
-	//
-	// If no type IDs are specified the server MUST return an INVALID_ARGUMENT
-	// error with an attached [NoEventTypes] value. See [NoEventTypesError].
+	// If the requested offset is beyond the end of the stream an OUT_OF_RANGE
+	// error occurs.
 	ConsumeEvents(*ConsumeEventsRequest, grpc.ServerStreamingServer[ConsumeEventsResponse]) error
 }
 

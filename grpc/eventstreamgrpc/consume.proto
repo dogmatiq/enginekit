@@ -7,43 +7,41 @@ import "github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto";
 import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 
 
-// ConsumeAPI is a service for consuming events from an offset-based ordered
-// stream.
+// ConsumeAPI is a service for consuming event messages from a offset-based,
+// ordered event streams.
 service ConsumeAPI {
-  // ListStreams lists the streams that the server provides.
-  //
-  // The server may add additional streams at any time.
+  // ListStreams returns a the event streams that may contain events whose
+  // message type IDs are among those specified in the [ListStreamsRequest].
   rpc ListStreams(ListStreamsRequest) returns (stream ListStreamsResponse);
 
-  // ConsumeEvents starts consuming from a specific offset within an event
-  // stream.
+  // ConsumeEvents returns events in order, starting from a specific offset
+  // within an event stream.
   //
-  // If the requested stream ID is unknown to the server it MUST return a
-  // NOT_FOUND error with an attached [UnrecognizedStream] value. See
-  // [UnrecognizedStreamError].
+  // The server delivers every event at or after the requested checkpoint offset
+  // whose message type ID is among those specified in the
+  // [ConsumeEventsRequest]. If no such events remain in the event stream, and
+  // the server cannot produce new events with any of the requested message type
+  // IDs, it closes the gRPC stream.
   //
-  // If the requested offset is beyond the end of the stream, the server SHOULD
-  // keep the stream open and send new events as they are written to the stream.
+  // If the requested stream ID is not recognized a NOT_FOUND error occurs.
   //
-  // The requested type IDs MUST be a subset of those type IDs associated with
-  // the stream, as per the result of the ListStreams operation. If any other
-  // type IDs are requested the server MUST return an INVALID_ARGUMENT error
-  // with an attached [UnrecognizedEventType] value for each unrecognized type
-  // ID. See [UnrecognizedEventTypeError].
-  //
-  // If no type IDs are specified the server MUST return an INVALID_ARGUMENT
-  // error with an attached [NoEventTypes] value. See [NoEventTypesError].
+  // If the requested offset is beyond the end of the stream an OUT_OF_RANGE
+  // error occurs.
   rpc ConsumeEvents(ConsumeEventsRequest)
       returns (stream ConsumeEventsResponse);
 }
 
-// ListStreamsRequest is the input to the ConsumeAPI.ListStreams method.
-message ListStreamsRequest {}
+// ListStreamsRequest is the input to the [ConsumeAPI.ListStreams] method.
+message ListStreamsRequest {
+  // MessageTypeIds is the set of message type IDs of the events that the client
+  // is interested in consuming.
+  repeated dogma.protobuf.UUID message_type_ids = 1;
+}
 
-// ListStreamsResponse is the output of the ConsumeAPI.ListStreams method.
+// ListStreamsResponse is the output of the [ConsumeAPI.ListStreams] method.
 message ListStreamsResponse {
-  // Stream is an event stream that can be consumed from this server.
-  Stream stream = 1;
+  // Streams is a list of event streams that can be consumed from this server.
+  repeated Stream stream = 1;
 }
 
 // Stream describes an offset-based ordered event stream.
@@ -51,54 +49,62 @@ message Stream {
   // StreamId is a unique identifier for the stream.
   dogma.protobuf.UUID stream_id = 1;
 
-  // EventTypeIds is the set of type IDs of events that may appear on the stream.
-  repeated dogma.protobuf.UUID event_type_ids = 2;
+  // NextOffset is the offset of the next event that will be written to the
+  // stream. The first event in the stream is at offset zero; therefore, this
+  // value is equivalent to the number of events that have been written to the
+  // stream.
+  uint64 next_offset = 2 [features.field_presence = IMPLICIT];
 }
 
-// ConsumeEventsRequest is the input to the ConsumeAPI.ConsumeEvents method.
+// ConsumeEventsRequest is the input to the [ConsumeAPI.ConsumeEvents] method.
 message ConsumeEventsRequest {
   // StreamId is the ID from which events are consumed.
   dogma.protobuf.UUID stream_id = 1;
 
-  // Offset is the offset of the earliest event to be consumed.
-  uint64 offset = 2 [features.field_presence = IMPLICIT];
+  // CheckpointOffset is the offset at which the consumer begins.
+  uint64 checkpoint_offset = 2 [features.field_presence = IMPLICIT];
 
-  // EventTypeIds is a list of type IDs of the events to be consumed. The
-  // consumer must be explicit about the event types that it understands; there
-  // is no mechanism to request all event types.
-  repeated dogma.protobuf.UUID event_type_ids = 3;
+  // MessageTypeIds is the set of message type IDs of the events that the client
+  // is interested in consuming.
+  //
+  // The server MUST omit any events that do not match one of the specified
+  // message type IDs from responses.
+  repeated dogma.protobuf.UUID message_type_ids = 3;
 }
 
-// ConsumeResponse is the (streaming) output of the ConsumeAPI.ConsumeEvents
-// method.
+// ConsumeEventsResponse is the (streaming) output of the
+// [ConsumeAPI.ConsumeEvents] method.
+//
+// It contains all of the events that match the requested message type IDs
+// specified in the [ConsumeEventsRequest], starting at the prior checkpoint
+// offset up to, but not including, the checkpoint offset in this response.
+//
+// If this is the first response in the consume operation, the prior checkpoint
+// offset is the checkpoint offset in the [ConsumeEventsRequest]. Otherwise, it
+// is the checkpoint offset in the prior response.
+//
+// The list of events may be empty, indicating that there are no matching events
+// in that range.
 message ConsumeEventsResponse {
-  // EventDelivery represents the delivery of a single event to the consumer.
-  message EventDelivery {
-    // Offset is the event's offset within the stream.
-    uint64 offset = 1 [features.field_presence = IMPLICIT];
+    // CheckpointOffset is the offset immediately after the range of the stream
+    // described by this response.
+    //
+    // After handling this and all preceding responses, the client may use this
+    // value as the checkpoint offset to resume consuming from the stream in a
+    // subsequent [ConsumeEventsRequest].
+    uint64 checkpoint_offset = 1 [features.field_presence = IMPLICIT];
 
-    // Envelope is the envelope containing the event.
-    dogma.protobuf.Envelope envelope = 2;
-  }
-
-  oneof operation { EventDelivery event_delivery = 1; }
-}
-
-// UnrecognizedStream is an error-details value for INVALID_ARGUMENT errors that
-// occurred because a consumer requested an unrecognized stream ID.
-message UnrecognizedStream {
-  // ApplicationKey is the ID of the unrecognized stream.
-  dogma.protobuf.UUID stream_id = 1;
-}
-
-// NoEventTypes is an error-details value for INVALID_ARGUMENT errors that
-// occurred because a client sent a consume request without specifying any event
-// type IDs.
-message NoEventTypes {}
-
-// UnrecognizedEventType is an error-details value for INVALID_ARGUMENT errors
-// that occurred because a specific event type was not recognized by the server.
-message UnrecognizedEventType {
-  // EventTypeId is the ID of the unrecognized event type.
-  dogma.protobuf.UUID event_type_id = 1;
+    // Envelopes is a (possibly empty) list of multi-envelopes containing events
+    // at offsets between the prior checkpoint offset and the checkpoint offset
+    // in this response.
+    //
+    // Each envelope includes the [envelopepb.EventStreamPosition] extension.
+    //
+    // The envelopes are ordered by the offset of the events they contain. There
+    // is no additional relationship implied between envelopes that appear in
+    // the same response.
+    //
+    // The offsets of the events within this response, or even within a single
+    // [envelopepb.MultiEnvelope] are not necessarily contiguous.
+    repeated dogma.protobuf.MultiEnvelope envelopes = 2;
 }

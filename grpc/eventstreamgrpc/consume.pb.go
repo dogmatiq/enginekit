@@ -22,11 +22,12 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// ListStreamsRequest is the input to the ConsumeAPI.ListStreams method.
+// ListStreamsRequest is the input to the [ConsumeAPI.ListStreams] method.
 type ListStreamsRequest struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                     protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MessageTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,1,rep,name=message_type_ids,json=messageTypeIds"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *ListStreamsRequest) Reset() {
@@ -54,22 +55,39 @@ func (x *ListStreamsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
+func (x *ListStreamsRequest) GetMessageTypeIds() []*uuidpb.UUID {
+	if x != nil {
+		if x.xxx_hidden_MessageTypeIds != nil {
+			return *x.xxx_hidden_MessageTypeIds
+		}
+	}
+	return nil
+}
+
+func (x *ListStreamsRequest) SetMessageTypeIds(v []*uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeIds = &v
+}
+
 type ListStreamsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
+	// MessageTypeIds is the set of message type IDs of the events that the client
+	// is interested in consuming.
+	MessageTypeIds []*uuidpb.UUID
 }
 
 func (b0 ListStreamsRequest_builder) Build() *ListStreamsRequest {
 	m0 := &ListStreamsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
+	x.xxx_hidden_MessageTypeIds = &b.MessageTypeIds
 	return m0
 }
 
-// ListStreamsResponse is the output of the ConsumeAPI.ListStreams method.
+// ListStreamsResponse is the output of the [ConsumeAPI.ListStreams] method.
 type ListStreamsResponse struct {
 	state             protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Stream *Stream                `protobuf:"bytes,1,opt,name=stream"`
+	xxx_hidden_Stream *[]*Stream             `protobuf:"bytes,1,rep,name=stream"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -99,50 +117,41 @@ func (x *ListStreamsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ListStreamsResponse) GetStream() *Stream {
+func (x *ListStreamsResponse) GetStream() []*Stream {
 	if x != nil {
-		return x.xxx_hidden_Stream
+		if x.xxx_hidden_Stream != nil {
+			return *x.xxx_hidden_Stream
+		}
 	}
 	return nil
 }
 
-func (x *ListStreamsResponse) SetStream(v *Stream) {
-	x.xxx_hidden_Stream = v
-}
-
-func (x *ListStreamsResponse) HasStream() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_Stream != nil
-}
-
-func (x *ListStreamsResponse) ClearStream() {
-	x.xxx_hidden_Stream = nil
+func (x *ListStreamsResponse) SetStream(v []*Stream) {
+	x.xxx_hidden_Stream = &v
 }
 
 type ListStreamsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Stream is an event stream that can be consumed from this server.
-	Stream *Stream
+	// Streams is a list of event streams that can be consumed from this server.
+	Stream []*Stream
 }
 
 func (b0 ListStreamsResponse_builder) Build() *ListStreamsResponse {
 	m0 := &ListStreamsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Stream = b.Stream
+	x.xxx_hidden_Stream = &b.Stream
 	return m0
 }
 
 // Stream describes an offset-based ordered event stream.
 type Stream struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_StreamId     *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
-	xxx_hidden_EventTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,2,rep,name=event_type_ids,json=eventTypeIds"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_StreamId   *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
+	xxx_hidden_NextOffset uint64                 `protobuf:"varint,2,opt,name=next_offset,json=nextOffset"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *Stream) Reset() {
@@ -177,21 +186,19 @@ func (x *Stream) GetStreamId() *uuidpb.UUID {
 	return nil
 }
 
-func (x *Stream) GetEventTypeIds() []*uuidpb.UUID {
+func (x *Stream) GetNextOffset() uint64 {
 	if x != nil {
-		if x.xxx_hidden_EventTypeIds != nil {
-			return *x.xxx_hidden_EventTypeIds
-		}
+		return x.xxx_hidden_NextOffset
 	}
-	return nil
+	return 0
 }
 
 func (x *Stream) SetStreamId(v *uuidpb.UUID) {
 	x.xxx_hidden_StreamId = v
 }
 
-func (x *Stream) SetEventTypeIds(v []*uuidpb.UUID) {
-	x.xxx_hidden_EventTypeIds = &v
+func (x *Stream) SetNextOffset(v uint64) {
+	x.xxx_hidden_NextOffset = v
 }
 
 func (x *Stream) HasStreamId() bool {
@@ -210,8 +217,11 @@ type Stream_builder struct {
 
 	// StreamId is a unique identifier for the stream.
 	StreamId *uuidpb.UUID
-	// EventTypeIds is the set of type IDs of events that may appear on the stream.
-	EventTypeIds []*uuidpb.UUID
+	// NextOffset is the offset of the next event that will be written to the
+	// stream. The first event in the stream is at offset zero; therefore, this
+	// value is equivalent to the number of events that have been written to the
+	// stream.
+	NextOffset uint64
 }
 
 func (b0 Stream_builder) Build() *Stream {
@@ -219,18 +229,18 @@ func (b0 Stream_builder) Build() *Stream {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_StreamId = b.StreamId
-	x.xxx_hidden_EventTypeIds = &b.EventTypeIds
+	x.xxx_hidden_NextOffset = b.NextOffset
 	return m0
 }
 
-// ConsumeEventsRequest is the input to the ConsumeAPI.ConsumeEvents method.
+// ConsumeEventsRequest is the input to the [ConsumeAPI.ConsumeEvents] method.
 type ConsumeEventsRequest struct {
-	state                   protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_StreamId     *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
-	xxx_hidden_Offset       uint64                 `protobuf:"varint,2,opt,name=offset"`
-	xxx_hidden_EventTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,3,rep,name=event_type_ids,json=eventTypeIds"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	state                       protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_StreamId         *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
+	xxx_hidden_CheckpointOffset uint64                 `protobuf:"varint,2,opt,name=checkpoint_offset,json=checkpointOffset"`
+	xxx_hidden_MessageTypeIds   *[]*uuidpb.UUID        `protobuf:"bytes,3,rep,name=message_type_ids,json=messageTypeIds"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ConsumeEventsRequest) Reset() {
@@ -265,17 +275,17 @@ func (x *ConsumeEventsRequest) GetStreamId() *uuidpb.UUID {
 	return nil
 }
 
-func (x *ConsumeEventsRequest) GetOffset() uint64 {
+func (x *ConsumeEventsRequest) GetCheckpointOffset() uint64 {
 	if x != nil {
-		return x.xxx_hidden_Offset
+		return x.xxx_hidden_CheckpointOffset
 	}
 	return 0
 }
 
-func (x *ConsumeEventsRequest) GetEventTypeIds() []*uuidpb.UUID {
+func (x *ConsumeEventsRequest) GetMessageTypeIds() []*uuidpb.UUID {
 	if x != nil {
-		if x.xxx_hidden_EventTypeIds != nil {
-			return *x.xxx_hidden_EventTypeIds
+		if x.xxx_hidden_MessageTypeIds != nil {
+			return *x.xxx_hidden_MessageTypeIds
 		}
 	}
 	return nil
@@ -285,12 +295,12 @@ func (x *ConsumeEventsRequest) SetStreamId(v *uuidpb.UUID) {
 	x.xxx_hidden_StreamId = v
 }
 
-func (x *ConsumeEventsRequest) SetOffset(v uint64) {
-	x.xxx_hidden_Offset = v
+func (x *ConsumeEventsRequest) SetCheckpointOffset(v uint64) {
+	x.xxx_hidden_CheckpointOffset = v
 }
 
-func (x *ConsumeEventsRequest) SetEventTypeIds(v []*uuidpb.UUID) {
-	x.xxx_hidden_EventTypeIds = &v
+func (x *ConsumeEventsRequest) SetMessageTypeIds(v []*uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeIds = &v
 }
 
 func (x *ConsumeEventsRequest) HasStreamId() bool {
@@ -309,12 +319,14 @@ type ConsumeEventsRequest_builder struct {
 
 	// StreamId is the ID from which events are consumed.
 	StreamId *uuidpb.UUID
-	// Offset is the offset of the earliest event to be consumed.
-	Offset uint64
-	// EventTypeIds is a list of type IDs of the events to be consumed. The
-	// consumer must be explicit about the event types that it understands; there
-	// is no mechanism to request all event types.
-	EventTypeIds []*uuidpb.UUID
+	// CheckpointOffset is the offset at which the consumer begins.
+	CheckpointOffset uint64
+	// MessageTypeIds is the set of message type IDs of the events that the client
+	// is interested in consuming.
+	//
+	// The server MUST omit any events that do not match one of the specified
+	// message type IDs from responses.
+	MessageTypeIds []*uuidpb.UUID
 }
 
 func (b0 ConsumeEventsRequest_builder) Build() *ConsumeEventsRequest {
@@ -322,18 +334,30 @@ func (b0 ConsumeEventsRequest_builder) Build() *ConsumeEventsRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_StreamId = b.StreamId
-	x.xxx_hidden_Offset = b.Offset
-	x.xxx_hidden_EventTypeIds = &b.EventTypeIds
+	x.xxx_hidden_CheckpointOffset = b.CheckpointOffset
+	x.xxx_hidden_MessageTypeIds = &b.MessageTypeIds
 	return m0
 }
 
-// ConsumeResponse is the (streaming) output of the ConsumeAPI.ConsumeEvents
-// method.
+// ConsumeEventsResponse is the (streaming) output of the
+// [ConsumeAPI.ConsumeEvents] method.
+//
+// It contains all of the events that match the requested message type IDs
+// specified in the [ConsumeEventsRequest], starting at the prior checkpoint
+// offset up to, but not including, the checkpoint offset in this response.
+//
+// If this is the first response in the consume operation, the prior checkpoint
+// offset is the checkpoint offset in the [ConsumeEventsRequest]. Otherwise, it
+// is the checkpoint offset in the prior response.
+//
+// The list of events may be empty, indicating that there are no matching events
+// in that range.
 type ConsumeEventsResponse struct {
-	state                protoimpl.MessageState            `protogen:"opaque.v1"`
-	xxx_hidden_Operation isConsumeEventsResponse_Operation `protobuf_oneof:"operation"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	state                       protoimpl.MessageState       `protogen:"opaque.v1"`
+	xxx_hidden_CheckpointOffset uint64                       `protobuf:"varint,1,opt,name=checkpoint_offset,json=checkpointOffset"`
+	xxx_hidden_Envelopes        *[]*envelopepb.MultiEnvelope `protobuf:"bytes,2,rep,name=envelopes"`
+	unknownFields               protoimpl.UnknownFields
+	sizeCache                   protoimpl.SizeCache
 }
 
 func (x *ConsumeEventsResponse) Reset() {
@@ -361,371 +385,61 @@ func (x *ConsumeEventsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ConsumeEventsResponse) GetEventDelivery() *ConsumeEventsResponse_EventDelivery {
+func (x *ConsumeEventsResponse) GetCheckpointOffset() uint64 {
 	if x != nil {
-		if x, ok := x.xxx_hidden_Operation.(*consumeEventsResponse_EventDelivery_); ok {
-			return x.EventDelivery
+		return x.xxx_hidden_CheckpointOffset
+	}
+	return 0
+}
+
+func (x *ConsumeEventsResponse) GetEnvelopes() []*envelopepb.MultiEnvelope {
+	if x != nil {
+		if x.xxx_hidden_Envelopes != nil {
+			return *x.xxx_hidden_Envelopes
 		}
 	}
 	return nil
 }
 
-func (x *ConsumeEventsResponse) SetEventDelivery(v *ConsumeEventsResponse_EventDelivery) {
-	if v == nil {
-		x.xxx_hidden_Operation = nil
-		return
-	}
-	x.xxx_hidden_Operation = &consumeEventsResponse_EventDelivery_{v}
+func (x *ConsumeEventsResponse) SetCheckpointOffset(v uint64) {
+	x.xxx_hidden_CheckpointOffset = v
 }
 
-func (x *ConsumeEventsResponse) HasOperation() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_Operation != nil
-}
-
-func (x *ConsumeEventsResponse) HasEventDelivery() bool {
-	if x == nil {
-		return false
-	}
-	_, ok := x.xxx_hidden_Operation.(*consumeEventsResponse_EventDelivery_)
-	return ok
-}
-
-func (x *ConsumeEventsResponse) ClearOperation() {
-	x.xxx_hidden_Operation = nil
-}
-
-func (x *ConsumeEventsResponse) ClearEventDelivery() {
-	if _, ok := x.xxx_hidden_Operation.(*consumeEventsResponse_EventDelivery_); ok {
-		x.xxx_hidden_Operation = nil
-	}
-}
-
-const ConsumeEventsResponse_Operation_not_set_case case_ConsumeEventsResponse_Operation = 0
-const ConsumeEventsResponse_EventDelivery_case case_ConsumeEventsResponse_Operation = 1
-
-func (x *ConsumeEventsResponse) WhichOperation() case_ConsumeEventsResponse_Operation {
-	if x == nil {
-		return ConsumeEventsResponse_Operation_not_set_case
-	}
-	switch x.xxx_hidden_Operation.(type) {
-	case *consumeEventsResponse_EventDelivery_:
-		return ConsumeEventsResponse_EventDelivery_case
-	default:
-		return ConsumeEventsResponse_Operation_not_set_case
-	}
+func (x *ConsumeEventsResponse) SetEnvelopes(v []*envelopepb.MultiEnvelope) {
+	x.xxx_hidden_Envelopes = &v
 }
 
 type ConsumeEventsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Fields of oneof xxx_hidden_Operation:
-	EventDelivery *ConsumeEventsResponse_EventDelivery
-	// -- end of xxx_hidden_Operation
+	// CheckpointOffset is the offset immediately after the range of the stream
+	// described by this response.
+	//
+	// After handling this and all preceding responses, the client may use this
+	// value as the checkpoint offset to resume consuming from the stream in a
+	// subsequent [ConsumeEventsRequest].
+	CheckpointOffset uint64
+	// Envelopes is a (possibly empty) list of multi-envelopes containing events
+	// at offsets between the prior checkpoint offset and the checkpoint offset
+	// in this response.
+	//
+	// Each envelope includes the [envelopepb.EventStreamPosition] extension.
+	//
+	// The envelopes are ordered by the offset of the events they contain. There
+	// is no additional relationship implied between envelopes that appear in
+	// the same response.
+	//
+	// The offsets of the events within this response, or even within a single
+	// [envelopepb.MultiEnvelope] are not necessarily contiguous.
+	Envelopes []*envelopepb.MultiEnvelope
 }
 
 func (b0 ConsumeEventsResponse_builder) Build() *ConsumeEventsResponse {
 	m0 := &ConsumeEventsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	if b.EventDelivery != nil {
-		x.xxx_hidden_Operation = &consumeEventsResponse_EventDelivery_{b.EventDelivery}
-	}
-	return m0
-}
-
-type case_ConsumeEventsResponse_Operation protoreflect.FieldNumber
-
-func (x case_ConsumeEventsResponse_Operation) String() string {
-	md := file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[4].Descriptor()
-	if x == 0 {
-		return "not set"
-	}
-	return protoimpl.X.MessageFieldStringOf(md, protoreflect.FieldNumber(x))
-}
-
-type isConsumeEventsResponse_Operation interface {
-	isConsumeEventsResponse_Operation()
-}
-
-type consumeEventsResponse_EventDelivery_ struct {
-	EventDelivery *ConsumeEventsResponse_EventDelivery `protobuf:"bytes,1,opt,name=event_delivery,json=eventDelivery,oneof"`
-}
-
-func (*consumeEventsResponse_EventDelivery_) isConsumeEventsResponse_Operation() {}
-
-// UnrecognizedStream is an error-details value for INVALID_ARGUMENT errors that
-// occurred because a consumer requested an unrecognized stream ID.
-type UnrecognizedStream struct {
-	state               protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_StreamId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=stream_id,json=streamId"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *UnrecognizedStream) Reset() {
-	*x = UnrecognizedStream{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UnrecognizedStream) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UnrecognizedStream) ProtoMessage() {}
-
-func (x *UnrecognizedStream) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *UnrecognizedStream) GetStreamId() *uuidpb.UUID {
-	if x != nil {
-		return x.xxx_hidden_StreamId
-	}
-	return nil
-}
-
-func (x *UnrecognizedStream) SetStreamId(v *uuidpb.UUID) {
-	x.xxx_hidden_StreamId = v
-}
-
-func (x *UnrecognizedStream) HasStreamId() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_StreamId != nil
-}
-
-func (x *UnrecognizedStream) ClearStreamId() {
-	x.xxx_hidden_StreamId = nil
-}
-
-type UnrecognizedStream_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// ApplicationKey is the ID of the unrecognized stream.
-	StreamId *uuidpb.UUID
-}
-
-func (b0 UnrecognizedStream_builder) Build() *UnrecognizedStream {
-	m0 := &UnrecognizedStream{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_StreamId = b.StreamId
-	return m0
-}
-
-// NoEventTypes is an error-details value for INVALID_ARGUMENT errors that
-// occurred because a client sent a consume request without specifying any event
-// type IDs.
-type NoEventTypes struct {
-	state         protoimpl.MessageState `protogen:"opaque.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *NoEventTypes) Reset() {
-	*x = NoEventTypes{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NoEventTypes) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NoEventTypes) ProtoMessage() {}
-
-func (x *NoEventTypes) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-type NoEventTypes_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-}
-
-func (b0 NoEventTypes_builder) Build() *NoEventTypes {
-	m0 := &NoEventTypes{}
-	b, x := &b0, m0
-	_, _ = b, x
-	return m0
-}
-
-// UnrecognizedEventType is an error-details value for INVALID_ARGUMENT errors
-// that occurred because a specific event type was not recognized by the server.
-type UnrecognizedEventType struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_EventTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=event_type_id,json=eventTypeId"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *UnrecognizedEventType) Reset() {
-	*x = UnrecognizedEventType{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UnrecognizedEventType) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UnrecognizedEventType) ProtoMessage() {}
-
-func (x *UnrecognizedEventType) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *UnrecognizedEventType) GetEventTypeId() *uuidpb.UUID {
-	if x != nil {
-		return x.xxx_hidden_EventTypeId
-	}
-	return nil
-}
-
-func (x *UnrecognizedEventType) SetEventTypeId(v *uuidpb.UUID) {
-	x.xxx_hidden_EventTypeId = v
-}
-
-func (x *UnrecognizedEventType) HasEventTypeId() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_EventTypeId != nil
-}
-
-func (x *UnrecognizedEventType) ClearEventTypeId() {
-	x.xxx_hidden_EventTypeId = nil
-}
-
-type UnrecognizedEventType_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// EventTypeId is the ID of the unrecognized event type.
-	EventTypeId *uuidpb.UUID
-}
-
-func (b0 UnrecognizedEventType_builder) Build() *UnrecognizedEventType {
-	m0 := &UnrecognizedEventType{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_EventTypeId = b.EventTypeId
-	return m0
-}
-
-// EventDelivery represents the delivery of a single event to the consumer.
-type ConsumeEventsResponse_EventDelivery struct {
-	state               protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Offset   uint64                 `protobuf:"varint,1,opt,name=offset"`
-	xxx_hidden_Envelope *envelopepb.Envelope   `protobuf:"bytes,2,opt,name=envelope"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) Reset() {
-	*x = ConsumeEventsResponse_EventDelivery{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ConsumeEventsResponse_EventDelivery) ProtoMessage() {}
-
-func (x *ConsumeEventsResponse_EventDelivery) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) GetOffset() uint64 {
-	if x != nil {
-		return x.xxx_hidden_Offset
-	}
-	return 0
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) GetEnvelope() *envelopepb.Envelope {
-	if x != nil {
-		return x.xxx_hidden_Envelope
-	}
-	return nil
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) SetOffset(v uint64) {
-	x.xxx_hidden_Offset = v
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) SetEnvelope(v *envelopepb.Envelope) {
-	x.xxx_hidden_Envelope = v
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) HasEnvelope() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_Envelope != nil
-}
-
-func (x *ConsumeEventsResponse_EventDelivery) ClearEnvelope() {
-	x.xxx_hidden_Envelope = nil
-}
-
-type ConsumeEventsResponse_EventDelivery_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// Offset is the event's offset within the stream.
-	Offset uint64
-	// Envelope is the envelope containing the event.
-	Envelope *envelopepb.Envelope
-}
-
-func (b0 ConsumeEventsResponse_EventDelivery_builder) Build() *ConsumeEventsResponse_EventDelivery {
-	m0 := &ConsumeEventsResponse_EventDelivery{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_Offset = b.Offset
-	x.xxx_hidden_Envelope = b.Envelope
+	x.xxx_hidden_CheckpointOffset = b.CheckpointOffset
+	x.xxx_hidden_Envelopes = &b.Envelopes
 	return m0
 }
 
@@ -733,66 +447,53 @@ var File_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto protor
 
 const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc = "" +
 	"\n" +
-	"@github.com/dogmatiq/enginekit/grpc/eventstreamgrpc/consume.proto\x12\x1cdogma.eventstream.consume.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"\x14\n" +
-	"\x12ListStreamsRequest\"S\n" +
+	"@github.com/dogmatiq/enginekit/grpc/eventstreamgrpc/consume.proto\x12\x1cdogma.eventstream.consume.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"T\n" +
+	"\x12ListStreamsRequest\x12>\n" +
+	"\x10message_type_ids\x18\x01 \x03(\v2\x14.dogma.protobuf.UUIDR\x0emessageTypeIds\"S\n" +
 	"\x13ListStreamsResponse\x12<\n" +
-	"\x06stream\x18\x01 \x01(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"w\n" +
+	"\x06stream\x18\x01 \x03(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"c\n" +
 	"\x06Stream\x121\n" +
-	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12:\n" +
-	"\x0eevent_type_ids\x18\x02 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\xa4\x01\n" +
+	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12&\n" +
+	"\vnext_offset\x18\x02 \x01(\x04B\x05\xaa\x01\x02\b\x02R\n" +
+	"nextOffset\"\xbd\x01\n" +
 	"\x14ConsumeEventsRequest\x121\n" +
-	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12\x1d\n" +
-	"\x06offset\x18\x02 \x01(\x04B\x05\xaa\x01\x02\b\x02R\x06offset\x12:\n" +
-	"\x0eevent_type_ids\x18\x03 \x03(\v2\x14.dogma.protobuf.UUIDR\feventTypeIds\"\xf6\x01\n" +
-	"\x15ConsumeEventsResponse\x12j\n" +
-	"\x0eevent_delivery\x18\x01 \x01(\v2A.dogma.eventstream.consume.v1.ConsumeEventsResponse.EventDeliveryH\x00R\reventDelivery\x1ad\n" +
-	"\rEventDelivery\x12\x1d\n" +
-	"\x06offset\x18\x01 \x01(\x04B\x05\xaa\x01\x02\b\x02R\x06offset\x124\n" +
-	"\benvelope\x18\x02 \x01(\v2\x18.dogma.protobuf.EnvelopeR\benvelopeB\v\n" +
-	"\toperation\"G\n" +
-	"\x12UnrecognizedStream\x121\n" +
-	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\"\x0e\n" +
-	"\fNoEventTypes\"Q\n" +
-	"\x15UnrecognizedEventType\x128\n" +
-	"\revent_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\veventTypeId2\xfe\x01\n" +
+	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x122\n" +
+	"\x11checkpoint_offset\x18\x02 \x01(\x04B\x05\xaa\x01\x02\b\x02R\x10checkpointOffset\x12>\n" +
+	"\x10message_type_ids\x18\x03 \x03(\v2\x14.dogma.protobuf.UUIDR\x0emessageTypeIds\"\x88\x01\n" +
+	"\x15ConsumeEventsResponse\x122\n" +
+	"\x11checkpoint_offset\x18\x01 \x01(\x04B\x05\xaa\x01\x02\b\x02R\x10checkpointOffset\x12;\n" +
+	"\tenvelopes\x18\x02 \x03(\v2\x1d.dogma.protobuf.MultiEnvelopeR\tenvelopes2\xfe\x01\n" +
 	"\n" +
 	"ConsumeAPI\x12t\n" +
 	"\vListStreams\x120.dogma.eventstream.consume.v1.ListStreamsRequest\x1a1.dogma.eventstream.consume.v1.ListStreamsResponse0\x01\x12z\n" +
 	"\rConsumeEvents\x122.dogma.eventstream.consume.v1.ConsumeEventsRequest\x1a3.dogma.eventstream.consume.v1.ConsumeEventsResponse0\x01B4Z2github.com/dogmatiq/enginekit/grpc/eventstreamgrpcb\beditionsp\xe9\a"
 
-var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_goTypes = []any{
-	(*ListStreamsRequest)(nil),                  // 0: dogma.eventstream.consume.v1.ListStreamsRequest
-	(*ListStreamsResponse)(nil),                 // 1: dogma.eventstream.consume.v1.ListStreamsResponse
-	(*Stream)(nil),                              // 2: dogma.eventstream.consume.v1.Stream
-	(*ConsumeEventsRequest)(nil),                // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest
-	(*ConsumeEventsResponse)(nil),               // 4: dogma.eventstream.consume.v1.ConsumeEventsResponse
-	(*UnrecognizedStream)(nil),                  // 5: dogma.eventstream.consume.v1.UnrecognizedStream
-	(*NoEventTypes)(nil),                        // 6: dogma.eventstream.consume.v1.NoEventTypes
-	(*UnrecognizedEventType)(nil),               // 7: dogma.eventstream.consume.v1.UnrecognizedEventType
-	(*ConsumeEventsResponse_EventDelivery)(nil), // 8: dogma.eventstream.consume.v1.ConsumeEventsResponse.EventDelivery
-	(*uuidpb.UUID)(nil),                         // 9: dogma.protobuf.UUID
-	(*envelopepb.Envelope)(nil),                 // 10: dogma.protobuf.Envelope
+	(*ListStreamsRequest)(nil),       // 0: dogma.eventstream.consume.v1.ListStreamsRequest
+	(*ListStreamsResponse)(nil),      // 1: dogma.eventstream.consume.v1.ListStreamsResponse
+	(*Stream)(nil),                   // 2: dogma.eventstream.consume.v1.Stream
+	(*ConsumeEventsRequest)(nil),     // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest
+	(*ConsumeEventsResponse)(nil),    // 4: dogma.eventstream.consume.v1.ConsumeEventsResponse
+	(*uuidpb.UUID)(nil),              // 5: dogma.protobuf.UUID
+	(*envelopepb.MultiEnvelope)(nil), // 6: dogma.protobuf.MultiEnvelope
 }
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_depIdxs = []int32{
-	2,  // 0: dogma.eventstream.consume.v1.ListStreamsResponse.stream:type_name -> dogma.eventstream.consume.v1.Stream
-	9,  // 1: dogma.eventstream.consume.v1.Stream.stream_id:type_name -> dogma.protobuf.UUID
-	9,  // 2: dogma.eventstream.consume.v1.Stream.event_type_ids:type_name -> dogma.protobuf.UUID
-	9,  // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest.stream_id:type_name -> dogma.protobuf.UUID
-	9,  // 4: dogma.eventstream.consume.v1.ConsumeEventsRequest.event_type_ids:type_name -> dogma.protobuf.UUID
-	8,  // 5: dogma.eventstream.consume.v1.ConsumeEventsResponse.event_delivery:type_name -> dogma.eventstream.consume.v1.ConsumeEventsResponse.EventDelivery
-	9,  // 6: dogma.eventstream.consume.v1.UnrecognizedStream.stream_id:type_name -> dogma.protobuf.UUID
-	9,  // 7: dogma.eventstream.consume.v1.UnrecognizedEventType.event_type_id:type_name -> dogma.protobuf.UUID
-	10, // 8: dogma.eventstream.consume.v1.ConsumeEventsResponse.EventDelivery.envelope:type_name -> dogma.protobuf.Envelope
-	0,  // 9: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:input_type -> dogma.eventstream.consume.v1.ListStreamsRequest
-	3,  // 10: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:input_type -> dogma.eventstream.consume.v1.ConsumeEventsRequest
-	1,  // 11: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:output_type -> dogma.eventstream.consume.v1.ListStreamsResponse
-	4,  // 12: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:output_type -> dogma.eventstream.consume.v1.ConsumeEventsResponse
-	11, // [11:13] is the sub-list for method output_type
-	9,  // [9:11] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	5, // 0: dogma.eventstream.consume.v1.ListStreamsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
+	2, // 1: dogma.eventstream.consume.v1.ListStreamsResponse.stream:type_name -> dogma.eventstream.consume.v1.Stream
+	5, // 2: dogma.eventstream.consume.v1.Stream.stream_id:type_name -> dogma.protobuf.UUID
+	5, // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest.stream_id:type_name -> dogma.protobuf.UUID
+	5, // 4: dogma.eventstream.consume.v1.ConsumeEventsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
+	6, // 5: dogma.eventstream.consume.v1.ConsumeEventsResponse.envelopes:type_name -> dogma.protobuf.MultiEnvelope
+	0, // 6: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:input_type -> dogma.eventstream.consume.v1.ListStreamsRequest
+	3, // 7: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:input_type -> dogma.eventstream.consume.v1.ConsumeEventsRequest
+	1, // 8: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:output_type -> dogma.eventstream.consume.v1.ListStreamsResponse
+	4, // 9: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:output_type -> dogma.eventstream.consume.v1.ConsumeEventsResponse
+	8, // [8:10] is the sub-list for method output_type
+	6, // [6:8] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_init() }
@@ -800,16 +501,13 @@ func file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_init(
 	if File_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto != nil {
 		return
 	}
-	file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_msgTypes[4].OneofWrappers = []any{
-		(*consumeEventsResponse_EventDelivery_)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc), len(file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -69,7 +69,9 @@ func NewListStreamsResponseBuilder() *ListStreamsResponseBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *ListStreamsResponseBuilder) From(x *ListStreamsResponse) *ListStreamsResponseBuilder {
 	proto.Reset(&b.prototype)
-	b.prototype.SetStream(x.GetStream())
+	if x.HasStream() {
+		b.prototype.SetStream(x.GetStream())
+	}
 	return b
 }
 
@@ -79,13 +81,15 @@ func (b *ListStreamsResponseBuilder) From(x *ListStreamsResponse) *ListStreamsRe
 // not modify previously constructed messages.
 func (b *ListStreamsResponseBuilder) Build() *ListStreamsResponse {
 	m := &ListStreamsResponse{}
-	m.SetStream(b.prototype.GetStream())
+	if b.prototype.HasStream() {
+		m.SetStream(b.prototype.GetStream())
+	}
 	return m
 }
 
 // WithStream configures the builder to set the Stream field to v,
 // then returns b.
-func (b *ListStreamsResponseBuilder) WithStream(v []*Stream) *ListStreamsResponseBuilder {
+func (b *ListStreamsResponseBuilder) WithStream(v *Stream) *ListStreamsResponseBuilder {
 	b.prototype.SetStream(v)
 	return b
 }

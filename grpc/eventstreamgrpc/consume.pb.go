@@ -87,7 +87,7 @@ func (b0 ListStreamsRequest_builder) Build() *ListStreamsRequest {
 // ListStreamsResponse is the output of the [ConsumeAPI.ListStreams] method.
 type ListStreamsResponse struct {
 	state             protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_Stream *[]*Stream             `protobuf:"bytes,1,rep,name=stream"`
+	xxx_hidden_Stream *Stream                `protobuf:"bytes,1,opt,name=stream"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -117,31 +117,41 @@ func (x *ListStreamsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ListStreamsResponse) GetStream() []*Stream {
+func (x *ListStreamsResponse) GetStream() *Stream {
 	if x != nil {
-		if x.xxx_hidden_Stream != nil {
-			return *x.xxx_hidden_Stream
-		}
+		return x.xxx_hidden_Stream
 	}
 	return nil
 }
 
-func (x *ListStreamsResponse) SetStream(v []*Stream) {
-	x.xxx_hidden_Stream = &v
+func (x *ListStreamsResponse) SetStream(v *Stream) {
+	x.xxx_hidden_Stream = v
+}
+
+func (x *ListStreamsResponse) HasStream() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_Stream != nil
+}
+
+func (x *ListStreamsResponse) ClearStream() {
+	x.xxx_hidden_Stream = nil
 }
 
 type ListStreamsResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// Streams is a list of event streams that can be consumed from this server.
-	Stream []*Stream
+	// Stream is an event stream that does or may contain at least one event with
+	// a message type ID that is among those in the [ListStreamsRequest].
+	Stream *Stream
 }
 
 func (b0 ListStreamsResponse_builder) Build() *ListStreamsResponse {
 	m0 := &ListStreamsResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_Stream = &b.Stream
+	x.xxx_hidden_Stream = b.Stream
 	return m0
 }
 
@@ -321,11 +331,8 @@ type ConsumeEventsRequest_builder struct {
 	StreamId *uuidpb.UUID
 	// CheckpointOffset is the offset at which the consumer begins.
 	CheckpointOffset uint64
-	// MessageTypeIds is the set of message type IDs of the events that the client
-	// is interested in consuming.
-	//
-	// The server MUST omit any events that do not match one of the specified
-	// message type IDs from responses.
+	// MessageTypeIds is the set of message type IDs of the event types to include
+	// in the responses.
 	MessageTypeIds []*uuidpb.UUID
 }
 
@@ -451,7 +458,7 @@ const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawD
 	"\x12ListStreamsRequest\x12>\n" +
 	"\x10message_type_ids\x18\x01 \x03(\v2\x14.dogma.protobuf.UUIDR\x0emessageTypeIds\"S\n" +
 	"\x13ListStreamsResponse\x12<\n" +
-	"\x06stream\x18\x01 \x03(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"c\n" +
+	"\x06stream\x18\x01 \x01(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"c\n" +
 	"\x06Stream\x121\n" +
 	"\tstream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\bstreamId\x12&\n" +
 	"\vnext_offset\x18\x02 \x01(\x04B\x05\xaa\x01\x02\b\x02R\n" +

@@ -37,10 +37,10 @@ type ConsumeAPIClient interface {
 	// within an event stream.
 	//
 	// The server delivers every event at or after the requested checkpoint offset
-	// whose message type ID is among those specified in the
-	// [ConsumeEventsRequest]. If no such events remain in the event stream, and
-	// the server cannot produce new events with any of the requested message type
-	// IDs, it closes the gRPC stream.
+	// whose message type ID is among those in the [ConsumeEventsRequest]. If no
+	// such events remain in the event stream, and the server cannot produce new
+	// events with any of the requested message type IDs, it closes the gRPC
+	// stream.
 	//
 	// If the requested stream ID is not recognized a NOT_FOUND error occurs.
 	//
@@ -109,10 +109,10 @@ type ConsumeAPIServer interface {
 	// within an event stream.
 	//
 	// The server delivers every event at or after the requested checkpoint offset
-	// whose message type ID is among those specified in the
-	// [ConsumeEventsRequest]. If no such events remain in the event stream, and
-	// the server cannot produce new events with any of the requested message type
-	// IDs, it closes the gRPC stream.
+	// whose message type ID is among those in the [ConsumeEventsRequest]. If no
+	// such events remain in the event stream, and the server cannot produce new
+	// events with any of the requested message type IDs, it closes the gRPC
+	// stream.
 	//
 	// If the requested stream ID is not recognized a NOT_FOUND error occurs.
 	//

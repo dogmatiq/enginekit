@@ -18,10 +18,10 @@ service ConsumeAPI {
   // within an event stream.
   //
   // The server delivers every event at or after the requested checkpoint offset
-  // whose message type ID is among those specified in the
-  // [ConsumeEventsRequest]. If no such events remain in the event stream, and
-  // the server cannot produce new events with any of the requested message type
-  // IDs, it closes the gRPC stream.
+  // whose message type ID is among those in the [ConsumeEventsRequest]. If no
+  // such events remain in the event stream, and the server cannot produce new
+  // events with any of the requested message type IDs, it closes the gRPC
+  // stream.
   //
   // If the requested stream ID is not recognized a NOT_FOUND error occurs.
   //
@@ -40,8 +40,9 @@ message ListStreamsRequest {
 
 // ListStreamsResponse is the output of the [ConsumeAPI.ListStreams] method.
 message ListStreamsResponse {
-  // Streams is a list of event streams that can be consumed from this server.
-  repeated Stream stream = 1;
+  // Stream is an event stream that does or may contain at least one event with
+  // a message type ID that is among those in the [ListStreamsRequest].
+  Stream stream = 1;
 }
 
 // Stream describes an offset-based ordered event stream.
@@ -64,11 +65,8 @@ message ConsumeEventsRequest {
   // CheckpointOffset is the offset at which the consumer begins.
   uint64 checkpoint_offset = 2 [features.field_presence = IMPLICIT];
 
-  // MessageTypeIds is the set of message type IDs of the events that the client
-  // is interested in consuming.
-  //
-  // The server MUST omit any events that do not match one of the specified
-  // message type IDs from responses.
+  // MessageTypeIds is the set of message type IDs of the event types to include
+  // in the responses.
   repeated dogma.protobuf.UUID message_type_ids = 3;
 }
 

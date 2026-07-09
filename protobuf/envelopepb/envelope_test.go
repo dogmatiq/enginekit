@@ -243,6 +243,19 @@ func TestEnvelope_Validate(t *testing.T) {
 	})
 }
 
+func TestEnvelope_AsMultiEnvelope(t *testing.T) {
+	t.Parallel()
+
+	env := newEnvelope()
+	multi := env.AsMultiEnvelope()
+
+	Expect(t, "unexpected header", multi.GetHeader(), env.GetHeader())
+
+	bodies := multi.GetBodies()
+	Expect(t, "unexpected body count", len(bodies), 1)
+	Expect(t, "unexpected body", bodies[0], env.GetBody())
+}
+
 func TestMultiEnvelope_All(t *testing.T) {
 	t.Parallel()
 

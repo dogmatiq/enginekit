@@ -38,6 +38,18 @@ func (x *Envelope) Validate() error {
 	return nil
 }
 
+// AsMultiEnvelope returns a [MultiEnvelope] that contains the same header and
+// body as x.
+//
+// This is a convenience method for when you want to treat a single-envelope
+// message as a multi-envelope message.
+func (x *Envelope) AsMultiEnvelope() *MultiEnvelope {
+	return NewMultiEnvelopeBuilder().
+		WithHeader(x.GetHeader()).
+		WithBodies([]*Body{x.GetBody()}).
+		Build()
+}
+
 // Validate returns an error if x is not well-formed.
 //
 // Well-formedness means that all compulsory fields are populated and that no

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
@@ -81,6 +82,28 @@ func (x *MultiEnvelope) All() iter.Seq[*Envelope] {
 			}
 		}
 	}
+}
+
+// AppendBodies appends the given bodies to x.
+func (x *MultiEnvelope) AppendBodies(bodies ...*Body) {
+	x.SetBodies(
+		append(
+			x.GetBodies(),
+			bodies...,
+		),
+	)
+}
+
+// TryAppendEnvelope attempts to append the body from the given envelope to x.
+//
+// It requires that x and env share equivalent headers. If they do not, it
+// returns false and does not modify x.
+func (x *MultiEnvelope) TryAppendEnvelope(env *Envelope) bool {
+	if proto.Equal(x.GetHeader(), env.GetHeader()) {
+		x.AppendBodies(env.GetBody())
+		return true
+	}
+	return false
 }
 
 // validate returns an error if x is not well-formed.

@@ -32,7 +32,6 @@ func NewListStreamsRequestBuilder() *ListStreamsRequestBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *ListStreamsRequestBuilder) From(x *ListStreamsRequest) *ListStreamsRequestBuilder {
 	proto.Reset(&b.prototype)
-	b.prototype.SetMessageTypeIds(x.GetMessageTypeIds())
 	return b
 }
 
@@ -42,15 +41,7 @@ func (b *ListStreamsRequestBuilder) From(x *ListStreamsRequest) *ListStreamsRequ
 // not modify previously constructed messages.
 func (b *ListStreamsRequestBuilder) Build() *ListStreamsRequest {
 	m := &ListStreamsRequest{}
-	m.SetMessageTypeIds(b.prototype.GetMessageTypeIds())
 	return m
-}
-
-// WithMessageTypeIds configures the builder to set the MessageTypeIds field to v,
-// then returns b.
-func (b *ListStreamsRequestBuilder) WithMessageTypeIds(v []*uuidpb.UUID) *ListStreamsRequestBuilder {
-	b.prototype.SetMessageTypeIds(v)
-	return b
 }
 
 type ListStreamsResponseBuilder struct {

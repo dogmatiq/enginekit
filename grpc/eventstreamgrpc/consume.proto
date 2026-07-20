@@ -10,8 +10,7 @@ import "github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto";
 // ConsumeAPI is a service for consuming event messages from offset-based,
 // ordered event streams.
 service ConsumeAPI {
-  // ListStreams returns the event streams that may contain events whose
-  // message type IDs are among those specified in the [ListStreamsRequest].
+  // ListStreams returns the event streams offered by the server.
   rpc ListStreams(ListStreamsRequest) returns (stream ListStreamsResponse);
 
   // ConsumeEvents returns events in order, starting from a specific offset
@@ -32,11 +31,7 @@ service ConsumeAPI {
 }
 
 // ListStreamsRequest is the input to the [ConsumeAPI.ListStreams] method.
-message ListStreamsRequest {
-  // MessageTypeIds is the set of message type IDs of the events that the client
-  // is interested in consuming.
-  repeated dogma.protobuf.UUID message_type_ids = 1;
-}
+message ListStreamsRequest {}
 
 // ListStreamsResponse is the output of the [ConsumeAPI.ListStreams] method.
 message ListStreamsResponse {

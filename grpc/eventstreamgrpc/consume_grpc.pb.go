@@ -30,8 +30,7 @@ const (
 // ConsumeAPI is a service for consuming event messages from offset-based,
 // ordered event streams.
 type ConsumeAPIClient interface {
-	// ListStreams returns the event streams that may contain events whose
-	// message type IDs are among those specified in the [ListStreamsRequest].
+	// ListStreams returns the event streams offered by the server.
 	ListStreams(ctx context.Context, in *ListStreamsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListStreamsResponse], error)
 	// ConsumeEvents returns events in order, starting from a specific offset
 	// within an event stream.
@@ -102,8 +101,7 @@ type ConsumeAPI_ConsumeEventsClient = grpc.ServerStreamingClient[ConsumeEventsRe
 // ConsumeAPI is a service for consuming event messages from offset-based,
 // ordered event streams.
 type ConsumeAPIServer interface {
-	// ListStreams returns the event streams that may contain events whose
-	// message type IDs are among those specified in the [ListStreamsRequest].
+	// ListStreams returns the event streams offered by the server.
 	ListStreams(*ListStreamsRequest, grpc.ServerStreamingServer[ListStreamsResponse]) error
 	// ConsumeEvents returns events in order, starting from a specific offset
 	// within an event stream.

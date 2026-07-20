@@ -24,10 +24,9 @@ const (
 
 // ListStreamsRequest is the input to the [ConsumeAPI.ListStreams] method.
 type ListStreamsRequest struct {
-	state                     protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_MessageTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,1,rep,name=message_type_ids,json=messageTypeIds"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListStreamsRequest) Reset() {
@@ -55,32 +54,15 @@ func (x *ListStreamsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *ListStreamsRequest) GetMessageTypeIds() []*uuidpb.UUID {
-	if x != nil {
-		if x.xxx_hidden_MessageTypeIds != nil {
-			return *x.xxx_hidden_MessageTypeIds
-		}
-	}
-	return nil
-}
-
-func (x *ListStreamsRequest) SetMessageTypeIds(v []*uuidpb.UUID) {
-	x.xxx_hidden_MessageTypeIds = &v
-}
-
 type ListStreamsRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// MessageTypeIds is the set of message type IDs of the events that the client
-	// is interested in consuming.
-	MessageTypeIds []*uuidpb.UUID
 }
 
 func (b0 ListStreamsRequest_builder) Build() *ListStreamsRequest {
 	m0 := &ListStreamsRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_MessageTypeIds = &b.MessageTypeIds
 	return m0
 }
 
@@ -454,9 +436,8 @@ var File_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto protor
 
 const file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_rawDesc = "" +
 	"\n" +
-	"@github.com/dogmatiq/enginekit/grpc/eventstreamgrpc/consume.proto\x12\x1cdogma.eventstream.consume.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"T\n" +
-	"\x12ListStreamsRequest\x12>\n" +
-	"\x10message_type_ids\x18\x01 \x03(\v2\x14.dogma.protobuf.UUIDR\x0emessageTypeIds\"S\n" +
+	"@github.com/dogmatiq/enginekit/grpc/eventstreamgrpc/consume.proto\x12\x1cdogma.eventstream.consume.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"\x14\n" +
+	"\x12ListStreamsRequest\"S\n" +
 	"\x13ListStreamsResponse\x12<\n" +
 	"\x06stream\x18\x01 \x01(\v2$.dogma.eventstream.consume.v1.StreamR\x06stream\"V\n" +
 	"\x06Stream\x12$\n" +
@@ -486,21 +467,20 @@ var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_goType
 	(*envelopepb.MultiEnvelope)(nil), // 6: dogma.protobuf.MultiEnvelope
 }
 var file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_depIdxs = []int32{
-	5, // 0: dogma.eventstream.consume.v1.ListStreamsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
-	2, // 1: dogma.eventstream.consume.v1.ListStreamsResponse.stream:type_name -> dogma.eventstream.consume.v1.Stream
-	5, // 2: dogma.eventstream.consume.v1.Stream.id:type_name -> dogma.protobuf.UUID
-	5, // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest.stream_id:type_name -> dogma.protobuf.UUID
-	5, // 4: dogma.eventstream.consume.v1.ConsumeEventsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
-	6, // 5: dogma.eventstream.consume.v1.ConsumeEventsResponse.envelopes:type_name -> dogma.protobuf.MultiEnvelope
-	0, // 6: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:input_type -> dogma.eventstream.consume.v1.ListStreamsRequest
-	3, // 7: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:input_type -> dogma.eventstream.consume.v1.ConsumeEventsRequest
-	1, // 8: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:output_type -> dogma.eventstream.consume.v1.ListStreamsResponse
-	4, // 9: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:output_type -> dogma.eventstream.consume.v1.ConsumeEventsResponse
-	8, // [8:10] is the sub-list for method output_type
-	6, // [6:8] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	2, // 0: dogma.eventstream.consume.v1.ListStreamsResponse.stream:type_name -> dogma.eventstream.consume.v1.Stream
+	5, // 1: dogma.eventstream.consume.v1.Stream.id:type_name -> dogma.protobuf.UUID
+	5, // 2: dogma.eventstream.consume.v1.ConsumeEventsRequest.stream_id:type_name -> dogma.protobuf.UUID
+	5, // 3: dogma.eventstream.consume.v1.ConsumeEventsRequest.message_type_ids:type_name -> dogma.protobuf.UUID
+	6, // 4: dogma.eventstream.consume.v1.ConsumeEventsResponse.envelopes:type_name -> dogma.protobuf.MultiEnvelope
+	0, // 5: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:input_type -> dogma.eventstream.consume.v1.ListStreamsRequest
+	3, // 6: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:input_type -> dogma.eventstream.consume.v1.ConsumeEventsRequest
+	1, // 7: dogma.eventstream.consume.v1.ConsumeAPI.ListStreams:output_type -> dogma.eventstream.consume.v1.ListStreamsResponse
+	4, // 8: dogma.eventstream.consume.v1.ConsumeAPI.ConsumeEvents:output_type -> dogma.eventstream.consume.v1.ConsumeEventsResponse
+	7, // [7:9] is the sub-list for method output_type
+	5, // [5:7] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_github_com_dogmatiq_enginekit_grpc_eventstreamgrpc_consume_proto_init() }

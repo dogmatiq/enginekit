@@ -243,6 +243,19 @@ func TestEnvelope_Validate(t *testing.T) {
 	})
 }
 
+func TestEnvelope_AsMultiEnvelope(t *testing.T) {
+	t.Parallel()
+
+	env := newEnvelope()
+	multi := env.AsMultiEnvelope()
+
+	Expect(t, "unexpected header", multi.GetHeader(), env.GetHeader())
+
+	bodies := multi.GetBodies()
+	Expect(t, "unexpected body count", len(bodies), 1)
+	Expect(t, "unexpected body", bodies[0], env.GetBody())
+}
+
 func TestMultiEnvelope_All(t *testing.T) {
 	t.Parallel()
 
@@ -304,6 +317,101 @@ func TestMultiEnvelope_All(t *testing.T) {
 		}
 
 		Expect(t, "unexpected envelope count", len(got), 0)
+	})
+}
+
+func TestMultiEnvelope_AppendBodies(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it appends bodies to the multi-envelope", func(t *testing.T) {
+		t.Parallel()
+
+		body1 := newEnvelope().GetBody()
+		body2 := newEnvelope().GetBody()
+		body3 := newEnvelope().GetBody()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(newEnvelope().GetHeader()).
+			WithBodies([]*Body{body1}).
+			Build()
+
+		multi.AppendBodies(body2, body3)
+
+		got := multi.GetBodies()
+		Expect(t, "unexpected body count", len(got), 3)
+		Expect(t, "unexpected body[0]", got[0], body1)
+		Expect(t, "unexpected body[1]", got[1], body2)
+		Expect(t, "unexpected body[2]", got[2], body3)
+	})
+
+	t.Run("it appends to an empty multi-envelope", func(t *testing.T) {
+		t.Parallel()
+
+		body := newEnvelope().GetBody()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(newEnvelope().GetHeader()).
+			Build()
+
+		multi.AppendBodies(body)
+
+		got := multi.GetBodies()
+		Expect(t, "unexpected body count", len(got), 1)
+		Expect(t, "unexpected body[0]", got[0], body)
+	})
+}
+
+func TestMultiEnvelope_TryAppendEnvelope(t *testing.T) {
+	t.Parallel()
+
+	t.Run("it appends when headers are equivalent", func(t *testing.T) {
+		t.Parallel()
+
+		header := newEnvelope().GetHeader()
+		body1 := newEnvelope().GetBody()
+		body2 := newEnvelope().GetBody()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(header).
+			WithBodies([]*Body{body1}).
+			Build()
+
+		env := NewEnvelopeBuilder().
+			WithHeader(header).
+			WithBody(body2).
+			Build()
+
+		ok := multi.TryAppendEnvelope(env)
+
+		Expect(t, "unexpected result", ok, true)
+		got := multi.GetBodies()
+		Expect(t, "unexpected body count", len(got), 2)
+		Expect(t, "unexpected body[0]", got[0], body1)
+		Expect(t, "unexpected body[1]", got[1], body2)
+	})
+
+	t.Run("it returns false when headers differ", func(t *testing.T) {
+		t.Parallel()
+
+		body1 := newEnvelope().GetBody()
+		body2 := newEnvelope().GetBody()
+
+		multi := NewMultiEnvelopeBuilder().
+			WithHeader(newEnvelope().GetHeader()).
+			WithBodies([]*Body{body1}).
+			Build()
+
+		env := NewEnvelopeBuilder().
+			WithHeader(newEnvelope().GetHeader()).
+			WithBody(body2).
+			Build()
+
+		ok := multi.TryAppendEnvelope(env)
+
+		Expect(t, "unexpected result", ok, false)
+		got := multi.GetBodies()
+		Expect(t, "unexpected body count", len(got), 1)
+		Expect(t, "unexpected body[0]", got[0], body1)
 	})
 }
 

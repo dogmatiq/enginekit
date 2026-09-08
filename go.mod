@@ -1,6 +1,6 @@
 module github.com/dogmatiq/enginekit
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/dogmatiq/dapper v0.6.1
@@ -13,7 +13,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.46.0
 	go.opentelemetry.io/otel/trace v1.46.0
 	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
-	golang.org/x/sync v0.22.0
+	golang.org/x/sync v0.23.0
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
 	pgregory.net/rapid v1.3.0

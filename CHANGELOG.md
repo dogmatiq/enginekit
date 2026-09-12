@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Changed
+
+- **[BC]** Changed `ConsumeAPI.ListStreams()` to use a streaming response.
+
 ## [0.26.5] - 2026-06-10
 
 ### Changed

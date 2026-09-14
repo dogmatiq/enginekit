@@ -11,6 +11,14 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `messaginggrpc.CommandExecutorAPI`, a gRPC service for executing
+  commands within a hosted Dogma application, with support for observing the
+  events recorded as a result.
+
 ## [0.26.5] - 2026-06-10
 
 ### Changed

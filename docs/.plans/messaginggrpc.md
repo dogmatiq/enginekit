@@ -13,11 +13,11 @@ _messaging plane_ proto package.
   (the `grpc` suffix is a Go directory convention only).
 - File-per-service, named after the service: `commandexecutor.proto` defines
   `CommandExecutorAPI` — the remote projection of `dogma.CommandExecutor`.
-- `eventstreamgrpc` is unused in reality, so it will _eventually_ move into
-  this package as `eventstreamconsumer.proto` / `EventStreamConsumerAPI`
-  (same methods: `ListStreams`, `ConsumeEvents`) — but that move is
-  **deferred; not part of the first pass**. Until then its
-  `UnrecognizedEventType` error detail is duplicated here by design;
+- `eventstreamgrpc` was unused in reality, so it has been moved into this
+  package as `eventstreamconsumer.proto` / `EventStreamConsumerAPI` (same
+  methods, renamed: `ListEventStreams`, `ConsumeEvents`); the old package is
+  deleted (**[BC]**, but acceptable since it was never used). Its
+  `UnrecognizedEventType` error detail is shared with `CommandExecutorAPI`;
   consolidation happens with the move.
 - Edition 2024, `features.field_presence = IMPLICIT` for scalars that don't
   need presence, imports from `uuidpb`/`envelopepb`, per existing protos.
@@ -142,12 +142,8 @@ vs wrong values are different client bugs.
   (configpb vocabulary) to message type IDs (envelope/registry vocabulary).
   Candidate fix: add type IDs to `configpb.Application` (BC-safe field
   addition), benefiting all APIs including eventstream.
-- **eventstreamgrpc → messaginggrpc move**: rename to
-  `EventStreamConsumerAPI` / `eventstreamconsumer.proto` in
-  `dogma.messaging.v1`; consolidate duplicated error details. Wire-breaking
-  but unused in reality; do as a dedicated change.
-- **eventstreamgrpc application gap**: streams don't identify their
-  application; fix when the package moves.
+- **eventstreamgrpc application gap**: streams still don't identify their
+  application; not fixed by the move, remains open.
 - **Upstream dogma clarification**: the local API is silent on
   `WithEventObserver` × idempotency-key-duplicate interplay; consider a doc
   clarification in `dogmatiq/dogma`.

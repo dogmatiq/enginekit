@@ -28,8 +28,6 @@ const (
 //
 // CommandExecutorAPI is a service for executing commands within a Dogma
 // application hosted by the engine on the server.
-//
-// It is the remote analogue of the [dogma.CommandExecutor] interface.
 type CommandExecutorAPIClient interface {
 	// ExecuteCommand submits a command for execution, and optionally observes
 	// the events that are recorded as a result of executing it.
@@ -44,12 +42,12 @@ type CommandExecutorAPIClient interface {
 	// See [UnrecognizedCommandTypeError].
 	//
 	// If the command data cannot be unmarshaled the server MUST return an
-	// INVALID_ARGUMENT error with an attached [MalformedCommand] value. See
-	// [MalformedCommandError].
+	// INVALID_ARGUMENT error with an attached [MalformedMessage] value. See
+	// [MalformedMessageError].
 	//
 	// If the command is well-formed but fails the application's validation
 	// logic the server MUST return an INVALID_ARGUMENT error with an attached
-	// [InvalidCommand] value. See [InvalidCommandError].
+	// [InvalidMessage] value. See [InvalidMessageError].
 	//
 	// The requested event type IDs MUST identify event types that may be
 	// recorded by the target application. If any other type IDs are requested
@@ -114,8 +112,6 @@ type CommandExecutorAPI_ExecuteCommandClient = grpc.ServerStreamingClient[Execut
 //
 // CommandExecutorAPI is a service for executing commands within a Dogma
 // application hosted by the engine on the server.
-//
-// It is the remote analogue of the [dogma.CommandExecutor] interface.
 type CommandExecutorAPIServer interface {
 	// ExecuteCommand submits a command for execution, and optionally observes
 	// the events that are recorded as a result of executing it.
@@ -130,12 +126,12 @@ type CommandExecutorAPIServer interface {
 	// See [UnrecognizedCommandTypeError].
 	//
 	// If the command data cannot be unmarshaled the server MUST return an
-	// INVALID_ARGUMENT error with an attached [MalformedCommand] value. See
-	// [MalformedCommandError].
+	// INVALID_ARGUMENT error with an attached [MalformedMessage] value. See
+	// [MalformedMessageError].
 	//
 	// If the command is well-formed but fails the application's validation
 	// logic the server MUST return an INVALID_ARGUMENT error with an attached
-	// [InvalidCommand] value. See [InvalidCommandError].
+	// [InvalidMessage] value. See [InvalidMessageError].
 	//
 	// The requested event type IDs MUST identify event types that may be
 	// recorded by the target application. If any other type IDs are requested

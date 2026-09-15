@@ -53,12 +53,12 @@ func (b *ExecuteCommandRequestBuilder) From(x *ExecuteCommandRequest) *ExecuteCo
 	if x.HasApplicationKey() {
 		b.prototype.SetApplicationKey(x.GetApplicationKey())
 	}
-	if x.HasCommandTypeId() {
-		b.prototype.SetCommandTypeId(x.GetCommandTypeId())
+	if x.HasMessageTypeId() {
+		b.prototype.SetMessageTypeId(x.GetMessageTypeId())
 	}
 	b.prototype.SetData(x.GetData())
 	b.prototype.SetIdempotencyKey(x.GetIdempotencyKey())
-	b.prototype.SetObservedEventTypeIds(x.GetObservedEventTypeIds())
+	b.prototype.SetObservedMessageTypeIds(x.GetObservedMessageTypeIds())
 	return b
 }
 
@@ -71,12 +71,12 @@ func (b *ExecuteCommandRequestBuilder) Build() *ExecuteCommandRequest {
 	if b.prototype.HasApplicationKey() {
 		m.SetApplicationKey(b.prototype.GetApplicationKey())
 	}
-	if b.prototype.HasCommandTypeId() {
-		m.SetCommandTypeId(b.prototype.GetCommandTypeId())
+	if b.prototype.HasMessageTypeId() {
+		m.SetMessageTypeId(b.prototype.GetMessageTypeId())
 	}
 	m.SetData(b.prototype.GetData())
 	m.SetIdempotencyKey(b.prototype.GetIdempotencyKey())
-	m.SetObservedEventTypeIds(b.prototype.GetObservedEventTypeIds())
+	m.SetObservedMessageTypeIds(b.prototype.GetObservedMessageTypeIds())
 	return m
 }
 
@@ -87,10 +87,10 @@ func (b *ExecuteCommandRequestBuilder) WithApplicationKey(v *uuidpb.UUID) *Execu
 	return b
 }
 
-// WithCommandTypeId configures the builder to set the CommandTypeId field to v,
+// WithMessageTypeId configures the builder to set the MessageTypeId field to v,
 // then returns b.
-func (b *ExecuteCommandRequestBuilder) WithCommandTypeId(v *uuidpb.UUID) *ExecuteCommandRequestBuilder {
-	b.prototype.SetCommandTypeId(v)
+func (b *ExecuteCommandRequestBuilder) WithMessageTypeId(v *uuidpb.UUID) *ExecuteCommandRequestBuilder {
+	b.prototype.SetMessageTypeId(v)
 	return b
 }
 
@@ -108,10 +108,10 @@ func (b *ExecuteCommandRequestBuilder) WithIdempotencyKey(v string) *ExecuteComm
 	return b
 }
 
-// WithObservedEventTypeIds configures the builder to set the ObservedEventTypeIds field to v,
+// WithObservedMessageTypeIds configures the builder to set the ObservedMessageTypeIds field to v,
 // then returns b.
-func (b *ExecuteCommandRequestBuilder) WithObservedEventTypeIds(v []*uuidpb.UUID) *ExecuteCommandRequestBuilder {
-	b.prototype.SetObservedEventTypeIds(v)
+func (b *ExecuteCommandRequestBuilder) WithObservedMessageTypeIds(v []*uuidpb.UUID) *ExecuteCommandRequestBuilder {
+	b.prototype.SetObservedMessageTypeIds(v)
 	return b
 }
 

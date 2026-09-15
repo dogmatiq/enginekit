@@ -22,17 +22,17 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// ExecuteCommandRequest is the input to the CommandExecutorAPI.ExecuteCommand
+// ExecuteCommandRequest is the input to the [CommandExecutorAPI.ExecuteCommand]
 // method.
 type ExecuteCommandRequest struct {
-	state                           protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_ApplicationKey       *uuidpb.UUID           `protobuf:"bytes,1,opt,name=application_key,json=applicationKey"`
-	xxx_hidden_CommandTypeId        *uuidpb.UUID           `protobuf:"bytes,2,opt,name=command_type_id,json=commandTypeId"`
-	xxx_hidden_Data                 []byte                 `protobuf:"bytes,3,opt,name=data"`
-	xxx_hidden_IdempotencyKey       string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey"`
-	xxx_hidden_ObservedEventTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,5,rep,name=observed_event_type_ids,json=observedEventTypeIds"`
-	unknownFields                   protoimpl.UnknownFields
-	sizeCache                       protoimpl.SizeCache
+	state                             protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_ApplicationKey         *uuidpb.UUID           `protobuf:"bytes,1,opt,name=application_key,json=applicationKey"`
+	xxx_hidden_MessageTypeId          *uuidpb.UUID           `protobuf:"bytes,2,opt,name=message_type_id,json=messageTypeId"`
+	xxx_hidden_Data                   []byte                 `protobuf:"bytes,3,opt,name=data"`
+	xxx_hidden_IdempotencyKey         string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey"`
+	xxx_hidden_ObservedMessageTypeIds *[]*uuidpb.UUID        `protobuf:"bytes,5,rep,name=observed_message_type_ids,json=observedMessageTypeIds"`
+	unknownFields                     protoimpl.UnknownFields
+	sizeCache                         protoimpl.SizeCache
 }
 
 func (x *ExecuteCommandRequest) Reset() {
@@ -67,9 +67,9 @@ func (x *ExecuteCommandRequest) GetApplicationKey() *uuidpb.UUID {
 	return nil
 }
 
-func (x *ExecuteCommandRequest) GetCommandTypeId() *uuidpb.UUID {
+func (x *ExecuteCommandRequest) GetMessageTypeId() *uuidpb.UUID {
 	if x != nil {
-		return x.xxx_hidden_CommandTypeId
+		return x.xxx_hidden_MessageTypeId
 	}
 	return nil
 }
@@ -88,10 +88,10 @@ func (x *ExecuteCommandRequest) GetIdempotencyKey() string {
 	return ""
 }
 
-func (x *ExecuteCommandRequest) GetObservedEventTypeIds() []*uuidpb.UUID {
+func (x *ExecuteCommandRequest) GetObservedMessageTypeIds() []*uuidpb.UUID {
 	if x != nil {
-		if x.xxx_hidden_ObservedEventTypeIds != nil {
-			return *x.xxx_hidden_ObservedEventTypeIds
+		if x.xxx_hidden_ObservedMessageTypeIds != nil {
+			return *x.xxx_hidden_ObservedMessageTypeIds
 		}
 	}
 	return nil
@@ -101,8 +101,8 @@ func (x *ExecuteCommandRequest) SetApplicationKey(v *uuidpb.UUID) {
 	x.xxx_hidden_ApplicationKey = v
 }
 
-func (x *ExecuteCommandRequest) SetCommandTypeId(v *uuidpb.UUID) {
-	x.xxx_hidden_CommandTypeId = v
+func (x *ExecuteCommandRequest) SetMessageTypeId(v *uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeId = v
 }
 
 func (x *ExecuteCommandRequest) SetData(v []byte) {
@@ -116,8 +116,8 @@ func (x *ExecuteCommandRequest) SetIdempotencyKey(v string) {
 	x.xxx_hidden_IdempotencyKey = v
 }
 
-func (x *ExecuteCommandRequest) SetObservedEventTypeIds(v []*uuidpb.UUID) {
-	x.xxx_hidden_ObservedEventTypeIds = &v
+func (x *ExecuteCommandRequest) SetObservedMessageTypeIds(v []*uuidpb.UUID) {
+	x.xxx_hidden_ObservedMessageTypeIds = &v
 }
 
 func (x *ExecuteCommandRequest) HasApplicationKey() bool {
@@ -127,19 +127,19 @@ func (x *ExecuteCommandRequest) HasApplicationKey() bool {
 	return x.xxx_hidden_ApplicationKey != nil
 }
 
-func (x *ExecuteCommandRequest) HasCommandTypeId() bool {
+func (x *ExecuteCommandRequest) HasMessageTypeId() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_CommandTypeId != nil
+	return x.xxx_hidden_MessageTypeId != nil
 }
 
 func (x *ExecuteCommandRequest) ClearApplicationKey() {
 	x.xxx_hidden_ApplicationKey = nil
 }
 
-func (x *ExecuteCommandRequest) ClearCommandTypeId() {
-	x.xxx_hidden_CommandTypeId = nil
+func (x *ExecuteCommandRequest) ClearMessageTypeId() {
+	x.xxx_hidden_MessageTypeId = nil
 }
 
 type ExecuteCommandRequest_builder struct {
@@ -148,9 +148,9 @@ type ExecuteCommandRequest_builder struct {
 	// ApplicationKey is the key of the application that is the target of the
 	// command.
 	ApplicationKey *uuidpb.UUID
-	// CommandTypeId is a unique identifier for the type of command, as per the
-	// Dogma message type registry.
-	CommandTypeId *uuidpb.UUID
+	// MessageTypeId is a unique identifier for the command's message type, as
+	// per the Dogma message type registry.
+	MessageTypeId *uuidpb.UUID
 	// Data is the binary command data obtained by calling
 	// [dogma.Message.MarshalBinary] on the command.
 	Data []byte
@@ -160,11 +160,11 @@ type ExecuteCommandRequest_builder struct {
 	// If it is non-empty, the server MUST NOT execute the command again if it
 	// has already been executed with the same idempotency key.
 	IdempotencyKey string
-	// ObservedEventTypeIds is a list of type IDs of the events to be observed
-	// as a result of executing the command. The client must be explicit about
-	// the event types that it understands; there is no mechanism to observe all
-	// event types.
-	ObservedEventTypeIds []*uuidpb.UUID
+	// ObservedMessageTypeIds is a list of message type IDs identifying the events
+	// to be observed as a result of executing the command. The client must be
+	// explicit about the event types that it understands; there is no mechanism
+	// to observe all event types.
+	ObservedMessageTypeIds []*uuidpb.UUID
 }
 
 func (b0 ExecuteCommandRequest_builder) Build() *ExecuteCommandRequest {
@@ -172,15 +172,15 @@ func (b0 ExecuteCommandRequest_builder) Build() *ExecuteCommandRequest {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_ApplicationKey = b.ApplicationKey
-	x.xxx_hidden_CommandTypeId = b.CommandTypeId
+	x.xxx_hidden_MessageTypeId = b.MessageTypeId
 	x.xxx_hidden_Data = b.Data
 	x.xxx_hidden_IdempotencyKey = b.IdempotencyKey
-	x.xxx_hidden_ObservedEventTypeIds = &b.ObservedEventTypeIds
+	x.xxx_hidden_ObservedMessageTypeIds = &b.ObservedMessageTypeIds
 	return m0
 }
 
-// ExecuteCommandResponse is the (streaming) output of the
-// CommandExecutorAPI.ExecuteCommand method.
+// ExecuteCommandResponse is the streaming output of the
+// [CommandExecutorAPI.ExecuteCommand] method.
 type ExecuteCommandResponse struct {
 	state                protoimpl.MessageState             `protogen:"opaque.v1"`
 	xxx_hidden_Operation isExecuteCommandResponse_Operation `protobuf_oneof:"operation"`
@@ -472,13 +472,13 @@ var File_github_com_dogmatiq_enginekit_grpc_messaginggrpc_commandexecutor_proto 
 
 const file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_commandexecutor_proto_rawDesc = "" +
 	"\n" +
-	"Fgithub.com/dogmatiq/enginekit/grpc/messaginggrpc/commandexecutor.proto\x12\x12dogma.messaging.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"\xac\x02\n" +
+	"Fgithub.com/dogmatiq/enginekit/grpc/messaginggrpc/commandexecutor.proto\x12\x12dogma.messaging.v1\x1a@github.com/dogmatiq/enginekit/protobuf/envelopepb/envelope.proto\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"\xb0\x02\n" +
 	"\x15ExecuteCommandRequest\x12=\n" +
 	"\x0fapplication_key\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\x0eapplicationKey\x12<\n" +
-	"\x0fcommand_type_id\x18\x02 \x01(\v2\x14.dogma.protobuf.UUIDR\rcommandTypeId\x12\x19\n" +
+	"\x0fmessage_type_id\x18\x02 \x01(\v2\x14.dogma.protobuf.UUIDR\rmessageTypeId\x12\x19\n" +
 	"\x04data\x18\x03 \x01(\fB\x05\xaa\x01\x02\b\x02R\x04data\x12.\n" +
-	"\x0fidempotency_key\x18\x04 \x01(\tB\x05\xaa\x01\x02\b\x02R\x0eidempotencyKey\x12K\n" +
-	"\x17observed_event_type_ids\x18\x05 \x03(\v2\x14.dogma.protobuf.UUIDR\x14observedEventTypeIds\"\xcb\x02\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tB\x05\xaa\x01\x02\b\x02R\x0eidempotencyKey\x12O\n" +
+	"\x19observed_message_type_ids\x18\x05 \x03(\v2\x14.dogma.protobuf.UUIDR\x16observedMessageTypeIds\"\xcb\x02\n" +
 	"\x16ExecuteCommandResponse\x12g\n" +
 	"\x10command_accepted\x18\x01 \x01(\v2:.dogma.messaging.v1.ExecuteCommandResponse.CommandAcceptedH\x00R\x0fcommandAccepted\x12a\n" +
 	"\x0eevent_recorded\x18\x02 \x01(\v28.dogma.messaging.v1.ExecuteCommandResponse.EventRecordedH\x00R\reventRecorded\x1a\x11\n" +
@@ -500,8 +500,8 @@ var file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_commandexecutor_proto_
 }
 var file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_commandexecutor_proto_depIdxs = []int32{
 	4, // 0: dogma.messaging.v1.ExecuteCommandRequest.application_key:type_name -> dogma.protobuf.UUID
-	4, // 1: dogma.messaging.v1.ExecuteCommandRequest.command_type_id:type_name -> dogma.protobuf.UUID
-	4, // 2: dogma.messaging.v1.ExecuteCommandRequest.observed_event_type_ids:type_name -> dogma.protobuf.UUID
+	4, // 1: dogma.messaging.v1.ExecuteCommandRequest.message_type_id:type_name -> dogma.protobuf.UUID
+	4, // 2: dogma.messaging.v1.ExecuteCommandRequest.observed_message_type_ids:type_name -> dogma.protobuf.UUID
 	2, // 3: dogma.messaging.v1.ExecuteCommandResponse.command_accepted:type_name -> dogma.messaging.v1.ExecuteCommandResponse.CommandAccepted
 	3, // 4: dogma.messaging.v1.ExecuteCommandResponse.event_recorded:type_name -> dogma.messaging.v1.ExecuteCommandResponse.EventRecorded
 	5, // 5: dogma.messaging.v1.ExecuteCommandResponse.EventRecorded.envelope:type_name -> dogma.protobuf.Envelope

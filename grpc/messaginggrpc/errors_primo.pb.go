@@ -52,6 +52,47 @@ func (b *UnrecognizedApplicationBuilder) WithApplicationKey(v *uuidpb.UUID) *Unr
 	return b
 }
 
+type UnrecognizedEventStreamBuilder struct {
+	prototype UnrecognizedEventStream
+}
+
+// NewUnrecognizedEventStreamBuilder returns a builder that constructs [UnrecognizedEventStream] messages.
+func NewUnrecognizedEventStreamBuilder() *UnrecognizedEventStreamBuilder {
+	return &UnrecognizedEventStreamBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *UnrecognizedEventStreamBuilder) From(x *UnrecognizedEventStream) *UnrecognizedEventStreamBuilder {
+	proto.Reset(&b.prototype)
+	if x.HasEventStreamId() {
+		b.prototype.SetEventStreamId(x.GetEventStreamId())
+	}
+	return b
+}
+
+// Build returns a new [UnrecognizedEventStream] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *UnrecognizedEventStreamBuilder) Build() *UnrecognizedEventStream {
+	m := &UnrecognizedEventStream{}
+	if b.prototype.HasEventStreamId() {
+		m.SetEventStreamId(b.prototype.GetEventStreamId())
+	}
+	return m
+}
+
+// WithEventStreamId configures the builder to set the EventStreamId field to v,
+// then returns b.
+func (b *UnrecognizedEventStreamBuilder) WithEventStreamId(v *uuidpb.UUID) *UnrecognizedEventStreamBuilder {
+	b.prototype.SetEventStreamId(v)
+	return b
+}
+
 type UnrecognizedCommandTypeBuilder struct {
 	prototype UnrecognizedCommandType
 }
@@ -68,8 +109,8 @@ func NewUnrecognizedCommandTypeBuilder() *UnrecognizedCommandTypeBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *UnrecognizedCommandTypeBuilder) From(x *UnrecognizedCommandType) *UnrecognizedCommandTypeBuilder {
 	proto.Reset(&b.prototype)
-	if x.HasCommandTypeId() {
-		b.prototype.SetCommandTypeId(x.GetCommandTypeId())
+	if x.HasMessageTypeId() {
+		b.prototype.SetMessageTypeId(x.GetMessageTypeId())
 	}
 	return b
 }
@@ -80,98 +121,16 @@ func (b *UnrecognizedCommandTypeBuilder) From(x *UnrecognizedCommandType) *Unrec
 // not modify previously constructed messages.
 func (b *UnrecognizedCommandTypeBuilder) Build() *UnrecognizedCommandType {
 	m := &UnrecognizedCommandType{}
-	if b.prototype.HasCommandTypeId() {
-		m.SetCommandTypeId(b.prototype.GetCommandTypeId())
+	if b.prototype.HasMessageTypeId() {
+		m.SetMessageTypeId(b.prototype.GetMessageTypeId())
 	}
 	return m
 }
 
-// WithCommandTypeId configures the builder to set the CommandTypeId field to v,
+// WithMessageTypeId configures the builder to set the MessageTypeId field to v,
 // then returns b.
-func (b *UnrecognizedCommandTypeBuilder) WithCommandTypeId(v *uuidpb.UUID) *UnrecognizedCommandTypeBuilder {
-	b.prototype.SetCommandTypeId(v)
-	return b
-}
-
-type MalformedCommandBuilder struct {
-	prototype MalformedCommand
-}
-
-// NewMalformedCommandBuilder returns a builder that constructs [MalformedCommand] messages.
-func NewMalformedCommandBuilder() *MalformedCommandBuilder {
-	return &MalformedCommandBuilder{}
-}
-
-// From configures the builder to use x as the prototype for new messages,
-// then returns b.
-//
-// It performs a shallow copy of x, such that any changes made via the builder
-// do not modify x. It does not make a copy of the field values themselves.
-func (b *MalformedCommandBuilder) From(x *MalformedCommand) *MalformedCommandBuilder {
-	proto.Reset(&b.prototype)
-	if x.HasCommandTypeId() {
-		b.prototype.SetCommandTypeId(x.GetCommandTypeId())
-	}
-	return b
-}
-
-// Build returns a new [MalformedCommand] containing the values configured via the builder.
-//
-// Each call returns a new message, such that future changes to the builder do
-// not modify previously constructed messages.
-func (b *MalformedCommandBuilder) Build() *MalformedCommand {
-	m := &MalformedCommand{}
-	if b.prototype.HasCommandTypeId() {
-		m.SetCommandTypeId(b.prototype.GetCommandTypeId())
-	}
-	return m
-}
-
-// WithCommandTypeId configures the builder to set the CommandTypeId field to v,
-// then returns b.
-func (b *MalformedCommandBuilder) WithCommandTypeId(v *uuidpb.UUID) *MalformedCommandBuilder {
-	b.prototype.SetCommandTypeId(v)
-	return b
-}
-
-type InvalidCommandBuilder struct {
-	prototype InvalidCommand
-}
-
-// NewInvalidCommandBuilder returns a builder that constructs [InvalidCommand] messages.
-func NewInvalidCommandBuilder() *InvalidCommandBuilder {
-	return &InvalidCommandBuilder{}
-}
-
-// From configures the builder to use x as the prototype for new messages,
-// then returns b.
-//
-// It performs a shallow copy of x, such that any changes made via the builder
-// do not modify x. It does not make a copy of the field values themselves.
-func (b *InvalidCommandBuilder) From(x *InvalidCommand) *InvalidCommandBuilder {
-	proto.Reset(&b.prototype)
-	if x.HasCommandTypeId() {
-		b.prototype.SetCommandTypeId(x.GetCommandTypeId())
-	}
-	return b
-}
-
-// Build returns a new [InvalidCommand] containing the values configured via the builder.
-//
-// Each call returns a new message, such that future changes to the builder do
-// not modify previously constructed messages.
-func (b *InvalidCommandBuilder) Build() *InvalidCommand {
-	m := &InvalidCommand{}
-	if b.prototype.HasCommandTypeId() {
-		m.SetCommandTypeId(b.prototype.GetCommandTypeId())
-	}
-	return m
-}
-
-// WithCommandTypeId configures the builder to set the CommandTypeId field to v,
-// then returns b.
-func (b *InvalidCommandBuilder) WithCommandTypeId(v *uuidpb.UUID) *InvalidCommandBuilder {
-	b.prototype.SetCommandTypeId(v)
+func (b *UnrecognizedCommandTypeBuilder) WithMessageTypeId(v *uuidpb.UUID) *UnrecognizedCommandTypeBuilder {
+	b.prototype.SetMessageTypeId(v)
 	return b
 }
 
@@ -191,8 +150,8 @@ func NewUnrecognizedEventTypeBuilder() *UnrecognizedEventTypeBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *UnrecognizedEventTypeBuilder) From(x *UnrecognizedEventType) *UnrecognizedEventTypeBuilder {
 	proto.Reset(&b.prototype)
-	if x.HasEventTypeId() {
-		b.prototype.SetEventTypeId(x.GetEventTypeId())
+	if x.HasMessageTypeId() {
+		b.prototype.SetMessageTypeId(x.GetMessageTypeId())
 	}
 	return b
 }
@@ -203,16 +162,98 @@ func (b *UnrecognizedEventTypeBuilder) From(x *UnrecognizedEventType) *Unrecogni
 // not modify previously constructed messages.
 func (b *UnrecognizedEventTypeBuilder) Build() *UnrecognizedEventType {
 	m := &UnrecognizedEventType{}
-	if b.prototype.HasEventTypeId() {
-		m.SetEventTypeId(b.prototype.GetEventTypeId())
+	if b.prototype.HasMessageTypeId() {
+		m.SetMessageTypeId(b.prototype.GetMessageTypeId())
 	}
 	return m
 }
 
-// WithEventTypeId configures the builder to set the EventTypeId field to v,
+// WithMessageTypeId configures the builder to set the MessageTypeId field to v,
 // then returns b.
-func (b *UnrecognizedEventTypeBuilder) WithEventTypeId(v *uuidpb.UUID) *UnrecognizedEventTypeBuilder {
-	b.prototype.SetEventTypeId(v)
+func (b *UnrecognizedEventTypeBuilder) WithMessageTypeId(v *uuidpb.UUID) *UnrecognizedEventTypeBuilder {
+	b.prototype.SetMessageTypeId(v)
+	return b
+}
+
+type MalformedMessageBuilder struct {
+	prototype MalformedMessage
+}
+
+// NewMalformedMessageBuilder returns a builder that constructs [MalformedMessage] messages.
+func NewMalformedMessageBuilder() *MalformedMessageBuilder {
+	return &MalformedMessageBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *MalformedMessageBuilder) From(x *MalformedMessage) *MalformedMessageBuilder {
+	proto.Reset(&b.prototype)
+	if x.HasMessageTypeId() {
+		b.prototype.SetMessageTypeId(x.GetMessageTypeId())
+	}
+	return b
+}
+
+// Build returns a new [MalformedMessage] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *MalformedMessageBuilder) Build() *MalformedMessage {
+	m := &MalformedMessage{}
+	if b.prototype.HasMessageTypeId() {
+		m.SetMessageTypeId(b.prototype.GetMessageTypeId())
+	}
+	return m
+}
+
+// WithMessageTypeId configures the builder to set the MessageTypeId field to v,
+// then returns b.
+func (b *MalformedMessageBuilder) WithMessageTypeId(v *uuidpb.UUID) *MalformedMessageBuilder {
+	b.prototype.SetMessageTypeId(v)
+	return b
+}
+
+type InvalidMessageBuilder struct {
+	prototype InvalidMessage
+}
+
+// NewInvalidMessageBuilder returns a builder that constructs [InvalidMessage] messages.
+func NewInvalidMessageBuilder() *InvalidMessageBuilder {
+	return &InvalidMessageBuilder{}
+}
+
+// From configures the builder to use x as the prototype for new messages,
+// then returns b.
+//
+// It performs a shallow copy of x, such that any changes made via the builder
+// do not modify x. It does not make a copy of the field values themselves.
+func (b *InvalidMessageBuilder) From(x *InvalidMessage) *InvalidMessageBuilder {
+	proto.Reset(&b.prototype)
+	if x.HasMessageTypeId() {
+		b.prototype.SetMessageTypeId(x.GetMessageTypeId())
+	}
+	return b
+}
+
+// Build returns a new [InvalidMessage] containing the values configured via the builder.
+//
+// Each call returns a new message, such that future changes to the builder do
+// not modify previously constructed messages.
+func (b *InvalidMessageBuilder) Build() *InvalidMessage {
+	m := &InvalidMessage{}
+	if b.prototype.HasMessageTypeId() {
+		m.SetMessageTypeId(b.prototype.GetMessageTypeId())
+	}
+	return m
+}
+
+// WithMessageTypeId configures the builder to set the MessageTypeId field to v,
+// then returns b.
+func (b *InvalidMessageBuilder) WithMessageTypeId(v *uuidpb.UUID) *InvalidMessageBuilder {
+	b.prototype.SetMessageTypeId(v)
 	return b
 }
 
@@ -235,6 +276,22 @@ func (x *UnrecognizedApplication) UnmarshalBinary(data []byte) error {
 // MarshalBinary returns the binary representation of the message, equivalent to
 // calling proto.Marshal(x).
 //
+// It allows [*UnrecognizedEventStream] to implement [encoding.BinaryMarshaler].
+func (x *UnrecognizedEventStream) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
+}
+
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*UnrecognizedEventStream] to implement [encoding.BinaryUnmarshaler].
+func (x *UnrecognizedEventStream) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
+}
+
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
 // It allows [*UnrecognizedCommandType] to implement [encoding.BinaryMarshaler].
 func (x *UnrecognizedCommandType) MarshalBinary() ([]byte, error) {
 	return proto.Marshal(x)
@@ -251,38 +308,6 @@ func (x *UnrecognizedCommandType) UnmarshalBinary(data []byte) error {
 // MarshalBinary returns the binary representation of the message, equivalent to
 // calling proto.Marshal(x).
 //
-// It allows [*MalformedCommand] to implement [encoding.BinaryMarshaler].
-func (x *MalformedCommand) MarshalBinary() ([]byte, error) {
-	return proto.Marshal(x)
-}
-
-// UnmarshalBinary populates x from its binary representation, equivalent to
-// calling proto.Unmarshal(data, x).
-//
-// It allows [*MalformedCommand] to implement [encoding.BinaryUnmarshaler].
-func (x *MalformedCommand) UnmarshalBinary(data []byte) error {
-	return proto.Unmarshal(data, x)
-}
-
-// MarshalBinary returns the binary representation of the message, equivalent to
-// calling proto.Marshal(x).
-//
-// It allows [*InvalidCommand] to implement [encoding.BinaryMarshaler].
-func (x *InvalidCommand) MarshalBinary() ([]byte, error) {
-	return proto.Marshal(x)
-}
-
-// UnmarshalBinary populates x from its binary representation, equivalent to
-// calling proto.Unmarshal(data, x).
-//
-// It allows [*InvalidCommand] to implement [encoding.BinaryUnmarshaler].
-func (x *InvalidCommand) UnmarshalBinary(data []byte) error {
-	return proto.Unmarshal(data, x)
-}
-
-// MarshalBinary returns the binary representation of the message, equivalent to
-// calling proto.Marshal(x).
-//
 // It allows [*UnrecognizedEventType] to implement [encoding.BinaryMarshaler].
 func (x *UnrecognizedEventType) MarshalBinary() ([]byte, error) {
 	return proto.Marshal(x)
@@ -293,5 +318,37 @@ func (x *UnrecognizedEventType) MarshalBinary() ([]byte, error) {
 //
 // It allows [*UnrecognizedEventType] to implement [encoding.BinaryUnmarshaler].
 func (x *UnrecognizedEventType) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
+}
+
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*MalformedMessage] to implement [encoding.BinaryMarshaler].
+func (x *MalformedMessage) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
+}
+
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*MalformedMessage] to implement [encoding.BinaryUnmarshaler].
+func (x *MalformedMessage) UnmarshalBinary(data []byte) error {
+	return proto.Unmarshal(data, x)
+}
+
+// MarshalBinary returns the binary representation of the message, equivalent to
+// calling proto.Marshal(x).
+//
+// It allows [*InvalidMessage] to implement [encoding.BinaryMarshaler].
+func (x *InvalidMessage) MarshalBinary() ([]byte, error) {
+	return proto.Marshal(x)
+}
+
+// UnmarshalBinary populates x from its binary representation, equivalent to
+// calling proto.Unmarshal(data, x).
+//
+// It allows [*InvalidMessage] to implement [encoding.BinaryUnmarshaler].
+func (x *InvalidMessage) UnmarshalBinary(data []byte) error {
 	return proto.Unmarshal(data, x)
 }

@@ -22,12 +22,12 @@ service CommandExecutorAPI {
   // See [UnrecognizedCommandTypeError].
   //
   // If the command data cannot be unmarshaled the server MUST return an
-  // INVALID_ARGUMENT error with an attached [MalformedCommand] value. See
-  // [MalformedCommandError].
+  // INVALID_ARGUMENT error with an attached [MalformedMessage] value. See
+  // [MalformedMessageError].
   //
   // If the command is well-formed but fails the application's validation
   // logic the server MUST return an INVALID_ARGUMENT error with an attached
-  // [InvalidCommand] value. See [InvalidCommandError].
+  // [InvalidMessage] value. See [InvalidMessageError].
   //
   // The requested event type IDs MUST identify event types that may be
   // recorded by the target application. If any other type IDs are requested
@@ -57,7 +57,7 @@ service CommandExecutorAPI {
   // original execution, but MAY end the stream immediately if it is unable to
   // determine which events those are.
   rpc ExecuteCommand(ExecuteCommandRequest)
-  returns (stream ExecuteCommandResponse);
+      returns (stream ExecuteCommandResponse);
 }
 
 // ExecuteCommandRequest is the input to the [CommandExecutorAPI.ExecuteCommand]
@@ -67,9 +67,9 @@ message ExecuteCommandRequest {
   // command.
   dogma.protobuf.UUID application_key = 1;
 
-  // CommandTypeId is a unique identifier for the type of command, as per the
-  // Dogma message type registry.
-  dogma.protobuf.UUID command_type_id = 2;
+  // MessageTypeId is a unique identifier for the command's message type, as
+  // per the Dogma message type registry.
+  dogma.protobuf.UUID message_type_id = 2;
 
   // Data is the binary command data obtained by calling
   // [dogma.Message.MarshalBinary] on the command.
@@ -82,11 +82,11 @@ message ExecuteCommandRequest {
   // has already been executed with the same idempotency key.
   string idempotency_key = 4 [features.field_presence = IMPLICIT];
 
-  // ObservedEventTypeIds is a list of type IDs of the events to be observed
-  // as a result of executing the command. The client must be explicit about
-  // the event types that it understands; there is no mechanism to observe all
-  // event types.
-  repeated dogma.protobuf.UUID observed_event_type_ids = 5;
+  // ObservedMessageTypeIds is a list of message type IDs identifying the events
+  // to be observed as a result of executing the command. The client must be
+  // explicit about the event types that it understands; there is no mechanism
+  // to observe all event types.
+  repeated dogma.protobuf.UUID observed_message_type_ids = 5;
 }
 
 // ExecuteCommandResponse is the streaming output of the

@@ -93,19 +93,90 @@ func (b0 UnrecognizedApplication_builder) Build() *UnrecognizedApplication {
 	return m0
 }
 
+// UnrecognizedEventStream is an error-details value for NOT_FOUND errors that
+// occurred because a client requested an unrecognized stream ID.
+type UnrecognizedEventStream struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_EventStreamId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=event_stream_id,json=eventStreamId"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *UnrecognizedEventStream) Reset() {
+	*x = UnrecognizedEventStream{}
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnrecognizedEventStream) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnrecognizedEventStream) ProtoMessage() {}
+
+func (x *UnrecognizedEventStream) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UnrecognizedEventStream) GetEventStreamId() *uuidpb.UUID {
+	if x != nil {
+		return x.xxx_hidden_EventStreamId
+	}
+	return nil
+}
+
+func (x *UnrecognizedEventStream) SetEventStreamId(v *uuidpb.UUID) {
+	x.xxx_hidden_EventStreamId = v
+}
+
+func (x *UnrecognizedEventStream) HasEventStreamId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_EventStreamId != nil
+}
+
+func (x *UnrecognizedEventStream) ClearEventStreamId() {
+	x.xxx_hidden_EventStreamId = nil
+}
+
+type UnrecognizedEventStream_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// EventStreamId is the ID of the unrecognized stream.
+	EventStreamId *uuidpb.UUID
+}
+
+func (b0 UnrecognizedEventStream_builder) Build() *UnrecognizedEventStream {
+	m0 := &UnrecognizedEventStream{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_EventStreamId = b.EventStreamId
+	return m0
+}
+
 // UnrecognizedCommandType is an error-details value for INVALID_ARGUMENT
 // errors that occurred because a specific command type was not recognized by
 // the server, or is not executable within the target application.
 type UnrecognizedCommandType struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_CommandTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=command_type_id,json=commandTypeId"`
+	xxx_hidden_MessageTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=message_type_id,json=messageTypeId"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
 
 func (x *UnrecognizedCommandType) Reset() {
 	*x = UnrecognizedCommandType{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[1]
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -117,7 +188,7 @@ func (x *UnrecognizedCommandType) String() string {
 func (*UnrecognizedCommandType) ProtoMessage() {}
 
 func (x *UnrecognizedCommandType) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[1]
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -128,183 +199,40 @@ func (x *UnrecognizedCommandType) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *UnrecognizedCommandType) GetCommandTypeId() *uuidpb.UUID {
+func (x *UnrecognizedCommandType) GetMessageTypeId() *uuidpb.UUID {
 	if x != nil {
-		return x.xxx_hidden_CommandTypeId
+		return x.xxx_hidden_MessageTypeId
 	}
 	return nil
 }
 
-func (x *UnrecognizedCommandType) SetCommandTypeId(v *uuidpb.UUID) {
-	x.xxx_hidden_CommandTypeId = v
+func (x *UnrecognizedCommandType) SetMessageTypeId(v *uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeId = v
 }
 
-func (x *UnrecognizedCommandType) HasCommandTypeId() bool {
+func (x *UnrecognizedCommandType) HasMessageTypeId() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_CommandTypeId != nil
+	return x.xxx_hidden_MessageTypeId != nil
 }
 
-func (x *UnrecognizedCommandType) ClearCommandTypeId() {
-	x.xxx_hidden_CommandTypeId = nil
+func (x *UnrecognizedCommandType) ClearMessageTypeId() {
+	x.xxx_hidden_MessageTypeId = nil
 }
 
 type UnrecognizedCommandType_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// CommandTypeId is the ID of the unrecognized command type.
-	CommandTypeId *uuidpb.UUID
+	// MessageTypeId is the ID of the unrecognized command type.
+	MessageTypeId *uuidpb.UUID
 }
 
 func (b0 UnrecognizedCommandType_builder) Build() *UnrecognizedCommandType {
 	m0 := &UnrecognizedCommandType{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_CommandTypeId = b.CommandTypeId
-	return m0
-}
-
-// MalformedCommand is an error-details value for INVALID_ARGUMENT errors that
-// occurred because a command's binary data could not be unmarshaled.
-type MalformedCommand struct {
-	state                    protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_CommandTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=command_type_id,json=commandTypeId"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
-}
-
-func (x *MalformedCommand) Reset() {
-	*x = MalformedCommand{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MalformedCommand) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MalformedCommand) ProtoMessage() {}
-
-func (x *MalformedCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *MalformedCommand) GetCommandTypeId() *uuidpb.UUID {
-	if x != nil {
-		return x.xxx_hidden_CommandTypeId
-	}
-	return nil
-}
-
-func (x *MalformedCommand) SetCommandTypeId(v *uuidpb.UUID) {
-	x.xxx_hidden_CommandTypeId = v
-}
-
-func (x *MalformedCommand) HasCommandTypeId() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_CommandTypeId != nil
-}
-
-func (x *MalformedCommand) ClearCommandTypeId() {
-	x.xxx_hidden_CommandTypeId = nil
-}
-
-type MalformedCommand_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// CommandTypeId is the ID of the command type that the data could not be
-	// unmarshaled as.
-	CommandTypeId *uuidpb.UUID
-}
-
-func (b0 MalformedCommand_builder) Build() *MalformedCommand {
-	m0 := &MalformedCommand{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_CommandTypeId = b.CommandTypeId
-	return m0
-}
-
-// InvalidCommand is an error-details value for INVALID_ARGUMENT errors that
-// occurred because a command failed the application's validation logic.
-type InvalidCommand struct {
-	state                    protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_CommandTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=command_type_id,json=commandTypeId"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
-}
-
-func (x *InvalidCommand) Reset() {
-	*x = InvalidCommand{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *InvalidCommand) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InvalidCommand) ProtoMessage() {}
-
-func (x *InvalidCommand) ProtoReflect() protoreflect.Message {
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-func (x *InvalidCommand) GetCommandTypeId() *uuidpb.UUID {
-	if x != nil {
-		return x.xxx_hidden_CommandTypeId
-	}
-	return nil
-}
-
-func (x *InvalidCommand) SetCommandTypeId(v *uuidpb.UUID) {
-	x.xxx_hidden_CommandTypeId = v
-}
-
-func (x *InvalidCommand) HasCommandTypeId() bool {
-	if x == nil {
-		return false
-	}
-	return x.xxx_hidden_CommandTypeId != nil
-}
-
-func (x *InvalidCommand) ClearCommandTypeId() {
-	x.xxx_hidden_CommandTypeId = nil
-}
-
-type InvalidCommand_builder struct {
-	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
-
-	// CommandTypeId is the ID of the type of the invalid command.
-	CommandTypeId *uuidpb.UUID
-}
-
-func (b0 InvalidCommand_builder) Build() *InvalidCommand {
-	m0 := &InvalidCommand{}
-	b, x := &b0, m0
-	_, _ = b, x
-	x.xxx_hidden_CommandTypeId = b.CommandTypeId
+	x.xxx_hidden_MessageTypeId = b.MessageTypeId
 	return m0
 }
 
@@ -312,15 +240,15 @@ func (b0 InvalidCommand_builder) Build() *InvalidCommand {
 // that occurred because a specific event type was not recognized by the
 // server.
 type UnrecognizedEventType struct {
-	state                  protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_EventTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=event_type_id,json=eventTypeId"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MessageTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=message_type_id,json=messageTypeId"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *UnrecognizedEventType) Reset() {
 	*x = UnrecognizedEventType{}
-	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[4]
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -332,6 +260,77 @@ func (x *UnrecognizedEventType) String() string {
 func (*UnrecognizedEventType) ProtoMessage() {}
 
 func (x *UnrecognizedEventType) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *UnrecognizedEventType) GetMessageTypeId() *uuidpb.UUID {
+	if x != nil {
+		return x.xxx_hidden_MessageTypeId
+	}
+	return nil
+}
+
+func (x *UnrecognizedEventType) SetMessageTypeId(v *uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeId = v
+}
+
+func (x *UnrecognizedEventType) HasMessageTypeId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_MessageTypeId != nil
+}
+
+func (x *UnrecognizedEventType) ClearMessageTypeId() {
+	x.xxx_hidden_MessageTypeId = nil
+}
+
+type UnrecognizedEventType_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// MessageTypeId is the ID of the unrecognized event type.
+	MessageTypeId *uuidpb.UUID
+}
+
+func (b0 UnrecognizedEventType_builder) Build() *UnrecognizedEventType {
+	m0 := &UnrecognizedEventType{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_MessageTypeId = b.MessageTypeId
+	return m0
+}
+
+// MalformedMessage is an error-details value for INVALID_ARGUMENT errors that
+// occurred because a message's binary data could not be unmarshaled.
+type MalformedMessage struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MessageTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=message_type_id,json=messageTypeId"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *MalformedMessage) Reset() {
+	*x = MalformedMessage{}
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MalformedMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MalformedMessage) ProtoMessage() {}
+
+func (x *MalformedMessage) ProtoReflect() protoreflect.Message {
 	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -343,40 +342,112 @@ func (x *UnrecognizedEventType) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *UnrecognizedEventType) GetEventTypeId() *uuidpb.UUID {
+func (x *MalformedMessage) GetMessageTypeId() *uuidpb.UUID {
 	if x != nil {
-		return x.xxx_hidden_EventTypeId
+		return x.xxx_hidden_MessageTypeId
 	}
 	return nil
 }
 
-func (x *UnrecognizedEventType) SetEventTypeId(v *uuidpb.UUID) {
-	x.xxx_hidden_EventTypeId = v
+func (x *MalformedMessage) SetMessageTypeId(v *uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeId = v
 }
 
-func (x *UnrecognizedEventType) HasEventTypeId() bool {
+func (x *MalformedMessage) HasMessageTypeId() bool {
 	if x == nil {
 		return false
 	}
-	return x.xxx_hidden_EventTypeId != nil
+	return x.xxx_hidden_MessageTypeId != nil
 }
 
-func (x *UnrecognizedEventType) ClearEventTypeId() {
-	x.xxx_hidden_EventTypeId = nil
+func (x *MalformedMessage) ClearMessageTypeId() {
+	x.xxx_hidden_MessageTypeId = nil
 }
 
-type UnrecognizedEventType_builder struct {
+type MalformedMessage_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	// EventTypeId is the ID of the unrecognized event type.
-	EventTypeId *uuidpb.UUID
+	// MessageTypeId is the ID of the message type that the data could not be
+	// unmarshaled as.
+	MessageTypeId *uuidpb.UUID
 }
 
-func (b0 UnrecognizedEventType_builder) Build() *UnrecognizedEventType {
-	m0 := &UnrecognizedEventType{}
+func (b0 MalformedMessage_builder) Build() *MalformedMessage {
+	m0 := &MalformedMessage{}
 	b, x := &b0, m0
 	_, _ = b, x
-	x.xxx_hidden_EventTypeId = b.EventTypeId
+	x.xxx_hidden_MessageTypeId = b.MessageTypeId
+	return m0
+}
+
+// InvalidMessage is an error-details value for INVALID_ARGUMENT errors that
+// occurred because a message failed the application's validation logic.
+type InvalidMessage struct {
+	state                    protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_MessageTypeId *uuidpb.UUID           `protobuf:"bytes,1,opt,name=message_type_id,json=messageTypeId"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *InvalidMessage) Reset() {
+	*x = InvalidMessage{}
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InvalidMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InvalidMessage) ProtoMessage() {}
+
+func (x *InvalidMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *InvalidMessage) GetMessageTypeId() *uuidpb.UUID {
+	if x != nil {
+		return x.xxx_hidden_MessageTypeId
+	}
+	return nil
+}
+
+func (x *InvalidMessage) SetMessageTypeId(v *uuidpb.UUID) {
+	x.xxx_hidden_MessageTypeId = v
+}
+
+func (x *InvalidMessage) HasMessageTypeId() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_MessageTypeId != nil
+}
+
+func (x *InvalidMessage) ClearMessageTypeId() {
+	x.xxx_hidden_MessageTypeId = nil
+}
+
+type InvalidMessage_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	// MessageTypeId is the ID of the type of the invalid message.
+	MessageTypeId *uuidpb.UUID
+}
+
+func (b0 InvalidMessage_builder) Build() *InvalidMessage {
+	m0 := &InvalidMessage{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_MessageTypeId = b.MessageTypeId
 	return m0
 }
 
@@ -387,35 +458,39 @@ const file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_rawDesc
 	"=github.com/dogmatiq/enginekit/grpc/messaginggrpc/errors.proto\x12\x12dogma.messaging.v1\x1a8github.com/dogmatiq/enginekit/protobuf/uuidpb/uuid.proto\"X\n" +
 	"\x17UnrecognizedApplication\x12=\n" +
 	"\x0fapplication_key\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\x0eapplicationKey\"W\n" +
+	"\x17UnrecognizedEventStream\x12<\n" +
+	"\x0fevent_stream_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\reventStreamId\"W\n" +
 	"\x17UnrecognizedCommandType\x12<\n" +
-	"\x0fcommand_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rcommandTypeId\"P\n" +
-	"\x10MalformedCommand\x12<\n" +
-	"\x0fcommand_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rcommandTypeId\"N\n" +
-	"\x0eInvalidCommand\x12<\n" +
-	"\x0fcommand_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rcommandTypeId\"Q\n" +
-	"\x15UnrecognizedEventType\x128\n" +
-	"\revent_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\veventTypeIdB2Z0github.com/dogmatiq/enginekit/grpc/messaginggrpcb\beditionsp\xe9\a"
+	"\x0fmessage_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rmessageTypeId\"U\n" +
+	"\x15UnrecognizedEventType\x12<\n" +
+	"\x0fmessage_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rmessageTypeId\"P\n" +
+	"\x10MalformedMessage\x12<\n" +
+	"\x0fmessage_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rmessageTypeId\"N\n" +
+	"\x0eInvalidMessage\x12<\n" +
+	"\x0fmessage_type_id\x18\x01 \x01(\v2\x14.dogma.protobuf.UUIDR\rmessageTypeIdB2Z0github.com/dogmatiq/enginekit/grpc/messaginggrpcb\beditionsp\xe9\a"
 
-var file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_goTypes = []any{
 	(*UnrecognizedApplication)(nil), // 0: dogma.messaging.v1.UnrecognizedApplication
-	(*UnrecognizedCommandType)(nil), // 1: dogma.messaging.v1.UnrecognizedCommandType
-	(*MalformedCommand)(nil),        // 2: dogma.messaging.v1.MalformedCommand
-	(*InvalidCommand)(nil),          // 3: dogma.messaging.v1.InvalidCommand
-	(*UnrecognizedEventType)(nil),   // 4: dogma.messaging.v1.UnrecognizedEventType
-	(*uuidpb.UUID)(nil),             // 5: dogma.protobuf.UUID
+	(*UnrecognizedEventStream)(nil), // 1: dogma.messaging.v1.UnrecognizedEventStream
+	(*UnrecognizedCommandType)(nil), // 2: dogma.messaging.v1.UnrecognizedCommandType
+	(*UnrecognizedEventType)(nil),   // 3: dogma.messaging.v1.UnrecognizedEventType
+	(*MalformedMessage)(nil),        // 4: dogma.messaging.v1.MalformedMessage
+	(*InvalidMessage)(nil),          // 5: dogma.messaging.v1.InvalidMessage
+	(*uuidpb.UUID)(nil),             // 6: dogma.protobuf.UUID
 }
 var file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_depIdxs = []int32{
-	5, // 0: dogma.messaging.v1.UnrecognizedApplication.application_key:type_name -> dogma.protobuf.UUID
-	5, // 1: dogma.messaging.v1.UnrecognizedCommandType.command_type_id:type_name -> dogma.protobuf.UUID
-	5, // 2: dogma.messaging.v1.MalformedCommand.command_type_id:type_name -> dogma.protobuf.UUID
-	5, // 3: dogma.messaging.v1.InvalidCommand.command_type_id:type_name -> dogma.protobuf.UUID
-	5, // 4: dogma.messaging.v1.UnrecognizedEventType.event_type_id:type_name -> dogma.protobuf.UUID
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	6, // 0: dogma.messaging.v1.UnrecognizedApplication.application_key:type_name -> dogma.protobuf.UUID
+	6, // 1: dogma.messaging.v1.UnrecognizedEventStream.event_stream_id:type_name -> dogma.protobuf.UUID
+	6, // 2: dogma.messaging.v1.UnrecognizedCommandType.message_type_id:type_name -> dogma.protobuf.UUID
+	6, // 3: dogma.messaging.v1.UnrecognizedEventType.message_type_id:type_name -> dogma.protobuf.UUID
+	6, // 4: dogma.messaging.v1.MalformedMessage.message_type_id:type_name -> dogma.protobuf.UUID
+	6, // 5: dogma.messaging.v1.InvalidMessage.message_type_id:type_name -> dogma.protobuf.UUID
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_init() }
@@ -429,7 +504,7 @@ func file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_rawDesc), len(file_github_com_dogmatiq_enginekit_grpc_messaginggrpc_errors_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

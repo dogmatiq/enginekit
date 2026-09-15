@@ -18,6 +18,15 @@ The format is based on [Keep a Changelog], and this project adheres to
 - Added `messaginggrpc.CommandExecutorAPI`, a gRPC service for executing
   commands within a hosted Dogma application, with support for observing the
   events recorded as a result.
+- Added `messaginggrpc.EventStreamConsumerAPI`, ported from
+  `eventstreamgrpc.ConsumeAPI` (see below).
+
+### Removed
+
+- **[BC]** Removed the `eventstreamgrpc` package. It was unused and has been
+  replaced by `messaginggrpc.EventStreamConsumerAPI`, which exposes the same
+  `ListEventStreams` and `ConsumeEvents` operations.
+
 
 ## [0.26.5] - 2026-06-10
 

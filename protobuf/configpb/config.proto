@@ -9,19 +9,19 @@ import "github.com/dogmatiq/enginekit/protobuf/identitypb/identity.proto";
 // [dogma.Command], [dogma.Event], and [dogma.Deadline] interfaces.
 enum MessageKind {
   UNKNOWN_MESSAGE_KIND = 0;
-  COMMAND = 1;
-  EVENT = 2;
-  DEADLINE = 3;
+  COMMAND              = 1;
+  EVENT                = 2;
+  DEADLINE             = 3;
 }
 
 // HandlerType is an enumeration of the types of handlers that an application
 // can contain.
 enum HandlerType {
   UNKNOWN_HANDLER_TYPE = 0;
-  AGGREGATE = 1;
-  PROCESS = 2;
-  INTEGRATION = 3;
-  PROJECTION = 4;
+  AGGREGATE            = 1;
+  PROCESS              = 2;
+  INTEGRATION          = 3;
+  PROJECTION           = 4;
 }
 
 // Application represents a Dogma application hosted by the engine on the

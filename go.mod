@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/dogmatiq/dapper v0.6.1
 	github.com/dogmatiq/dogma v0.25.0
-	github.com/dogmatiq/primo v0.4.0
+	github.com/dogmatiq/primo v0.4.1
 	github.com/dogmatiq/spruce v0.2.4
 	github.com/google/go-cmp v0.7.0
 	go.opentelemetry.io/otel v1.46.0

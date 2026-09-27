@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog], and this project adheres to
   events recorded as a result.
 - Added `messaginggrpc.EventStreamConsumerAPI`, ported from
   `eventstreamgrpc.ConsumeAPI` (see below).
+- Added `envelopepb.Envelope.AsMultiEnvelope()`.
+- Added `envelopepb.MultiEnvelope.AppendBodies()` and `TryAppendEnvelope()`.
 
 ### Removed
 

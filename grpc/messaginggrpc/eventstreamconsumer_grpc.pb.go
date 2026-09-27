@@ -27,31 +27,26 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// EventStreamConsumerAPI is a service for consuming events from an
-// offset-based ordered stream.
+// EventStreamConsumerAPI is a service for consuming event messages from
+// offset-based, ordered event streams.
 type EventStreamConsumerAPIClient interface {
-	// ListEventStreams lists the streams that the server provides.
-	ListEventStreams(ctx context.Context, in *ListEventStreamsRequest, opts ...grpc.CallOption) (*ListEventStreamsResponse, error)
-	// ConsumeEvents starts consuming from a specific offset within an event
+	// ListEventStreams returns the event streams offered by the server.
+	ListEventStreams(ctx context.Context, in *ListEventStreamsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListEventStreamsResponse], error)
+	// ConsumeEvents returns event messages from a single stream, in order,
+	// starting from a specific offset within an event stream.
+	//
+	// The server delivers every event at or after the requested checkpoint offset
+	// whose message type ID is among those in the [ConsumeEventsRequest]. If no
+	// such events remain in the event stream, and the server cannot produce new
+	// events with any of the requested message type IDs, it closes the gRPC
 	// stream.
 	//
-	// If the requested stream ID is unknown to the server it MUST return a
+	// If the requested stream ID is not recognized the server MUST return a
 	// NOT_FOUND error with an attached [UnrecognizedEventStream] value. See
 	// [UnrecognizedEventStreamError].
 	//
-	// If the requested offset is beyond the end of the stream, the server
-	// SHOULD keep the stream open and send new events as they are written to
-	// the stream.
-	//
-	// The requested type IDs MUST be a subset of those type IDs associated
-	// with the stream, as per the result of the ListEventStreams operation. If
-	// any other type IDs are requested the server MUST return an
-	// INVALID_ARGUMENT error with an attached [UnrecognizedEventType] value
-	// for each unrecognized type ID. See [UnrecognizedEventTypeError].
-	//
-	// If no type IDs are specified the server MUST return an INVALID_ARGUMENT
-	// error. This is a pure request-shape violation with no server-state
-	// dependent data to report, so it carries no error-details value.
+	// If the requested offset is beyond the end of the stream an OUT_OF_RANGE
+	// error occurs.
 	ConsumeEvents(ctx context.Context, in *ConsumeEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ConsumeEventsResponse], error)
 }
 
@@ -63,19 +58,28 @@ func NewEventStreamConsumerAPIClient(cc grpc.ClientConnInterface) EventStreamCon
 	return &eventStreamConsumerAPIClient{cc}
 }
 
-func (c *eventStreamConsumerAPIClient) ListEventStreams(ctx context.Context, in *ListEventStreamsRequest, opts ...grpc.CallOption) (*ListEventStreamsResponse, error) {
+func (c *eventStreamConsumerAPIClient) ListEventStreams(ctx context.Context, in *ListEventStreamsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ListEventStreamsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListEventStreamsResponse)
-	err := c.cc.Invoke(ctx, EventStreamConsumerAPI_ListEventStreams_FullMethodName, in, out, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &EventStreamConsumerAPI_ServiceDesc.Streams[0], EventStreamConsumerAPI_ListEventStreams_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &grpc.GenericClientStream[ListEventStreamsRequest, ListEventStreamsResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EventStreamConsumerAPI_ListEventStreamsClient = grpc.ServerStreamingClient[ListEventStreamsResponse]
 
 func (c *eventStreamConsumerAPIClient) ConsumeEvents(ctx context.Context, in *ConsumeEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ConsumeEventsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &EventStreamConsumerAPI_ServiceDesc.Streams[0], EventStreamConsumerAPI_ConsumeEvents_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &EventStreamConsumerAPI_ServiceDesc.Streams[1], EventStreamConsumerAPI_ConsumeEvents_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,31 +100,26 @@ type EventStreamConsumerAPI_ConsumeEventsClient = grpc.ServerStreamingClient[Con
 // All implementations should embed UnimplementedEventStreamConsumerAPIServer
 // for forward compatibility.
 //
-// EventStreamConsumerAPI is a service for consuming events from an
-// offset-based ordered stream.
+// EventStreamConsumerAPI is a service for consuming event messages from
+// offset-based, ordered event streams.
 type EventStreamConsumerAPIServer interface {
-	// ListEventStreams lists the streams that the server provides.
-	ListEventStreams(context.Context, *ListEventStreamsRequest) (*ListEventStreamsResponse, error)
-	// ConsumeEvents starts consuming from a specific offset within an event
+	// ListEventStreams returns the event streams offered by the server.
+	ListEventStreams(*ListEventStreamsRequest, grpc.ServerStreamingServer[ListEventStreamsResponse]) error
+	// ConsumeEvents returns event messages from a single stream, in order,
+	// starting from a specific offset within an event stream.
+	//
+	// The server delivers every event at or after the requested checkpoint offset
+	// whose message type ID is among those in the [ConsumeEventsRequest]. If no
+	// such events remain in the event stream, and the server cannot produce new
+	// events with any of the requested message type IDs, it closes the gRPC
 	// stream.
 	//
-	// If the requested stream ID is unknown to the server it MUST return a
+	// If the requested stream ID is not recognized the server MUST return a
 	// NOT_FOUND error with an attached [UnrecognizedEventStream] value. See
 	// [UnrecognizedEventStreamError].
 	//
-	// If the requested offset is beyond the end of the stream, the server
-	// SHOULD keep the stream open and send new events as they are written to
-	// the stream.
-	//
-	// The requested type IDs MUST be a subset of those type IDs associated
-	// with the stream, as per the result of the ListEventStreams operation. If
-	// any other type IDs are requested the server MUST return an
-	// INVALID_ARGUMENT error with an attached [UnrecognizedEventType] value
-	// for each unrecognized type ID. See [UnrecognizedEventTypeError].
-	//
-	// If no type IDs are specified the server MUST return an INVALID_ARGUMENT
-	// error. This is a pure request-shape violation with no server-state
-	// dependent data to report, so it carries no error-details value.
+	// If the requested offset is beyond the end of the stream an OUT_OF_RANGE
+	// error occurs.
 	ConsumeEvents(*ConsumeEventsRequest, grpc.ServerStreamingServer[ConsumeEventsResponse]) error
 }
 
@@ -131,8 +130,8 @@ type EventStreamConsumerAPIServer interface {
 // pointer dereference when methods are called.
 type UnimplementedEventStreamConsumerAPIServer struct{}
 
-func (UnimplementedEventStreamConsumerAPIServer) ListEventStreams(context.Context, *ListEventStreamsRequest) (*ListEventStreamsResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListEventStreams not implemented")
+func (UnimplementedEventStreamConsumerAPIServer) ListEventStreams(*ListEventStreamsRequest, grpc.ServerStreamingServer[ListEventStreamsResponse]) error {
+	return status.Error(codes.Unimplemented, "method ListEventStreams not implemented")
 }
 func (UnimplementedEventStreamConsumerAPIServer) ConsumeEvents(*ConsumeEventsRequest, grpc.ServerStreamingServer[ConsumeEventsResponse]) error {
 	return status.Error(codes.Unimplemented, "method ConsumeEvents not implemented")
@@ -157,23 +156,16 @@ func RegisterEventStreamConsumerAPIServer(s grpc.ServiceRegistrar, srv EventStre
 	s.RegisterService(&EventStreamConsumerAPI_ServiceDesc, srv)
 }
 
-func _EventStreamConsumerAPI_ListEventStreams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListEventStreamsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _EventStreamConsumerAPI_ListEventStreams_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ListEventStreamsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(EventStreamConsumerAPIServer).ListEventStreams(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EventStreamConsumerAPI_ListEventStreams_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventStreamConsumerAPIServer).ListEventStreams(ctx, req.(*ListEventStreamsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(EventStreamConsumerAPIServer).ListEventStreams(m, &grpc.GenericServerStream[ListEventStreamsRequest, ListEventStreamsResponse]{ServerStream: stream})
 }
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type EventStreamConsumerAPI_ListEventStreamsServer = grpc.ServerStreamingServer[ListEventStreamsResponse]
 
 func _EventStreamConsumerAPI_ConsumeEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ConsumeEventsRequest)
@@ -192,13 +184,13 @@ type EventStreamConsumerAPI_ConsumeEventsServer = grpc.ServerStreamingServer[Con
 var EventStreamConsumerAPI_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "dogma.messaging.v1.EventStreamConsumerAPI",
 	HandlerType: (*EventStreamConsumerAPIServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "ListEventStreams",
-			Handler:    _EventStreamConsumerAPI_ListEventStreams_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ListEventStreams",
+			Handler:       _EventStreamConsumerAPI_ListEventStreams_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "ConsumeEvents",
 			Handler:       _EventStreamConsumerAPI_ConsumeEvents_Handler,

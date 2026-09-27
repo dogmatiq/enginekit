@@ -16,15 +16,6 @@ import (
 	proto "google.golang.org/protobuf/proto"
 )
 
-// TryGetEventDelivery returns the EventDelivery value if x.Operation is set to EventDelivery.
-// Otherwise, ok is false and v is the zero-value.
-func (x *ConsumeEventsResponse) TryGetEventDelivery() (v *ConsumeEventsResponse_EventDelivery, ok bool) {
-	if x.HasEventDelivery() {
-		return x.GetEventDelivery(), true
-	}
-	return v, false
-}
-
 type ListEventStreamsRequestBuilder struct {
 	prototype ListEventStreamsRequest
 }
@@ -69,7 +60,9 @@ func NewListEventStreamsResponseBuilder() *ListEventStreamsResponseBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *ListEventStreamsResponseBuilder) From(x *ListEventStreamsResponse) *ListEventStreamsResponseBuilder {
 	proto.Reset(&b.prototype)
-	b.prototype.SetStreams(x.GetStreams())
+	if x.HasEventStream() {
+		b.prototype.SetEventStream(x.GetEventStream())
+	}
 	return b
 }
 
@@ -79,14 +72,16 @@ func (b *ListEventStreamsResponseBuilder) From(x *ListEventStreamsResponse) *Lis
 // not modify previously constructed messages.
 func (b *ListEventStreamsResponseBuilder) Build() *ListEventStreamsResponse {
 	m := &ListEventStreamsResponse{}
-	m.SetStreams(b.prototype.GetStreams())
+	if b.prototype.HasEventStream() {
+		m.SetEventStream(b.prototype.GetEventStream())
+	}
 	return m
 }
 
-// WithStreams configures the builder to set the Streams field to v,
+// WithEventStream configures the builder to set the EventStream field to v,
 // then returns b.
-func (b *ListEventStreamsResponseBuilder) WithStreams(v []*EventStream) *ListEventStreamsResponseBuilder {
-	b.prototype.SetStreams(v)
+func (b *ListEventStreamsResponseBuilder) WithEventStream(v *EventStream) *ListEventStreamsResponseBuilder {
+	b.prototype.SetEventStream(v)
 	return b
 }
 
@@ -109,7 +104,7 @@ func (b *EventStreamBuilder) From(x *EventStream) *EventStreamBuilder {
 	if x.HasEventStreamId() {
 		b.prototype.SetEventStreamId(x.GetEventStreamId())
 	}
-	b.prototype.SetMessageTypeIds(x.GetMessageTypeIds())
+	b.prototype.SetNextOffset(x.GetNextOffset())
 	return b
 }
 
@@ -122,7 +117,7 @@ func (b *EventStreamBuilder) Build() *EventStream {
 	if b.prototype.HasEventStreamId() {
 		m.SetEventStreamId(b.prototype.GetEventStreamId())
 	}
-	m.SetMessageTypeIds(b.prototype.GetMessageTypeIds())
+	m.SetNextOffset(b.prototype.GetNextOffset())
 	return m
 }
 
@@ -133,10 +128,10 @@ func (b *EventStreamBuilder) WithEventStreamId(v *uuidpb.UUID) *EventStreamBuild
 	return b
 }
 
-// WithMessageTypeIds configures the builder to set the MessageTypeIds field to v,
+// WithNextOffset configures the builder to set the NextOffset field to v,
 // then returns b.
-func (b *EventStreamBuilder) WithMessageTypeIds(v []*uuidpb.UUID) *EventStreamBuilder {
-	b.prototype.SetMessageTypeIds(v)
+func (b *EventStreamBuilder) WithNextOffset(v uint64) *EventStreamBuilder {
+	b.prototype.SetNextOffset(v)
 	return b
 }
 
@@ -159,7 +154,7 @@ func (b *ConsumeEventsRequestBuilder) From(x *ConsumeEventsRequest) *ConsumeEven
 	if x.HasEventStreamId() {
 		b.prototype.SetEventStreamId(x.GetEventStreamId())
 	}
-	b.prototype.SetOffset(x.GetOffset())
+	b.prototype.SetCheckpointOffset(x.GetCheckpointOffset())
 	b.prototype.SetMessageTypeIds(x.GetMessageTypeIds())
 	return b
 }
@@ -173,7 +168,7 @@ func (b *ConsumeEventsRequestBuilder) Build() *ConsumeEventsRequest {
 	if b.prototype.HasEventStreamId() {
 		m.SetEventStreamId(b.prototype.GetEventStreamId())
 	}
-	m.SetOffset(b.prototype.GetOffset())
+	m.SetCheckpointOffset(b.prototype.GetCheckpointOffset())
 	m.SetMessageTypeIds(b.prototype.GetMessageTypeIds())
 	return m
 }
@@ -185,10 +180,10 @@ func (b *ConsumeEventsRequestBuilder) WithEventStreamId(v *uuidpb.UUID) *Consume
 	return b
 }
 
-// WithOffset configures the builder to set the Offset field to v,
+// WithCheckpointOffset configures the builder to set the CheckpointOffset field to v,
 // then returns b.
-func (b *ConsumeEventsRequestBuilder) WithOffset(v uint64) *ConsumeEventsRequestBuilder {
-	b.prototype.SetOffset(v)
+func (b *ConsumeEventsRequestBuilder) WithCheckpointOffset(v uint64) *ConsumeEventsRequestBuilder {
+	b.prototype.SetCheckpointOffset(v)
 	return b
 }
 
@@ -215,9 +210,8 @@ func NewConsumeEventsResponseBuilder() *ConsumeEventsResponseBuilder {
 // do not modify x. It does not make a copy of the field values themselves.
 func (b *ConsumeEventsResponseBuilder) From(x *ConsumeEventsResponse) *ConsumeEventsResponseBuilder {
 	proto.Reset(&b.prototype)
-	if x.HasEventDelivery() {
-		b.prototype.SetEventDelivery(x.GetEventDelivery())
-	}
+	b.prototype.SetCheckpointOffset(x.GetCheckpointOffset())
+	b.prototype.SetEnvelopes(x.GetEnvelopes())
 	return b
 }
 
@@ -227,135 +221,23 @@ func (b *ConsumeEventsResponseBuilder) From(x *ConsumeEventsResponse) *ConsumeEv
 // not modify previously constructed messages.
 func (b *ConsumeEventsResponseBuilder) Build() *ConsumeEventsResponse {
 	m := &ConsumeEventsResponse{}
-	if b.prototype.HasEventDelivery() {
-		m.SetEventDelivery(b.prototype.GetEventDelivery())
-	}
+	m.SetCheckpointOffset(b.prototype.GetCheckpointOffset())
+	m.SetEnvelopes(b.prototype.GetEnvelopes())
 	return m
 }
 
-// WithEventDelivery configures the builder to set the EventDelivery field to v,
+// WithCheckpointOffset configures the builder to set the CheckpointOffset field to v,
 // then returns b.
-func (b *ConsumeEventsResponseBuilder) WithEventDelivery(v *ConsumeEventsResponse_EventDelivery) *ConsumeEventsResponseBuilder {
-	b.prototype.SetEventDelivery(v)
+func (b *ConsumeEventsResponseBuilder) WithCheckpointOffset(v uint64) *ConsumeEventsResponseBuilder {
+	b.prototype.SetCheckpointOffset(v)
 	return b
 }
 
-type ConsumeEventsResponse_EventDeliveryBuilder struct {
-	prototype ConsumeEventsResponse_EventDelivery
-}
-
-// NewConsumeEventsResponse_EventDeliveryBuilder returns a builder that constructs [ConsumeEventsResponse_EventDelivery] messages.
-func NewConsumeEventsResponse_EventDeliveryBuilder() *ConsumeEventsResponse_EventDeliveryBuilder {
-	return &ConsumeEventsResponse_EventDeliveryBuilder{}
-}
-
-// From configures the builder to use x as the prototype for new messages,
+// WithEnvelopes configures the builder to set the Envelopes field to v,
 // then returns b.
-//
-// It performs a shallow copy of x, such that any changes made via the builder
-// do not modify x. It does not make a copy of the field values themselves.
-func (b *ConsumeEventsResponse_EventDeliveryBuilder) From(x *ConsumeEventsResponse_EventDelivery) *ConsumeEventsResponse_EventDeliveryBuilder {
-	proto.Reset(&b.prototype)
-	b.prototype.SetOffset(x.GetOffset())
-	if x.HasEnvelope() {
-		b.prototype.SetEnvelope(x.GetEnvelope())
-	}
+func (b *ConsumeEventsResponseBuilder) WithEnvelopes(v []*envelopepb.MultiEnvelope) *ConsumeEventsResponseBuilder {
+	b.prototype.SetEnvelopes(v)
 	return b
-}
-
-// Build returns a new [ConsumeEventsResponse_EventDelivery] containing the values configured via the builder.
-//
-// Each call returns a new message, such that future changes to the builder do
-// not modify previously constructed messages.
-func (b *ConsumeEventsResponse_EventDeliveryBuilder) Build() *ConsumeEventsResponse_EventDelivery {
-	m := &ConsumeEventsResponse_EventDelivery{}
-	m.SetOffset(b.prototype.GetOffset())
-	if b.prototype.HasEnvelope() {
-		m.SetEnvelope(b.prototype.GetEnvelope())
-	}
-	return m
-}
-
-// WithOffset configures the builder to set the Offset field to v,
-// then returns b.
-func (b *ConsumeEventsResponse_EventDeliveryBuilder) WithOffset(v uint64) *ConsumeEventsResponse_EventDeliveryBuilder {
-	b.prototype.SetOffset(v)
-	return b
-}
-
-// WithEnvelope configures the builder to set the Envelope field to v,
-// then returns b.
-func (b *ConsumeEventsResponse_EventDeliveryBuilder) WithEnvelope(v *envelopepb.Envelope) *ConsumeEventsResponse_EventDeliveryBuilder {
-	b.prototype.SetEnvelope(v)
-	return b
-}
-
-// MustSwitch_ConsumeEventsResponse_Operation invokes one of the given functions based on
-// the value of x.Operation.
-//
-// It panics if x.Operation is nil.
-func MustSwitch_ConsumeEventsResponse_Operation(
-	x *ConsumeEventsResponse,
-	caseEventDelivery func(*ConsumeEventsResponse_EventDelivery),
-) {
-	switch x.WhichOperation() {
-	case ConsumeEventsResponse_EventDelivery_case:
-		caseEventDelivery(x.GetEventDelivery())
-	default:
-		panic("MustSwitch_ConsumeEventsResponse_Operation: x.Operation is not set")
-	}
-}
-
-// Switch_ConsumeEventsResponse_Operation invokes one of the given functions based on
-// the value of x.Operation.
-//
-// It calls none() if x.Operation is nil.
-func Switch_ConsumeEventsResponse_Operation(
-	x *ConsumeEventsResponse,
-	caseEventDelivery func(*ConsumeEventsResponse_EventDelivery),
-	none func(),
-) {
-	switch x.WhichOperation() {
-	case ConsumeEventsResponse_EventDelivery_case:
-		caseEventDelivery(x.GetEventDelivery())
-	default:
-		none()
-	}
-}
-
-// MustMap_ConsumeEventsResponse_Operation maps x.Operation to a value of type T by invoking
-// one of the given functions.
-//
-// It invokes the function that corresponds to the value of x.Operation,
-// and returns that function's result. It panics if x.Operation is nil.
-func MustMap_ConsumeEventsResponse_Operation[T any](
-	x *ConsumeEventsResponse,
-	caseEventDelivery func(*ConsumeEventsResponse_EventDelivery) T,
-) T {
-	switch x.WhichOperation() {
-	case ConsumeEventsResponse_EventDelivery_case:
-		return caseEventDelivery(x.GetEventDelivery())
-	default:
-		panic("MustMap_ConsumeEventsResponse_Operation: x.Operation is not set")
-	}
-}
-
-// Map_ConsumeEventsResponse_Operation maps x.Operation to a value of type T by invoking
-// one of the given functions.
-//
-// It invokes the function that corresponds to the value of x.Operation,
-// and returns that function's result. It calls none() if x.Operation is nil.
-func Map_ConsumeEventsResponse_Operation[T any](
-	x *ConsumeEventsResponse,
-	caseEventDelivery func(*ConsumeEventsResponse_EventDelivery) T,
-	none func() T,
-) T {
-	switch x.WhichOperation() {
-	case ConsumeEventsResponse_EventDelivery_case:
-		return caseEventDelivery(x.GetEventDelivery())
-	default:
-		return none()
-	}
 }
 
 // EventStreamConsumerAPIClientStub is a test implementation of the [EventStreamConsumerAPIClient] interface.
@@ -363,14 +245,14 @@ var _ EventStreamConsumerAPIClient = (*EventStreamConsumerAPIClientStub)(nil)
 
 type EventStreamConsumerAPIClientStub struct {
 	// ListEventStreamsFunc is a function that implements the ListEventStreams RPC method.
-	ListEventStreamsFunc func(ctx context.Context, req *ListEventStreamsRequest, options ...grpc.CallOption) (*ListEventStreamsResponse, error)
+	ListEventStreamsFunc func(ctx context.Context, req *ListEventStreamsRequest, options ...grpc.CallOption) (EventStreamConsumerAPI_ListEventStreamsClient, error)
 
 	// ConsumeEventsFunc is a function that implements the ConsumeEvents RPC method.
 	ConsumeEventsFunc func(ctx context.Context, req *ConsumeEventsRequest, options ...grpc.CallOption) (EventStreamConsumerAPI_ConsumeEventsClient, error)
 }
 
 // ListEventStreams calls c.ListEventStreamsFunc if it is non-nil. Otherwise, it returns an error.
-func (c *EventStreamConsumerAPIClientStub) ListEventStreams(ctx context.Context, req *ListEventStreamsRequest, options ...grpc.CallOption) (*ListEventStreamsResponse, error) {
+func (c *EventStreamConsumerAPIClientStub) ListEventStreams(ctx context.Context, req *ListEventStreamsRequest, options ...grpc.CallOption) (EventStreamConsumerAPI_ListEventStreamsClient, error) {
 	if c.ListEventStreamsFunc == nil {
 		return nil, status.Error(codes.Unimplemented, "method ListEventStreams not implemented")
 	}
@@ -462,21 +344,5 @@ func (x *ConsumeEventsResponse) MarshalBinary() ([]byte, error) {
 //
 // It allows [*ConsumeEventsResponse] to implement [encoding.BinaryUnmarshaler].
 func (x *ConsumeEventsResponse) UnmarshalBinary(data []byte) error {
-	return proto.Unmarshal(data, x)
-}
-
-// MarshalBinary returns the binary representation of the message, equivalent to
-// calling proto.Marshal(x).
-//
-// It allows [*ConsumeEventsResponse_EventDelivery] to implement [encoding.BinaryMarshaler].
-func (x *ConsumeEventsResponse_EventDelivery) MarshalBinary() ([]byte, error) {
-	return proto.Marshal(x)
-}
-
-// UnmarshalBinary populates x from its binary representation, equivalent to
-// calling proto.Unmarshal(data, x).
-//
-// It allows [*ConsumeEventsResponse_EventDelivery] to implement [encoding.BinaryUnmarshaler].
-func (x *ConsumeEventsResponse_EventDelivery) UnmarshalBinary(data []byte) error {
 	return proto.Unmarshal(data, x)
 }

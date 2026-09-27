@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"iter"
 
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
@@ -35,6 +36,18 @@ func (x *Envelope) Validate() error {
 	}
 
 	return nil
+}
+
+// AsMultiEnvelope returns a [MultiEnvelope] that contains the same header and
+// body as x.
+//
+// This is a convenience method for when you want to treat a single-envelope
+// message as a multi-envelope message.
+func (x *Envelope) AsMultiEnvelope() *MultiEnvelope {
+	return NewMultiEnvelopeBuilder().
+		WithHeader(x.GetHeader()).
+		WithBodies([]*Body{x.GetBody()}).
+		Build()
 }
 
 // Validate returns an error if x is not well-formed.
@@ -81,6 +94,28 @@ func (x *MultiEnvelope) All() iter.Seq[*Envelope] {
 			}
 		}
 	}
+}
+
+// AppendBodies appends the given bodies to x.
+func (x *MultiEnvelope) AppendBodies(bodies ...*Body) {
+	x.SetBodies(
+		append(
+			x.GetBodies(),
+			bodies...,
+		),
+	)
+}
+
+// TryAppendEnvelope attempts to append the body from the given envelope to x.
+//
+// It requires that x and env share equivalent headers. If they do not, it
+// returns false and does not modify x.
+func (x *MultiEnvelope) TryAppendEnvelope(env *Envelope) bool {
+	if proto.Equal(x.GetHeader(), env.GetHeader()) {
+		x.AppendBodies(env.GetBody())
+		return true
+	}
+	return false
 }
 
 // validate returns an error if x is not well-formed.

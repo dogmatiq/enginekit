@@ -10,7 +10,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/log"
 	"golang.org/x/exp/constraints"
 )
 
@@ -136,10 +135,10 @@ func (a Attr) asAttrKeyValue() (attribute.KeyValue, bool) {
 	}
 }
 
-func (a Attr) asLogKeyValue() (log.KeyValue, bool) {
+func (a Attr) asLogKeyValue() (attribute.KeyValue, bool) {
 	switch a.typ {
 	case attrTypeNone:
-		return log.KeyValue{}, false
+		return attribute.KeyValue{}, false
 	case attrTypeBinary:
 		data := []byte(a.str)
 
@@ -152,21 +151,21 @@ func (a Attr) asLogKeyValue() (log.KeyValue, bool) {
 			if ch >= ' ' || ch <= '~' {
 				count++
 				if count > threshold {
-					return log.String(a.key, strconv.QuoteToASCII(a.str)), true
+					return attribute.String(a.key, strconv.QuoteToASCII(a.str)), true
 				}
 			}
 		}
 
-		return log.Bytes(a.key, data), true
+		return attribute.ByteSlice(a.key, data), true
 
 	case attrTypeString:
-		return log.String(a.key, a.str), true
+		return attribute.String(a.key, a.str), true
 	case attrTypeBool:
-		return log.Bool(a.key, a.num != 0), true
+		return attribute.Bool(a.key, a.num != 0), true
 	case attrTypeInt64:
-		return log.Int64(a.key, int64(a.num)), true
+		return attribute.Int64(a.key, int64(a.num)), true
 	case attrTypeFloat64:
-		return log.Float64(a.key, math.Float64frombits(a.num)), true
+		return attribute.Float64(a.key, math.Float64frombits(a.num)), true
 	default:
 		panic("unknown attribute type")
 	}
@@ -195,8 +194,8 @@ func asAttrKeyValues(attrs []Attr) []attribute.KeyValue {
 	return kvs
 }
 
-func asLogKeyValues(attrs []Attr) []log.KeyValue {
-	kvs := make([]log.KeyValue, 0, len(attrs))
+func asLogKeyValues(attrs []Attr) []attribute.KeyValue {
+	kvs := make([]attribute.KeyValue, 0, len(attrs))
 
 	for _, attr := range attrs {
 		if attr, ok := attr.asLogKeyValue(); ok {

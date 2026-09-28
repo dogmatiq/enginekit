@@ -54,10 +54,10 @@ func (r *Recorder) log(
 	var rec log.Record
 	rec.SetEventName(event)
 	rec.SetSeverity(severity)
-	rec.SetBody(log.StringValue(message))
+	rec.SetBody(attribute.StringValue(message))
 
 	if err != nil {
-		rec.AddAttributes(log.String("error", err.Error()))
+		rec.AddAttributes(attribute.String("error", err.Error()))
 	}
 
 	rec.AddAttributes(r.logKVs...)

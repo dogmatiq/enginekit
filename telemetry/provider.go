@@ -47,7 +47,7 @@ type Recorder struct {
 	meter   metric.Meter
 	logger  log.Logger
 	attrKVs attribute.Set
-	logKVs  []log.KeyValue
+	logKVs  []attribute.KeyValue
 
 	errorCount              Instrument[int64]
 	operationCount          Instrument[int64]

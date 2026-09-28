@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"strconv"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/log/embedded"
 )
@@ -42,9 +43,12 @@ func (l *standardLogger) Emit(ctx context.Context, rec log.Record) {
 		message = "?"
 	)
 
-	if rec.Body().Kind() == log.KindString {
+	switch rec.Body().Type() {
+	case attribute.EMPTY:
+		// ignore
+	case attribute.STRING:
 		message = rec.Body().AsString()
-	} else if !rec.Body().Empty() {
+	default:
 		attrs = append(
 			attrs,
 			slogAttrFromLogValue("body", rec.Body()),
@@ -56,7 +60,7 @@ func (l *standardLogger) Emit(ctx context.Context, rec log.Record) {
 	}
 
 	rec.WalkAttributes(
-		func(kv log.KeyValue) bool {
+		func(kv attribute.KeyValue) bool {
 			attrs = append(
 				attrs,
 				slogAttrFromLogValue(kv.Key, kv.Value),
@@ -104,40 +108,45 @@ func slogLevelFromLogSeverity(sev log.Severity) slog.Level {
 
 // slogAttrFromLogValue converts an OpenTelemetry [log.Value] to an
 // [slog.Attr].
-func slogAttrFromLogValue(name string, v log.Value) slog.Attr {
-	switch v.Kind() {
-	case log.KindEmpty:
-		return slog.Any(name, nil)
+func slogAttrFromLogValue(k attribute.Key, v attribute.Value) slog.Attr {
+	key := string(k)
 
-	case log.KindBool:
-		return slog.Bool(name, v.AsBool())
+	switch v.Type() {
+	case attribute.EMPTY:
+		return slog.Any(key, nil)
 
-	case log.KindFloat64:
-		return slog.Float64(name, v.AsFloat64())
+	case attribute.BOOL:
+		return slog.Bool(key, v.AsBool())
 
-	case log.KindInt64:
-		return slog.Int64(name, v.AsInt64())
+	case attribute.FLOAT64:
+		return slog.Float64(key, v.AsFloat64())
 
-	case log.KindString:
-		return slog.String(name, v.AsString())
+	case attribute.INT64:
+		return slog.Int64(key, v.AsInt64())
 
-	case log.KindBytes:
-		return slog.Any(name, v.AsBytes())
+	case attribute.STRING:
+		return slog.String(key, v.AsString())
 
-	case log.KindSlice:
+	case attribute.BYTESLICE:
+		return slog.Any(key, v.AsByteSlice())
+
+	case attribute.SLICE,
+		attribute.INT64SLICE,
+		attribute.FLOAT64SLICE,
+		attribute.STRINGSLICE:
 		var attrs []slog.Attr
 		for i, elem := range v.AsSlice() {
 			attrs = append(
 				attrs,
 				slogAttrFromLogValue(
-					strconv.Itoa(i),
+					attribute.Key(strconv.Itoa(i)),
 					elem,
 				),
 			)
 		}
-		return slog.GroupAttrs(name, attrs...)
+		return slog.GroupAttrs(key, attrs...)
 
-	case log.KindMap:
+	case attribute.MAP:
 		var attrs []slog.Attr
 		for _, pair := range v.AsMap() {
 			attrs = append(
@@ -148,9 +157,9 @@ func slogAttrFromLogValue(name string, v log.Value) slog.Attr {
 				),
 			)
 		}
-		return slog.GroupAttrs(name, attrs...)
+		return slog.GroupAttrs(key, attrs...)
 
 	default:
-		return slog.String(name, v.String())
+		return slog.String(key, v.String())
 	}
 }

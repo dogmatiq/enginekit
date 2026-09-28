@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
 )
@@ -111,56 +110,24 @@ func (x *Identity) UnmarshalText(text []byte) error {
 	return x.Validate()
 }
 
-// Format implements the fmt.Formatter interface, allowing identities to be
-// formatted with functions from the fmt package.
-func (x *Identity) Format(f fmt.State, verb rune) {
-	format := fmt.FormatString(f, verb)
-
-	// If we're formatting as a string, show the UUID followed by the name. A
-	// question mark is used as a placeholder when the name is empty.
-	if verb == 's' {
-		name := x.GetName()
-		if name == "" {
-			name = "?"
-		}
-
-		var b strings.Builder
-		key, _ := x.GetKey().MarshalText()
-		b.Write(key)
-		b.WriteByte(' ')
-		b.WriteString(name)
-
-		fmt.Fprintf(f, format, b.String())
-		return
+// AsString returns a human-readable representation of the identity.
+func (x *Identity) AsString() string {
+	name := x.GetName()
+	if name == "" {
+		name = "?"
 	}
 
-	// If we're formatting the Go syntax, output something more useful than the
-	// protobuf internals.
-	if verb == 'v' && f.Flag('#') {
-		fmt.Fprintf(
-			f,
-			"identitypb.New(%#v, %#v)",
-			x.GetName(),
-			x.GetKey(),
-		)
-		return
-	}
+	return fmt.Sprintf("%s %s", x.GetKey(), name)
 
-	// Otherwise, fall-back to the default behavior. In order to avoid infinite
-	// recursion into this method, we define a new type that does not have any
-	// methods.
+}
 
-	// First, we create an alias to the _real_ type so that we can base our new
-	// type on it without causing a recursive type definition.
-	type realType = Identity
-
-	// Then, we create a new type with the structure of the real type, but none
-	// of its methods. We use the same name as the real type so that any format
-	// verbs that include the type name (such as "%T") will still print the
-	// correct name.
-	type Identity realType
-
-	fmt.Fprintf(f, format, (*Identity)(x))
+// GoString implements the [fmt.GoStringer] interface.
+func (x *Identity) GoString() string {
+	return fmt.Sprintf(
+		"identitypb.New(%#v, %#v)",
+		x.GetName(),
+		x.GetKey(),
+	)
 }
 
 // Equal returns true if x and id are equal.

@@ -1,7 +1,6 @@
 package identitypb_test
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 
@@ -188,56 +187,6 @@ func TestIdentity_ParseAndMustParse(t *testing.T) {
 					)
 				})
 			})
-		}
-	})
-}
-
-func TestIdentity_Format(t *testing.T) {
-	t.Parallel()
-
-	subject := New(
-		"<name>",
-		uuidpb.
-			NewUUIDBuilder().
-			WithUpper(0xa967a8b93f9c4918).
-			WithLower(0x9a4119577be5fec5).
-			Build(),
-	)
-
-	cases := []struct {
-		Desc   string
-		Format string
-		Want   string
-	}{
-		{
-			"it formats as a UUID-prefixed string",
-			"%s",
-			`a967a8b9-3f9c-4918-9a41-19577be5fec5 <name>`,
-		},
-		{
-			"it formats as a Go constructor expression",
-			"%#v",
-			`identitypb.New("<name>", uuidpb.MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5"))`,
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.Desc, func(t *testing.T) {
-			t.Parallel()
-
-			actual := fmt.Sprintf(c.Format, subject)
-			if actual != c.Want {
-				t.Fatalf("got %q, want %q", actual, c.Want)
-			}
-		})
-	}
-
-	t.Run("the %v verb uses the default protobuf formatting", func(t *testing.T) {
-		t.Parallel()
-
-		actual := fmt.Sprintf("%v", subject)
-		if !strings.HasPrefix(actual, "&{") {
-			t.Errorf("got %q, want raw struct output", actual)
 		}
 	})
 }

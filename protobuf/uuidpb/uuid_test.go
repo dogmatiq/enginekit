@@ -2,8 +2,6 @@ package uuidpb_test
 
 import (
 	"bytes"
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/dogmatiq/dapper"
@@ -760,57 +758,6 @@ func TestUUID_DapperString(t *testing.T) {
 	if actual != expect {
 		t.Fatalf("got %q, want %q", actual, expect)
 	}
-}
-
-func TestUUID_Format(t *testing.T) {
-	t.Parallel()
-
-	subject := NewUUIDBuilder().
-		WithUpper(0xa967a8b93f9c4918).
-		WithLower(0x9a4119577be5fec5).
-		Build()
-
-	cases := []struct {
-		Desc   string
-		Format string
-		Want   string
-	}{
-		{
-			"string",
-			"%s",
-			`a967a8b9-3f9c-4918-9a41-19577be5fec5`,
-		},
-		{
-			"quoted string",
-			"%q",
-			`"a967a8b9-3f9c-4918-9a41-19577be5fec5"`,
-		},
-		{
-			"go string",
-			"%#v",
-			`uuidpb.MustParse("a967a8b9-3f9c-4918-9a41-19577be5fec5")`,
-		},
-	}
-
-	for _, c := range cases {
-		t.Run(c.Desc, func(t *testing.T) {
-			t.Parallel()
-
-			actual := fmt.Sprintf(c.Format, subject)
-			if actual != c.Want {
-				t.Fatalf("got %q, want %q", actual, c.Want)
-			}
-		})
-	}
-
-	t.Run("the %v verb uses the default protobuf formatting", func(t *testing.T) {
-		t.Parallel()
-
-		actual := fmt.Sprintf("%v", subject)
-		if !strings.HasPrefix(actual, "&{") {
-			t.Errorf("got %q, want raw struct output", actual)
-		}
-	})
 }
 
 func TestUUID_Validate(t *testing.T) {

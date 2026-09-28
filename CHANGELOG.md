@@ -22,12 +22,12 @@ The format is based on [Keep a Changelog], and this project adheres to
   `eventstreamgrpc.ConsumeAPI` (see below).
 - Added `envelopepb.Envelope.AsMultiEnvelope()`.
 - Added `envelopepb.MultiEnvelope.AppendBodies()` and `TryAppendEnvelope()`.
+- Added severity text to OpenTelemetry log messages.
 
 ### Removed
 
 - **[BC]** Removed the `eventstreamgrpc` package. It was unused, and has been
   replaced by `messaginggrpc.EventStreamConsumerAPI`.
-
 
 ## [0.26.5] - 2026-06-10
 

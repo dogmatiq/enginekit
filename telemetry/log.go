@@ -54,6 +54,7 @@ func (r *Recorder) log(
 	var rec log.Record
 	rec.SetEventName(event)
 	rec.SetSeverity(severity)
+	rec.SetSeverityText(severity.String())
 	rec.SetBody(attribute.StringValue(message))
 
 	if err != nil {

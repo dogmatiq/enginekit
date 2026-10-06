@@ -50,6 +50,19 @@ func TestSet(t *testing.T) {
 					subject.Clear()
 					clear(expected)
 				},
+				"diff with intersecting set": func(t *rapid.T) {
+					v := xrapid.SampledFromSeq(maps.Keys(expected)).Draw(t, "existing member")
+					other := uuidpb.NewSet(uuidpb.MustParse(v))
+					subject = subject.Diff(other)
+					delete(expected, v)
+				},
+				"diff with disjoint set": func(t *rapid.T) {
+					other := uuidpb.NewSet(uuidpb.Generate())
+					subject = subject.Diff(other)
+				},
+				"diff with nil set": func(t *rapid.T) {
+					subject = subject.Diff(nil)
+				},
 				"": func(t *rapid.T) {
 					if subject.Len() != len(expected) {
 						t.Fatalf("unexpected length: got %d, want %d", subject.Len(), len(expected))
@@ -114,6 +127,58 @@ func TestSet(t *testing.T) {
 
 							if subject.Has(v) {
 								t.Fatalf("adding to cloned set modified the original set")
+							}
+						}
+					}
+
+					// check IsEqual()
+					{
+						if !subject.IsEqual(subject) {
+							t.Fatalf("expected set to be equal to itself")
+						}
+
+						clone := subject.Clone()
+
+						if !clone.IsEqual(subject) {
+							t.Fatalf("expected cloned set to be equal to the original set")
+						}
+					}
+
+					// check Delta()
+					{
+						added := uuidpb.Generate()
+						var shared *uuidpb.UUID
+
+						other := uuidpb.NewSet(added)
+
+						if subject.Len() != 0 {
+							v := xrapid.SampledFromSeq(maps.Keys(expected)).Draw(t, "common member")
+							shared = uuidpb.MustParse(v)
+							other.Add(shared)
+						}
+
+						add, remove := subject.Delta(other)
+
+						if !add.Has(added) {
+							t.Fatalf("expected %q to be in the add set", added)
+						}
+
+						if shared != nil {
+							if add.Has(shared) {
+								t.Fatalf("did not expect %q to be in the add set", shared)
+							}
+
+							if remove.Has(shared) {
+								t.Fatalf("did not expect %q to be in the remove set", shared)
+							}
+						}
+
+						for k := range expected {
+							if k == shared.AsString() {
+								continue
+							}
+							if !remove.Has(uuidpb.MustParse(k)) {
+								t.Fatalf("expected %q to be in the remove set", k)
 							}
 						}
 					}

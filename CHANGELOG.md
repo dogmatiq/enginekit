@@ -13,6 +13,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Added `uuidpb.NewSet()`.
+- Added `uuidpb.Set.Diff()` and `BidirectionalDiff()`.
+
 ### Deprecated
 
 - Deprecated the `collections/constraints`, `collections/maps`, and `collections/sets` packages.

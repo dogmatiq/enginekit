@@ -3,6 +3,8 @@ package uuidpb
 import (
 	"iter"
 	"maps"
+	"slices"
+	"strings"
 )
 
 // Set is a collection of [UUID] values.
@@ -146,4 +148,31 @@ func (s *Set) Clone() *Set {
 	return &Set{
 		m: maps.Clone(s.m),
 	}
+}
+
+// GoString returns a Go-syntax representation of the set.
+func (s *Set) GoString() string {
+	if s == nil {
+		return "(*uuidpb.Set)(nil)"
+	}
+
+	var w strings.Builder
+
+	w.WriteString("uuidpb.NewSet(")
+
+	sorted := slices.SortedFunc(
+		s.All(),
+		(*UUID).Compare,
+	)
+
+	for i, v := range sorted {
+		if i > 0 {
+			w.WriteString(", ")
+		}
+		w.WriteString(v.GoString())
+	}
+
+	w.WriteString(")")
+
+	return w.String()
 }

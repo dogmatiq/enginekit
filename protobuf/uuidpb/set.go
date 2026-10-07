@@ -150,6 +150,33 @@ func (s *Set) Clone() *Set {
 	}
 }
 
+func (s *Set) String() string {
+	var w strings.Builder
+
+	w.WriteString("{")
+
+	sorted := slices.SortedFunc(
+		s.All(),
+		(*UUID).Compare,
+	)
+
+	for i, v := range sorted {
+		if i > 0 {
+			w.WriteString(", ")
+		}
+		w.WriteString(v.AsString())
+	}
+
+	w.WriteString("}")
+
+	return w.String()
+}
+
+// DapperString implements [github.com/dogmatiq/dapper.Stringer].
+func (s *Set) DapperString() string {
+	return s.String()
+}
+
 // GoString returns a Go-syntax representation of the set.
 func (s *Set) GoString() string {
 	if s == nil {

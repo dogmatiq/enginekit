@@ -187,6 +187,19 @@ func TestSet(t *testing.T) {
 		)
 	})
 
+	t.Run("func String()", func(t *testing.T) {
+		v1 := MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c")
+		v2 := MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49")
+
+		subject := uuidpb.NewSet(v1, v2)
+		got := subject.String()
+		want := `{015ab018-80aa-4c31-982c-48e19a4d5a49, e9ba3d40-273f-445b-a2b5-0498beb6953c}`
+
+		if got != want {
+			t.Fatalf("unexpected String() output: got %q, want %q", got, want)
+		}
+	})
+
 	t.Run("func GoString()", func(t *testing.T) {
 		v1 := MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c")
 		v2 := MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49")

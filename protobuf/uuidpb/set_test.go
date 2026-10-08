@@ -64,8 +64,12 @@ func TestSet(t *testing.T) {
 					subject = subject.Diff(nil)
 				},
 				"": func(t *rapid.T) {
-					if subject.Len() != len(expected) {
-						t.Fatalf("unexpected length: got %d, want %d", subject.Len(), len(expected))
+					if got, want := subject.Len(), len(expected); got != want {
+						t.Fatalf("unexpected length: got %d, want %d", got, want)
+					}
+
+					if got, want := subject.IsEmpty(), len(expected) == 0; got != want {
+						t.Fatalf("unexpected IsEmpty() result: got %v, want %v", got, want)
 					}
 
 					want := slices.Sorted(maps.Keys(expected))
@@ -142,6 +146,16 @@ func TestSet(t *testing.T) {
 						if !clone.IsEqual(subject) {
 							t.Fatalf("expected cloned set to be equal to the original set")
 						}
+
+						if subject.IsEmpty() {
+							if !subject.IsEqual(nil) {
+								t.Fatalf("expected empty set to be equal to nil")
+							}
+
+							if !(*Set)(nil).IsEqual(subject) {
+								t.Fatalf("expected nil to be equal to empty set")
+							}
+						}
 					}
 
 					// check Delta()
@@ -151,7 +165,7 @@ func TestSet(t *testing.T) {
 
 						other := uuidpb.NewSet(added)
 
-						if subject.Len() != 0 {
+						if !subject.IsEmpty() {
 							v := xrapid.SampledFromSeq(maps.Keys(expected)).Draw(t, "common member")
 							shared = uuidpb.MustParse(v)
 							other.Add(shared)

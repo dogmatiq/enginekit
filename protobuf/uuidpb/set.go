@@ -74,9 +74,14 @@ func (s *Set) All() iter.Seq[*UUID] {
 
 // IsEqual reports whether the set contains the same members as the given set.
 func (s *Set) IsEqual(x *Set) bool {
-	if s == nil || x == nil {
-		return s == x
+	if s == nil {
+		return x.IsEmpty()
 	}
+
+	if x == nil {
+		return s.IsEmpty()
+	}
+
 	return maps.Equal(s.m, x.m)
 }
 
@@ -130,6 +135,11 @@ func (s *Set) Len() int {
 	}
 
 	return len(s.m)
+}
+
+// IsEmpty returns true if the set contains no members.
+func (s *Set) IsEmpty() bool {
+	return s == nil || len(s.m) == 0
 }
 
 // Clear removes all members from the set.

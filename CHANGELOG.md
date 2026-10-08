@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.27.4] - 2026-10-08
+
+### Added
+
+- Added `uuidpb.Set.IsEmpty()`.
+
+### Fixed
+
+- Fixed issue with `uuidpb.Set.IsEqual()` that treated `nil` and a non-`nil`
+  empty set as inequal.
+
 ## [0.27.3] - 2026-10-07
 
 ### Added
@@ -687,6 +698,7 @@ which itself includes a large numbers of breaking changes.
 [0.27.1]: https://github.com/dogmatiq/enginekit/releases/v0.27.1
 [0.27.2]: https://github.com/dogmatiq/enginekit/releases/v0.27.2
 [0.27.3]: https://github.com/dogmatiq/enginekit/releases/v0.27.3
+[0.27.4]: https://github.com/dogmatiq/enginekit/releases/v0.27.4
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

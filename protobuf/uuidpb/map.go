@@ -95,6 +95,11 @@ func (m *Map[T]) Len() int {
 	return len(m.m)
 }
 
+// IsEmpty returns true if the map contains no elements.
+func (m *Map[T]) IsEmpty() bool {
+	return m == nil || len(m.m) == 0
+}
+
 // Clear removes all elements from the map.
 func (m *Map[T]) Clear() {
 	if m != nil {

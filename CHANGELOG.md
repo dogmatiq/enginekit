@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [0.27.5] - 2026-10-08
+
+### Added
+
+- Added `uuidpb.Map.IsEmpty()`.
+
 ## [0.27.4] - 2026-10-08
 
 ### Added
@@ -699,6 +705,7 @@ which itself includes a large numbers of breaking changes.
 [0.27.2]: https://github.com/dogmatiq/enginekit/releases/v0.27.2
 [0.27.3]: https://github.com/dogmatiq/enginekit/releases/v0.27.3
 [0.27.4]: https://github.com/dogmatiq/enginekit/releases/v0.27.4
+[0.27.5]: https://github.com/dogmatiq/enginekit/releases/v0.27.5
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

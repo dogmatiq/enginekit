@@ -58,6 +58,10 @@ func TestMap(t *testing.T) {
 						t.Fatalf("unexpected length: got %d, want %d", subject.Len(), len(expected))
 					}
 
+					if got, want := subject.IsEmpty(), len(expected) == 0; got != want {
+						t.Fatalf("unexpected IsEmpty() result: got %v, want %v", got, want)
+					}
+
 					wantKeys := slices.Sorted(maps.Keys(expected))
 					wantValues := slices.Sorted(maps.Values(expected))
 

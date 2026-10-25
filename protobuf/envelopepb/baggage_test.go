@@ -158,3 +158,66 @@ func TestGetBaggage(t *testing.T) {
 		})
 	})
 }
+
+func TestMustGetBaggage(t *testing.T) {
+	t.Run("when a matching baggage value is present", func(t *testing.T) {
+		t.Run("it returns the value", func(t *testing.T) {
+			body := NewBodyBuilder().Build()
+			SetBaggage(body, wrapperspb.String("hello"))
+
+			Expect(
+				t,
+				"unexpected baggage value value",
+				MustGetBaggage[*wrapperspb.StringValue](body),
+				wrapperspb.String("hello"),
+			)
+		})
+	})
+
+	t.Run("when no baggage values are present", func(t *testing.T) {
+		t.Run("it panics", func(t *testing.T) {
+			ExpectPanic(
+				t,
+				"baggage value is not present",
+				func() {
+					MustGetBaggage[*wrapperspb.StringValue](NewBodyBuilder().Build())
+				},
+			)
+		})
+	})
+
+	t.Run("when only baggage values of other types are present", func(t *testing.T) {
+		t.Run("it panics", func(t *testing.T) {
+			body := NewBodyBuilder().Build()
+			SetBaggage(body, wrapperspb.Int64(42))
+
+			ExpectPanic(
+				t,
+				"baggage value is not present",
+				func() {
+					MustGetBaggage[*wrapperspb.StringValue](body)
+				},
+			)
+		})
+	})
+
+	t.Run("when the baggage value cannot be unmarshalled", func(t *testing.T) {
+		t.Run("it panics", func(t *testing.T) {
+			body := NewBodyBuilder().Build()
+			body.SetBaggage([]*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/google.protobuf.StringValue",
+					Value:   []byte{0x0a, 0x05}, // truncated string field
+				},
+			})
+
+			defer func() {
+				if recover() == nil {
+					t.Fatal("expected a panic")
+				}
+			}()
+
+			MustGetBaggage[*wrapperspb.StringValue](body)
+		})
+	})
+}

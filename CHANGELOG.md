@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `envelopepb.MustGetExtension()` and `envelopepb.MustGetBaggage()`.
+
 ## [0.27.6] - 2026-10-25
 
 ### Added

@@ -1,6 +1,10 @@
 package envelopepb
 
-import "google.golang.org/protobuf/proto"
+import (
+	"fmt"
+
+	"google.golang.org/protobuf/proto"
+)
 
 // SetBaggage sets x as a baggage value on body. If a baggage value with the
 // same type URL is already present, it is replaced.
@@ -47,4 +51,26 @@ func GetBaggage[
 	}
 
 	return nil, false, nil
+}
+
+// MustGetBaggage returns the baggage value matching T from body's baggage.
+//
+// It panics if no baggage value of the matching type is present, or if it could
+// not be unmarshalled.
+func MustGetBaggage[
+	T interface {
+		*E
+		proto.Message
+	},
+	E any,
+](body *Body) T {
+	x, ok, err := GetBaggage[T](body)
+	if err != nil {
+		panic(fmt.Sprintf("unable to unmarshal baggage value: %s", err))
+	}
+	if !ok {
+		panic("baggage value is not present")
+	}
+
+	return x
 }

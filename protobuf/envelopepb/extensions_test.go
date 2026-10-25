@@ -160,6 +160,69 @@ func TestGetExtension(t *testing.T) {
 	})
 }
 
+func TestMustGetExtension(t *testing.T) {
+	t.Run("when a matching extension is present", func(t *testing.T) {
+		t.Run("it returns the value", func(t *testing.T) {
+			body := NewBodyBuilder().Build()
+			SetExtension(body, wrapperspb.String("hello"))
+
+			Expect(
+				t,
+				"unexpected extension value",
+				MustGetExtension[*wrapperspb.StringValue](body),
+				wrapperspb.String("hello"),
+			)
+		})
+	})
+
+	t.Run("when no extensions are present", func(t *testing.T) {
+		t.Run("it panics", func(t *testing.T) {
+			ExpectPanic(
+				t,
+				"extension is not present",
+				func() {
+					MustGetExtension[*wrapperspb.StringValue](NewBodyBuilder().Build())
+				},
+			)
+		})
+	})
+
+	t.Run("when only extensions of other types are present", func(t *testing.T) {
+		t.Run("it panics", func(t *testing.T) {
+			body := NewBodyBuilder().Build()
+			SetExtension(body, wrapperspb.Int64(42))
+
+			ExpectPanic(
+				t,
+				"extension is not present",
+				func() {
+					MustGetExtension[*wrapperspb.StringValue](body)
+				},
+			)
+		})
+	})
+
+	t.Run("when the extension cannot be unmarshalled", func(t *testing.T) {
+		t.Run("it panics", func(t *testing.T) {
+			body := NewBodyBuilder().Build()
+			body.SetExtensions([]*anypb.Any{
+				{
+					TypeUrl: "type.googleapis.com/google.protobuf.StringValue",
+					Value:   []byte{0x0a, 0x05}, // truncated string field
+				},
+			})
+
+			defer func() {
+				if recover() == nil {
+					t.Fatal("expected a panic")
+				}
+			}()
+
+			MustGetExtension[*wrapperspb.StringValue](body)
+		})
+	})
+}
+
 func TestEventStreamPosition(t *testing.T) {
 	t.Run("when wrapped in anypb.Any", func(t *testing.T) {
 		t.Run("it has a stable, fully-qualified type URL", func(t *testing.T) {

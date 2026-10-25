@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
-## [Unreleased]
+## [0.27.7] - 2026-10-25
 
 ### Added
 
@@ -719,6 +719,7 @@ which itself includes a large numbers of breaking changes.
 [0.27.4]: https://github.com/dogmatiq/enginekit/releases/v0.27.4
 [0.27.5]: https://github.com/dogmatiq/enginekit/releases/v0.27.5
 [0.27.6]: https://github.com/dogmatiq/enginekit/releases/v0.27.6
+[0.27.7]: https://github.com/dogmatiq/enginekit/releases/v0.27.7
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

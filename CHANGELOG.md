@@ -11,6 +11,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `xsync.Signal`.
+
 ## [0.27.5] - 2026-10-08
 
 ### Added

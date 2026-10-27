@@ -11,6 +11,19 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Changed
+
+- **[BC]** `envelopepb.GetExtension()`, `MustGetExtension()`, `GetBaggage()`
+  and `MustGetBaggage()` now accept an `*Envelope` instead of a `*Body`.
+
+### Fixed
+
+- `envelopepb.GetExtension()` and `GetBaggage()` now find values that are
+  present in the envelope's header, such as those shared by every message in a
+  `MultiEnvelope`. Values in the body still take precedence.
+
 ## [0.27.7] - 2026-10-25
 
 ### Added

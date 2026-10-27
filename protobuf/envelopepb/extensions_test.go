@@ -89,10 +89,10 @@ func TestSetExtension(t *testing.T) {
 func TestGetExtension(t *testing.T) {
 	t.Run("when a matching extension is present", func(t *testing.T) {
 		t.Run("it returns the value and true", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetExtension(body, wrapperspb.String("hello"))
+			env := newEmptyEnvelope()
+			SetExtension(env.GetBody(), wrapperspb.String("hello"))
 
-			got, ok, err := GetExtension[*wrapperspb.StringValue](body)
+			got, ok, err := GetExtension[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -109,11 +109,81 @@ func TestGetExtension(t *testing.T) {
 		})
 	})
 
+	t.Run("when a matching extension is present in the header", func(t *testing.T) {
+		t.Run("it returns the value and true", func(t *testing.T) {
+			env := newEmptyEnvelope()
+			env.GetHeader().SetExtensions([]*anypb.Any{
+				mustMarshalAny(t, wrapperspb.String("hello")),
+			})
+
+			got, ok, err := GetExtension[*wrapperspb.StringValue](env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !ok {
+				t.Fatal("expected to find a matching extension")
+			}
+
+			Expect(
+				t,
+				"unexpected extension value",
+				got,
+				wrapperspb.String("hello"),
+			)
+		})
+	})
+
+	t.Run("when a matching extension is present in both the header and the body", func(t *testing.T) {
+		t.Run("it returns the value from the body", func(t *testing.T) {
+			env := newEmptyEnvelope()
+			env.GetHeader().SetExtensions([]*anypb.Any{
+				mustMarshalAny(t, wrapperspb.String("header")),
+			})
+			SetExtension(env.GetBody(), wrapperspb.String("body"))
+
+			got, ok, err := GetExtension[*wrapperspb.StringValue](env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !ok {
+				t.Fatal("expected to find a matching extension")
+			}
+
+			Expect(
+				t,
+				"unexpected extension value",
+				got,
+				wrapperspb.String("body"),
+			)
+		})
+	})
+
+	t.Run("when the envelope was obtained from a multi-envelope", func(t *testing.T) {
+		t.Run("it returns values from the shared header", func(t *testing.T) {
+			multi := NewMultiEnvelopeBuilder().
+				WithHeader(NewHeaderBuilder().Build()).
+				Build()
+			multi.GetHeader().SetExtensions([]*anypb.Any{
+				mustMarshalAny(t, wrapperspb.String("shared")),
+			})
+			multi.AppendBodies(NewBodyBuilder().Build())
+
+			for env := range multi.All() {
+				Expect(
+					t,
+					"unexpected extension value",
+					MustGetExtension[*wrapperspb.StringValue](env),
+					wrapperspb.String("shared"),
+				)
+			}
+		})
+	})
+
 	t.Run("when no extensions are present", func(t *testing.T) {
 		t.Run("it returns false", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
+			env := newEmptyEnvelope()
 
-			got, ok, err := GetExtension[*wrapperspb.StringValue](body)
+			got, ok, err := GetExtension[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -128,10 +198,10 @@ func TestGetExtension(t *testing.T) {
 
 	t.Run("when only extensions of other types are present", func(t *testing.T) {
 		t.Run("it returns false", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetExtension(body, wrapperspb.Int64(42))
+			env := newEmptyEnvelope()
+			SetExtension(env.GetBody(), wrapperspb.Int64(42))
 
-			got, ok, err := GetExtension[*wrapperspb.StringValue](body)
+			got, ok, err := GetExtension[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -146,10 +216,10 @@ func TestGetExtension(t *testing.T) {
 
 	t.Run("when a value of the requested type has been set as baggage", func(t *testing.T) {
 		t.Run("it returns false (baggage and extensions are distinct)", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetBaggage(body, wrapperspb.String("hello"))
+			env := newEmptyEnvelope()
+			SetBaggage(env.GetBody(), wrapperspb.String("hello"))
 
-			_, ok, err := GetExtension[*wrapperspb.StringValue](body)
+			_, ok, err := GetExtension[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -163,13 +233,13 @@ func TestGetExtension(t *testing.T) {
 func TestMustGetExtension(t *testing.T) {
 	t.Run("when a matching extension is present", func(t *testing.T) {
 		t.Run("it returns the value", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetExtension(body, wrapperspb.String("hello"))
+			env := newEmptyEnvelope()
+			SetExtension(env.GetBody(), wrapperspb.String("hello"))
 
 			Expect(
 				t,
 				"unexpected extension value",
-				MustGetExtension[*wrapperspb.StringValue](body),
+				MustGetExtension[*wrapperspb.StringValue](env),
 				wrapperspb.String("hello"),
 			)
 		})
@@ -181,7 +251,7 @@ func TestMustGetExtension(t *testing.T) {
 				t,
 				"extension is not present",
 				func() {
-					MustGetExtension[*wrapperspb.StringValue](NewBodyBuilder().Build())
+					MustGetExtension[*wrapperspb.StringValue](newEmptyEnvelope())
 				},
 			)
 		})
@@ -189,14 +259,14 @@ func TestMustGetExtension(t *testing.T) {
 
 	t.Run("when only extensions of other types are present", func(t *testing.T) {
 		t.Run("it panics", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetExtension(body, wrapperspb.Int64(42))
+			env := newEmptyEnvelope()
+			SetExtension(env.GetBody(), wrapperspb.Int64(42))
 
 			ExpectPanic(
 				t,
 				"extension is not present",
 				func() {
-					MustGetExtension[*wrapperspb.StringValue](body)
+					MustGetExtension[*wrapperspb.StringValue](env)
 				},
 			)
 		})
@@ -204,8 +274,8 @@ func TestMustGetExtension(t *testing.T) {
 
 	t.Run("when the extension cannot be unmarshalled", func(t *testing.T) {
 		t.Run("it panics", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			body.SetExtensions([]*anypb.Any{
+			env := newEmptyEnvelope()
+			env.GetBody().SetExtensions([]*anypb.Any{
 				{
 					TypeUrl: "type.googleapis.com/google.protobuf.StringValue",
 					Value:   []byte{0x0a, 0x05}, // truncated string field
@@ -218,7 +288,7 @@ func TestMustGetExtension(t *testing.T) {
 				}
 			}()
 
-			MustGetExtension[*wrapperspb.StringValue](body)
+			MustGetExtension[*wrapperspb.StringValue](env)
 		})
 	})
 }
@@ -245,10 +315,10 @@ func TestEventStreamPosition(t *testing.T) {
 				WithOffset(42).
 				Build()
 
-			body := NewBodyBuilder().Build()
-			SetExtension(body, want)
+			env := newEmptyEnvelope()
+			SetExtension(env.GetBody(), want)
 
-			got, ok, err := GetExtension[*EventStreamPosition](body)
+			got, ok, err := GetExtension[*EventStreamPosition](env)
 			if err != nil {
 				t.Fatal(err)
 			}

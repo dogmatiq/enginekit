@@ -29,7 +29,9 @@ func SetExtension[
 	)
 }
 
-// GetExtension returns the extension matching T from body's extensions.
+// GetExtension returns the extension matching T from env's extensions.
+//
+// Values in the envelope's body take precedence over those in its header.
 //
 // The second return value reports whether an extension of the matching type
 // was present. The third return value is non-nil if the extension was present
@@ -40,20 +42,14 @@ func GetExtension[
 		proto.Message
 	},
 	E any,
-](body *Body) (T, bool, error) {
-	var out T
-
-	for _, ext := range body.GetExtensions() {
-		if ext.MessageIs(out) {
-			out = new(E)
-			return out, true, ext.UnmarshalTo(out)
-		}
-	}
-
-	return nil, false, nil
+](env *Envelope) (T, bool, error) {
+	return findAnyValue[T](
+		env.GetBody().GetExtensions(),
+		env.GetHeader().GetExtensions(),
+	)
 }
 
-// MustGetExtension returns the extension matching T from body's extensions.
+// MustGetExtension returns the extension matching T from env's extensions.
 //
 // It panics if no extension of the matching type is present, or if it could not be
 // unmarshalled.
@@ -63,8 +59,8 @@ func MustGetExtension[
 		proto.Message
 	},
 	E any,
-](body *Body) T {
-	x, ok, err := GetExtension[T](body)
+](env *Envelope) T {
+	x, ok, err := GetExtension[T](env)
 	if err != nil {
 		panic(fmt.Sprintf("unable to unmarshal extension: %s", err))
 	}

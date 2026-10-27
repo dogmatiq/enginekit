@@ -10,6 +10,7 @@ import (
 	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
 	identitypb "github.com/dogmatiq/enginekit/protobuf/identitypb"
 	uuidpb "github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	"google.golang.org/protobuf/proto"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -527,4 +528,24 @@ func newEnvelope(modifiers ...func(*Envelope)) *envelopepb.Envelope {
 	}
 
 	return env
+}
+
+// newEmptyEnvelope returns an envelope with an empty header and body.
+func newEmptyEnvelope() *Envelope {
+	return NewEnvelopeBuilder().
+		WithHeader(NewHeaderBuilder().Build()).
+		WithBody(NewBodyBuilder().Build()).
+		Build()
+}
+
+// mustMarshalAny returns m wrapped in an [anypb.Any].
+func mustMarshalAny(t testing.TB, m proto.Message) *anypb.Any {
+	t.Helper()
+
+	a, err := anypb.New(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return a
 }

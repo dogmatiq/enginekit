@@ -88,10 +88,10 @@ func TestSetBaggage(t *testing.T) {
 func TestGetBaggage(t *testing.T) {
 	t.Run("when a matching baggage value is present", func(t *testing.T) {
 		t.Run("it returns the value and true", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetBaggage(body, wrapperspb.String("hello"))
+			env := newEmptyEnvelope()
+			SetBaggage(env.GetBody(), wrapperspb.String("hello"))
 
-			got, ok, err := GetBaggage[*wrapperspb.StringValue](body)
+			got, ok, err := GetBaggage[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -108,11 +108,60 @@ func TestGetBaggage(t *testing.T) {
 		})
 	})
 
+	t.Run("when a matching baggage value is present in the header", func(t *testing.T) {
+		t.Run("it returns the value and true", func(t *testing.T) {
+			env := newEmptyEnvelope()
+			env.GetHeader().SetBaggage([]*anypb.Any{
+				mustMarshalAny(t, wrapperspb.String("hello")),
+			})
+
+			got, ok, err := GetBaggage[*wrapperspb.StringValue](env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !ok {
+				t.Fatal("expected to find a matching baggage value")
+			}
+
+			Expect(
+				t,
+				"unexpected baggage value",
+				got,
+				wrapperspb.String("hello"),
+			)
+		})
+	})
+
+	t.Run("when a matching baggage value is present in both the header and the body", func(t *testing.T) {
+		t.Run("it returns the value from the body", func(t *testing.T) {
+			env := newEmptyEnvelope()
+			env.GetHeader().SetBaggage([]*anypb.Any{
+				mustMarshalAny(t, wrapperspb.String("header")),
+			})
+			SetBaggage(env.GetBody(), wrapperspb.String("body"))
+
+			got, ok, err := GetBaggage[*wrapperspb.StringValue](env)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !ok {
+				t.Fatal("expected to find a matching baggage value")
+			}
+
+			Expect(
+				t,
+				"unexpected baggage value",
+				got,
+				wrapperspb.String("body"),
+			)
+		})
+	})
+
 	t.Run("when no baggage values are present", func(t *testing.T) {
 		t.Run("it returns false", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
+			env := newEmptyEnvelope()
 
-			got, ok, err := GetBaggage[*wrapperspb.StringValue](body)
+			got, ok, err := GetBaggage[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -127,10 +176,10 @@ func TestGetBaggage(t *testing.T) {
 
 	t.Run("when only baggage values of other types are present", func(t *testing.T) {
 		t.Run("it returns false", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetBaggage(body, wrapperspb.Int64(42))
+			env := newEmptyEnvelope()
+			SetBaggage(env.GetBody(), wrapperspb.Int64(42))
 
-			got, ok, err := GetBaggage[*wrapperspb.StringValue](body)
+			got, ok, err := GetBaggage[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -145,10 +194,10 @@ func TestGetBaggage(t *testing.T) {
 
 	t.Run("when a value of the requested type has been set as an extension", func(t *testing.T) {
 		t.Run("it returns false (baggage and extensions are distinct)", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetExtension(body, wrapperspb.String("hello"))
+			env := newEmptyEnvelope()
+			SetExtension(env.GetBody(), wrapperspb.String("hello"))
 
-			_, ok, err := GetBaggage[*wrapperspb.StringValue](body)
+			_, ok, err := GetBaggage[*wrapperspb.StringValue](env)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -162,13 +211,13 @@ func TestGetBaggage(t *testing.T) {
 func TestMustGetBaggage(t *testing.T) {
 	t.Run("when a matching baggage value is present", func(t *testing.T) {
 		t.Run("it returns the value", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetBaggage(body, wrapperspb.String("hello"))
+			env := newEmptyEnvelope()
+			SetBaggage(env.GetBody(), wrapperspb.String("hello"))
 
 			Expect(
 				t,
 				"unexpected baggage value value",
-				MustGetBaggage[*wrapperspb.StringValue](body),
+				MustGetBaggage[*wrapperspb.StringValue](env),
 				wrapperspb.String("hello"),
 			)
 		})
@@ -180,7 +229,7 @@ func TestMustGetBaggage(t *testing.T) {
 				t,
 				"baggage value is not present",
 				func() {
-					MustGetBaggage[*wrapperspb.StringValue](NewBodyBuilder().Build())
+					MustGetBaggage[*wrapperspb.StringValue](newEmptyEnvelope())
 				},
 			)
 		})
@@ -188,14 +237,14 @@ func TestMustGetBaggage(t *testing.T) {
 
 	t.Run("when only baggage values of other types are present", func(t *testing.T) {
 		t.Run("it panics", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			SetBaggage(body, wrapperspb.Int64(42))
+			env := newEmptyEnvelope()
+			SetBaggage(env.GetBody(), wrapperspb.Int64(42))
 
 			ExpectPanic(
 				t,
 				"baggage value is not present",
 				func() {
-					MustGetBaggage[*wrapperspb.StringValue](body)
+					MustGetBaggage[*wrapperspb.StringValue](env)
 				},
 			)
 		})
@@ -203,8 +252,8 @@ func TestMustGetBaggage(t *testing.T) {
 
 	t.Run("when the baggage value cannot be unmarshalled", func(t *testing.T) {
 		t.Run("it panics", func(t *testing.T) {
-			body := NewBodyBuilder().Build()
-			body.SetBaggage([]*anypb.Any{
+			env := newEmptyEnvelope()
+			env.GetBody().SetBaggage([]*anypb.Any{
 				{
 					TypeUrl: "type.googleapis.com/google.protobuf.StringValue",
 					Value:   []byte{0x0a, 0x05}, // truncated string field
@@ -217,7 +266,7 @@ func TestMustGetBaggage(t *testing.T) {
 				}
 			}()
 
-			MustGetBaggage[*wrapperspb.StringValue](body)
+			MustGetBaggage[*wrapperspb.StringValue](env)
 		})
 	})
 }

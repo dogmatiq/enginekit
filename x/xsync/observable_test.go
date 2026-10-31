@@ -104,13 +104,13 @@ func TestObservable(t *testing.T) {
 	})
 }
 
-func TestStoreIfChanged(t *testing.T) {
-	t.Run("it stores a changed value and notifies readers", func(t *testing.T) {
+func TestChangeObservable(t *testing.T) {
+	t.Run("it changes the value and notifies readers", func(t *testing.T) {
 		var value Observable[int]
 		_, changed := value.Load()
 
-		if !StoreIfChanged(&value, 1) {
-			t.Fatal("expected the value to be stored")
+		if !ChangeObservable(&value, 1) {
+			t.Fatal("expected the value to be changed")
 		}
 
 		select {
@@ -130,8 +130,8 @@ func TestStoreIfChanged(t *testing.T) {
 
 		_, changed := value.Load()
 
-		if StoreIfChanged(&value, 1) {
-			t.Fatal("expected the value not to be stored")
+		if ChangeObservable(&value, 1) {
+			t.Fatal("expected the value not to be changed")
 		}
 
 		select {
@@ -145,8 +145,8 @@ func TestStoreIfChanged(t *testing.T) {
 		var value Observable[int]
 		_, changed := value.Load()
 
-		if StoreIfChanged(&value, 0) {
-			t.Fatal("expected the value not to be stored")
+		if ChangeObservable(&value, 0) {
+			t.Fatal("expected the value not to be changed")
 		}
 
 		select {
@@ -156,19 +156,19 @@ func TestStoreIfChanged(t *testing.T) {
 		}
 	})
 
-	t.Run("it stores only changed values with multiple writers", func(t *testing.T) {
+	t.Run("it changes the value only when it differs, with multiple writers", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
 			var (
 				value   Observable[bool]
-				stores  atomic.Int64
+				changes atomic.Int64
 				writers sync.WaitGroup
 			)
 
 			for range 3 {
 				writers.Go(func() {
 					for range 100 {
-						if StoreIfChanged(&value, rand.N(2) == 1) {
-							stores.Add(1)
+						if ChangeObservable(&value, rand.N(2) == 1) {
+							changes.Add(1)
 						}
 					}
 				})
@@ -176,13 +176,13 @@ func TestStoreIfChanged(t *testing.T) {
 
 			writers.Wait()
 
-			// Each store that reports a change flips the value, so the final
+			// Each call that reports a change flips the value, so the final
 			// value is true if and only if there was an odd number of them.
 			got, _ := value.Load()
-			want := stores.Load()%2 == 1
+			want := changes.Load()%2 == 1
 
 			if got != want {
-				t.Fatalf("unexpected final value after %d changes: got %t, want %t", stores.Load(), got, want)
+				t.Fatalf("unexpected final value after %d changes: got %t, want %t", changes.Load(), got, want)
 			}
 		})
 	})

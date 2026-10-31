@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Added
 
-- Added `xsync.StoreIfChanged()`, which updates an `Observable` only if the
+- Added `xsync.ChangeObservable()`, which updates an `Observable` only if the
   new value differs from its current value, so that readers are not notified
   when nothing has changed.
 

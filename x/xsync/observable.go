@@ -47,12 +47,12 @@ retry:
 	}
 }
 
-// StoreIfChanged updates the value of o to v, unless v is already its current
+// ChangeObservable changes the value of o to v, unless v is already its current
 // value.
 //
-// It returns true if the value was updated, in which case the channel returned
+// It returns true if the value was changed, in which case the channel returned
 // by any prior call to [Observable.Load] is closed.
-func StoreIfChanged[T comparable](o *Observable[T], v T) bool {
+func ChangeObservable[T comparable](o *Observable[T], v T) bool {
 	var next *observableState[T]
 
 	for {

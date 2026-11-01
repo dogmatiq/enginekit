@@ -468,7 +468,7 @@ func asHex(upper, lower uint64) [36]byte {
 	source := &upper
 	shift := 60
 
-	for index := 0; index < 36; index++ {
+	for index := range 36 {
 		switch index {
 		case 18:
 			source = &lower

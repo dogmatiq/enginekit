@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ### Changed
 
+- **[BC]** Update minimum Go version to v1.27.
 - **[BC]** `envelopepb.GetExtension()`, `MustGetExtension()`, `GetBaggage()`
   and `MustGetBaggage()` now accept an `*Envelope` instead of a `*Body`.
 

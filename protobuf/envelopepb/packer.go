@@ -3,6 +3,7 @@ package envelopepb
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"time"
 
 	"github.com/dogmatiq/dogma"
@@ -319,8 +320,7 @@ func flattenAnyValues(header, body []*anypb.Any) []*anypb.Any {
 	}
 
 	appendLastWins := func(values []*anypb.Any) {
-		for idx := len(values) - 1; idx >= 0; idx-- {
-			v := values[idx]
+		for _, v := range slices.Backward(values) {
 			if !isSeen(v) {
 				start--
 				result[start] = v

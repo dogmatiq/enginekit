@@ -55,7 +55,7 @@ func Binary(k string, v []byte) Attr {
 // Type returns a string attribute set to the name of T.
 func Type[T any](k string, v T) Attr {
 	t := reflect.TypeOf(v)
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	return String(k, t.String())

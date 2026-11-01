@@ -47,6 +47,43 @@ retry:
 	}
 }
 
+// ChangeObservable changes the value of o to v, unless v is already its current
+// value.
+//
+// It returns true if the value was changed, in which case the channel returned
+// by any prior call to [Observable.Load] is closed.
+func ChangeObservable[T comparable](o *Observable[T], v T) bool {
+	var next *observableState[T]
+
+	for {
+		prev := o.state.Load()
+
+		var current T
+		if prev != nil {
+			current = prev.value
+		}
+
+		if current == v {
+			return false
+		}
+
+		if next == nil {
+			next = &observableState[T]{
+				value:    v,
+				replaced: make(chan struct{}),
+			}
+		}
+
+		if o.state.CompareAndSwap(prev, next) {
+			if prev != nil {
+				close(prev.replaced)
+			}
+
+			return true
+		}
+	}
+}
+
 type observableState[T any] struct {
 	value    T
 	replaced chan struct{}

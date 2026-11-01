@@ -13,6 +13,12 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+### Added
+
+- Added `xsync.ChangeObservable()`, which updates an `Observable` only if the
+  new value differs from its current value, so that readers are not notified
+  when nothing has changed.
+
 ### Changed
 
 - **[BC]** Update minimum Go version to v1.27.

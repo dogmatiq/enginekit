@@ -5,6 +5,7 @@ import (
 	"math/rand/v2"
 	"slices"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"testing/synctest"
 
@@ -98,6 +99,90 @@ func TestObservable(t *testing.T) {
 				case <-done:
 					return
 				}
+			}
+		})
+	})
+}
+
+func TestChangeObservable(t *testing.T) {
+	t.Run("it changes the value and notifies readers", func(t *testing.T) {
+		var value Observable[int]
+		_, changed := value.Load()
+
+		if !ChangeObservable(&value, 1) {
+			t.Fatal("expected the value to be changed")
+		}
+
+		select {
+		case <-changed:
+		default:
+			t.Fatal("expected readers to be notified")
+		}
+
+		if v, _ := value.Load(); v != 1 {
+			t.Fatalf("unexpected value: got %d, want 1", v)
+		}
+	})
+
+	t.Run("it does not notify readers when the value is unchanged", func(t *testing.T) {
+		var value Observable[int]
+		value.Store(1)
+
+		_, changed := value.Load()
+
+		if ChangeObservable(&value, 1) {
+			t.Fatal("expected the value not to be changed")
+		}
+
+		select {
+		case <-changed:
+			t.Fatal("expected readers not to be notified")
+		default:
+		}
+	})
+
+	t.Run("it treats the zero value as the initial value", func(t *testing.T) {
+		var value Observable[int]
+		_, changed := value.Load()
+
+		if ChangeObservable(&value, 0) {
+			t.Fatal("expected the value not to be changed")
+		}
+
+		select {
+		case <-changed:
+			t.Fatal("expected readers not to be notified")
+		default:
+		}
+	})
+
+	t.Run("it changes the value only when it differs, with multiple writers", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			var (
+				value   Observable[bool]
+				changes atomic.Int64
+				writers sync.WaitGroup
+			)
+
+			for range 3 {
+				writers.Go(func() {
+					for range 100 {
+						if ChangeObservable(&value, rand.N(2) == 1) {
+							changes.Add(1)
+						}
+					}
+				})
+			}
+
+			writers.Wait()
+
+			// Each call that reports a change flips the value, so the final
+			// value is true if and only if there was an odd number of them.
+			got, _ := value.Load()
+			want := changes.Load()%2 == 1
+
+			if got != want {
+				t.Fatalf("unexpected final value after %d changes: got %t, want %t", changes.Load(), got, want)
 			}
 		})
 	})

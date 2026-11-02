@@ -70,12 +70,8 @@ func (p *Packer) PackEffects(
 		opt.applyPackEffectsOption(header)
 	}
 
-	// A multi-envelope with no bodies validates only the header.
-	if err := envelopepb.NewMultiEnvelopeBuilder().
-		WithHeader(header).
-		Build().
-		Validate(); err != nil {
-		panic(err)
+	if err := header.Validate(); err != nil {
+		panic(fmt.Errorf("invalid header: %w", err))
 	}
 
 	return &EffectPacker{
@@ -144,13 +140,8 @@ func packEffectBody[T any](
 		body.SetCreatedAt(p.now())
 	}
 
-	env := envelopepb.NewEnvelopeBuilder().
-		WithHeader(p.header).
-		WithBody(body).
-		Build()
-
-	if err := env.Validate(); err != nil {
-		panic(err)
+	if err := body.Validate(p.header); err != nil {
+		panic(fmt.Errorf("invalid body: %w", err))
 	}
 
 	p.bodies = append(p.bodies, body)

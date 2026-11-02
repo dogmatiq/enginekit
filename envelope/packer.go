@@ -1,7 +1,6 @@
 package envelope
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"slices"
@@ -113,7 +112,7 @@ func Unpack[T dogma.Message](env *envelopepb.Envelope) (T, error) {
 
 	message := env.GetBody().GetMessage()
 
-	if err := validateMessage(message); err != nil {
+	if err := message.Validate(); err != nil {
 		return zero, fmt.Errorf(
 			"unable to unpack envelope as %s: %w",
 			reflect.TypeFor[T](),
@@ -152,23 +151,6 @@ func Unpack[T dogma.Message](env *envelopepb.Envelope) (T, error) {
 	}
 
 	return v, nil
-}
-
-// validateMessage returns an error if m is not well-formed.
-func validateMessage(m *envelopepb.Message) error {
-	if m == nil {
-		return errors.New("must not be nil")
-	}
-
-	if err := m.GetTypeId().Validate(); err != nil {
-		return fmt.Errorf("invalid type ID (%s): %w", m.GetTypeId(), err)
-	}
-
-	if m.GetDescription() == "" {
-		return errors.New("invalid description: must not be empty")
-	}
-
-	return nil
 }
 
 // now returns the current time.
@@ -285,14 +267,14 @@ func WithExtension(x proto.Message) interface {
 	PackEffectEventOption
 	PackEffectDeadlineOption
 } {
-	v := marshalAsAny(x)
+	v := packAsAny(x)
 
 	return universalOption{
 		applyToBodyFunc: func(body *envelopepb.Body) {
-			body.SetExtensions(appendOrReplace(body.GetExtensions(), v))
+			envelopepb.SetExtension(body, v)
 		},
 		applyToHeaderFunc: func(header *envelopepb.Header) {
-			header.SetExtensions(appendOrReplace(header.GetExtensions(), v))
+			envelopepb.SetExtension(header, v)
 		},
 	}
 }
@@ -308,14 +290,14 @@ func WithBaggage(x proto.Message) interface {
 	PackEffectEventOption
 	PackEffectDeadlineOption
 } {
-	v := marshalAsAny(x)
+	v := packAsAny(x)
 
 	return universalOption{
 		applyToBodyFunc: func(body *envelopepb.Body) {
-			body.SetBaggage(appendOrReplace(body.GetBaggage(), v))
+			envelopepb.SetBaggage(body, v)
 		},
 		applyToHeaderFunc: func(header *envelopepb.Header) {
-			header.SetBaggage(appendOrReplace(header.GetBaggage(), v))
+			envelopepb.SetBaggage(header, v)
 		},
 	}
 }

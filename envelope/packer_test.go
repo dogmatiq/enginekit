@@ -303,18 +303,25 @@ func TestWithExtension(t *testing.T) {
 				WithExtension(nil)
 			},
 		)
-	})
 
-	t.Run("it panics if x is an empty any", func(t *testing.T) {
 		ExpectPanic(
 			t,
-			"value must not be an empty google.protobuf.Any",
+			"value must not be nil",
 			func() {
-				var x *anypb.Any
-				WithExtension(x)
+				WithExtension((*anypb.Any)(nil))
 			},
 		)
 
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithExtension((*wrapperspb.StringValue)(nil))
+			},
+		)
+	})
+
+	t.Run("it panics if x is an empty any", func(t *testing.T) {
 		ExpectPanic(
 			t,
 			"value must not be an empty google.protobuf.Any",
@@ -334,38 +341,6 @@ func TestWithExtension(t *testing.T) {
 		}
 
 		got := packer.PackCommand(CommandA1, WithExtension(wrapperspb.String("")))
-
-		if len(got.GetBody().GetExtensions()) != 1 {
-			t.Fatalf("unexpected extension count: got %d, want 1", len(got.GetBody().GetExtensions()))
-		}
-
-		if got.GetBody().GetExtensions()[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
-			t.Fatalf(
-				"unexpected extension type URL: got %q, want %q",
-				got.GetBody().GetExtensions()[0].GetTypeUrl(),
-				"type.googleapis.com/google.protobuf.StringValue",
-			)
-		}
-
-		if len(got.GetBody().GetExtensions()[0].GetValue()) != 0 {
-			t.Fatalf(
-				"unexpected extension payload length: got %d, want 0",
-				len(got.GetBody().GetExtensions()[0].GetValue()),
-			)
-		}
-	})
-
-	t.Run("it accepts typed nil messages", func(t *testing.T) {
-		packer := &Packer{
-			Application: identitypb.
-				NewIdentityBuilder().
-				WithName("app").
-				WithKey(uuidpb.Generate()).
-				Build(),
-		}
-
-		var value *wrapperspb.StringValue
-		got := packer.PackCommand(CommandA1, WithExtension(value))
 
 		if len(got.GetBody().GetExtensions()) != 1 {
 			t.Fatalf("unexpected extension count: got %d, want 1", len(got.GetBody().GetExtensions()))
@@ -486,6 +461,22 @@ func TestWithBaggage(t *testing.T) {
 			"value must not be nil",
 			func() {
 				WithBaggage(nil)
+			},
+		)
+
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithBaggage((*anypb.Any)(nil))
+			},
+		)
+
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithBaggage((*wrapperspb.StringValue)(nil))
 			},
 		)
 	})

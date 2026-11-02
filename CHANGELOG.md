@@ -30,6 +30,12 @@ binary encoding is unchanged.
 - Added the `uuidcollection` package, which contains `Map`, `Set` and
   `NewSet()` previously in `uuidpb`.
 
+### Changed
+
+- **[BC]** `envelope.WithExtension()` and `WithBaggage()` now panic if the
+  value is a nil pointer, such as `(*wrapperspb.StringValue)(nil)`. Previously,
+  it was packed as an empty message.
+
 ### Removed
 
 - **[BC]** Removed the `protobuf/uuidpb`, `protobuf/identitypb` and

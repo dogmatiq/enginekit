@@ -267,14 +267,12 @@ func WithExtension(x proto.Message) interface {
 	PackEffectEventOption
 	PackEffectDeadlineOption
 } {
-	v := packAsAny(x)
-
 	return universalOption{
 		applyToBodyFunc: func(body *envelopepb.Body) {
-			envelopepb.SetExtension(body, v)
+			envelopepb.SetExtension(body, x)
 		},
 		applyToHeaderFunc: func(header *envelopepb.Header) {
-			envelopepb.SetExtension(header, v)
+			envelopepb.SetExtension(header, x)
 		},
 	}
 }
@@ -290,14 +288,12 @@ func WithBaggage(x proto.Message) interface {
 	PackEffectEventOption
 	PackEffectDeadlineOption
 } {
-	v := packAsAny(x)
-
 	return universalOption{
 		applyToBodyFunc: func(body *envelopepb.Body) {
-			envelopepb.SetBaggage(body, v)
+			envelopepb.SetBaggage(body, x)
 		},
 		applyToHeaderFunc: func(header *envelopepb.Header) {
-			envelopepb.SetBaggage(header, v)
+			envelopepb.SetBaggage(header, x)
 		},
 	}
 }

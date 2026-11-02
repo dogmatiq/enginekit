@@ -295,12 +295,20 @@ func TestWithIdempotencyKey(t *testing.T) {
 }
 
 func TestWithExtension(t *testing.T) {
+	packer := &Packer{
+		Application: identitypb.
+			NewIdentityBuilder().
+			WithName("app").
+			WithKey(uuidpb.Generate()).
+			Build(),
+	}
+
 	t.Run("it panics if x is nil", func(t *testing.T) {
 		ExpectPanic(
 			t,
 			"value must not be nil",
 			func() {
-				WithExtension(nil)
+				packer.PackCommand(CommandA1, WithExtension(nil))
 			},
 		)
 
@@ -308,7 +316,7 @@ func TestWithExtension(t *testing.T) {
 			t,
 			"value must not be nil",
 			func() {
-				WithExtension((*anypb.Any)(nil))
+				packer.PackCommand(CommandA1, WithExtension((*anypb.Any)(nil)))
 			},
 		)
 
@@ -316,7 +324,7 @@ func TestWithExtension(t *testing.T) {
 			t,
 			"value must not be nil",
 			func() {
-				WithExtension((*wrapperspb.StringValue)(nil))
+				packer.PackCommand(CommandA1, WithExtension((*wrapperspb.StringValue)(nil)))
 			},
 		)
 	})
@@ -326,7 +334,7 @@ func TestWithExtension(t *testing.T) {
 			t,
 			"value must not be an empty google.protobuf.Any",
 			func() {
-				WithExtension(&anypb.Any{})
+				packer.PackCommand(CommandA1, WithExtension(&anypb.Any{}))
 			},
 		)
 	})
@@ -455,12 +463,20 @@ func TestWithExtension(t *testing.T) {
 }
 
 func TestWithBaggage(t *testing.T) {
+	packer := &Packer{
+		Application: identitypb.
+			NewIdentityBuilder().
+			WithName("app").
+			WithKey(uuidpb.Generate()).
+			Build(),
+	}
+
 	t.Run("it panics if x is nil", func(t *testing.T) {
 		ExpectPanic(
 			t,
 			"value must not be nil",
 			func() {
-				WithBaggage(nil)
+				packer.PackCommand(CommandA1, WithBaggage(nil))
 			},
 		)
 
@@ -468,7 +484,7 @@ func TestWithBaggage(t *testing.T) {
 			t,
 			"value must not be nil",
 			func() {
-				WithBaggage((*anypb.Any)(nil))
+				packer.PackCommand(CommandA1, WithBaggage((*anypb.Any)(nil)))
 			},
 		)
 
@@ -476,7 +492,7 @@ func TestWithBaggage(t *testing.T) {
 			t,
 			"value must not be nil",
 			func() {
-				WithBaggage((*wrapperspb.StringValue)(nil))
+				packer.PackCommand(CommandA1, WithBaggage((*wrapperspb.StringValue)(nil)))
 			},
 		)
 	})
@@ -486,7 +502,7 @@ func TestWithBaggage(t *testing.T) {
 			t,
 			"value must not be an empty google.protobuf.Any",
 			func() {
-				WithBaggage(&anypb.Any{})
+				packer.PackCommand(CommandA1, WithBaggage(&anypb.Any{}))
 			},
 		)
 	})

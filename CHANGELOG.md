@@ -35,6 +35,9 @@ binary encoding is unchanged.
 - **[BC]** `envelope.WithExtension()` and `WithBaggage()` now panic if the
   value is a nil pointer, such as `(*wrapperspb.StringValue)(nil)`. Previously,
   it was packed as an empty message.
+- `envelope.WithExtension()` and `WithBaggage()` now report an invalid value
+  when the option is applied by the packer, rather than when the option is
+  created.
 
 ### Removed
 

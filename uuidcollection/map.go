@@ -1,17 +1,19 @@
-package uuidpb
+package uuidcollection
 
 import (
 	"iter"
 	"maps"
+
+	"github.com/dogmatiq/protobuf/uuidpb"
 )
 
-// Map is a map from [UUID] to values of type T.
+// Map is a map from [uuidpb.UUID] to values of type T.
 type Map[T any] struct {
 	m map[key]T
 }
 
 // Get returns the value associated with the given key.
-func (m *Map[T]) Get(k *UUID) (T, bool) {
+func (m *Map[T]) Get(k *uuidpb.UUID) (T, bool) {
 	if m.Len() == 0 {
 		var zero T
 		return zero, false
@@ -22,7 +24,7 @@ func (m *Map[T]) Get(k *UUID) (T, bool) {
 }
 
 // Has reports whether the map contains a value for the given key.
-func (m *Map[T]) Has(k *UUID) bool {
+func (m *Map[T]) Has(k *uuidpb.UUID) bool {
 	if m.Len() == 0 {
 		return false
 	}
@@ -32,7 +34,7 @@ func (m *Map[T]) Has(k *UUID) bool {
 }
 
 // Set sets the value associated with the given key.
-func (m *Map[T]) Set(k *UUID, v T) {
+func (m *Map[T]) Set(k *uuidpb.UUID, v T) {
 	if m.m == nil {
 		m.m = map[key]T{}
 	}
@@ -41,15 +43,15 @@ func (m *Map[T]) Set(k *UUID, v T) {
 }
 
 // Delete removes the value associated with the given key.
-func (m *Map[T]) Delete(k *UUID) {
+func (m *Map[T]) Delete(k *uuidpb.UUID) {
 	if m.Len() != 0 {
 		delete(m.m, asKey(k))
 	}
 }
 
 // All yields all key/value pairs in the map.
-func (m *Map[T]) All() iter.Seq2[*UUID, T] {
-	return func(yield func(*UUID, T) bool) {
+func (m *Map[T]) All() iter.Seq2[*uuidpb.UUID, T] {
+	return func(yield func(*uuidpb.UUID, T) bool) {
 		if m != nil {
 			for k, v := range m.m {
 				if !yield(k.asUUID(), v) {
@@ -61,8 +63,8 @@ func (m *Map[T]) All() iter.Seq2[*UUID, T] {
 }
 
 // Keys yields all keys in the map.
-func (m *Map[T]) Keys() iter.Seq[*UUID] {
-	return func(yield func(*UUID) bool) {
+func (m *Map[T]) Keys() iter.Seq[*uuidpb.UUID] {
+	return func(yield func(*uuidpb.UUID) bool) {
 		if m != nil {
 			for k := range m.m {
 				if !yield(k.asUUID()) {
@@ -122,13 +124,13 @@ func (m *Map[T]) Clone() *Map[T] {
 type key struct{ upper, lower uint64 }
 
 // asKey converts a UUID to a key.
-func asKey(u *UUID) key {
+func asKey(u *uuidpb.UUID) key {
 	return key{u.GetUpper(), u.GetLower()}
 }
 
 // asUUID converts a key back to a UUID.
-func (k key) asUUID() *UUID {
-	return NewUUIDBuilder().
+func (k key) asUUID() *uuidpb.UUID {
+	return uuidpb.NewUUIDBuilder().
 		WithUpper(k.upper).
 		WithLower(k.lower).
 		Build()

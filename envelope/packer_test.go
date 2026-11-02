@@ -1,4 +1,4 @@
-package envelopepb_test
+package envelope_test
 
 import (
 	"fmt"
@@ -7,10 +7,11 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/envelope"
 	. "github.com/dogmatiq/enginekit/internal/test"
-	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	. "github.com/dogmatiq/protobuf/envelopepb"
+	"github.com/dogmatiq/protobuf/identitypb"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -92,7 +93,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		t.Run("it panics if passed an unregistered message", func(t *testing.T) {
 			ExpectPanic(
 				t,
-				"*envelopepb_test.T is not a registered message type",
+				"*envelope_test.T is not a registered message type",
 				func() {
 					type T struct{ dogma.Command }
 					packer.PackCommand(&T{})
@@ -103,7 +104,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		t.Run("it panics if the message cannot be marshaled", func(t *testing.T) {
 			ExpectPanic(
 				t,
-				"unable to marshal *envelopepb_test.T: json: unsupported type: func()",
+				"unable to marshal *envelope_test.T: json: unsupported type: func()",
 				func() {
 					type T struct{ CommandStub[func()] }
 					dogma.RegisterCommand[*T]("622003a4-01a5-4c77-8a4c-cb36b51994e7")
@@ -302,18 +303,25 @@ func TestWithExtension(t *testing.T) {
 				WithExtension(nil)
 			},
 		)
-	})
 
-	t.Run("it panics if x is an empty any", func(t *testing.T) {
 		ExpectPanic(
 			t,
-			"value must not be an empty google.protobuf.Any",
+			"value must not be nil",
 			func() {
-				var x *anypb.Any
-				WithExtension(x)
+				WithExtension((*anypb.Any)(nil))
 			},
 		)
 
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithExtension((*wrapperspb.StringValue)(nil))
+			},
+		)
+	})
+
+	t.Run("it panics if x is an empty any", func(t *testing.T) {
 		ExpectPanic(
 			t,
 			"value must not be an empty google.protobuf.Any",
@@ -333,38 +341,6 @@ func TestWithExtension(t *testing.T) {
 		}
 
 		got := packer.PackCommand(CommandA1, WithExtension(wrapperspb.String("")))
-
-		if len(got.GetBody().GetExtensions()) != 1 {
-			t.Fatalf("unexpected extension count: got %d, want 1", len(got.GetBody().GetExtensions()))
-		}
-
-		if got.GetBody().GetExtensions()[0].GetTypeUrl() != "type.googleapis.com/google.protobuf.StringValue" {
-			t.Fatalf(
-				"unexpected extension type URL: got %q, want %q",
-				got.GetBody().GetExtensions()[0].GetTypeUrl(),
-				"type.googleapis.com/google.protobuf.StringValue",
-			)
-		}
-
-		if len(got.GetBody().GetExtensions()[0].GetValue()) != 0 {
-			t.Fatalf(
-				"unexpected extension payload length: got %d, want 0",
-				len(got.GetBody().GetExtensions()[0].GetValue()),
-			)
-		}
-	})
-
-	t.Run("it accepts typed nil messages", func(t *testing.T) {
-		packer := &Packer{
-			Application: identitypb.
-				NewIdentityBuilder().
-				WithName("app").
-				WithKey(uuidpb.Generate()).
-				Build(),
-		}
-
-		var value *wrapperspb.StringValue
-		got := packer.PackCommand(CommandA1, WithExtension(value))
 
 		if len(got.GetBody().GetExtensions()) != 1 {
 			t.Fatalf("unexpected extension count: got %d, want 1", len(got.GetBody().GetExtensions()))
@@ -485,6 +461,22 @@ func TestWithBaggage(t *testing.T) {
 			"value must not be nil",
 			func() {
 				WithBaggage(nil)
+			},
+		)
+
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithBaggage((*anypb.Any)(nil))
+			},
+		)
+
+		ExpectPanic(
+			t,
+			"value must not be nil",
+			func() {
+				WithBaggage((*wrapperspb.StringValue)(nil))
 			},
 		)
 	})

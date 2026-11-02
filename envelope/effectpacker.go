@@ -1,28 +1,29 @@
-package envelopepb
+package envelope
 
 import (
 	"fmt"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	"github.com/dogmatiq/protobuf/envelopepb"
+	"github.com/dogmatiq/protobuf/identitypb"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // An EffectPacker packs messages produced while handling a specific causal
-// message into a [MultiEnvelope].
+// message into a [envelopepb.MultiEnvelope].
 type EffectPacker struct {
 	generateID func() *uuidpb.UUID
 	now        func() *timestamppb.Timestamp
-	header     *Header
-	bodies     []*Body
+	header     *envelopepb.Header
+	bodies     []*envelopepb.Body
 	sealed     bool
 }
 
 // PackEffects returns an [EffectPacker] that packs messages produced by h while
 // handling cause.
 func (p *Packer) PackEffects(
-	cause *Envelope,
+	cause *envelopepb.Envelope,
 	h *identitypb.Identity,
 	options ...PackEffectsOption,
 ) *EffectPacker {
@@ -51,10 +52,10 @@ func (p *Packer) PackEffects(
 		}
 	}
 
-	header := NewHeaderBuilder().
+	header := envelopepb.NewHeaderBuilder().
 		WithCausationId(cause.GetBody().GetMessageId()).
 		WithCorrelationId(cause.GetHeader().GetCorrelationId()).
-		WithSource(NewSourceBuilder().
+		WithSource(envelopepb.NewSourceBuilder().
 			WithSite(p.Site).
 			WithApplication(p.Application).
 			WithHandler(h).
@@ -69,7 +70,7 @@ func (p *Packer) PackEffects(
 		opt.applyPackEffectsOption(header)
 	}
 
-	if err := header.validate(); err != nil {
+	if err := header.Validate(); err != nil {
 		panic(fmt.Errorf("invalid header: %w", err))
 	}
 
@@ -81,26 +82,26 @@ func (p *Packer) PackEffects(
 }
 
 // PackCommand appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackCommand(m dogma.Command, options ...PackEffectCommandOption) *Envelope {
+func (p *EffectPacker) PackCommand(m dogma.Command, options ...PackEffectCommandOption) *envelopepb.Envelope {
 	return packEffectBody(p, m, PackEffectCommandOption.applyPackEffectCommandOption, options...)
 }
 
 // PackEvent appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackEvent(m dogma.Event, options ...PackEffectEventOption) *Envelope {
+func (p *EffectPacker) PackEvent(m dogma.Event, options ...PackEffectEventOption) *envelopepb.Envelope {
 	return packEffectBody(p, m, PackEffectEventOption.applyPackEffectEventOption, options...)
 }
 
 // PackDeadline appends m to the multi-envelope under construction.
-func (p *EffectPacker) PackDeadline(m dogma.Deadline, options ...PackEffectDeadlineOption) *Envelope {
+func (p *EffectPacker) PackDeadline(m dogma.Deadline, options ...PackEffectDeadlineOption) *envelopepb.Envelope {
 	return packEffectBody(p, m, PackEffectDeadlineOption.applyPackEffectDeadlineOption, options...)
 }
 
 func packEffectBody[T any](
 	p *EffectPacker,
 	m dogma.Message,
-	apply func(T, *Body),
+	apply func(T, *envelopepb.Body),
 	options ...T,
-) *Envelope {
+) *envelopepb.Envelope {
 	p.mustNotBeSealed()
 
 	mt, ok := dogma.RegisteredMessageTypeOf(m)
@@ -120,10 +121,10 @@ func packEffectBody[T any](
 		))
 	}
 
-	body := NewBodyBuilder().
+	body := envelopepb.NewBodyBuilder().
 		WithMessageId(p.generateID()).
 		WithMessage(
-			NewMessageBuilder().
+			envelopepb.NewMessageBuilder().
 				WithTypeId(uuidpb.MustParse(mt.ID())).
 				WithDescription(m.MessageDescription()).
 				WithData(data).
@@ -139,21 +140,21 @@ func packEffectBody[T any](
 		body.SetCreatedAt(p.now())
 	}
 
-	if err := body.validate(p.header); err != nil {
+	if err := body.Validate(p.header); err != nil {
 		panic(fmt.Errorf("invalid body: %w", err))
 	}
 
 	p.bodies = append(p.bodies, body)
 
-	return NewEnvelopeBuilder().
+	return envelopepb.NewEnvelopeBuilder().
 		WithHeader(p.header).
 		WithBody(body).
 		Build()
 }
 
-// Seal returns a [MultiEnvelope] containing all packed messages, or false if no
-// messages were packed.
-func (p *EffectPacker) Seal() (*MultiEnvelope, bool) {
+// Seal returns a [envelopepb.MultiEnvelope] containing all packed messages, or
+// false if no messages were packed.
+func (p *EffectPacker) Seal() (*envelopepb.MultiEnvelope, bool) {
 	p.mustNotBeSealed()
 	p.sealed = true
 
@@ -161,7 +162,7 @@ func (p *EffectPacker) Seal() (*MultiEnvelope, bool) {
 		return nil, false
 	}
 
-	return NewMultiEnvelopeBuilder().
+	return envelopepb.NewMultiEnvelopeBuilder().
 		WithHeader(p.header).
 		WithBodies(p.bodies).
 		Build(), true

@@ -1,13 +1,13 @@
-package uuidpb_test
+package uuidcollection_test
 
 import (
 	"maps"
 	"slices"
 	"testing"
 
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
-	. "github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	. "github.com/dogmatiq/enginekit/uuidcollection"
 	"github.com/dogmatiq/enginekit/x/xrapid"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"pgregory.net/rapid"
 )
 
@@ -52,12 +52,12 @@ func TestSet(t *testing.T) {
 				},
 				"diff with intersecting set": func(t *rapid.T) {
 					v := xrapid.SampledFromSeq(maps.Keys(expected)).Draw(t, "existing member")
-					other := uuidpb.NewSet(uuidpb.MustParse(v))
+					other := NewSet(uuidpb.MustParse(v))
 					subject = subject.Diff(other)
 					delete(expected, v)
 				},
 				"diff with disjoint set": func(t *rapid.T) {
-					other := uuidpb.NewSet(uuidpb.Generate())
+					other := NewSet(uuidpb.Generate())
 					subject = subject.Diff(other)
 				},
 				"diff with nil set": func(t *rapid.T) {
@@ -163,7 +163,7 @@ func TestSet(t *testing.T) {
 						added := uuidpb.Generate()
 						var shared *uuidpb.UUID
 
-						other := uuidpb.NewSet(added)
+						other := NewSet(added)
 
 						if !subject.IsEmpty() {
 							v := xrapid.SampledFromSeq(maps.Keys(expected)).Draw(t, "common member")
@@ -202,10 +202,10 @@ func TestSet(t *testing.T) {
 	})
 
 	t.Run("func String()", func(t *testing.T) {
-		v1 := MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c")
-		v2 := MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49")
+		v1 := uuidpb.MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c")
+		v2 := uuidpb.MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49")
 
-		subject := uuidpb.NewSet(v1, v2)
+		subject := NewSet(v1, v2)
 		got := subject.String()
 		want := `{015ab018-80aa-4c31-982c-48e19a4d5a49, e9ba3d40-273f-445b-a2b5-0498beb6953c}`
 
@@ -215,12 +215,12 @@ func TestSet(t *testing.T) {
 	})
 
 	t.Run("func GoString()", func(t *testing.T) {
-		v1 := MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c")
-		v2 := MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49")
+		v1 := uuidpb.MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c")
+		v2 := uuidpb.MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49")
 
-		subject := uuidpb.NewSet(v1, v2)
+		subject := NewSet(v1, v2)
 		got := subject.GoString()
-		want := `uuidpb.NewSet(uuidpb.MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49"), uuidpb.MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c"))`
+		want := `uuidcollection.NewSet(uuidpb.MustParse("015ab018-80aa-4c31-982c-48e19a4d5a49"), uuidpb.MustParse("e9ba3d40-273f-445b-a2b5-0498beb6953c"))`
 
 		if got != want {
 			t.Fatalf("unexpected GoString() output: got %q, want %q", got, want)

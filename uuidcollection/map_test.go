@@ -1,13 +1,13 @@
-package uuidpb_test
+package uuidcollection_test
 
 import (
 	"maps"
 	"slices"
 	"testing"
 
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
-	. "github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	. "github.com/dogmatiq/enginekit/uuidcollection"
 	"github.com/dogmatiq/enginekit/x/xrapid"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"pgregory.net/rapid"
 )
 

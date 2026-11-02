@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"go.opentelemetry.io/otel/attribute"
 	"golang.org/x/exp/constraints"
 )

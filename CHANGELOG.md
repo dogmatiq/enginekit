@@ -11,6 +11,39 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+This release moves Dogma's Protocol Buffers schema to the
+[`github.com/dogmatiq/protobuf`] module. The `uuidpb`, `identitypb`,
+`envelopepb` and `messaginggrpc` packages are now provided by that module, and
+`configpb` is regenerated to import its types.
+
+The schema in `github.com/dogmatiq/protobuf` uses the `dogma.protobuf.v1`
+Protocol Buffers package instead of `dogma.protobuf`, so the full names of
+these messages and their `google.protobuf.Any` type URLs have changed. Their
+binary encoding is unchanged.
+
+### Added
+
+- Added the `envelope` package, which contains `Packer`, `EffectPacker`,
+  `Unpack()` and the packing options previously in `envelopepb`.
+- Added the `uuidcollection` package, which contains `Map`, `Set` and
+  `NewSet()` previously in `uuidpb`.
+
+### Removed
+
+- **[BC]** Removed the `protobuf/uuidpb`, `protobuf/identitypb` and
+  `protobuf/envelopepb` packages. Use the packages of the same name in
+  `github.com/dogmatiq/protobuf` instead.
+- **[BC]** Removed the `grpc/messaginggrpc` package. Use the package of the same
+  name in `github.com/dogmatiq/protobuf` instead.
+- **[BC]** Removed `CommandExecutorAPI` and the `UnrecognizedApplication`,
+  `UnrecognizedCommandType`, `UnrecognizedEventType`, `MalformedMessage` and
+  `InvalidMessage` error details, along with their error constructors. They're
+  expected in a future version of `github.com/dogmatiq/protobuf`.
+
+[`github.com/dogmatiq/protobuf`]: https://github.com/dogmatiq/protobuf
+
 ## [0.28.0] - 2026-11-02
 
 ### Added

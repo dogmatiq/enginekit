@@ -1,14 +1,16 @@
-package envelopepb
+package envelope
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"slices"
 	"time"
 
 	"github.com/dogmatiq/dogma"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	"github.com/dogmatiq/protobuf/envelopepb"
+	"github.com/dogmatiq/protobuf/identitypb"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -38,7 +40,7 @@ type Packer struct {
 }
 
 // PackCommand returns an envelope containing the given command.
-func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Envelope {
+func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *envelopepb.Envelope {
 	mt, ok := dogma.RegisteredMessageTypeOf(m)
 	if !ok {
 		panic(fmt.Sprintf(
@@ -58,21 +60,21 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Env
 
 	id := p.generateID()
 
-	env := NewEnvelopeBuilder().
+	env := envelopepb.NewEnvelopeBuilder().
 		WithHeader(
-			NewHeaderBuilder().
+			envelopepb.NewHeaderBuilder().
 				WithCausationId(id).
 				WithCorrelationId(id).
-				WithSource(NewSourceBuilder().
+				WithSource(envelopepb.NewSourceBuilder().
 					WithSite(p.Site).
 					WithApplication(p.Application).
 					Build()).
 				Build(),
 		).
 		WithBody(
-			NewBodyBuilder().
+			envelopepb.NewBodyBuilder().
 				WithMessageId(id).
-				WithMessage(NewMessageBuilder().
+				WithMessage(envelopepb.NewMessageBuilder().
 					WithTypeId(uuidpb.MustParse(mt.ID())).
 					WithDescription(m.MessageDescription()).
 					WithData(data).
@@ -106,12 +108,12 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *Env
 //
 // T may be a message interface such as [dogma.Command] or a concrete message
 // type.
-func Unpack[T dogma.Message](env *Envelope) (T, error) {
+func Unpack[T dogma.Message](env *envelopepb.Envelope) (T, error) {
 	var zero T
 
 	message := env.GetBody().GetMessage()
 
-	if err := message.validate(); err != nil {
+	if err := validateMessage(message); err != nil {
 		return zero, fmt.Errorf(
 			"unable to unpack envelope as %s: %w",
 			reflect.TypeFor[T](),
@@ -152,6 +154,23 @@ func Unpack[T dogma.Message](env *Envelope) (T, error) {
 	return v, nil
 }
 
+// validateMessage returns an error if m is not well-formed.
+func validateMessage(m *envelopepb.Message) error {
+	if m == nil {
+		return errors.New("must not be nil")
+	}
+
+	if err := m.GetTypeId().Validate(); err != nil {
+		return fmt.Errorf("invalid type ID (%s): %w", m.GetTypeId(), err)
+	}
+
+	if m.GetDescription() == "" {
+		return errors.New("invalid description: must not be empty")
+	}
+
+	return nil
+}
+
 // now returns the current time.
 func (p *Packer) now() *timestamppb.Timestamp {
 	if p.Now == nil {
@@ -173,57 +192,63 @@ func (p *Packer) generateID() *uuidpb.UUID {
 // PackCommandOption is an option that modifies the behavior of
 // [Packer.PackCommand].
 type PackCommandOption interface {
-	applyPackCommandOption(*Envelope)
+	applyPackCommandOption(*envelopepb.Envelope)
 }
 
 // PackEffectsOption is an option that modifies the behavior of
 // [Packer.PackEffects].
 type PackEffectsOption interface {
-	applyPackEffectsOption(*Header)
+	applyPackEffectsOption(*envelopepb.Header)
 }
 
 // PackEffectCommandOption is an option that modifies the behavior of
 // [EffectPacker.PackCommand].
 type PackEffectCommandOption interface {
-	applyPackEffectCommandOption(*Body)
+	applyPackEffectCommandOption(*envelopepb.Body)
 }
 
 // PackEffectEventOption is an option that modifies the behavior of
 // [EffectPacker.PackEvent].
 type PackEffectEventOption interface {
-	applyPackEffectEventOption(*Body)
+	applyPackEffectEventOption(*envelopepb.Body)
 }
 
 // PackEffectDeadlineOption is an option that modifies the behavior of
 // [EffectPacker.PackDeadline].
 type PackEffectDeadlineOption interface {
-	applyPackEffectDeadlineOption(*Body)
+	applyPackEffectDeadlineOption(*envelopepb.Body)
 }
 
 type (
-	packEffectsOption            func(*Header)
-	packCommandOptionFunc        func(*Body)
-	packEffectDeadlineOptionFunc func(*Body)
+	packEffectsOption            func(*envelopepb.Header)
+	packCommandOptionFunc        func(*envelopepb.Body)
+	packEffectDeadlineOptionFunc func(*envelopepb.Body)
 	universalOption              struct {
-		applyToBodyFunc   func(*Body)
-		applyToHeaderFunc func(*Header)
+		applyToBodyFunc   func(*envelopepb.Body)
+		applyToHeaderFunc func(*envelopepb.Header)
 	}
 )
 
-func (o packEffectsOption) applyPackEffectsOption(header *Header)               { o(header) }
-func (o packCommandOptionFunc) applyPackCommandOption(env *Envelope)            { o(env.GetBody()) }
-func (o packEffectDeadlineOptionFunc) applyPackEffectDeadlineOption(body *Body) { o(body) }
-func (o universalOption) applyPackCommandOption(env *Envelope)                  { o.applyToBodyFunc(env.GetBody()) }
-func (o universalOption) applyPackEffectCommandOption(body *Body)               { o.applyToBodyFunc(body) }
-func (o universalOption) applyPackEffectEventOption(body *Body)                 { o.applyToBodyFunc(body) }
-func (o universalOption) applyPackEffectDeadlineOption(body *Body)              { o.applyToBodyFunc(body) }
-func (o universalOption) applyPackEffectsOption(header *Header)                 { o.applyToHeaderFunc(header) }
+func (o packEffectsOption) applyPackEffectsOption(header *envelopepb.Header)               { o(header) }
+func (o packCommandOptionFunc) applyPackCommandOption(env *envelopepb.Envelope)            { o(env.GetBody()) }
+func (o packEffectDeadlineOptionFunc) applyPackEffectDeadlineOption(body *envelopepb.Body) { o(body) }
+func (o universalOption) applyPackCommandOption(env *envelopepb.Envelope) {
+	o.applyToBodyFunc(env.GetBody())
+}
+func (o universalOption) applyPackEffectCommandOption(body *envelopepb.Body) { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectEventOption(body *envelopepb.Body)   { o.applyToBodyFunc(body) }
+func (o universalOption) applyPackEffectDeadlineOption(body *envelopepb.Body) {
+	o.applyToBodyFunc(body)
+}
+func (o universalOption) applyPackEffectsOption(header *envelopepb.Header) {
+	o.applyToHeaderFunc(header)
+}
 
 // WithIdempotencyKey sets the idempotency key of a command packed via
 // [Packer.PackCommand].
 func WithIdempotencyKey(key string) PackCommandOption {
 	return packCommandOptionFunc(
-		func(body *Body) {
+		func(body *envelopepb.Body) {
 			body.SetIdempotencyKey(key)
 		},
 	)
@@ -233,7 +258,7 @@ func WithIdempotencyKey(key string) PackCommandOption {
 // of messages packed via [Packer.PackEffects].
 func WithInstanceID(id string) PackEffectsOption {
 	return packEffectsOption(
-		func(header *Header) {
+		func(header *envelopepb.Header) {
 			header.GetSource().SetInstanceId(id)
 		},
 	)
@@ -243,7 +268,7 @@ func WithInstanceID(id string) PackEffectsOption {
 // via [EffectPacker.PackDeadline].
 func WithScheduledFor(t time.Time) PackEffectDeadlineOption {
 	return packEffectDeadlineOptionFunc(
-		func(body *Body) {
+		func(body *envelopepb.Body) {
 			body.SetScheduledFor(timestamppb.New(t))
 		},
 	)
@@ -263,10 +288,10 @@ func WithExtension(x proto.Message) interface {
 	v := marshalAsAny(x)
 
 	return universalOption{
-		applyToBodyFunc: func(body *Body) {
+		applyToBodyFunc: func(body *envelopepb.Body) {
 			body.SetExtensions(appendOrReplace(body.GetExtensions(), v))
 		},
-		applyToHeaderFunc: func(header *Header) {
+		applyToHeaderFunc: func(header *envelopepb.Header) {
 			header.SetExtensions(appendOrReplace(header.GetExtensions(), v))
 		},
 	}
@@ -286,17 +311,17 @@ func WithBaggage(x proto.Message) interface {
 	v := marshalAsAny(x)
 
 	return universalOption{
-		applyToBodyFunc: func(body *Body) {
+		applyToBodyFunc: func(body *envelopepb.Body) {
 			body.SetBaggage(appendOrReplace(body.GetBaggage(), v))
 		},
-		applyToHeaderFunc: func(header *Header) {
+		applyToHeaderFunc: func(header *envelopepb.Header) {
 			header.SetBaggage(appendOrReplace(header.GetBaggage(), v))
 		},
 	}
 }
 
-// flattenAnyValues merges two slices of [*anypb.Any] values from a [Header] and
-// [Body] into a single slice.
+// flattenAnyValues merges two slices of [*anypb.Any] values from a
+// [envelopepb.Header] and [envelopepb.Body] into a single slice.
 //
 // Later values override earlier values with the same type URL, so body values
 // override header values and the last repeated value in either location wins.

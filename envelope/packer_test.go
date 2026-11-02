@@ -1,4 +1,4 @@
-package envelopepb_test
+package envelope_test
 
 import (
 	"fmt"
@@ -7,10 +7,11 @@ import (
 
 	"github.com/dogmatiq/dogma"
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/envelope"
 	. "github.com/dogmatiq/enginekit/internal/test"
-	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	. "github.com/dogmatiq/protobuf/envelopepb"
+	"github.com/dogmatiq/protobuf/identitypb"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -92,7 +93,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		t.Run("it panics if passed an unregistered message", func(t *testing.T) {
 			ExpectPanic(
 				t,
-				"*envelopepb_test.T is not a registered message type",
+				"*envelope_test.T is not a registered message type",
 				func() {
 					type T struct{ dogma.Command }
 					packer.PackCommand(&T{})
@@ -103,7 +104,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 		t.Run("it panics if the message cannot be marshaled", func(t *testing.T) {
 			ExpectPanic(
 				t,
-				"unable to marshal *envelopepb_test.T: json: unsupported type: func()",
+				"unable to marshal *envelope_test.T: json: unsupported type: func()",
 				func() {
 					type T struct{ CommandStub[func()] }
 					dogma.RegisterCommand[*T]("622003a4-01a5-4c77-8a4c-cb36b51994e7")

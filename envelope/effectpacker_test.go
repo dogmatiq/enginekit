@@ -1,14 +1,15 @@
-package envelopepb_test
+package envelope_test
 
 import (
 	"testing"
 	"time"
 
 	. "github.com/dogmatiq/enginekit/enginetest/stubs"
+	. "github.com/dogmatiq/enginekit/envelope"
 	. "github.com/dogmatiq/enginekit/internal/test"
-	. "github.com/dogmatiq/enginekit/protobuf/envelopepb"
-	"github.com/dogmatiq/enginekit/protobuf/identitypb"
-	"github.com/dogmatiq/enginekit/protobuf/uuidpb"
+	. "github.com/dogmatiq/protobuf/envelopepb"
+	"github.com/dogmatiq/protobuf/identitypb"
+	"github.com/dogmatiq/protobuf/uuidpb"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"

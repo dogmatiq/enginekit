@@ -1,19 +1,21 @@
-package uuidpb
+package uuidcollection
 
 import (
 	"iter"
 	"maps"
 	"slices"
 	"strings"
+
+	"github.com/dogmatiq/protobuf/uuidpb"
 )
 
-// Set is a collection of [UUID] values.
+// Set is a collection of [uuidpb.UUID] values.
 type Set struct {
 	m map[key]struct{}
 }
 
-// NewSet creates a new set containing the given [UUID] values.
-func NewSet(values ...*UUID) *Set {
+// NewSet creates a new set containing the given [uuidpb.UUID] values.
+func NewSet(values ...*uuidpb.UUID) *Set {
 	s := &Set{
 		m: make(map[key]struct{}, len(values)),
 	}
@@ -25,8 +27,8 @@ func NewSet(values ...*UUID) *Set {
 	return s
 }
 
-// Has reports whether the set contains the given [UUID].
-func (s *Set) Has(v *UUID) bool {
+// Has reports whether the set contains the given [uuidpb.UUID].
+func (s *Set) Has(v *uuidpb.UUID) bool {
 	return s.has(asKey(v))
 }
 
@@ -39,8 +41,8 @@ func (s *Set) has(k key) bool {
 	return ok
 }
 
-// Add adds the given [UUID] to the set.
-func (s *Set) Add(v *UUID) {
+// Add adds the given [uuidpb.UUID] to the set.
+func (s *Set) Add(v *uuidpb.UUID) {
 	s.add(asKey(v))
 }
 
@@ -52,16 +54,16 @@ func (s *Set) add(k key) {
 	s.m[k] = struct{}{}
 }
 
-// Delete removes the given [UUID] from the set.
-func (s *Set) Delete(v *UUID) {
+// Delete removes the given [uuidpb.UUID] from the set.
+func (s *Set) Delete(v *uuidpb.UUID) {
 	if s != nil {
 		delete(s.m, asKey(v))
 	}
 }
 
 // All yields all members of the set.
-func (s *Set) All() iter.Seq[*UUID] {
-	return func(yield func(*UUID) bool) {
+func (s *Set) All() iter.Seq[*uuidpb.UUID] {
+	return func(yield func(*uuidpb.UUID) bool) {
 		if s != nil {
 			for v := range s.m {
 				if !yield(v.asUUID()) {
@@ -167,7 +169,7 @@ func (s *Set) String() string {
 
 	sorted := slices.SortedFunc(
 		s.All(),
-		(*UUID).Compare,
+		(*uuidpb.UUID).Compare,
 	)
 
 	for i, v := range sorted {
@@ -190,16 +192,16 @@ func (s *Set) DapperString() string {
 // GoString returns a Go-syntax representation of the set.
 func (s *Set) GoString() string {
 	if s == nil {
-		return "(*uuidpb.Set)(nil)"
+		return "(*uuidcollection.Set)(nil)"
 	}
 
 	var w strings.Builder
 
-	w.WriteString("uuidpb.NewSet(")
+	w.WriteString("uuidcollection.NewSet(")
 
 	sorted := slices.SortedFunc(
 		s.All(),
-		(*UUID).Compare,
+		(*uuidpb.UUID).Compare,
 	)
 
 	for i, v := range sorted {

@@ -51,7 +51,7 @@ func TestFuture(t *testing.T) {
 		select {
 		case <-ctx.Done():
 			t.Fatal(context.Cause(ctx))
-		case <-f.Ready():
+		case <-f.Chan():
 		}
 
 		v, ok := f.Load()

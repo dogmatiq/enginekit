@@ -11,6 +11,20 @@ type Future[T any] struct {
 	ch  atomic.Pointer[chan struct{}]
 }
 
+// FutureR is the receive-only view of a [Future], analogous to a receive-only
+// channel (<-chan) for a bidirectional channel.
+//
+// It exposes the methods that read or wait for the value, but not
+// [Future.Store]. A *Future satisfies FutureR without conversion.
+type FutureR[T any] interface {
+	Load() (T, bool)
+	Wait() T
+	WaitContext(ctx context.Context) (T, error)
+	Chan() <-chan struct{}
+}
+
+var _ FutureR[int] = (*Future[int])(nil)
+
 // Load returns the value stored in the [Future], if it is ready.
 func (a *Future[T]) Load() (T, bool) {
 	if p := a.ptr.Load(); p != nil {
@@ -33,8 +47,8 @@ func (a *Future[T]) Store(v T) bool {
 	return false
 }
 
-// Ready returns a channel that is closed when the value becomes available.
-func (a *Future[T]) Ready() <-chan struct{} {
+// Chan returns a channel that is closed when the value becomes available.
+func (a *Future[T]) Chan() <-chan struct{} {
 	return a.stored()
 }
 

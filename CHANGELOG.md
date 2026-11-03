@@ -11,6 +11,19 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `xsync.LatchR`, `FutureR`, `ObservableR` and `SignalR`, which are
+  receive-only views of the corresponding types, analogous to a `<-chan` for a
+  `chan`.
+
+### Changed
+
+- **[BC]** Renamed `xsync.Future.Ready()` to `Chan()`, for consistency with
+  `Latch` and `Signal`.
+
 ## [0.29.0] - 2026-11-02
 
 This release moves Dogma's Protocol Buffers schema to the
@@ -784,6 +797,7 @@ which itself includes a large numbers of breaking changes.
 [0.27.7]: https://github.com/dogmatiq/enginekit/releases/v0.27.7
 [0.28.0]: https://github.com/dogmatiq/enginekit/releases/tag/v0.28.0
 [0.29.0]: https://github.com/dogmatiq/enginekit/releases/tag/v0.29.0
+[unreleased]: https://github.com/dogmatiq/enginekit/compare/v0.29.0...HEAD
 
 <!-- version template
 ## [0.0.1] - YYYY-MM-DD

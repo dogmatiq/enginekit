@@ -14,6 +14,20 @@ type Latch struct {
 	ch             chan struct{}
 }
 
+// LatchR is the receive-only view of a [Latch], analogous to a receive-only
+// channel (<-chan) for a bidirectional channel.
+//
+// It exposes the methods that observe or wait on the latch, but not
+// [Latch.Set]. A *Latch satisfies LatchR without conversion.
+type LatchR interface {
+	IsSet() bool
+	Wait()
+	WaitContext(ctx context.Context) error
+	Chan() <-chan struct{}
+}
+
+var _ LatchR = (*Latch)(nil)
+
 // Set unblocks any goroutines that are waiting on the latch.
 //
 // It returns true if the latch was set by this call, or false if it was already

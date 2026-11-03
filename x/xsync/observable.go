@@ -9,6 +9,17 @@ type Observable[T any] struct {
 	state atomic.Pointer[observableState[T]]
 }
 
+// ObservableR is the receive-only view of an [Observable], analogous to a
+// receive-only channel (<-chan) for a bidirectional channel.
+//
+// It exposes [Observable.Load], but not [Observable.Store]. An *Observable
+// satisfies ObservableR without conversion.
+type ObservableR[T any] interface {
+	Load() (T, <-chan struct{})
+}
+
+var _ ObservableR[int] = (*Observable[int])(nil)
+
 // Load returns the current value and a channel that is closed when that is
 // replaced by a subsequent call to Store.
 func (o *Observable[T]) Load() (T, <-chan struct{}) {

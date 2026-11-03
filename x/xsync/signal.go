@@ -16,6 +16,22 @@ type Signal struct {
 	ch   chan struct{}
 }
 
+// SignalR is the receive-only view of a [Signal], analogous to a receive-only
+// channel (<-chan) for a bidirectional channel.
+//
+// It exposes the methods that wait on the signal, but not [Signal.Notify].
+// A *Signal satisfies SignalR without conversion.
+//
+// As with a channel, receiving consumes the notification. If several goroutines
+// wait on the same SignalR, each notification unblocks only one of them.
+type SignalR interface {
+	Wait()
+	WaitContext(ctx context.Context) error
+	Chan() <-chan struct{}
+}
+
+var _ SignalR = (*Signal)(nil)
+
 // Notify unblocks one waiting goroutine.
 //
 // If there are no waiting goroutines, the notification remains pending and a

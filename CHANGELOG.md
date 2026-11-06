@@ -11,6 +11,17 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Removed
+
+- **[BC]** Removed the `x/xsync` package. Its types are now provided by
+  [`github.com/dogmatiq/cosyne`], with the same names, except that
+  `xsync.SucceedOnce` is now `cosyne.Once`. `xsync.ChangeObservable()` has no
+  replacement.
+
+[`github.com/dogmatiq/cosyne`]: https://github.com/dogmatiq/cosyne
+
 ## [0.30.0] - 2026-11-04
 
 ### Added

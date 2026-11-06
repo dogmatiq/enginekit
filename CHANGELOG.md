@@ -13,6 +13,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Updated to [`github.com/dogmatiq/protobuf`] v0.7.0.
+
 ### Removed
 
 - **[BC]** Removed the `x/xsync` package. Its types are now provided by

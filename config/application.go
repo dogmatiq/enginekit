@@ -7,7 +7,6 @@ import (
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/protobuf/identitypb"
-	"github.com/dogmatiq/protobuf/uuidpb"
 )
 
 // Application is an [Entity] that represents the configuration of a
@@ -165,11 +164,11 @@ func reportIdentityConflicts(ctx *validateContext, app *Application) {
 		}
 	}
 
-	normalizeKey := func(k string) string {
-		if id, err := uuidpb.Parse(k); err == nil {
-			return id.AsString()
+	normalizeKey := func(k UnparsedUUID) string {
+		if id, ok := k.TryAsStd(); ok {
+			return id.String()
 		}
-		return k
+		return k.String()
 	}
 
 	for _, id := range app.identities() {

@@ -11,6 +11,29 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [bc]: https://github.com/dogmatiq/.github/blob/main/VERSIONING.md#changelogs
 
+## [Unreleased]
+
+### Added
+
+- Added `config.UnparsedUUID`, a string that is expected to contain a UUID, but
+  that hasn't yet been parsed. Its `AsStd()` and `AsProto()` methods return the
+  UUID as a `uuid.UUID` and a `*uuidpb.UUID`, and panic if it isn't valid.
+  `TryAsStd()` and `TryAsProto()` return false instead.
+- Added `config.InvalidMessageTypeIDError`, which validation of a
+  `config.Route` reports when its message type ID isn't a valid UUID.
+- Added `stubs.ProjectionEventScopeStub.MessageID()` and `MessageIDFunc`.
+
+### Changed
+
+- **[BC]** Updated to Dogma v0.26.0.
+- **[BC]** `config.Route.MessageTypeID` and `config.Identity.Key` now use
+  `optional.Optional[config.UnparsedUUID]`.
+- **[BC]** `stubs.MessageTypeID()` now returns a `uuid.UUID`.
+- **[BC]** `stubs.ProjectionEventScopeStub.StreamID()` and `StreamIDFunc` now
+  use a `uuid.UUID`.
+- **[BC]** `stubs.ProjectionMessageHandlerStub.CheckpointOffset()` and
+  `CheckpointOffsetFunc` now take the stream ID as a `uuid.UUID`.
+
 ## [0.31.0] - 2026-11-06
 
 ### Changed

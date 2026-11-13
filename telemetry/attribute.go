@@ -110,7 +110,7 @@ func UUID(k string, v *uuidpb.UUID) Attr {
 
 // MessageTypeName returns a string attribute set to the registered name of the
 func MessageTypeName(k string, id *uuidpb.UUID) Attr {
-	if t, ok := dogma.RegisteredMessageTypeByID(id.AsString()); ok {
+	if t, ok := dogma.RegisteredMessageTypeByID(id.AsStd()); ok {
 		return String(k, t.GoType().Name())
 	}
 	return Attr{}

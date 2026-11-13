@@ -431,7 +431,7 @@ func TestProcess(t *testing.T) {
 					`unsupported handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesCommandRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*CommandStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 					},
@@ -441,7 +441,7 @@ func TestProcess(t *testing.T) {
 					`unsupported records-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(RecordsEventRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*EventStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 					},

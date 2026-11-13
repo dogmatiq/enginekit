@@ -125,7 +125,7 @@ func packEffectBody[T any](
 		WithMessageId(p.generateID()).
 		WithMessage(
 			envelopepb.NewMessageBuilder().
-				WithTypeId(uuidpb.MustParse(mt.ID())).
+				WithTypeId(uuidpb.FromStd(mt.ID())).
 				WithDescription(m.MessageDescription()).
 				WithData(data).
 				Build(),

@@ -61,7 +61,7 @@ func TestFromApplication(t *testing.T) {
 					IdentityComponents: []*config.Identity{
 						{
 							Name: optional.Some("app"),
-							Key:  optional.Some("bed53df8-bf22-4502-be4b-64d56532d8be"),
+							Key:  optional.Some(config.UnparsedUUID("bed53df8-bf22-4502-be4b-64d56532d8be")),
 						},
 					},
 					TypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.ApplicationStub"),

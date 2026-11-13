@@ -55,19 +55,19 @@ func TestFromAggregate(t *testing.T) {
 					IdentityComponents: []*config.Identity{
 						{
 							Name: optional.Some("aggregate"),
-							Key:  optional.Some("d9d75a75-7839-4b3e-a7e5-c8884b88ea57"),
+							Key:  optional.Some(config.UnparsedUUID("d9d75a75-7839-4b3e-a7e5-c8884b88ea57")),
 						},
 					},
 					RouteComponents: []*config.Route{
 						{
 							RouteType:       optional.Some(config.HandlesCommandRouteType),
-							MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+							MessageTypeID:   optional.Some(config.UnparsedUUID(MessageTypeID[*CommandStub[TypeA]]().String())),
 							MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 						},
 						{
 							RouteType:       optional.Some(config.RecordsEventRouteType),
-							MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+							MessageTypeID:   optional.Some(config.UnparsedUUID(MessageTypeID[*EventStub[TypeA]]().String())),
 							MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 						},

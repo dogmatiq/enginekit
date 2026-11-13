@@ -63,7 +63,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 				WithCreatedAt(timestamppb.New(now)).
 				WithMessage(NewMessageBuilder().
 					WithDescription(`command(stubs.TypeA:A1, valid)`).
-					WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+					WithTypeId(MessageTypeUUID[*CommandStub[TypeA]]()).
 					WithData([]byte(`{"content":"A1"}`)).
 					Build()).
 				Build(),
@@ -187,7 +187,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 					env := NewEnvelopeBuilder().
 						WithBody(NewBodyBuilder().
 							WithMessage(NewMessageBuilder().
-								WithTypeId(uuidpb.MustParse(mt.ID())).
+								WithTypeId(uuidpb.FromStd(mt.ID())).
 								WithDescription(c.Message.MessageDescription()).
 								WithData(data).
 								Build()).
@@ -226,7 +226,7 @@ func TestPacker_PackAndUnpack(t *testing.T) {
 				WithBody(NewBodyBuilder().
 					WithMessage(NewMessageBuilder().
 						WithDescription("<description>").
-						WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+						WithTypeId(MessageTypeUUID[*CommandStub[TypeA]]()).
 						WithData([]byte(`}`)).
 						Build()).
 					Build()).

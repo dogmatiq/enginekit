@@ -7,7 +7,6 @@ import (
 	"unicode"
 
 	"github.com/dogmatiq/enginekit/optional"
-	"github.com/dogmatiq/protobuf/uuidpb"
 )
 
 // Identity is a [Component] that that represents the unique identity of an
@@ -19,7 +18,7 @@ type Identity struct {
 	Name optional.Optional[string]
 
 	// Key is the key element of the identity.
-	Key optional.Optional[string]
+	Key optional.Optional[UnparsedUUID]
 }
 
 func (i *Identity) String() string {
@@ -48,12 +47,12 @@ func (i *Identity) String() string {
 
 	if !keyOK {
 		w.WriteByte('?')
-	} else if uuid, err := uuidpb.Parse(key); err == nil {
-		w.WriteString(uuid.AsString())
-	} else if !isPrintable(key) || strings.Contains(key, `"`) {
-		w.WriteString(strconv.Quote(key))
+	} else if id, ok := key.TryAsStd(); ok {
+		w.WriteString(id.String())
+	} else if !isPrintable(key.String()) || strings.Contains(key.String(), `"`) {
+		w.WriteString(strconv.Quote(key.String()))
 	} else {
-		w.WriteString(key)
+		w.WriteString(key.String())
 	}
 
 	return w.String()
@@ -71,8 +70,8 @@ func (i *Identity) validate(ctx *validateContext) {
 	}
 
 	if k, ok := i.Key.TryGet(); ok {
-		if _, err := uuidpb.Parse(k); err != nil {
-			ctx.Invalid(InvalidIdentityKeyError{k})
+		if _, ok := k.TryAsStd(); !ok {
+			ctx.Invalid(InvalidIdentityKeyError{k.String()})
 		}
 	} else {
 		ctx.Absent("key")
@@ -101,13 +100,13 @@ func (i *Identity) describe(ctx *describeContext) {
 
 		if !hasK {
 			ctx.Print("?")
-		} else if !isPrintable(k) || strings.Contains(k, `"`) {
-			ctx.Print(strconv.Quote(k))
+		} else if !isPrintable(k.String()) || strings.Contains(k.String(), `"`) {
+			ctx.Print(strconv.Quote(k.String()))
 		} else {
-			ctx.Print(k)
+			ctx.Print(k.String())
 
-			if uuid, err := uuidpb.Parse(k); err == nil {
-				if uuid.AsString() != k {
+			if id, ok := k.TryAsStd(); ok {
+				if id.String() != k.String() {
 					ctx.Print(" (non-canonical)")
 				}
 			}

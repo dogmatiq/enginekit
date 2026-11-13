@@ -29,7 +29,7 @@ func (b *IdentityBuilder) Name(name string) {
 
 // Key sets the key element of the identity.
 func (b *IdentityBuilder) Key(key string) {
-	b.target.Key = optional.Some(key)
+	b.target.Key = optional.Some(config.UnparsedUUID(key))
 }
 
 // Partial marks the compomnent as partially configured.

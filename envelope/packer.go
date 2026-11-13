@@ -74,7 +74,7 @@ func (p *Packer) PackCommand(m dogma.Command, options ...PackCommandOption) *env
 			envelopepb.NewBodyBuilder().
 				WithMessageId(id).
 				WithMessage(envelopepb.NewMessageBuilder().
-					WithTypeId(uuidpb.MustParse(mt.ID())).
+					WithTypeId(uuidpb.FromStd(mt.ID())).
 					WithDescription(m.MessageDescription()).
 					WithData(data).
 					Build()).
@@ -120,7 +120,7 @@ func Unpack[T dogma.Message](env *envelopepb.Envelope) (T, error) {
 		)
 	}
 
-	mt, ok := dogma.RegisteredMessageTypeByID(message.GetTypeId().AsString())
+	mt, ok := dogma.RegisteredMessageTypeByID(message.GetTypeId().AsStd())
 	if !ok {
 		return zero, fmt.Errorf(
 			"unable to unpack envelope as %s: %s is not a registered message type ID",

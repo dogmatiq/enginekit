@@ -581,7 +581,7 @@ func TestEffectPacker_Pack(t *testing.T) {
 						WithCreatedAt(timestamppb.New(now)).
 						WithMessage(NewMessageBuilder().
 							WithDescription(`command(stubs.TypeA:A2, valid)`).
-							WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+							WithTypeId(MessageTypeUUID[*CommandStub[TypeA]]()).
 							WithData([]byte(`{"content":"A2"}`)).
 							Build()).
 						Build(),
@@ -655,7 +655,7 @@ func TestEffectPacker_Pack(t *testing.T) {
 						WithCreatedAt(timestamppb.New(now)).
 						WithMessage(NewMessageBuilder().
 							WithDescription(`event(stubs.TypeA:A1, valid)`).
-							WithTypeId(uuidpb.MustParse(MessageTypeID[*EventStub[TypeA]]())).
+							WithTypeId(MessageTypeUUID[*EventStub[TypeA]]()).
 							WithData([]byte(`{"content":"A1"}`)).
 							Build()).
 						Build(),
@@ -732,7 +732,7 @@ func TestEffectPacker_Pack(t *testing.T) {
 						WithScheduledFor(timestamppb.New(scheduledFor)).
 						WithMessage(NewMessageBuilder().
 							WithDescription(`deadline(stubs.TypeA:A1, valid)`).
-							WithTypeId(uuidpb.MustParse(MessageTypeID[*DeadlineStub[TypeA]]())).
+							WithTypeId(MessageTypeUUID[*DeadlineStub[TypeA]]()).
 							WithData([]byte(`{"content":"A1"}`)).
 							Build()).
 						Build(),
@@ -821,7 +821,7 @@ func TestEffectPacker_Seal(t *testing.T) {
 					WithCreatedAt(timestamppb.New(now)).
 					WithMessage(NewMessageBuilder().
 						WithDescription(`command(stubs.TypeA:A1, valid)`).
-						WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+						WithTypeId(MessageTypeUUID[*CommandStub[TypeA]]()).
 						WithData([]byte(`{"content":"A1"}`)).
 						Build()).
 					Build(),
@@ -830,7 +830,7 @@ func TestEffectPacker_Seal(t *testing.T) {
 					WithCreatedAt(timestamppb.New(now)).
 					WithMessage(NewMessageBuilder().
 						WithDescription(`command(stubs.TypeA:A2, valid)`).
-						WithTypeId(uuidpb.MustParse(MessageTypeID[*CommandStub[TypeA]]())).
+						WithTypeId(MessageTypeUUID[*CommandStub[TypeA]]()).
 						WithData([]byte(`{"content":"A2"}`)).
 						Build()).
 					Build(),

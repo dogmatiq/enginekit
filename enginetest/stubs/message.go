@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"uuid"
 
 	"github.com/dogmatiq/dogma"
 	"github.com/dogmatiq/protobuf/uuidpb"
@@ -760,11 +761,11 @@ var (
 
 var namePattern = regexp.MustCompile(`(Command|Event|Deadline)Stub\[[^]]+\.Type(.)\]`)
 
-// MessageTypeID returns the RFC 4122 UUID for a message stub of type T.
+// MessageTypeID returns the RFC 9562 UUID for a message stub of type T.
 //
 // T must be one of [CommandStub], [EventStub], or [DeadlineStub], with a type
 // parameter of [TypeA] to [TypeZ], otherwise the function panics.
-func MessageTypeID[T dogma.Message]() string {
+func MessageTypeID[T dogma.Message]() uuid.UUID {
 	typeName := reflect.TypeFor[T]().String()
 	matches := namePattern.FindStringSubmatch(typeName)
 
@@ -784,99 +785,99 @@ func MessageTypeID[T dogma.Message]() string {
 
 	letter := 0xa + matches[2][0] - 'A' // convert letter to 0-25 range
 
-	return fmt.Sprintf("%s0000000-0000-4000-8000-%012x", prefix, letter)
+	return uuid.MustParse(
+		fmt.Sprintf("%s0000000-0000-4000-8000-%012x", prefix, letter),
+	)
 }
 
-// MessageTypeUUID returns the RFC 4122 UUID for a message stub of type T as
+// MessageTypeUUID returns the RFC 9562 UUID for a message stub of type T as
 // a [uuidpb.UUID].
 //
 // T must be one of [CommandStub], [EventStub], or [DeadlineStub], with a type
 // parameter of [TypeA] to [TypeZ], otherwise the function panics.
 func MessageTypeUUID[T dogma.Message]() *uuidpb.UUID {
-	return uuidpb.MustParse(
-		MessageTypeID[T](),
-	)
+	return uuidpb.FromStd(MessageTypeID[T]())
 }
 
 func init() {
-	dogma.RegisterCommand[*CommandStub[TypeA]](MessageTypeID[*CommandStub[TypeA]]())
-	dogma.RegisterCommand[*CommandStub[TypeB]](MessageTypeID[*CommandStub[TypeB]]())
-	dogma.RegisterCommand[*CommandStub[TypeC]](MessageTypeID[*CommandStub[TypeC]]())
-	dogma.RegisterCommand[*CommandStub[TypeD]](MessageTypeID[*CommandStub[TypeD]]())
-	dogma.RegisterCommand[*CommandStub[TypeE]](MessageTypeID[*CommandStub[TypeE]]())
-	dogma.RegisterCommand[*CommandStub[TypeF]](MessageTypeID[*CommandStub[TypeF]]())
-	dogma.RegisterCommand[*CommandStub[TypeG]](MessageTypeID[*CommandStub[TypeG]]())
-	dogma.RegisterCommand[*CommandStub[TypeH]](MessageTypeID[*CommandStub[TypeH]]())
-	dogma.RegisterCommand[*CommandStub[TypeI]](MessageTypeID[*CommandStub[TypeI]]())
-	dogma.RegisterCommand[*CommandStub[TypeJ]](MessageTypeID[*CommandStub[TypeJ]]())
-	dogma.RegisterCommand[*CommandStub[TypeK]](MessageTypeID[*CommandStub[TypeK]]())
-	dogma.RegisterCommand[*CommandStub[TypeL]](MessageTypeID[*CommandStub[TypeL]]())
-	dogma.RegisterCommand[*CommandStub[TypeM]](MessageTypeID[*CommandStub[TypeM]]())
-	dogma.RegisterCommand[*CommandStub[TypeN]](MessageTypeID[*CommandStub[TypeN]]())
-	dogma.RegisterCommand[*CommandStub[TypeO]](MessageTypeID[*CommandStub[TypeO]]())
-	dogma.RegisterCommand[*CommandStub[TypeP]](MessageTypeID[*CommandStub[TypeP]]())
-	dogma.RegisterCommand[*CommandStub[TypeQ]](MessageTypeID[*CommandStub[TypeQ]]())
-	dogma.RegisterCommand[*CommandStub[TypeR]](MessageTypeID[*CommandStub[TypeR]]())
-	dogma.RegisterCommand[*CommandStub[TypeS]](MessageTypeID[*CommandStub[TypeS]]())
-	dogma.RegisterCommand[*CommandStub[TypeT]](MessageTypeID[*CommandStub[TypeT]]())
-	dogma.RegisterCommand[*CommandStub[TypeU]](MessageTypeID[*CommandStub[TypeU]]())
-	dogma.RegisterCommand[*CommandStub[TypeV]](MessageTypeID[*CommandStub[TypeV]]())
-	dogma.RegisterCommand[*CommandStub[TypeW]](MessageTypeID[*CommandStub[TypeW]]())
-	dogma.RegisterCommand[*CommandStub[TypeX]](MessageTypeID[*CommandStub[TypeX]]())
-	dogma.RegisterCommand[*CommandStub[TypeY]](MessageTypeID[*CommandStub[TypeY]]())
-	dogma.RegisterCommand[*CommandStub[TypeZ]](MessageTypeID[*CommandStub[TypeZ]]())
+	dogma.RegisterCommand[*CommandStub[TypeA]](MessageTypeID[*CommandStub[TypeA]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeB]](MessageTypeID[*CommandStub[TypeB]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeC]](MessageTypeID[*CommandStub[TypeC]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeD]](MessageTypeID[*CommandStub[TypeD]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeE]](MessageTypeID[*CommandStub[TypeE]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeF]](MessageTypeID[*CommandStub[TypeF]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeG]](MessageTypeID[*CommandStub[TypeG]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeH]](MessageTypeID[*CommandStub[TypeH]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeI]](MessageTypeID[*CommandStub[TypeI]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeJ]](MessageTypeID[*CommandStub[TypeJ]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeK]](MessageTypeID[*CommandStub[TypeK]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeL]](MessageTypeID[*CommandStub[TypeL]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeM]](MessageTypeID[*CommandStub[TypeM]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeN]](MessageTypeID[*CommandStub[TypeN]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeO]](MessageTypeID[*CommandStub[TypeO]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeP]](MessageTypeID[*CommandStub[TypeP]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeQ]](MessageTypeID[*CommandStub[TypeQ]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeR]](MessageTypeID[*CommandStub[TypeR]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeS]](MessageTypeID[*CommandStub[TypeS]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeT]](MessageTypeID[*CommandStub[TypeT]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeU]](MessageTypeID[*CommandStub[TypeU]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeV]](MessageTypeID[*CommandStub[TypeV]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeW]](MessageTypeID[*CommandStub[TypeW]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeX]](MessageTypeID[*CommandStub[TypeX]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeY]](MessageTypeID[*CommandStub[TypeY]]().String())
+	dogma.RegisterCommand[*CommandStub[TypeZ]](MessageTypeID[*CommandStub[TypeZ]]().String())
 
-	dogma.RegisterEvent[*EventStub[TypeA]](MessageTypeID[*EventStub[TypeA]]())
-	dogma.RegisterEvent[*EventStub[TypeB]](MessageTypeID[*EventStub[TypeB]]())
-	dogma.RegisterEvent[*EventStub[TypeC]](MessageTypeID[*EventStub[TypeC]]())
-	dogma.RegisterEvent[*EventStub[TypeD]](MessageTypeID[*EventStub[TypeD]]())
-	dogma.RegisterEvent[*EventStub[TypeE]](MessageTypeID[*EventStub[TypeE]]())
-	dogma.RegisterEvent[*EventStub[TypeF]](MessageTypeID[*EventStub[TypeF]]())
-	dogma.RegisterEvent[*EventStub[TypeG]](MessageTypeID[*EventStub[TypeG]]())
-	dogma.RegisterEvent[*EventStub[TypeH]](MessageTypeID[*EventStub[TypeH]]())
-	dogma.RegisterEvent[*EventStub[TypeI]](MessageTypeID[*EventStub[TypeI]]())
-	dogma.RegisterEvent[*EventStub[TypeJ]](MessageTypeID[*EventStub[TypeJ]]())
-	dogma.RegisterEvent[*EventStub[TypeK]](MessageTypeID[*EventStub[TypeK]]())
-	dogma.RegisterEvent[*EventStub[TypeL]](MessageTypeID[*EventStub[TypeL]]())
-	dogma.RegisterEvent[*EventStub[TypeM]](MessageTypeID[*EventStub[TypeM]]())
-	dogma.RegisterEvent[*EventStub[TypeN]](MessageTypeID[*EventStub[TypeN]]())
-	dogma.RegisterEvent[*EventStub[TypeO]](MessageTypeID[*EventStub[TypeO]]())
-	dogma.RegisterEvent[*EventStub[TypeP]](MessageTypeID[*EventStub[TypeP]]())
-	dogma.RegisterEvent[*EventStub[TypeQ]](MessageTypeID[*EventStub[TypeQ]]())
-	dogma.RegisterEvent[*EventStub[TypeR]](MessageTypeID[*EventStub[TypeR]]())
-	dogma.RegisterEvent[*EventStub[TypeS]](MessageTypeID[*EventStub[TypeS]]())
-	dogma.RegisterEvent[*EventStub[TypeT]](MessageTypeID[*EventStub[TypeT]]())
-	dogma.RegisterEvent[*EventStub[TypeU]](MessageTypeID[*EventStub[TypeU]]())
-	dogma.RegisterEvent[*EventStub[TypeV]](MessageTypeID[*EventStub[TypeV]]())
-	dogma.RegisterEvent[*EventStub[TypeW]](MessageTypeID[*EventStub[TypeW]]())
-	dogma.RegisterEvent[*EventStub[TypeX]](MessageTypeID[*EventStub[TypeX]]())
-	dogma.RegisterEvent[*EventStub[TypeY]](MessageTypeID[*EventStub[TypeY]]())
-	dogma.RegisterEvent[*EventStub[TypeZ]](MessageTypeID[*EventStub[TypeZ]]())
+	dogma.RegisterEvent[*EventStub[TypeA]](MessageTypeID[*EventStub[TypeA]]().String())
+	dogma.RegisterEvent[*EventStub[TypeB]](MessageTypeID[*EventStub[TypeB]]().String())
+	dogma.RegisterEvent[*EventStub[TypeC]](MessageTypeID[*EventStub[TypeC]]().String())
+	dogma.RegisterEvent[*EventStub[TypeD]](MessageTypeID[*EventStub[TypeD]]().String())
+	dogma.RegisterEvent[*EventStub[TypeE]](MessageTypeID[*EventStub[TypeE]]().String())
+	dogma.RegisterEvent[*EventStub[TypeF]](MessageTypeID[*EventStub[TypeF]]().String())
+	dogma.RegisterEvent[*EventStub[TypeG]](MessageTypeID[*EventStub[TypeG]]().String())
+	dogma.RegisterEvent[*EventStub[TypeH]](MessageTypeID[*EventStub[TypeH]]().String())
+	dogma.RegisterEvent[*EventStub[TypeI]](MessageTypeID[*EventStub[TypeI]]().String())
+	dogma.RegisterEvent[*EventStub[TypeJ]](MessageTypeID[*EventStub[TypeJ]]().String())
+	dogma.RegisterEvent[*EventStub[TypeK]](MessageTypeID[*EventStub[TypeK]]().String())
+	dogma.RegisterEvent[*EventStub[TypeL]](MessageTypeID[*EventStub[TypeL]]().String())
+	dogma.RegisterEvent[*EventStub[TypeM]](MessageTypeID[*EventStub[TypeM]]().String())
+	dogma.RegisterEvent[*EventStub[TypeN]](MessageTypeID[*EventStub[TypeN]]().String())
+	dogma.RegisterEvent[*EventStub[TypeO]](MessageTypeID[*EventStub[TypeO]]().String())
+	dogma.RegisterEvent[*EventStub[TypeP]](MessageTypeID[*EventStub[TypeP]]().String())
+	dogma.RegisterEvent[*EventStub[TypeQ]](MessageTypeID[*EventStub[TypeQ]]().String())
+	dogma.RegisterEvent[*EventStub[TypeR]](MessageTypeID[*EventStub[TypeR]]().String())
+	dogma.RegisterEvent[*EventStub[TypeS]](MessageTypeID[*EventStub[TypeS]]().String())
+	dogma.RegisterEvent[*EventStub[TypeT]](MessageTypeID[*EventStub[TypeT]]().String())
+	dogma.RegisterEvent[*EventStub[TypeU]](MessageTypeID[*EventStub[TypeU]]().String())
+	dogma.RegisterEvent[*EventStub[TypeV]](MessageTypeID[*EventStub[TypeV]]().String())
+	dogma.RegisterEvent[*EventStub[TypeW]](MessageTypeID[*EventStub[TypeW]]().String())
+	dogma.RegisterEvent[*EventStub[TypeX]](MessageTypeID[*EventStub[TypeX]]().String())
+	dogma.RegisterEvent[*EventStub[TypeY]](MessageTypeID[*EventStub[TypeY]]().String())
+	dogma.RegisterEvent[*EventStub[TypeZ]](MessageTypeID[*EventStub[TypeZ]]().String())
 
-	dogma.RegisterDeadline[*DeadlineStub[TypeA]](MessageTypeID[*DeadlineStub[TypeA]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeB]](MessageTypeID[*DeadlineStub[TypeB]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeC]](MessageTypeID[*DeadlineStub[TypeC]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeD]](MessageTypeID[*DeadlineStub[TypeD]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeE]](MessageTypeID[*DeadlineStub[TypeE]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeF]](MessageTypeID[*DeadlineStub[TypeF]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeG]](MessageTypeID[*DeadlineStub[TypeG]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeH]](MessageTypeID[*DeadlineStub[TypeH]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeI]](MessageTypeID[*DeadlineStub[TypeI]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeJ]](MessageTypeID[*DeadlineStub[TypeJ]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeK]](MessageTypeID[*DeadlineStub[TypeK]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeL]](MessageTypeID[*DeadlineStub[TypeL]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeM]](MessageTypeID[*DeadlineStub[TypeM]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeN]](MessageTypeID[*DeadlineStub[TypeN]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeO]](MessageTypeID[*DeadlineStub[TypeO]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeP]](MessageTypeID[*DeadlineStub[TypeP]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeQ]](MessageTypeID[*DeadlineStub[TypeQ]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeR]](MessageTypeID[*DeadlineStub[TypeR]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeS]](MessageTypeID[*DeadlineStub[TypeS]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeT]](MessageTypeID[*DeadlineStub[TypeT]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeU]](MessageTypeID[*DeadlineStub[TypeU]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeV]](MessageTypeID[*DeadlineStub[TypeV]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeW]](MessageTypeID[*DeadlineStub[TypeW]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeX]](MessageTypeID[*DeadlineStub[TypeX]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeY]](MessageTypeID[*DeadlineStub[TypeY]]())
-	dogma.RegisterDeadline[*DeadlineStub[TypeZ]](MessageTypeID[*DeadlineStub[TypeZ]]())
+	dogma.RegisterDeadline[*DeadlineStub[TypeA]](MessageTypeID[*DeadlineStub[TypeA]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeB]](MessageTypeID[*DeadlineStub[TypeB]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeC]](MessageTypeID[*DeadlineStub[TypeC]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeD]](MessageTypeID[*DeadlineStub[TypeD]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeE]](MessageTypeID[*DeadlineStub[TypeE]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeF]](MessageTypeID[*DeadlineStub[TypeF]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeG]](MessageTypeID[*DeadlineStub[TypeG]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeH]](MessageTypeID[*DeadlineStub[TypeH]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeI]](MessageTypeID[*DeadlineStub[TypeI]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeJ]](MessageTypeID[*DeadlineStub[TypeJ]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeK]](MessageTypeID[*DeadlineStub[TypeK]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeL]](MessageTypeID[*DeadlineStub[TypeL]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeM]](MessageTypeID[*DeadlineStub[TypeM]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeN]](MessageTypeID[*DeadlineStub[TypeN]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeO]](MessageTypeID[*DeadlineStub[TypeO]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeP]](MessageTypeID[*DeadlineStub[TypeP]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeQ]](MessageTypeID[*DeadlineStub[TypeQ]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeR]](MessageTypeID[*DeadlineStub[TypeR]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeS]](MessageTypeID[*DeadlineStub[TypeS]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeT]](MessageTypeID[*DeadlineStub[TypeT]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeU]](MessageTypeID[*DeadlineStub[TypeU]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeV]](MessageTypeID[*DeadlineStub[TypeV]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeW]](MessageTypeID[*DeadlineStub[TypeW]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeX]](MessageTypeID[*DeadlineStub[TypeX]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeY]](MessageTypeID[*DeadlineStub[TypeY]]().String())
+	dogma.RegisterDeadline[*DeadlineStub[TypeZ]](MessageTypeID[*DeadlineStub[TypeZ]]().String())
 }

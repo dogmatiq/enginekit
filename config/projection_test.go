@@ -332,7 +332,7 @@ func TestProjection(t *testing.T) {
 					`unsupported handles-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesCommandRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*CommandStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 					},
@@ -342,7 +342,7 @@ func TestProjection(t *testing.T) {
 					`unsupported executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*CommandStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 					},
@@ -352,7 +352,7 @@ func TestProjection(t *testing.T) {
 					`unsupported records-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(RecordsEventRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*EventStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 					},
@@ -362,7 +362,7 @@ func TestProjection(t *testing.T) {
 					`unsupported schedules-deadline route for *github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(SchedulesDeadlineRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*DeadlineStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*DeadlineStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*DeadlineStub[TypeA]]()),
 					},

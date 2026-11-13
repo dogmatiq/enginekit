@@ -349,7 +349,7 @@ func TestIntegration(t *testing.T) {
 					`unsupported executes-command route for *github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(ExecutesCommandRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*CommandStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 					},
@@ -359,7 +359,7 @@ func TestIntegration(t *testing.T) {
 					`unsupported handles-event route for *github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(HandlesEventRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*EventStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 					},
@@ -369,7 +369,7 @@ func TestIntegration(t *testing.T) {
 					`unsupported schedules-deadline route for *github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]`,
 					&Route{
 						RouteType:       optional.Some(SchedulesDeadlineRouteType),
-						MessageTypeID:   optional.Some(MessageTypeID[*DeadlineStub[TypeA]]()),
+						MessageTypeID:   optional.Some(UnparsedUUID(MessageTypeID[*DeadlineStub[TypeA]]().String())),
 						MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.DeadlineStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 						MessageType:     optional.Some(message.TypeFor[*DeadlineStub[TypeA]]()),
 					},

@@ -55,13 +55,13 @@ func TestFromProjection(t *testing.T) {
 					IdentityComponents: []*config.Identity{
 						{
 							Name: optional.Some("projection"),
-							Key:  optional.Some("050415ad-ce90-496f-8987-40467e5415e0"),
+							Key:  optional.Some(config.UnparsedUUID("050415ad-ce90-496f-8987-40467e5415e0")),
 						},
 					},
 					RouteComponents: []*config.Route{
 						{
 							RouteType:       optional.Some(config.HandlesEventRouteType),
-							MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+							MessageTypeID:   optional.Some(config.UnparsedUUID(MessageTypeID[*EventStub[TypeA]]().String())),
 							MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 						},

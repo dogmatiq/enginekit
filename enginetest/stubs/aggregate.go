@@ -3,6 +3,7 @@ package stubs
 import (
 	"encoding/json"
 	"fmt"
+	"uuid"
 
 	"github.com/dogmatiq/dogma"
 )
@@ -43,8 +44,8 @@ func (r *AggregateRootStub) MarshalBinary() ([]byte, error) {
 	}
 
 	type envelope struct {
-		TypeID string `json:"type_id"`
-		Data   []byte `json:"data"`
+		TypeID uuid.UUID `json:"type_id"`
+		Data   []byte    `json:"data"`
 	}
 
 	var envelopes []envelope
@@ -75,8 +76,8 @@ func (r *AggregateRootStub) UnmarshalBinary(data []byte) error {
 	}
 
 	type envelope struct {
-		TypeID string `json:"type_id"`
-		Data   []byte `json:"data"`
+		TypeID uuid.UUID `json:"type_id"`
+		Data   []byte    `json:"data"`
 	}
 
 	var envelopes []envelope

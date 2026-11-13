@@ -16,7 +16,7 @@ func TestIdentity(t *testing.T) {
 				Error: ``,
 				Component: &Identity{
 					Name: optional.Some("name"),
-					Key:  optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+					Key:  optional.Some(UnparsedUUID("2da5eec5-374e-4716-b1c7-f24abd8df57f")),
 				},
 			},
 			{
@@ -24,7 +24,7 @@ func TestIdentity(t *testing.T) {
 				Error: ``,
 				Component: &Identity{
 					Name: optional.Some("😀"),
-					Key:  optional.Some("79f63053-1ca6-4537-974f-dd0121eb5195"),
+					Key:  optional.Some(UnparsedUUID("79f63053-1ca6-4537-974f-dd0121eb5195")),
 				},
 			},
 			{
@@ -42,7 +42,7 @@ func TestIdentity(t *testing.T) {
 				Component: &Identity{
 					IsSpeculative: true,
 					Name:          optional.Some("name"),
-					Key:           optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
+					Key:           optional.Some(UnparsedUUID("e6b691dd-731c-4c14-8e1c-1622381202dc")),
 				},
 			},
 			{
@@ -54,7 +54,7 @@ func TestIdentity(t *testing.T) {
 				Component: &Identity{
 					IsSpeculative: true,
 					Name:          optional.Some("name"),
-					Key:           optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
+					Key:           optional.Some(UnparsedUUID("e6b691dd-731c-4c14-8e1c-1622381202dc")),
 				},
 			},
 			{
@@ -67,7 +67,7 @@ func TestIdentity(t *testing.T) {
 					// build dynamically and we don't have the _entire_ string.
 					IsPartial: true,
 					Name:      optional.Some("name"),
-					Key:       optional.Some("e6b691dd-731c-4c14-8e1c-1622381202dc"),
+					Key:       optional.Some(UnparsedUUID("e6b691dd-731c-4c14-8e1c-1622381202dc")),
 				},
 			},
 			{
@@ -75,7 +75,7 @@ func TestIdentity(t *testing.T) {
 				Error: `identity:""/c79d01bb-b289-4e5d-b2fd-9779f33b3a19 is invalid: invalid name (""), expected a non-empty, printable UTF-8 string with no whitespace`,
 				Component: &Identity{
 					Name: optional.Some(""),
-					Key:  optional.Some("c79d01bb-b289-4e5d-b2fd-9779f33b3a19"),
+					Key:  optional.Some(UnparsedUUID("c79d01bb-b289-4e5d-b2fd-9779f33b3a19")),
 				},
 			},
 			{
@@ -83,7 +83,7 @@ func TestIdentity(t *testing.T) {
 				Error: `identity:"the name"/c405f1e2-b309-4a43-84bf-5a1f8e7656b8 is invalid: invalid name ("the name"), expected a non-empty, printable UTF-8 string with no whitespace`,
 				Component: &Identity{
 					Name: optional.Some("the name"),
-					Key:  optional.Some("c405f1e2-b309-4a43-84bf-5a1f8e7656b8"),
+					Key:  optional.Some(UnparsedUUID("c405f1e2-b309-4a43-84bf-5a1f8e7656b8")),
 				},
 			},
 			{
@@ -91,7 +91,7 @@ func TestIdentity(t *testing.T) {
 				Error: `identity:"name\n"/79f63053-1ca6-4537-974f-dd0121eb5195 is invalid: invalid name ("name\n"), expected a non-empty, printable UTF-8 string with no whitespace`,
 				Component: &Identity{
 					Name: optional.Some("name\n"),
-					Key:  optional.Some("79f63053-1ca6-4537-974f-dd0121eb5195"),
+					Key:  optional.Some(UnparsedUUID("79f63053-1ca6-4537-974f-dd0121eb5195")),
 				},
 			},
 			{
@@ -99,7 +99,7 @@ func TestIdentity(t *testing.T) {
 				Error: `identity:name/"" is invalid: invalid key (""), expected an RFC 4122/9562 UUID`,
 				Component: &Identity{
 					Name: optional.Some("name"),
-					Key:  optional.Some(""),
+					Key:  optional.Some(UnparsedUUID("")),
 				},
 			},
 			{
@@ -107,7 +107,7 @@ func TestIdentity(t *testing.T) {
 				Error: `identity:name/_b4ac052-68b1-4877-974e-c437aceb7f3f is invalid: invalid key ("_b4ac052-68b1-4877-974e-c437aceb7f3f"), expected an RFC 4122/9562 UUID`,
 				Component: &Identity{
 					Name: optional.Some("name"),
-					Key:  optional.Some("_b4ac052-68b1-4877-974e-c437aceb7f3f"),
+					Key:  optional.Some(UnparsedUUID("_b4ac052-68b1-4877-974e-c437aceb7f3f")),
 				},
 			},
 		},
@@ -122,7 +122,7 @@ func TestIdentity(t *testing.T) {
 				Description: `valid identity name/2da5eec5-374e-4716-b1c7-f24abd8df57f`,
 				Component: &Identity{
 					Name: optional.Some("name"),
-					Key:  optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+					Key:  optional.Some(UnparsedUUID("2da5eec5-374e-4716-b1c7-f24abd8df57f")),
 				},
 			},
 			{
@@ -143,7 +143,7 @@ func TestIdentity(t *testing.T) {
 					`  - name is unavailable`,
 				),
 				Component: &Identity{
-					Key: optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+					Key: optional.Some(UnparsedUUID("2da5eec5-374e-4716-b1c7-f24abd8df57f")),
 				},
 			},
 			{
@@ -155,7 +155,7 @@ func TestIdentity(t *testing.T) {
 				),
 				Component: &Identity{
 					Name: optional.Some("\b"),
-					Key:  optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+					Key:  optional.Some(UnparsedUUID("2da5eec5-374e-4716-b1c7-f24abd8df57f")),
 				},
 			},
 			{
@@ -178,7 +178,7 @@ func TestIdentity(t *testing.T) {
 				),
 				Component: &Identity{
 					Name: optional.Some("name"),
-					Key:  optional.Some("key"),
+					Key:  optional.Some(UnparsedUUID("key")),
 				},
 			},
 			{
@@ -187,7 +187,7 @@ func TestIdentity(t *testing.T) {
 				Description: `valid identity name/2DA5EEC5-374E-4716-B1C7-F24ABD8DF57F (non-canonical)`,
 				Component: &Identity{
 					Name: optional.Some("name"),
-					Key:  optional.Some("2DA5EEC5-374E-4716-B1C7-F24ABD8DF57F"),
+					Key:  optional.Some(UnparsedUUID("2DA5EEC5-374E-4716-B1C7-F24ABD8DF57F")),
 				},
 			},
 			{
@@ -197,7 +197,7 @@ func TestIdentity(t *testing.T) {
 				Component: &Identity{
 					IsSpeculative: true,
 					Name:          optional.Some("name"),
-					Key:           optional.Some("2da5eec5-374e-4716-b1c7-f24abd8df57f"),
+					Key:           optional.Some(UnparsedUUID("2da5eec5-374e-4716-b1c7-f24abd8df57f")),
 				},
 			},
 		},

@@ -3,6 +3,7 @@ package stubs
 import (
 	"context"
 	"time"
+	"uuid"
 
 	"github.com/dogmatiq/dogma"
 )
@@ -12,7 +13,7 @@ import (
 type ProjectionMessageHandlerStub struct {
 	ConfigureFunc        func(dogma.ProjectionConfigurer)
 	HandleEventFunc      func(context.Context, dogma.ProjectionEventScope, dogma.Event) (uint64, error)
-	CheckpointOffsetFunc func(context.Context, string) (uint64, error)
+	CheckpointOffsetFunc func(context.Context, uuid.UUID) (uint64, error)
 	CompactFunc          func(context.Context, dogma.ProjectionCompactScope) error
 	ResetFunc            func(context.Context, dogma.ProjectionResetScope) error
 }
@@ -42,7 +43,7 @@ func (h *ProjectionMessageHandlerStub) HandleEvent(
 // resume handling events from a specific stream.
 func (h *ProjectionMessageHandlerStub) CheckpointOffset(
 	ctx context.Context,
-	id string,
+	id uuid.UUID,
 ) (uint64, error) {
 	if h.CheckpointOffsetFunc != nil {
 		return h.CheckpointOffsetFunc(ctx, id)
@@ -78,8 +79,9 @@ func (h *ProjectionMessageHandlerStub) Reset(
 type ProjectionEventScopeStub struct {
 	NowFunc              func() time.Time
 	LogFunc              func(format string, args ...any)
+	MessageIDFunc        func() uuid.UUID
 	RecordedAtFunc       func() time.Time
-	StreamIDFunc         func() string
+	StreamIDFunc         func() uuid.UUID
 	OffsetFunc           func() uint64
 	CheckpointOffsetFunc func() uint64
 }
@@ -101,6 +103,14 @@ func (s *ProjectionEventScopeStub) Log(format string, args ...any) {
 	}
 }
 
+// MessageID returns the RFC 9562 UUID that uniquely identifies the [Event].
+func (s *ProjectionEventScopeStub) MessageID() uuid.UUID {
+	if s.MessageIDFunc != nil {
+		return s.MessageIDFunc()
+	}
+	return uuid.MustParse("4e8d9f6a-3c1b-4b7e-9a52-0f6d2c8e1b73")
+}
+
 // RecordedAt returns the time at which the [Event] occurred.
 func (s *ProjectionEventScopeStub) RecordedAt() time.Time {
 	if s.RecordedAtFunc != nil {
@@ -111,11 +121,11 @@ func (s *ProjectionEventScopeStub) RecordedAt() time.Time {
 
 // StreamID returns the RFC 9562 UUID that identifies the event stream to
 // which the [Event] belongs.
-func (s *ProjectionEventScopeStub) StreamID() string {
+func (s *ProjectionEventScopeStub) StreamID() uuid.UUID {
 	if s.StreamIDFunc != nil {
 		return s.StreamIDFunc()
 	}
-	return "6d1e805f-1760-409f-b1eb-e14983ec3f68"
+	return uuid.MustParse("6d1e805f-1760-409f-b1eb-e14983ec3f68")
 }
 
 // Offset returns the event's zero-based offset within the stream.

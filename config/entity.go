@@ -8,7 +8,6 @@ import (
 	"github.com/dogmatiq/enginekit/internal/typename"
 	"github.com/dogmatiq/enginekit/optional"
 	"github.com/dogmatiq/protobuf/identitypb"
-	"github.com/dogmatiq/protobuf/uuidpb"
 )
 
 // An Entity is a [Component] that that represents the configuration of a Dogma
@@ -113,7 +112,7 @@ func resolveIdentity(e Entity) *identitypb.Identity {
 	return identitypb.
 		NewIdentityBuilder().
 		WithName(id.Name.Get()).
-		WithKey(uuidpb.MustParse(id.Key.Get())).
+		WithKey(id.Key.Get().AsProto()).
 		Build()
 }
 

@@ -107,6 +107,19 @@ func TestRoute(t *testing.T) {
 				},
 			},
 			{
+				Name:   "invalid message type ID",
+				String: `route:handles-command:SomeCommand`,
+				Description: multiline(
+					`invalid handles-command route for pkg.SomeCommand (type unavailable)`,
+					`  - invalid message type ID ("non-uuid"), expected an RFC 4122/9562 UUID`,
+				),
+				Component: &Route{
+					RouteType:       optional.Some(HandlesCommandRouteType),
+					MessageTypeID:   optional.Some(UnparsedUUID("non-uuid")),
+					MessageTypeName: optional.Some("pkg.SomeCommand"),
+				},
+			},
+			{
 				Name:   "mismatched message kind",
 				String: `route:handles-event:CommandStub[TypeA]`,
 				Description: multiline(

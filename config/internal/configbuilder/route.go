@@ -40,7 +40,7 @@ func (b *RouteBuilder) AsPerRoute(r dogma.MessageRoute) {
 	messageType := r.Type()
 	goType := messageType.GoType()
 
-	b.target.MessageTypeID = optional.Some(messageType.ID())
+	b.target.MessageTypeID = optional.Some(config.UnparsedUUID(messageType.ID().String()))
 	b.target.MessageTypeName = optional.Some(typename.Get(goType))
 	b.target.MessageType = optional.Some(message.TypeFromReflect(goType))
 }

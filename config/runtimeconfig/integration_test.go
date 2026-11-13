@@ -56,19 +56,19 @@ func TestFromIntegration(t *testing.T) {
 					IdentityComponents: []*config.Identity{
 						{
 							Name: optional.Some("integration"),
-							Key:  optional.Some("51ffcb6f-171f-41a1-90e7-6fe1111649cd"),
+							Key:  optional.Some(config.UnparsedUUID("51ffcb6f-171f-41a1-90e7-6fe1111649cd")),
 						},
 					},
 					RouteComponents: []*config.Route{
 						{
 							RouteType:       optional.Some(config.HandlesCommandRouteType),
-							MessageTypeID:   optional.Some(MessageTypeID[*CommandStub[TypeA]]()),
+							MessageTypeID:   optional.Some(config.UnparsedUUID(MessageTypeID[*CommandStub[TypeA]]().String())),
 							MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.CommandStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							MessageType:     optional.Some(message.TypeFor[*CommandStub[TypeA]]()),
 						},
 						{
 							RouteType:       optional.Some(config.RecordsEventRouteType),
-							MessageTypeID:   optional.Some(MessageTypeID[*EventStub[TypeA]]()),
+							MessageTypeID:   optional.Some(config.UnparsedUUID(MessageTypeID[*EventStub[TypeA]]().String())),
 							MessageTypeName: optional.Some("*github.com/dogmatiq/enginekit/enginetest/stubs.EventStub[github.com/dogmatiq/enginekit/enginetest/stubs.TypeA]"),
 							MessageType:     optional.Some(message.TypeFor[*EventStub[TypeA]]()),
 						},

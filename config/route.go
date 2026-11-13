@@ -2,6 +2,7 @@ package config
 
 import (
 	"cmp"
+	"fmt"
 	"strings"
 
 	"github.com/dogmatiq/enginekit/config/internal/renderer"
@@ -17,8 +18,8 @@ type Route struct {
 	// RouteType is the type of route, if available.
 	RouteType optional.Optional[RouteType]
 
-	// TypeID is the unique identifier of the message type.
-	MessageTypeID optional.Optional[string]
+	// MessageTypeID is the unique identifier of the message type.
+	MessageTypeID optional.Optional[UnparsedUUID]
 
 	// MessageTypeName is the fully-qualified name of the Go type that
 	// implements the [dogma.Message] interface, if available.
@@ -65,7 +66,7 @@ func (r *Route) validate(ctx *validateContext) {
 	validateComponent(ctx)
 
 	rt, hasRT := r.RouteType.TryGet()
-	_, hasID := r.MessageTypeID.TryGet()
+	id, hasID := r.MessageTypeID.TryGet()
 	mn, hasMN := r.MessageTypeName.TryGet()
 	mt, hasMT := r.MessageType.TryGet()
 
@@ -75,6 +76,12 @@ func (r *Route) validate(ctx *validateContext) {
 
 	if !hasMN {
 		ctx.Absent("message type name")
+	}
+
+	if hasID {
+		if _, ok := id.TryAsStd(); !ok {
+			ctx.Invalid(InvalidMessageTypeIDError{id.String()})
+		}
 	}
 
 	if ctx.Options.ForExecution {
@@ -155,4 +162,14 @@ func (e MessageKindMismatchError) Error() string {
 		e.MessageType.Kind(),
 		e.RouteType.MessageKind(),
 	)
+}
+
+// InvalidMessageTypeIDError indicates that the message type ID of a [Route] is
+// invalid.
+type InvalidMessageTypeIDError struct {
+	InvalidID string
+}
+
+func (e InvalidMessageTypeIDError) Error() string {
+	return fmt.Sprintf("invalid message type ID (%q), expected an RFC 4122/9562 UUID", e.InvalidID)
 }
